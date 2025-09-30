@@ -1,0 +1,26 @@
+# AWS SDK
+boto3==1.34.144
+
+# Data Processing
+pandas==2.0.3
+numpy==1.24.3
+pyarrow==12.0.1
+
+# Database
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.23
+
+# JSON Processing
+jsonschema==4.19.2
+
+# Testing
+pytest==7.4.3
+
+# Jupyter (for analysis)
+jupyter==1.0.0
+ipykernel==6.26.0
+
+# Utilities
+python-dotenv==1.0.0
+pyyaml==6.0.1
+tqdm==4.66.1
