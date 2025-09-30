@@ -53,7 +53,7 @@ pip list | grep pandas
 
 - **Working:** AWS credentials verified, S3 bucket `nba-sim-raw-data-lake` with 146,115 files
 - **Environment:** Conda env `nba-aws`, Python 3.11.13, all dependencies installed
-- **Git:** Local repository initialized with first commit (GitHub push pending)
+- **Git:** Repository synced with GitHub (SSH authentication, 3 commits pushed)
 - **Cost:** Currently ~$2.74/month for S3 storage only
 
 ### Critical Paths:
@@ -72,7 +72,6 @@ pip list | grep pandas
 
 ### Known Issues:
 
-- GitHub push blocked (needs Personal Access Token, not password)
 - PyCharm may be slow (data folder should be marked as "Excluded")
 
 ### IMPORTANT NOTES:
@@ -138,7 +137,6 @@ pip list | grep pandas
 - Optional: S3 Analytics Lake, Athena, CloudWatch
 
 **Blockers:**
-- GitHub push requires Personal Access Token setup
 - Must complete Glue Crawler + RDS before ETL job can run
 
 ---
@@ -322,8 +320,8 @@ pip list | grep pandas
 
 ### ADR-004: Git Without GitHub Push (Deferred)
 
-**Date:** September 29, 2025  
-**Status:** Deferred  
+**Date:** September 29, 2025
+**Status:** ✅ COMPLETE (September 30, 2025) - See ADR-005
 **Decision:** Initialize Git locally, defer GitHub remote push
 
 **Context:** GitHub authentication now requires Personal Access Token (PAT), not password. Setting up PAT requires additional steps outside core project setup.
@@ -349,6 +347,86 @@ pip list | grep pandas
 1. Create GitHub Personal Access Token at github.com/settings/tokens
 2. Use token as password: `git push -u origin main`
 3. Or configure credential helper: `git config credential.helper store`
+
+---
+
+### ADR-005: Git Remote Configuration (SSH vs HTTPS)
+
+**Date:** September 30, 2025
+**Status:** Resolved
+**Supersedes:** ADR-004 (GitHub Integration now complete)
+
+**Context:** Git supports two primary protocols for remote operations: HTTPS (requires PAT tokens) and SSH (requires SSH keys). Initial setup attempted HTTPS but encountered authentication issues.
+
+**Problem Encountered:**
+- Initial Git remote was set to placeholder HTTPS URL: `https://github.com/YOUR-USERNAME/nba-simulator-aws.git`
+- GitHub deprecated password authentication - requires Personal Access Token (PAT) for HTTPS
+- Attempted HTTPS with PAT but failed with "could not locate repository" error
+- User had SSH keys already configured with GitHub account
+
+**Decision:** Configure Git remote to use SSH protocol instead of HTTPS
+
+**Implementation:**
+```bash
+# Update remote from placeholder to correct SSH URL
+git remote set-url origin git@github.com:ryanranft/nba-simulator-aws.git
+
+# Verify SSH authentication
+ssh -T git@github.com
+# Output: "Hi ryanranft! You've successfully authenticated..."
+
+# Fetch remote content
+git fetch origin
+
+# Rebase local commits on top of remote initial commit
+git pull origin main --rebase
+
+# Push to GitHub
+git push -u origin main
+```
+
+**Rationale:**
+
+1. **SSH Keys Already Configured:**
+   - User's system already had SSH keys set up with GitHub
+   - No need to create and manage PAT tokens
+   - More secure than storing tokens
+
+2. **Simpler Workflow:**
+   - SSH: No password/token prompts for push/pull operations
+   - HTTPS: Would require entering PAT token or storing credentials
+
+3. **Security:**
+   - SSH keys are more secure than PAT tokens
+   - Keys use public-key cryptography
+   - Can be revoked per-device on GitHub
+
+4. **Standard Practice:**
+   - SSH is the recommended method for regular Git operations
+   - HTTPS is better for automated systems (CI/CD, scripts)
+
+**Consequences:**
+
+- **Positive:** Seamless push/pull without password prompts, more secure
+- **Negative:** Requires SSH keys on any new machine (one-time setup)
+- **Note:** Claude Code desktop app uses GitHub API (unaffected by local SSH/HTTPS choice)
+
+**Initial Push Resolution:**
+
+When first pushing to GitHub, encountered diverged history:
+- Remote had GitHub's initial commit (f026047)
+- Local had "Initial project setup" (5457d5a) + documentation commits (2f019c1)
+- Solution: Rebased local commits on top of remote with `git pull origin main --rebase`
+
+**Final Configuration:**
+
+- **Remote URL:** `git@github.com:ryanranft/nba-simulator-aws.git`
+- **Authentication:** SSH keys
+- **Branch tracking:** `main` branch tracks `origin/main`
+- **Repository URL:** https://github.com/ryanranft/nba-simulator-aws
+- **Commits Pushed:** f026047 (initial) → 5457d5a (setup) → 2f019c1 (docs)
+
+**Review Date:** No review needed - configuration is working correctly
 
 ---
 
@@ -402,11 +480,13 @@ These decisions must be finalized before starting the Glue ETL job:
 
 ### Configuration Decisions
 
-**GitHub Integration (ADR-004)**
-- **Status:** Deferred
-- **Action Required:** Create Personal Access Token at github.com/settings/tokens
-- **Blocking:** Remote backup, but not blocking AWS development
-- **Priority:** Low
+**GitHub Integration (ADR-005)**
+- **Status:** ✅ COMPLETE (September 30, 2025)
+- **Solution:** Configured Git remote to use SSH instead of HTTPS
+- **Remote URL:** `git@github.com:ryanranft/nba-simulator-aws.git`
+- **Repository:** https://github.com/ryanranft/nba-simulator-aws
+- **Authentication:** SSH keys (already configured)
+- **Branch:** main, tracking origin/main
 
 ---
 
