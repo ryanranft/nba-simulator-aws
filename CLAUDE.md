@@ -30,6 +30,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Update PROGRESS.md to mark task as ✅ COMPLETE
 - Move to next task
 
+**Command Logging:**
+9. **When executing terminal commands**, encourage user to use the command logging system:
+   - Source the logging script: `source scripts/shell/log_command.sh`
+   - Execute commands with: `log_cmd <command>`
+   - Example: `log_cmd aws s3 ls s3://nba-sim-raw-data-lake/`
+10. **Reference COMMAND_LOG.md** when debugging similar issues to learn from past solutions
+11. **Add solutions to errors** using `log_solution <description>` helper function
+12. **CRITICAL - Before committing COMMAND_LOG.md to Git:**
+   - Always review for sensitive information (credentials, API keys, passwords, tokens)
+   - Sanitize AWS account IDs if sharing publicly
+   - Replace sensitive IPs/endpoints with placeholders
+   - Remove or redact any Personal Access Tokens (PATs)
+   - Remind user to review before any `git add` or `git commit` that includes COMMAND_LOG.md
+
 ## Project Overview
 
 NBA Game Simulator & ML Platform - A Python-based AWS data pipeline that:
@@ -90,6 +104,112 @@ Phase 5 (⏸️): SageMaker ML Pipeline
 ```
 
 **Key Architectural Decision:** Extract only 10% of JSON fields during ETL to reduce costs and improve performance (119 GB → 12 GB).
+
+## Git & GitHub Configuration
+
+**Remote URL:** `git@github.com:ryanranft/nba-simulator-aws.git`
+**Authentication:** SSH (not HTTPS)
+**Branch:** `main` (tracks `origin/main`)
+**Repository (web):** https://github.com/ryanranft/nba-simulator-aws
+
+### Important Notes
+
+- This repository uses **SSH authentication**, not HTTPS
+- SSH keys are already configured on your system
+- No Personal Access Token (PAT) needed for push/pull operations
+- Git commands work seamlessly without password prompts
+- **Current status:** ✅ Configured and operational
+
+### Common Git Commands
+
+```bash
+# Check current status
+git status
+
+# View remote configuration
+git remote -v
+# Should show: git@github.com:ryanranft/nba-simulator-aws.git
+
+# Pull latest changes
+git pull origin main
+
+# Add and commit changes
+git add <files>
+git commit -m "Your commit message"
+
+# Push to GitHub
+git push origin main
+
+# View commit history
+git log --oneline --graph --all
+
+# View current branch and tracking info
+git branch -vv
+```
+
+### Creating Commits
+
+**Follow the commit message format:**
+```bash
+git commit -m "$(cat <<'EOF'
+Brief description of changes
+
+Detailed explanation if needed
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
+```
+
+### Troubleshooting
+
+**If you encounter "Permission denied (publickey)" error:**
+```bash
+# Test SSH connection to GitHub
+ssh -T git@github.com
+# Should output: "Hi ryanranft! You've successfully authenticated..."
+
+# If this fails, SSH keys may need to be re-added to ssh-agent
+ssh-add ~/.ssh/id_rsa  # or your key file name
+```
+
+**If remote URL is wrong (shows HTTPS instead of SSH):**
+```bash
+# Check current remote
+git remote -v
+
+# Fix if it shows https:// instead of git@
+git remote set-url origin git@github.com:ryanranft/nba-simulator-aws.git
+
+# Verify the change
+git remote -v
+```
+
+**If you see "diverged branches" error:**
+```bash
+# Fetch remote changes
+git fetch origin
+
+# Rebase your local commits on top of remote
+git pull origin main --rebase
+
+# Then push
+git push origin main
+```
+
+**If push is rejected (non-fast-forward):**
+```bash
+# Fetch and check what's different
+git fetch origin
+git log origin/main..main  # Your commits
+git log main..origin/main  # Remote commits
+
+# Rebase (recommended) or merge
+git pull origin main --rebase
+git push origin main
+```
 
 ## Common Commands
 
@@ -158,7 +278,7 @@ s3://nba-sim-raw-data-lake/
 - AWS CLI is system-wide, NOT in conda (do not `pip install awscli`)
 - Data folder (119 GB) is gitignored - never commit to Git
 - Python 3.11 required for AWS Glue 4.0 compatibility
-- GitHub push pending (requires Personal Access Token)
+- Git/GitHub configured with SSH authentication (operational)
 
 **Cost Awareness:**
 - Current: $2.74/month (S3 storage only)
