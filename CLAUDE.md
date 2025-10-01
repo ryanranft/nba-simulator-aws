@@ -20,10 +20,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Instructions for Claude
 
 **Session Initialization:**
-- Run `./scripts/shell/verify_setup.sh` to check environment health
-- Review recent commits: `git log --oneline -5`
-- Check current costs: `./scripts/aws/check_costs.sh`
+- Run `make verify-all` to check environment, AWS, and files
+- Or individually: `make verify-env`, `make verify-aws`
+- Review recent commits: `git log --oneline -5` or `make git-status`
+- Check current costs: `make check-costs`
 - Identify current phase from PROGRESS.md
+- View all available commands: `make help`
 
 **CRITICAL - Progress Tracking Protocol:**
 
@@ -332,13 +334,34 @@ aws configure
 **Weekly maintenance:**
 ```bash
 # Update documentation automatically
-./scripts/maintenance/update_docs.sh
+make update-docs
 
 # Check if PROGRESS.md matches AWS reality
-python scripts/maintenance/sync_progress.py
+make sync-progress
 
 # Monitor AWS costs
-./scripts/aws/check_costs.sh
+make check-costs
+```
+
+**Makefile Commands (Recommended):**
+```bash
+# View all available commands
+make help
+
+# File inventory and summaries
+make inventory              # Generate FILE_INVENTORY.md with file summaries
+make describe FILE=path     # Show detailed info about specific file
+
+# Verification
+make verify-all             # Run all checks (env + AWS + files)
+make verify-env             # Check conda environment
+make verify-aws             # Check AWS credentials and S3
+
+# Utilities
+make stats                  # Show project statistics
+make backup                 # Create backup of critical files
+make clean                  # Remove temporary files
+make git-status             # Show git status and recent commits
 ```
 
 **PyCharm performance tip:** Mark `data/` folder as "Excluded" in Project Structure settings to prevent indexing 146K+ files.
