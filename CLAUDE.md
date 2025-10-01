@@ -44,6 +44,89 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    - Remove or redact any Personal Access Tokens (PATs)
    - Remind user to review before any `git add` or `git commit` that includes COMMAND_LOG.md
 
+**Documentation System:**
+13. **Architecture Decision Records (ADRs)** - Read `docs/adr/README.md` for architectural context:
+   - ADR-001: Redshift exclusion (cost optimization: RDS vs Redshift)
+   - ADR-002: Data extraction strategy (10% field selection, 119 GB → 12 GB)
+   - ADR-003: Python version selection (3.11 for AWS Glue 4.0 compatibility)
+   - ADR-005: Git SSH authentication (SSH vs HTTPS for GitHub)
+   - Use `docs/adr/template.md` when creating new ADRs for significant technical decisions
+
+14. **Code Style Guide** - Follow `docs/STYLE_GUIDE.md` when writing code:
+   - Python: PEP 8, snake_case functions, type hints required
+   - SQL: Uppercase keywords, one column per line, explicit JOINs
+   - File naming: snake_case for Python/SQL, kebab-case for configs
+   - Documentation: Docstrings required for all functions
+   - Error handling: Explicit try/except with logging
+
+15. **Testing Strategy** - Follow `docs/TESTING.md` for test implementation:
+   - Priority: Data validation tests (non-negative scores, valid dates, required fields)
+   - Use pytest for all tests
+   - Test files in `tests/` directory matching `test_*.py` pattern
+   - ETL tests: Validate transformations with sample data
+   - Integration tests: Test AWS resource interactions
+   - Mock AWS services using moto library
+
+16. **Setup Guide** - Reference `docs/SETUP.md` for environment configuration:
+   - 11-step setup process (Homebrew → Conda → AWS CLI → Git → SSH)
+   - Use `scripts/shell/verify_setup.sh` to verify environment health
+   - Conda environment: `nba-aws` with Python 3.11.13
+   - Required packages: boto3, pandas, numpy, psycopg2-binary, sqlalchemy
+
+17. **Troubleshooting Guide** - Check `docs/TROUBLESHOOTING.md` for common issues:
+   - 28 documented problems with solutions across 7 categories
+   - Environment issues: Python version, Conda activation, package conflicts
+   - AWS issues: Credentials, permissions, service quotas
+   - Git/GitHub issues: SSH keys, authentication, merge conflicts
+   - Always check this before implementing new error handling
+
+18. **Environment Variables** - Use `.env.example` as template:
+   - Copy to `.env` and populate with actual values
+   - Load with python-dotenv in Python scripts
+   - Never commit `.env` file (gitignored)
+   - 35 variables documented: AWS config, RDS credentials, ETL settings
+
+19. **Cost Tracking** - Run `scripts/aws/check_costs.sh` to monitor AWS spending:
+   - Shows month-to-date costs by service
+   - Checks S3 storage size and estimated cost
+   - Verifies RDS/EC2/Glue status
+   - Provides cost forecast and budget alerts
+   - Recommendations for cost optimization
+
+20. **Quick Reference** - Use `QUICKSTART.md` for daily workflow:
+   - Common commands for environment, AWS, Git
+   - File locations and documentation map
+   - Quick troubleshooting fixes
+   - Current phase status and next tasks
+
+21. **Documentation Maintenance** - Keep documentation current:
+   - **Weekly**: Run `./scripts/maintenance/update_docs.sh` to auto-update:
+     - AWS costs in QUICKSTART.md from Cost Explorer API
+     - ADR count in docs/adr/README.md
+     - "Last Updated" timestamps across all docs
+     - Project statistics (commits, files, lines of code)
+     - Validates internal documentation links
+     - Flags stale documentation (30+ days old)
+   - **Weekly**: Run `python scripts/maintenance/sync_progress.py` to check:
+     - S3 bucket status vs PROGRESS.md Phase 1
+     - RDS database status vs PROGRESS.md Phase 3.1
+     - Glue crawler status vs PROGRESS.md Phase 2.1
+     - Glue ETL job status vs PROGRESS.md Phase 2.2
+     - Suggests PROGRESS.md updates based on actual AWS resources
+   - **Manual Updates Required** (see `docs/DOCUMENTATION_MAINTENANCE.md`):
+     - ADRs: Create when making architectural decisions
+     - PROGRESS.md: Update after completing major phases
+     - TROUBLESHOOTING.md: Add new issues when encountered and solved
+     - STYLE_GUIDE.md: Update when code preferences change
+     - TESTING.md: Update when testing strategy evolves
+   - **Monthly Review**: Follow checklist in DOCUMENTATION_MAINTENANCE.md
+     - Run all automation scripts
+     - Review stale documentation warnings
+     - Verify PROGRESS.md accuracy
+     - Check for broken links
+     - Update statistics
+   - **NEVER auto-commit documentation changes** - always review before committing
+
 ## Project Overview
 
 NBA Game Simulator & ML Platform - A Python-based AWS data pipeline that:
@@ -79,6 +162,9 @@ aws s3 ls s3://nba-sim-raw-data-lake/
 - **Original Data:** `/Users/ryanranft/0espn/data/nba/` (119 GB source)
 - **S3 Bucket:** `s3://nba-sim-raw-data-lake` (146,115 files)
 - **Conda Env:** `/Users/ryanranft/miniconda3/envs/nba-aws`
+- **Quick Reference:** `QUICKSTART.md` (one-page command reference)
+- **Maintenance Scripts:** `scripts/maintenance/` (doc automation)
+- **Cost Tracking:** `scripts/aws/check_costs.sh` (AWS spending monitor)
 
 ## Architecture
 
@@ -307,6 +393,18 @@ git status
 ```bash
 aws configure
 # Enter: access key, secret key, region (us-east-1), output format (json)
+```
+
+**Weekly maintenance:**
+```bash
+# Update documentation automatically
+./scripts/maintenance/update_docs.sh
+
+# Check if PROGRESS.md matches AWS reality
+python scripts/maintenance/sync_progress.py
+
+# Monitor AWS costs
+./scripts/aws/check_costs.sh
 ```
 
 **PyCharm performance tip:** Mark `data/` folder as "Excluded" in Project Structure settings to prevent indexing 146K+ files.
