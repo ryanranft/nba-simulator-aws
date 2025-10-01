@@ -23,23 +23,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 1. **Always run at start of each session:**
    - **Credentials:** Auto-loaded from ~/.zshrc when entering project directory (no verification needed)
    - **Startup checklist** - Automatically run (don't ask user, just do it):
-     1. Get hardware info:
-        ```bash
-        system_profiler SPHardwareDataType | grep -E "Model Name|Model Identifier|Chip|Total Number of Cores|Memory"
-        ```
-     2. Run combined startup command to verify all software versions:
-        ```bash
-        echo "=== SYSTEM INFO ===" && sw_vers && echo "" && echo "=== HOMEBREW ===" && brew --version && which brew && echo "" && echo "=== CONDA ===" && conda --version && conda info --base && conda env list | grep nba-aws && echo "" && echo "=== PYTHON ===" && python --version && which python && echo "" && echo "=== AWS CLI ===" && aws --version && which aws && echo "" && echo "=== GIT ===" && git --version && which git && echo "" && echo "=== KEY PACKAGES ===" && pip show boto3 pandas numpy 2>/dev/null | grep -E "^(Name|Version):"
-        ```
-     3. Run `git status` to check current changes
-     4. Present summary in compact format showing only key versions and git status
-     5. **Append session info to `.session-history.md`** with:
-        - Current date/time
-        - Hardware info (Model, Chip, Cores, Memory)
-        - Software versions (macOS, Homebrew, Conda, Python, AWS CLI, Git, key packages)
-        - Git status (branch, modified files, untracked files)
-        - Leave "Work Summary" blank for user to fill in later
-     6. Do NOT show full command output - extract and present only the important info
+     ```bash
+     bash scripts/shell/session_startup.sh
+     ```
+     - **What it checks:**
+       - Hardware: Model, Chip, Cores, Memory
+       - System: macOS version, Homebrew version and location
+       - Conda: Version, base path, active environment
+       - Python: Version, location, key packages (boto3, pandas, numpy) with install paths
+       - AWS CLI: Version and location
+       - Git: Version, location, status (branch, modified/untracked files), recent commits
+     - **Output format:** Clean, organized sections with all diagnostic details preserved
+     - **After running:** Append formatted output to `.session-history.md` for version tracking
    - Identify current phase from PROGRESS.md
    - Ask: "Any work completed since last session that should be marked ✅ COMPLETE in PROGRESS.md?"
 
