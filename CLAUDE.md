@@ -308,10 +308,15 @@ grep -E "(AWS_ACCESS_KEY|aws_secret|password|192\.168\.|10\.|172\.(1[6-9]|2[0-9]
 **Whitelist - Safe patterns (don't trigger false positives):**
 ```bash
 # These are OK in documentation:
-✅ Placeholder examples: "AWS_ACCESS_KEY****************", "your-access-key-here"
+✅ Placeholder examples: "<YOUR_AWS_ACCESS_KEY_HERE>", "your-access-key-here", "<INSERT_KEY_HERE>"
 ✅ Documentation keywords: describing what to check for (like this list)
 ✅ Redacted credentials: [REDACTED], [Private network], [Router]
+✅ Environment variable format: AWS_ACCESS_KEY_ID= (without value)
 ✅ Public DNS: Not allowed per user requirement (remove ALL IPs)
+
+# NEVER use these placeholders (trigger security scanners):
+❌ AWS_ACCESS_KEY**************** (still contains AWS_ACCESS_KEY prefix)
+❌ Any pattern starting with AWS_ACCESS_KEY, even if redacted
 ```
 
 **Security Check Protocol:**
