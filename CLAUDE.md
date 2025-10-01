@@ -2,7 +2,28 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Quick Decision Tree
+
+**When user asks to do something:**
+1. **Is it the next pending task in PROGRESS.md?** → Proceed
+2. **Is it skipping ahead?** → Check prerequisites first, warn if missing
+3. **Is it changing the plan?** → Update PROGRESS.md first, get approval
+4. **Will it cost money?** → Warn user with estimate, get confirmation
+5. **Could it break something?** → Explain risk, suggest backup/test approach
+
+**When a command fails:**
+1. Check `TROUBLESHOOTING.md` for known solution
+2. If unknown, STOP and ask user for guidance
+3. Don't attempt multiple fixes automatically
+4. Log solution with `log_solution` after resolving
+
 ## Instructions for Claude
+
+**Session Initialization:**
+- Run `./scripts/shell/verify_setup.sh` to check environment health
+- Review recent commits: `git log --oneline -5`
+- Check current costs: `./scripts/aws/check_costs.sh`
+- Identify current phase from PROGRESS.md
 
 **CRITICAL - Progress Tracking Protocol:**
 
@@ -15,12 +36,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    - Mark changed sections with date and reason
    - Get user confirmation before proceeding with the updated plan
 4. **Only mark tasks as "✅ COMPLETE" when you receive:**
-   - Terminal output showing successful execution, OR
-   - Explicit verbal confirmation from the user that the task is complete
+   - Terminal output showing successful execution (exit code 0, expected output), AND
+   - Either: User says "done", "complete", "looks good", or similar affirmation
+   - OR: User proceeds to ask about the next task (implicit confirmation)
+   - **Exception:** Minor tasks (<5 min) can be auto-marked if command succeeds with clear success output
 5. **Do NOT assume completion** - even if a command runs without errors, wait for user confirmation
 6. **Update PROGRESS.md immediately** after each completed step
 7. **If errors occur**, document them in PROGRESS.md and work with user to resolve before proceeding
 8. **Maintain the same format and detail level** when updating PROGRESS.md
+
+**Update PROGRESS.md when:**
+- ✅ Completing any phase or sub-phase
+- ⏸️ Discovering blockers or missing prerequisites
+- 📝 Changing approach or architecture
+- ❌ Encountering errors that delay timeline
+- ✅ User explicitly confirms task completion
+- 💰 Actual costs differ significantly from estimates
+
+**Error Handling Protocol:**
+- If a command fails, STOP and report to user immediately
+- Do NOT attempt multiple fixes without user guidance
+- Check `TROUBLESHOOTING.md` for known solutions first
+- If unknown error, log with `log_solution` after resolving
+- Update PROGRESS.md with error details and resolution
+
+**Context Awareness:**
+- Check what phase we're in before suggesting commands
+- Don't suggest Phase 3 commands if Phase 2 isn't complete
+- Verify prerequisites exist before executing dependent tasks
+- Use `python scripts/maintenance/sync_progress.py` if unsure of current state
 
 **Your workflow should be:**
 - Read PROGRESS.md to understand current state
@@ -44,88 +88,41 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    - Remove or redact any Personal Access Tokens (PATs)
    - Remind user to review before any `git add` or `git commit` that includes COMMAND_LOG.md
 
-**Documentation System:**
-13. **Architecture Decision Records (ADRs)** - Read `docs/adr/README.md` for architectural context:
-   - ADR-001: Redshift exclusion (cost optimization: RDS vs Redshift)
-   - ADR-002: Data extraction strategy (10% field selection, 119 GB → 12 GB)
-   - ADR-003: Python version selection (3.11 for AWS Glue 4.0 compatibility)
-   - ADR-005: Git SSH authentication (SSH vs HTTPS for GitHub)
-   - Use `docs/adr/template.md` when creating new ADRs for significant technical decisions
+**Documentation System (Quick Reference):**
 
-14. **Code Style Guide** - Follow `docs/STYLE_GUIDE.md` when writing code:
-   - Python: PEP 8, snake_case functions, type hints required
-   - SQL: Uppercase keywords, one column per line, explicit JOINs
-   - File naming: snake_case for Python/SQL, kebab-case for configs
-   - Documentation: Docstrings required for all functions
-   - Error handling: Explicit try/except with logging
+**Architecture & Decisions:**
+- **ADRs** (`docs/adr/README.md`) - Why we made key technical decisions
+  - ADR-001: Redshift exclusion (saves $200-600/month)
+  - ADR-002: 10% data extraction (119 GB → 12 GB)
+  - ADR-003: Python 3.11 (Glue compatibility)
+  - ADR-005: Git SSH authentication
+  - Use `docs/adr/template.md` for new decisions
 
-15. **Testing Strategy** - Follow `docs/TESTING.md` for test implementation:
-   - Priority: Data validation tests (non-negative scores, valid dates, required fields)
-   - Use pytest for all tests
-   - Test files in `tests/` directory matching `test_*.py` pattern
-   - ETL tests: Validate transformations with sample data
-   - Integration tests: Test AWS resource interactions
-   - Mock AWS services using moto library
+**Code Quality:**
+- **Style Guide** (`docs/STYLE_GUIDE.md`) - Required for all code
+  - Python: PEP 8, snake_case, type hints required
+  - SQL: Uppercase keywords, explicit JOINs
+  - Docstrings required for all functions
+- **Testing** (`docs/TESTING.md`) - pytest strategy
+  - Priority: Data validation (scores, dates, required fields)
+  - Mock AWS with moto library
+- **Troubleshooting** (`docs/TROUBLESHOOTING.md`) - **Check FIRST when errors occur**
+  - 28 documented issues with solutions
+  - 7 categories: Environment, AWS, Git, ETL, Database, Performance, Security
 
-16. **Setup Guide** - Reference `docs/SETUP.md` for environment configuration:
-   - 11-step setup process (Homebrew → Conda → AWS CLI → Git → SSH)
-   - Use `scripts/shell/verify_setup.sh` to verify environment health
-   - Conda environment: `nba-aws` with Python 3.11.13
-   - Required packages: boto3, pandas, numpy, psycopg2-binary, sqlalchemy
+**Environment & Setup:**
+- **Setup Guide** (`docs/SETUP.md`) - Fresh environment setup (11 steps)
+- **Environment Variables** (`.env.example`) - 35 variables, NEVER commit `.env`
+- **verify_setup.sh** - Quick health check script
 
-17. **Troubleshooting Guide** - Check `docs/TROUBLESHOOTING.md` for common issues:
-   - 28 documented problems with solutions across 7 categories
-   - Environment issues: Python version, Conda activation, package conflicts
-   - AWS issues: Credentials, permissions, service quotas
-   - Git/GitHub issues: SSH keys, authentication, merge conflicts
-   - Always check this before implementing new error handling
-
-18. **Environment Variables** - Use `.env.example` as template:
-   - Copy to `.env` and populate with actual values
-   - Load with python-dotenv in Python scripts
-   - Never commit `.env` file (gitignored)
-   - 35 variables documented: AWS config, RDS credentials, ETL settings
-
-19. **Cost Tracking** - Run `scripts/aws/check_costs.sh` to monitor AWS spending:
-   - Shows month-to-date costs by service
-   - Checks S3 storage size and estimated cost
-   - Verifies RDS/EC2/Glue status
-   - Provides cost forecast and budget alerts
-   - Recommendations for cost optimization
-
-20. **Quick Reference** - Use `QUICKSTART.md` for daily workflow:
-   - Common commands for environment, AWS, Git
-   - File locations and documentation map
-   - Quick troubleshooting fixes
-   - Current phase status and next tasks
-
-21. **Documentation Maintenance** - Keep documentation current:
-   - **Weekly**: Run `./scripts/maintenance/update_docs.sh` to auto-update:
-     - AWS costs in QUICKSTART.md from Cost Explorer API
-     - ADR count in docs/adr/README.md
-     - "Last Updated" timestamps across all docs
-     - Project statistics (commits, files, lines of code)
-     - Validates internal documentation links
-     - Flags stale documentation (30+ days old)
-   - **Weekly**: Run `python scripts/maintenance/sync_progress.py` to check:
-     - S3 bucket status vs PROGRESS.md Phase 1
-     - RDS database status vs PROGRESS.md Phase 3.1
-     - Glue crawler status vs PROGRESS.md Phase 2.1
-     - Glue ETL job status vs PROGRESS.md Phase 2.2
-     - Suggests PROGRESS.md updates based on actual AWS resources
-   - **Manual Updates Required** (see `docs/DOCUMENTATION_MAINTENANCE.md`):
-     - ADRs: Create when making architectural decisions
-     - PROGRESS.md: Update after completing major phases
-     - TROUBLESHOOTING.md: Add new issues when encountered and solved
-     - STYLE_GUIDE.md: Update when code preferences change
-     - TESTING.md: Update when testing strategy evolves
-   - **Monthly Review**: Follow checklist in DOCUMENTATION_MAINTENANCE.md
-     - Run all automation scripts
-     - Review stale documentation warnings
-     - Verify PROGRESS.md accuracy
-     - Check for broken links
-     - Update statistics
-   - **NEVER auto-commit documentation changes** - always review before committing
+**Operational:**
+- **QUICKSTART.md** - Daily commands, file locations, quick fixes
+- **check_costs.sh** - AWS spending monitor (run weekly)
+- **Documentation Maintenance** (`docs/DOCUMENTATION_MAINTENANCE.md`)
+  - Weekly: `update_docs.sh` (auto-updates costs, timestamps, stats)
+  - Weekly: `sync_progress.py` (checks AWS vs PROGRESS.md)
+  - Monthly: Review checklist for stale docs
+  - **NEVER auto-commit** - always review changes
 
 ## Project Overview
 
@@ -193,49 +190,19 @@ Phase 5 (⏸️): SageMaker ML Pipeline
 
 ## Git & GitHub Configuration
 
-**Remote URL:** `git@github.com:ryanranft/nba-simulator-aws.git`
-**Authentication:** SSH (not HTTPS)
+**Status:** ✅ Configured with SSH authentication
+**Remote:** `git@github.com:ryanranft/nba-simulator-aws.git`
 **Branch:** `main` (tracks `origin/main`)
-**Repository (web):** https://github.com/ryanranft/nba-simulator-aws
+**Repository:** https://github.com/ryanranft/nba-simulator-aws
 
-### Important Notes
+**Key points:**
+- Uses SSH (not HTTPS), no password prompts needed
+- SSH keys already configured
+- See `QUICKSTART.md` lines 56-73 for common commands
+- See `docs/TROUBLESHOOTING.md` lines 336-508 for Git issues
+- See `ADR-005` for full SSH vs HTTPS rationale
 
-- This repository uses **SSH authentication**, not HTTPS
-- SSH keys are already configured on your system
-- No Personal Access Token (PAT) needed for push/pull operations
-- Git commands work seamlessly without password prompts
-- **Current status:** ✅ Configured and operational
-
-### Common Git Commands
-
-```bash
-# Check current status
-git status
-
-# View remote configuration
-git remote -v
-# Should show: git@github.com:ryanranft/nba-simulator-aws.git
-
-# Pull latest changes
-git pull origin main
-
-# Add and commit changes
-git add <files>
-git commit -m "Your commit message"
-
-# Push to GitHub
-git push origin main
-
-# View commit history
-git log --oneline --graph --all
-
-# View current branch and tracking info
-git branch -vv
-```
-
-### Creating Commits
-
-**Follow the commit message format:**
+**Commit format (include co-authorship footer):**
 ```bash
 git commit -m "$(cat <<'EOF'
 Brief description of changes
@@ -247,54 +214,6 @@ Detailed explanation if needed
 Co-Authored-By: Claude <noreply@anthropic.com>
 EOF
 )"
-```
-
-### Troubleshooting
-
-**If you encounter "Permission denied (publickey)" error:**
-```bash
-# Test SSH connection to GitHub
-ssh -T git@github.com
-# Should output: "Hi ryanranft! You've successfully authenticated..."
-
-# If this fails, SSH keys may need to be re-added to ssh-agent
-ssh-add ~/.ssh/id_rsa  # or your key file name
-```
-
-**If remote URL is wrong (shows HTTPS instead of SSH):**
-```bash
-# Check current remote
-git remote -v
-
-# Fix if it shows https:// instead of git@
-git remote set-url origin git@github.com:ryanranft/nba-simulator-aws.git
-
-# Verify the change
-git remote -v
-```
-
-**If you see "diverged branches" error:**
-```bash
-# Fetch remote changes
-git fetch origin
-
-# Rebase your local commits on top of remote
-git pull origin main --rebase
-
-# Then push
-git push origin main
-```
-
-**If push is rejected (non-fast-forward):**
-```bash
-# Fetch and check what's different
-git fetch origin
-git log origin/main..main  # Your commits
-git log main..origin/main  # Remote commits
-
-# Rebase (recommended) or merge
-git pull origin main --rebase
-git push origin main
 ```
 
 ## Common Commands
@@ -366,10 +285,25 @@ s3://nba-sim-raw-data-lake/
 - Python 3.11 required for AWS Glue 4.0 compatibility
 - Git/GitHub configured with SSH authentication (operational)
 
-**Cost Awareness:**
-- Current: $2.74/month (S3 storage only)
-- After Glue + RDS: ~$46/month
-- Full deployment: $95-130/month
+**Cost Awareness (IMPORTANT):**
+- **Current:** $2.74/month (S3 storage only)
+- **After Glue + RDS:** ~$46/month
+- **Full deployment:** $95-130/month
+- **Monthly budget target:** $150 (alert if approaching)
+- **ALWAYS warn user before:**
+  - Creating RDS instances (~$29/month)
+  - Creating EC2 instances (~$5-15/month)
+  - Creating Glue jobs (~$13/month)
+  - Creating SageMaker notebooks (~$50/month)
+- **Suggest cost estimates** before proceeding
+- **Remind to stop/delete** resources when done testing
+
+**Data Safety Protocol:**
+- NEVER delete or modify S3 bucket contents without explicit user request
+- NEVER drop database tables without user confirmation
+- NEVER commit `.env`, credentials, or sensitive data
+- ALWAYS run `sanitize_command_log.sh` before committing COMMAND_LOG.md
+- Backup before destructive operations (provide backup command)
 
 ## Next Steps
 
