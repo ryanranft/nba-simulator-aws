@@ -19,21 +19,21 @@ Repository is now **100% clean** with AWS account ID removed from:
 
 ### 1. File Contents Scan ✅ CLEAN
 ```bash
-git ls-files | xargs grep "575734508327"
+git ls-files | xargs grep "$AWS_ACCOUNT_ID"
 # Result: No matches found
 ```
 **Status:** ✅ Account ID not present in any tracked files
 
 ### 2. Commit Messages Scan ✅ CLEAN
 ```bash
-git log --all --grep="575734508327"
+git log --all --grep="$AWS_ACCOUNT_ID"
 # Result: No commits found
 ```
 **Status:** ✅ Account ID not present in any commit messages
 
 ### 3. Commit Message Content Verification ✅ SANITIZED
 ```bash
-git show 7e7bf32 --format="%B" | grep "575734508327"
+git show 7e7bf32 --format="%B" | grep "$AWS_ACCOUNT_ID"
 # Result: No matches
 ```
 
@@ -56,7 +56,7 @@ Sanitize AWS account ID from all documentation files
 
 ### 4. Commit Diff Content ✅ CLEAN
 ```bash
-git log --all -p | grep "575734508327"
+git log --all -p | grep "$AWS_ACCOUNT_ID"
 # Result: No matches in file diffs
 ```
 **Status:** ✅ Account ID removed from all file changes
@@ -184,7 +184,7 @@ Contains: Git history after file sanitization, before commit message sanitizatio
 **BEFORE (contained actual account ID):**
 ```
 **1. CLAUDE.md (Line 416):**
-- Changed: Account: 575734508327
+- Changed: Account: [REDACTED]
 - To: Account: <your-aws-account-id>
 ```
 
@@ -202,25 +202,28 @@ Contains: Git history after file sanitization, before commit message sanitizatio
 Anyone can verify the repository is clean by running:
 
 ```bash
+# Set your AWS account ID to search for (stored in .env, never commit!)
+# AWS_ACCOUNT_ID=your-account-id-here
+
 # 1. Check file contents
-git ls-files | xargs grep "575734508327"
+git ls-files | xargs grep "$AWS_ACCOUNT_ID"
 # Expected: No output
 
 # 2. Check commit messages
-git log --all --grep="575734508327"
+git log --all --grep="$AWS_ACCOUNT_ID"
 # Expected: No output
 
 # 3. Check commit diffs
-git log --all -p | grep "575734508327"
+git log --all -p | grep "$AWS_ACCOUNT_ID"
 # Expected: No output
 
 # 4. Verify commit count preserved
 git log --all --oneline | wc -l
-# Expected: 30 commits
+# Expected: 30+ commits
 
 # 5. Check HEAD
 git log -1 --oneline
-# Expected: 1ce5728 Update SHA references after commit message sanitization
+# Expected: Recent commit message
 ```
 
 ---
