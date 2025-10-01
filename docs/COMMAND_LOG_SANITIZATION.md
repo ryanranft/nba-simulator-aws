@@ -72,7 +72,7 @@ Already done! The pre-commit hook is installed at:
 ```bash
 # Log some commands with sensitive data
 log_cmd aws sts get-caller-identity
-# Output shows: "Account": "************"
+# Output shows: "Account": "<your-account-id>"
 
 log_cmd aws s3 ls
 # Output shows IP addresses in metadata
@@ -87,7 +87,7 @@ git commit -m "Add AWS commands"
 # ⚠️  Sensitive information sanitized!
 #
 # Changes made:
-# < "Account": "************"
+# < "Account": "<your-account-id>"
 # > "Account": "************"
 #
 # ⚠️  IMPORTANT: Review sanitized changes before proceeding

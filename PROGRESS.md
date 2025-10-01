@@ -1097,7 +1097,7 @@ aws sagemaker delete-notebook-instance --notebook-instance-name nba-ml-notebook
 
 ### AWS Configuration
 
-- **Account ID:** ************
+- **Account ID:** <your-aws-account-id>
 - **IAM User:** iam
 - **Region:** us-east-1
 - **Permissions:** AdministratorAccess

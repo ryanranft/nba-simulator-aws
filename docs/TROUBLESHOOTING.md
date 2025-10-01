@@ -265,7 +265,7 @@ aws s3 ls s3://nba-sim-raw-data-lake/
 **Check account:**
 ```bash
 aws sts get-caller-identity
-# Verify Account ID is correct: ************
+# Verify Account ID matches your AWS account
 ```
 
 **Check permissions:**

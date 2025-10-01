@@ -413,7 +413,7 @@ s3://nba-sim-raw-data-lake/
 ## Important Notes
 
 **AWS Configuration:**
-- Account: ************
+- Account: <your-aws-account-id>
 - Region: us-east-1
 - IAM User: iam (AdministratorAccess)
 
