@@ -366,7 +366,7 @@ git clone git@github.com:ryanranft/nba-simulator-aws.git
 4. Risk of history rewriting outweighs benefit
 
 **Alternative:** Keep current approach:
-- ✅ Current files sanitized (commit 40ed145)
+- ✅ Current files sanitized (commit 7e7bf32)
 - ✅ Future commits will be clean
 - ✅ Security hooks prevent future exposure
 - ⚠️ Account ID in old commits (acceptable for this low-risk data)
