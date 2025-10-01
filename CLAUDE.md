@@ -19,13 +19,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Instructions for Claude
 
-**Session Initialization:**
-- Run `make verify-all` to check environment, AWS, and files
-- Or individually: `make verify-env`, `make verify-aws`
-- Review recent commits: `git log --oneline -5` or `make git-status`
-- Check current costs: `make check-costs`
-- Identify current phase from PROGRESS.md
-- View all available commands: `make help`
+**Session Initialization (Proactive):**
+1. **Always run at start of each session:**
+   - `make verify-all` - Check environment, AWS, and files
+   - `make git-status` - Review recent commits
+   - `make check-costs` - Check current AWS costs
+   - Identify current phase from PROGRESS.md
+
+2. **Ask user if they want to run (based on time since last update):**
+   - If Monday or 7+ days since last update: "Would you like me to run `make update-docs` for weekly maintenance?"
+   - If 7+ days since last inventory: "Should I run `make inventory` to update file summaries?"
+   - If new AWS resources may exist: "Should I run `make sync-progress` to check if PROGRESS.md matches AWS?"
+   - If any .md files modified: "After these changes, should I run `make inventory` to update FILE_INVENTORY.md?"
+
+3. **Remind user at end of session:**
+   - If COMMAND_LOG.md was modified: "Remember to review COMMAND_LOG.md for sensitive data before committing"
+   - If multiple files changed: "Consider running `make backup` to create a backup"
+   - If documentation changed: "Consider running `make inventory` to update file summaries"
 
 **CRITICAL - Progress Tracking Protocol:**
 
@@ -54,6 +64,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ❌ Encountering errors that delay timeline
 - ✅ User explicitly confirms task completion
 - 💰 Actual costs differ significantly from estimates
+
+**Proactively suggest running maintenance tasks when:**
+- **After completing a phase:** "Phase X.Y complete! Should I run `make sync-progress` to verify AWS resources match PROGRESS.md?"
+- **After creating/modifying scripts:** "New scripts created. Should I run `make inventory` to update FILE_INVENTORY.md?"
+- **After solving a new error:** "This error isn't in TROUBLESHOOTING.md yet. Should I add it? (Then run `make inventory`)"
+- **After making architectural decisions:** "Should I create an ADR for this decision? (See docs/adr/template.md)"
+- **After creating AWS resources:** "New AWS resources created. Should I run `make check-costs` to see the cost impact?"
+- **Monday morning or start of week:** "It's a new week! Should I run `make update-docs` for weekly maintenance?"
+- **After 5+ commits:** "Several commits made. Should I run `make backup` to create a backup?"
 
 **Error Handling Protocol:**
 - If a command fails, STOP and report to user immediately
