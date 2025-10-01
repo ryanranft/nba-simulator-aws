@@ -34,7 +34,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
        - AWS CLI: Version and location
        - Git: Version, location, status (branch, modified/untracked files), recent commits
      - **Output format:** Clean, organized sections with all diagnostic details preserved
-     - **After running:** Append formatted output to `.session-history.md` for version tracking
+     - **Session start:** Show output to user for review
+     - **After EVERY commit:** Append to `.session-history.md` with:
+       ```bash
+       bash scripts/shell/session_startup.sh >> .session-history.md
+       ```
+       This creates a version snapshot for each commit, allowing user to correlate git history with exact software versions used
    - Identify current phase from PROGRESS.md
    - Ask: "Any work completed since last session that should be marked ✅ COMPLETE in PROGRESS.md?"
 
