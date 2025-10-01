@@ -163,19 +163,62 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Update PROGRESS.md to mark task as ✅ COMPLETE
 - Move to next task
 
-**Command Logging:**
-9. **When executing terminal commands**, encourage user to use the command logging system:
-   - Source the logging script: `source scripts/shell/log_command.sh`
-   - Execute commands with: `log_cmd <command>`
-   - Example: `log_cmd aws s3 ls s3://nba-sim-raw-data-lake/`
-10. **Reference COMMAND_LOG.md** when debugging similar issues to learn from past solutions
-11. **Add solutions to errors** using `log_solution <description>` helper function
-12. **CRITICAL - Before committing COMMAND_LOG.md to Git:**
-   - Always review for sensitive information (credentials, API keys, passwords, tokens)
-   - Sanitize AWS account IDs if sharing publicly
-   - Replace sensitive IPs/endpoints with placeholders
-   - Remove or redact any Personal Access Tokens (PATs)
-   - Remind user to review before any `git add` or `git commit` that includes COMMAND_LOG.md
+**Command Logging & Code Snippet Tracking:**
+
+**CRITICAL: Log ALL code changes and outcomes to COMMAND_LOG.md for learning and reference**
+
+9. **When writing/editing code files**, manually document in COMMAND_LOG.md:
+   - **What you created/changed:** File path, function/class name, purpose
+   - **Code snippet:** The actual code written (if short) or summary (if long)
+   - **Outcome:** Did it work? Any errors? What was learned?
+   - **Format:**
+     ```markdown
+     ## [Timestamp] Code Change: [Brief Description]
+     **File:** `path/to/file.py`
+     **Purpose:** What this code does and why
+
+     **Code:**
+     ```python
+     # Actual code snippet or summary
+     ```
+
+     **Outcome:**
+     - ✅ Success / ❌ Failed
+     - Error messages (if any)
+     - What worked / what didn't
+     - Lessons learned
+     ```
+   - **When to log:**
+     - ✅ New functions/classes created
+     - ✅ Bug fixes (what was broken, how you fixed it)
+     - ✅ Refactoring (what changed, why)
+     - ✅ Failed attempts (what didn't work, why)
+     - ✅ Performance improvements
+   - **Why this matters:**
+     - Learn from past mistakes (avoid repeating failed approaches)
+     - Track what patterns work well in this codebase
+     - Build institutional knowledge of trial and error
+     - Reference successful solutions for similar problems
+
+10. **When executing terminal commands**, encourage user to use the command logging system:
+    - Source the logging script: `source scripts/shell/log_command.sh`
+    - Execute commands with: `log_cmd <command>`
+    - Example: `log_cmd aws s3 ls s3://nba-sim-raw-data-lake/`
+
+11. **Reference COMMAND_LOG.md** when debugging similar issues to learn from past solutions:
+    - **Before writing new code:** Check if similar code was written before
+    - **When errors occur:** Search for similar error messages in log
+    - **When choosing approaches:** Review what worked/failed previously
+    - Use as a learning database of what works in this project
+
+12. **Add solutions to errors** using `log_solution <description>` helper function
+
+13. **CRITICAL - Before committing COMMAND_LOG.md to Git:**
+    - Always review for sensitive information (credentials, API keys, passwords, tokens)
+    - Sanitize AWS account IDs if sharing publicly
+    - Replace sensitive IPs/endpoints with placeholders
+    - Remove or redact any Personal Access Tokens (PATs)
+    - Remind user to review before any `git add` or `git commit` that includes COMMAND_LOG.md
 
 **Documentation Update Triggers:**
 
@@ -192,7 +235,7 @@ The following documentation requires MANUAL updates (cannot be automated):
 | **QUICKSTART.md** | When daily workflow changes | Update relevant command section |
 | **TESTING.md** | When testing strategy evolves | Update approach, add examples |
 | **.env.example** | When new env variables needed | Add variable with description |
-| **COMMAND_LOG.md** | After every significant command | Use `log_cmd`, `log_note`, `log_solution` |
+| **COMMAND_LOG.md** | After every significant command OR code change | Use `log_cmd`, `log_note`, `log_solution` for commands; manually log all code snippets with outcomes (success/failure, errors, lessons learned) |
 
 **Automated Documentation (run weekly):**
 - `make update-docs` - Updates timestamps, costs, stats, validates links
