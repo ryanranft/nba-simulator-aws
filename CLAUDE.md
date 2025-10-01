@@ -55,6 +55,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    - **PROGRESS.md Cost Estimates:** After creating AWS resources → ask "Should I run `make check-costs` and update PROGRESS.md with actual costs?"
    - **TROUBLESHOOTING.md:** After solving new error → ask "Should I add this solution to TROUBLESHOOTING.md?"
    - **ADRs:** After architectural decision → ask "Should I create ADR-00X for this decision? (see docs/adr/template.md)"
+     - **When to create ADRs:**
+       - ✅ Significant architectural decisions (database choice, service selection, framework adoption)
+       - ✅ Technology choices with long-term impact (Python version, AWS service vs self-hosted)
+       - ✅ Major trade-offs (cost vs performance, simplicity vs scalability, storage vs compute)
+       - ✅ Decisions affecting multiple parts of system (authentication method, logging strategy, error handling)
+       - ✅ Rejecting common approaches (why NOT using X, why avoiding Y)
+       - ✅ Development workflow changes (build process, deployment strategy, testing approach)
+     - **When NOT to create ADRs:**
+       - ❌ Small implementation details (variable naming, file organization)
+       - ❌ Temporary workarounds (quick fixes, patches)
+       - ❌ Obvious choices with no alternatives (using JSON for config, Git for version control)
+       - ❌ Easily reversible decisions with no consequences (UI colors, log message format)
    - **QUICKSTART.md:** If workflow changed → ask "Should we update QUICKSTART.md with these new commands?"
    - **STYLE_GUIDE.md:** If code style preference emerges → ask "Should we document this style preference in STYLE_GUIDE.md?"
 
@@ -175,7 +187,9 @@ The following documentation requires MANUAL updates (cannot be automated):
   - ADR-003: Python 3.11 (Glue compatibility)
   - ADR-004: Git without GitHub push (superseded by ADR-005)
   - ADR-005: Git SSH authentication
+  - ADR-006: Session initialization automation
   - Use `docs/adr/template.md` for new decisions
+  - See lines 58-69 above for when to create ADRs
 
 **Code Quality:**
 - **Style Guide** (`docs/STYLE_GUIDE.md`) - Required for all code
