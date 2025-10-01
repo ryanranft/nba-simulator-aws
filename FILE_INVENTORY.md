@@ -1,6 +1,6 @@
 # FILE_INVENTORY.md
 
-**Auto-generated:** 2025-10-01 18:15:06
+**Auto-generated:** 2025-10-01 18:23:25
 
 **Purpose:** Comprehensive inventory of all project files with automatic summaries.
 
@@ -16,7 +16,7 @@
 
 ### .session-history.md
 
-**Type:** Markdown documentation (393 lines)
+**Type:** Markdown documentation (451 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** <!-- AUTO-UPDATE TRIGGER: Run `bash scripts/shell/session_startup.sh >> .session-history.md` AFTER every commit -->
 
@@ -34,7 +34,7 @@
 
 ### COMMAND_LOG.md
 
-**Type:** Markdown documentation (203 lines)
+**Type:** Markdown documentation (399 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** <!-- AUTO-UPDATE TRIGGER: After EVERY code file creation/modification, failed command, or error resolution -->
 
@@ -42,7 +42,7 @@
 
 **Type:** Markdown documentation (305 lines)
 **Last Modified:** 2025-10-01
-**Purpose:** **Auto-generated:** 2025-10-01 18:09:30
+**Purpose:** **Auto-generated:** 2025-10-01 18:15:06
 
 ### MACHINE_SPECS.md
 
@@ -137,6 +137,16 @@
 **Dependencies:** AWS CLI, Conda, Git
 **Usage:** `./scripts/shell/session_startup.sh`
 
+### scripts/shell/setup_git_hooks.sh
+
+**Type:** Bash script (146 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** Setup Git Hooks for NBA Simulator AWS Project
+**Key Functions:**
+- `create_hook()`
+**Dependencies:** AWS CLI, Conda, Git
+**Usage:** `./scripts/shell/setup_git_hooks.sh`
+
 ### scripts/shell/verify_gitignore.sh
 
 **Type:** Bash script (47 lines)
@@ -196,7 +206,7 @@
 
 ### docs/SETUP.md
 
-**Type:** Markdown documentation (492 lines)
+**Type:** Markdown documentation (556 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** **Project:** NBA Game Simulator & ML Platform
 
@@ -290,12 +300,12 @@
 
 ## Summary Statistics
 
-**Total files documented:** 36
-**Total lines of code/docs:** 15,766
+**Total files documented:** 37
+**Total lines of code/docs:** 16,230
 
 **Files by type:**
 - Markdown documentation: 24
-- Bash script: 8
+- Bash script: 9
 - Python script: 2
 - File: 1
 - EXAMPLE file: 1

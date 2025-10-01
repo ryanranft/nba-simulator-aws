@@ -235,7 +235,71 @@ git remote -v
 
 ---
 
-### 7. Create Conda Environment
+### 7. Set Up Git Hooks (Recommended)
+
+**Purpose:** Automate session history logging after every commit.
+
+The project includes a post-commit hook that automatically appends environment snapshots to `.session-history.md`. Since Git hooks are not tracked in the repository, you need to set them up manually after cloning.
+
+**Option 1: Run setup script (recommended):**
+```bash
+# Automated setup - installs all hooks
+bash scripts/shell/setup_git_hooks.sh
+```
+
+**Option 2: Manual setup:**
+```bash
+# Navigate to project root
+cd /Users/ryanranft/nba-simulator-aws
+
+# Create post-commit hook
+cat > .git/hooks/post-commit << 'EOF'
+#!/bin/bash
+# Post-commit hook: Automatically log session snapshot after every commit
+
+# Change to project root directory
+cd "$(git rev-parse --show-toplevel)"
+
+# Append session snapshot to .session-history.md
+bash scripts/shell/session_startup.sh >> .session-history.md
+
+# Silent success
+exit 0
+EOF
+
+# Make it executable
+chmod +x .git/hooks/post-commit
+
+# Verify hook exists
+ls -la .git/hooks/post-commit
+```
+
+**What this does:**
+- After every `git commit`, automatically appends environment state to `.session-history.md`
+- Logs: hardware specs, Python version, conda environment, git status, package versions
+- Enables correlation of git commits with exact software versions used
+
+**Verify it works:**
+```bash
+# Make a test commit
+touch test.txt
+git add test.txt
+git commit -m "Test post-commit hook"
+
+# Check if .session-history.md was updated
+tail -20 .session-history.md
+# Should show recent session snapshot
+
+# Clean up test file
+git rm test.txt
+git commit -m "Remove test file"
+```
+
+**Note:** `.session-history.md` is gitignored (local-only). Each developer maintains their own session history.
+
+---
+
+### 8. Create Conda Environment
 
 ```bash
 # Create environment with Python 3.11
@@ -255,7 +319,7 @@ which python
 
 ---
 
-### 8. Install Python Dependencies
+### 9. Install Python Dependencies
 
 ```bash
 # Make sure environment is activated
@@ -281,7 +345,7 @@ pip list | grep numpy      # Should show numpy version
 
 ---
 
-### 9. Configure Environment Variables (Optional)
+### 10. Configure Environment Variables (Optional)
 
 **Create `.env` file:**
 ```bash
@@ -307,7 +371,7 @@ EOF
 
 ---
 
-### 10. Verify S3 Access
+### 11. Verify S3 Access
 
 ```bash
 # List S3 buckets
@@ -328,7 +392,7 @@ aws s3 ls s3://nba-sim-raw-data-lake/ --recursive --summarize | grep "Total Obje
 
 ---
 
-### 11. Set Up Command Logging (Optional)
+### 12. Set Up Command Logging (Optional)
 
 ```bash
 # Make logging script executable
