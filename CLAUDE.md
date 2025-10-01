@@ -300,7 +300,7 @@ grep -E "(AWS_ACCESS_KEY|aws_secret|password|192\.168\.|10\.|172\.(1[6-9]|2[0-9]
 #   ❌ Private IP addresses (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
 #   ❌ ANY IP addresses (per user requirement)
 #   ❌ Passwords, API keys, Bearer tokens
-#   ❌ SSH private keys (BEGIN [REDACTED] KEY)
+#   ❌ SSH private keys (BEGIN + PRIVATE + KEY)
 #   ❌ GitHub tokens (ghp_..., github_pat_...)
 #   ❌ Database connection strings with passwords (postgresql://user:pass@host)
 ```
