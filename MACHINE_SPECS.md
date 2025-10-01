@@ -94,6 +94,341 @@ top -o MEM -n 10 -l 1
 - **RDS queries:** Result sets consume memory, use LIMIT for testing
 - **SageMaker training:** Runs on AWS, but downloading results uses local memory
 
+### Python Memory Management Settings
+
+**Python's memory behavior on macOS:**
+
+Python uses a private heap for memory allocation, managed by Python's memory allocator. Understanding Python's memory management helps optimize for this project's large-scale data processing.
+
+**Check Python memory allocator:**
+```python
+import sys
+print(f"Python memory allocator: {sys.version}")
+print(f"Pointer size: {sys.maxsize.bit_length() + 1} bits")
+```
+
+**Expected output (Python 3.11 on M2 Max):**
+- 64-bit Python
+- Native ARM64 build
+- Uses system malloc() by default on macOS
+
+**Python memory configuration:**
+
+**1. Default Python Memory Settings:**
+```python
+import sys
+import resource
+
+# Check current memory limit
+soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+print(f"Memory limit (soft): {soft}")  # Usually unlimited (-1)
+print(f"Memory limit (hard): {hard}")  # Usually unlimited (-1)
+
+# Check data segment limit
+soft, hard = resource.getrlimit(resource.RLIMIT_DATA)
+print(f"Data limit (soft): {soft}")
+print(f"Data limit (hard): {hard}")
+```
+
+**2. Python Garbage Collection:**
+
+Python uses reference counting + generational garbage collection:
+
+```python
+import gc
+
+# Check garbage collection settings
+print(f"GC enabled: {gc.isenabled()}")
+print(f"GC thresholds: {gc.get_threshold()}")
+# Default: (700, 10, 10)
+# Means: collect when 700 allocations - deallocations occur
+
+# View garbage collection stats
+print(f"GC stats: {gc.get_stats()}")
+```
+
+**Optimize GC for large data processing:**
+```python
+import gc
+
+# Disable automatic GC for performance-critical sections
+gc.disable()
+
+# Process large dataset here
+# ...
+
+# Manually trigger collection when appropriate
+gc.collect()
+
+# Re-enable automatic GC
+gc.enable()
+```
+
+**3. Memory-Efficient Data Processing Patterns:**
+
+**Use generators for large file iteration:**
+```python
+def json_file_generator(directory):
+    """Memory-efficient file iteration"""
+    for file_path in glob.glob(f"{directory}/*.json"):
+        with open(file_path, 'r') as f:
+            yield json.load(f)
+
+# Good: processes one file at a time
+for data in json_file_generator("/path/to/files"):
+    process(data)
+
+# Bad: loads all files into memory
+all_data = [json.load(open(f)) for f in glob.glob("*.json")]  # Don't do this!
+```
+
+**Use chunking for Pandas:**
+```python
+# Process large CSV in chunks
+chunk_size = 10000
+for chunk in pd.read_csv('large_file.csv', chunksize=chunk_size):
+    process(chunk)
+    # Memory is freed after each chunk
+
+# Instead of loading entire file:
+# df = pd.read_csv('large_file.csv')  # May consume 2-3x file size
+```
+
+**Use appropriate dtypes:**
+```python
+# Reduce memory usage with explicit dtypes
+dtypes = {
+    'player_id': 'int32',      # Instead of int64 (saves 50%)
+    'points': 'int16',          # Instead of int64 (saves 75%)
+    'game_date': 'category',    # For repeated strings
+}
+
+df = pd.read_csv('data.csv', dtype=dtypes)
+
+# Check memory usage
+print(df.memory_usage(deep=True).sum() / 1024**2, "MB")
+```
+
+**4. Python-Specific Memory Limits:**
+
+**Set memory limit for Python process (if needed):**
+```python
+import resource
+
+# Set soft limit to 60 GB (safety buffer)
+memory_limit = 60 * 1024**3  # 60 GB in bytes
+try:
+    resource.setrlimit(resource.RLIMIT_AS, (memory_limit, resource.RLIM_INFINITY))
+    print(f"Memory limit set to {memory_limit / 1024**3:.1f} GB")
+except ValueError:
+    print("Could not set memory limit (macOS may not support RLIMIT_AS)")
+```
+
+**Note:** macOS may not enforce RLIMIT_AS strictly. Use as a safety check, not hard limit.
+
+**5. Monitoring Python Memory Usage:**
+
+**Track memory usage in scripts:**
+```python
+import psutil
+import os
+
+def get_memory_usage():
+    """Get current process memory usage in MB"""
+    process = psutil.Process(os.getpid())
+    mem_info = process.memory_info()
+    return {
+        'rss': mem_info.rss / 1024**2,  # Resident Set Size (physical memory)
+        'vms': mem_info.vms / 1024**2,  # Virtual Memory Size
+    }
+
+# Usage:
+print(f"Memory before: {get_memory_usage()['rss']:.1f} MB")
+# ... do work ...
+print(f"Memory after: {get_memory_usage()['rss']:.1f} MB")
+```
+
+**Memory profiling with memory_profiler:**
+```bash
+# Install memory profiler
+pip install memory-profiler
+
+# Usage in code:
+from memory_profiler import profile
+
+@profile
+def my_function():
+    # Code to profile
+    data = load_large_dataset()
+    process(data)
+
+# Run with line-by-line memory usage:
+python -m memory_profiler script.py
+```
+
+**6. multiprocessing Memory Considerations:**
+
+**Each subprocess gets its own memory space:**
+```python
+from multiprocessing import Pool
+import os
+
+def process_file(file_path):
+    # Each worker process has its own memory
+    # Parent process memory is NOT shared (copy-on-write)
+    data = load_and_process(file_path)
+    return results
+
+# With 8 workers, peak memory = 8 * per-process-memory
+with Pool(processes=8) as pool:
+    results = pool.map(process_file, file_list)
+```
+
+**Memory estimate for multiprocessing:**
+- Single process uses 5 GB
+- With 8 workers: 8 * 5 GB = 40 GB peak memory
+- System overhead: +2-3 GB
+- **Total estimated:** ~45 GB
+
+**Safe worker count calculation:**
+```python
+import psutil
+
+def calculate_safe_workers(memory_per_worker_gb=5):
+    """Calculate safe number of workers based on available memory"""
+    available_memory_gb = psutil.virtual_memory().available / 1024**3
+    safe_workers = int((available_memory_gb * 0.8) / memory_per_worker_gb)
+    max_workers = psutil.cpu_count()
+    return min(safe_workers, max_workers)
+
+# Example:
+workers = calculate_safe_workers(memory_per_worker_gb=5)
+print(f"Safe worker count: {workers}")
+```
+
+**7. Common Memory Pitfalls:**
+
+**Pitfall 1: Pandas string columns (object dtype)**
+```python
+# Bad: object dtype uses ~50 bytes per string
+df = pd.read_csv('data.csv')  # Default reads strings as 'object'
+
+# Good: Use category for repeated strings
+df['team_id'] = df['team_id'].astype('category')  # Saves 80-90% memory
+```
+
+**Pitfall 2: Accumulating results in lists**
+```python
+# Bad: accumulates all results in memory
+results = []
+for file in files:
+    results.append(process(file))  # List grows unbounded
+
+# Good: process and write incrementally
+for file in files:
+    result = process(file)
+    write_to_database(result)  # Memory freed immediately
+```
+
+**Pitfall 3: Not closing file handles**
+```python
+# Bad: file handles stay open (memory leak)
+files = [open(f) for f in file_list]
+
+# Good: use context managers
+for file_path in file_list:
+    with open(file_path) as f:
+        process(f)  # File closed automatically
+```
+
+**8. Project-Specific Memory Settings:**
+
+**For this NBA simulator project (146K JSON files):**
+
+**Recommended configuration:**
+```python
+# In your processing script
+import gc
+import psutil
+
+# Configuration
+CHUNK_SIZE = 10000  # Process 10K files at a time
+WORKER_COUNT = 8    # 8 parallel workers (M2 Max has 12 cores)
+MEMORY_PER_WORKER = 4  # GB per worker process
+
+# Disable automatic GC during bulk processing
+gc.disable()
+
+# Process in chunks
+for chunk_start in range(0, 146115, CHUNK_SIZE):
+    chunk_files = files[chunk_start:chunk_start + CHUNK_SIZE]
+
+    with Pool(processes=WORKER_COUNT) as pool:
+        results = pool.map(process_file, chunk_files)
+
+    # Write results and free memory
+    write_results(results)
+    del results
+
+    # Manual GC every chunk
+    gc.collect()
+
+    # Monitor memory
+    mem = psutil.virtual_memory()
+    print(f"Memory usage: {mem.percent}%")
+    if mem.percent > 70:
+        print("WARNING: Memory usage high, reducing chunk size")
+        CHUNK_SIZE = CHUNK_SIZE // 2
+
+# Re-enable automatic GC
+gc.enable()
+```
+
+**Expected memory usage:**
+- Single file processing: ~5 MB per file
+- 8 workers: 8 * 5 MB = 40 MB working set
+- Pandas overhead: ~500 MB
+- Python interpreter: ~100 MB
+- **Total estimated:** ~1-2 GB for normal operations
+
+**9. Python Environment Variables:**
+
+**Set before running Python scripts:**
+```bash
+# Disable Python bytecode generation (saves disk I/O)
+export PYTHONDONTWRITEBYTECODE=1
+
+# Force unbuffered output (for logging)
+export PYTHONUNBUFFERED=1
+
+# Set Python memory allocator (for debugging)
+# export PYTHONMALLOC=debug  # Only for debugging memory leaks
+
+# Set hash seed for reproducibility
+export PYTHONHASHSEED=0
+```
+
+**Add to .zprofile or .zshenv:**
+```bash
+echo 'export PYTHONDONTWRITEBYTECODE=1' >> ~/.zprofile
+echo 'export PYTHONUNBUFFERED=1' >> ~/.zprofile
+```
+
+**10. Memory Usage Summary for This Project:**
+
+| Operation | Estimated Memory | Safe with 96 GB? | Notes |
+|-----------|------------------|------------------|-------|
+| **Single file processing** | 5 MB | ✅ Always safe | Minimal memory footprint |
+| **100 files sequential** | 50 MB | ✅ Always safe | Files processed one at a time |
+| **10K files (single process)** | 2-5 GB | ✅ Safe | Use generators |
+| **10K files (8 workers)** | 10-15 GB | ✅ Safe | Parallel processing |
+| **All 146K files (naive load)** | 15-20 GB | ✅ Safe but not recommended | Use chunking instead |
+| **Pandas DataFrame (1M rows)** | 500 MB - 2 GB | ✅ Safe | Depends on dtypes |
+| **8 Jupyter kernels** | 4-10 GB | ✅ Safe | Limit to 2-3 active kernels |
+| **Full ETL pipeline** | 20-30 GB | ✅ Safe | Process in batches |
+
+**Maximum safe memory usage:** 70 GB (leaves 26 GB buffer for system)
+
 ---
 
 ## Disk I/O Performance
