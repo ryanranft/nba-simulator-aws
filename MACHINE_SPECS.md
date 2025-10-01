@@ -1589,6 +1589,429 @@ echo $SHELL
 
 ---
 
+## IDE/Editor Configuration
+
+**Primary IDE:** PyCharm Professional 2024.1 (or compatible version)
+**Alternatives:** VS Code with Python extension, Jupyter Lab
+
+### PyCharm Configuration for This Project
+
+#### 1. Project Structure Settings
+
+**CRITICAL - Exclude Large Data Directory:**
+
+The `data/` directory contains 146,115 JSON files (119 GB). PyCharm will attempt to index all files by default, which causes:
+- **Extreme slowdown** (30+ minutes indexing time)
+- **High memory usage** (10-15 GB just for indexing)
+- **UI freezing** during file operations
+- **Search performance degradation**
+
+**Solution: Mark `data/` as Excluded**
+
+```
+PyCharm → Preferences → Project → Project Structure
+└─ Select "data" folder
+└─ Click "Excluded" button (red folder icon)
+```
+
+**Verify exclusion:**
+```bash
+# Check .idea/nba-simulator-aws.iml for:
+<excludeFolder url="file://$MODULE_DIR$/data" />
+```
+
+**Directories to exclude:**
+- `data/` - 146K JSON files (119 GB)
+- `__pycache__/` - Python bytecode (auto-regenerated)
+- `.pytest_cache/` - Test cache
+- `*.egg-info/` - Package metadata
+- `venv/` or `.venv/` - If accidentally created (this project uses Conda)
+
+**Directories to mark as Sources Root:**
+- `src/` - Source code directory
+- `scripts/` - Utility scripts
+
+#### 2. Python Interpreter Configuration
+
+**Interpreter:** Conda environment `nba-aws` (Python 3.11.13)
+
+**Configure in PyCharm:**
+```
+Preferences → Project → Python Interpreter
+└─ Click gear icon → Add
+└─ Select "Conda Environment"
+└─ Choose "Existing environment"
+└─ Path: /Users/ryanranft/miniconda3/envs/nba-aws/bin/python
+```
+
+**Verify correct interpreter:**
+```python
+import sys
+print(sys.executable)
+# Expected: /Users/ryanranft/miniconda3/envs/nba-aws/bin/python
+print(sys.version)
+# Expected: 3.11.13 | packaged by conda-forge
+```
+
+**Check installed packages in PyCharm:**
+```
+Preferences → Project → Python Interpreter → Packages tab
+```
+
+**Expected packages:** boto3, pandas, psycopg2-binary, sqlalchemy, pytest, black, flake8
+
+#### 3. Code Style Settings
+
+**Follow PEP 8 with project-specific adjustments**
+
+**Configure in PyCharm:**
+```
+Preferences → Editor → Code Style → Python
+```
+
+**Settings:**
+- **Line length:** 88 characters (Black formatter default)
+- **Indentation:** 4 spaces (not tabs)
+- **Imports:** Use isort style (group stdlib, third-party, local)
+- **Docstrings:** Google style (see STYLE_GUIDE.md)
+
+**Enable formatters:**
+```
+Preferences → Tools → Black
+└─ Enable "On save"
+└─ Path: /Users/ryanranft/miniconda3/envs/nba-aws/bin/black
+
+Preferences → Tools → Flake8
+└─ Path: /Users/ryanranft/miniconda3/envs/nba-aws/bin/flake8
+```
+
+**Auto-format on save:**
+```
+Preferences → Tools → Actions on Save
+└─ Enable "Reformat code"
+└─ Enable "Optimize imports"
+```
+
+#### 4. Run/Debug Configurations
+
+**Python script template:**
+```
+Run → Edit Configurations → Templates → Python
+└─ Interpreter: nba-aws (Python 3.11.13)
+└─ Working directory: /Users/ryanranft/nba-simulator-aws
+└─ Environment variables: (load from .env file)
+```
+
+**Load environment variables from .env:**
+```
+Run → Edit Configurations
+└─ EnvFile tab → Enable EnvFile
+└─ Add .env file path: /Users/ryanranft/nba-simulator-aws/.env
+```
+
+**Pytest configuration:**
+```
+Run → Edit Configurations → Edit configuration templates → Python tests → pytest
+└─ Target: Custom
+└─ Additional Arguments: -v --tb=short
+└─ Working directory: /Users/ryanranft/nba-simulator-aws
+```
+
+#### 5. File Watchers (Optional)
+
+**Auto-run Black on Python file save:**
+```
+Preferences → Tools → File Watchers → +
+└─ Name: Black
+└─ File type: Python
+└─ Program: /Users/ryanranft/miniconda3/envs/nba-aws/bin/black
+└─ Arguments: $FilePath$
+└─ Working directory: $ProjectFileDir$
+```
+
+#### 6. Version Control Integration
+
+**Git integration settings:**
+```
+Preferences → Version Control → Git
+└─ Path to Git executable: /opt/homebrew/bin/git
+└─ Enable "Commit message template": .gitmessage
+```
+
+**Commit template:**
+```
+Preferences → Version Control → Commit
+└─ Enable "Check TODO"
+└─ Enable "Perform code analysis"
+└─ Disable "Check for files in .gitignore" (data/ already excluded)
+```
+
+**Before commit checklist (automatic):**
+- Reformat code (Black)
+- Optimize imports (isort)
+- Run Flake8
+- Check for TODO comments
+- Scan for security issues (pre-commit hook will catch credentials)
+
+#### 7. Memory Settings for PyCharm
+
+**CRITICAL - Increase PyCharm heap size for large projects**
+
+Even with `data/` excluded, this is a large codebase with many Python packages.
+
+**Edit PyCharm VM options:**
+```
+Help → Edit Custom VM Options
+```
+
+**Recommended settings:**
+```
+-Xms2g          # Initial heap size: 2 GB
+-Xmx8g          # Maximum heap size: 8 GB
+-XX:ReservedCodeCacheSize=1g
+-XX:+UseG1GC    # G1 garbage collector (better for large heaps)
+```
+
+**Monitor PyCharm memory usage:**
+```
+View → Appearance → Status Bar Widgets → Memory Indicator
+```
+
+**If PyCharm becomes slow:**
+1. Check memory indicator (should be <6 GB)
+2. Invalidate caches: `File → Invalidate Caches / Restart`
+3. Verify `data/` is still excluded
+4. Close unused tool windows
+
+#### 8. Database Tools
+
+**Configure RDS PostgreSQL connection (when RDS is created):**
+```
+View → Tool Windows → Database → + → Data Source → PostgreSQL
+└─ Host: nba-sim-db.xxxxx.us-east-1.rds.amazonaws.com
+└─ Port: 5432
+└─ Database: nba_simulator
+└─ User: postgres
+└─ Password: (from .env file)
+└─ Test Connection
+```
+
+**Enable SQL dialect:**
+```
+Preferences → Languages & Frameworks → SQL Dialects
+└─ Project SQL Dialect: PostgreSQL
+```
+
+#### 9. Terminal Configuration
+
+**Use integrated terminal with Conda:**
+```
+Preferences → Tools → Terminal
+└─ Shell path: /bin/zsh
+└─ Environment variables: CONDA_AUTO_ACTIVATE_BASE=false
+```
+
+**Auto-activate nba-aws environment in terminal:**
+
+Add to `~/.zshrc`:
+```bash
+# Auto-activate conda environment when in project directory
+if [[ "$PWD" == "/Users/ryanranft/nba-simulator-aws"* ]] && [[ "$CONDA_DEFAULT_ENV" != "nba-aws" ]]; then
+    conda activate nba-aws
+fi
+```
+
+#### 10. Indexing Optimization
+
+**Exclude patterns from indexing:**
+```
+Preferences → Editor → File Types → Ignore files and folders
+```
+
+**Add these patterns:**
+```
+*.csv;*.json;*.parquet;*.log;__pycache__;.pytest_cache;*.egg-info
+```
+
+**Reduce indexing frequency:**
+```
+Help → Edit Custom Properties
+```
+
+**Add:**
+```
+# Reduce indexing frequency
+idea.max.intellisense.filesize=10000
+# Don't index files larger than 10 MB
+```
+
+### VS Code Configuration (Alternative)
+
+**If using VS Code instead of PyCharm:**
+
+**Install extensions:**
+```bash
+code --install-extension ms-python.python
+code --install-extension ms-python.vscode-pylance
+code --install-extension ms-toolsai.jupyter
+code --install-extension ms-azuretools.vscode-docker
+```
+
+**Workspace settings (`.vscode/settings.json`):**
+```json
+{
+  "python.defaultInterpreterPath": "/Users/ryanranft/miniconda3/envs/nba-aws/bin/python",
+  "python.formatting.provider": "black",
+  "python.linting.flake8Enabled": true,
+  "python.linting.enabled": true,
+  "editor.formatOnSave": true,
+  "editor.rulers": [88],
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/*.egg-info": true,
+    "data/": true
+  },
+  "files.watcherExclude": {
+    "**/data/**": true
+  },
+  "search.exclude": {
+    "**/data/**": true
+  }
+}
+```
+
+**Tasks configuration (`.vscode/tasks.json`):**
+```json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run tests",
+      "type": "shell",
+      "command": "conda run -n nba-aws pytest -v",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Format with Black",
+      "type": "shell",
+      "command": "conda run -n nba-aws black .",
+      "group": "none",
+      "problemMatcher": []
+    }
+  ]
+}
+```
+
+### Jupyter Configuration
+
+**For interactive data exploration:**
+
+**Launch Jupyter Lab:**
+```bash
+conda activate nba-aws
+jupyter lab --notebook-dir=/Users/ryanranft/nba-simulator-aws
+```
+
+**Configure Jupyter kernel:**
+```bash
+# Ensure nba-aws kernel is available
+python -m ipykernel install --user --name nba-aws --display-name "Python 3.11 (nba-aws)"
+```
+
+**Jupyter memory limit (optional):**
+```python
+# In notebook cell, set memory limit
+import resource
+resource.setrlimit(resource.RLIMIT_AS, (70 * 1024**3, -1))  # 70 GB soft limit
+```
+
+**Recommended Jupyter extensions:**
+```bash
+conda install -n nba-aws jupyterlab-git
+conda install -n nba-aws jupyterlab_code_formatter
+```
+
+### Editor Performance Comparison
+
+| Editor | Memory Usage | Indexing Time | Best For |
+|--------|--------------|---------------|----------|
+| **PyCharm** | 4-8 GB | 2-5 min (with data/ excluded) | Full-featured IDE, debugging, refactoring |
+| **VS Code** | 1-3 GB | 30-60 sec | Lightweight, fast startup, extensible |
+| **Jupyter Lab** | 2-4 GB | N/A (no indexing) | Interactive data exploration, visualization |
+| **Vim/Neovim** | <100 MB | N/A | Quick edits, remote work, minimal resources |
+
+### Common PyCharm Issues & Solutions
+
+**Issue 1: PyCharm freezes during startup**
+- **Cause:** Indexing 146K JSON files in `data/`
+- **Solution:** Exclude `data/` folder (see step 1)
+
+**Issue 2: "Cannot find reference" errors for imports**
+- **Cause:** Wrong Python interpreter or sources root not set
+- **Solution:** Verify Conda interpreter, mark `src/` as Sources Root
+
+**Issue 3: Black formatter not found**
+- **Cause:** Black not installed in Conda environment
+- **Solution:** `conda activate nba-aws && conda install black`
+
+**Issue 4: High memory usage (>10 GB)**
+- **Cause:** Too many files indexed, large heap size
+- **Solution:** Invalidate caches, verify exclusions, reduce Xmx to 6g
+
+**Issue 5: Git integration not working**
+- **Cause:** PyCharm can't find Git executable
+- **Solution:** Set path to `/opt/homebrew/bin/git` (Apple Silicon) or `/usr/local/bin/git` (Intel)
+
+### IDE Configuration Checklist
+
+**Before starting development:**
+
+- [ ] Exclude `data/` directory from indexing
+- [ ] Configure Conda interpreter (nba-aws, Python 3.11.13)
+- [ ] Set up Black formatter (88 character line length)
+- [ ] Enable Flake8 linting
+- [ ] Configure Git integration with commit template (.gitmessage)
+- [ ] Set up .env file loading for environment variables
+- [ ] Increase IDE heap size (PyCharm: 8 GB)
+- [ ] Configure database tools (when RDS is created)
+- [ ] Set up pytest run configuration
+- [ ] Enable auto-format on save
+
+**Verify configuration:**
+```bash
+# Check Python interpreter
+python --version  # Should be 3.11.13
+
+# Check Black is available
+black --version
+
+# Check Flake8 is available
+flake8 --version
+
+# Check data/ is excluded (should be empty or error)
+# In PyCharm: Search → Find in Files → Scope: Project Files
+# Search for "game_id" in data/ - should return no results if excluded properly
+```
+
+### Additional Resources
+
+**PyCharm documentation:**
+- https://www.jetbrains.com/help/pycharm/conda-support-creating-conda-virtual-environment.html
+- https://www.jetbrains.com/help/pycharm/excluding-files-from-project.html
+
+**VS Code Python documentation:**
+- https://code.visualstudio.com/docs/python/python-tutorial
+- https://code.visualstudio.com/docs/python/environments
+
+**Project-specific guides:**
+- `docs/STYLE_GUIDE.md` - Code style conventions
+- `docs/SETUP.md` - Environment setup instructions
+- `QUICKSTART.md` - Common commands and workflows
+
+---
+
 ## Environment Variables
 
 **Shell Configuration Files:** `.zshrc`, `.zprofile`, `.zshenv`
