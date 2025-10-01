@@ -7,11 +7,11 @@
 
 ## Quick Diagnosis
 
-**Run the verification script first:**
+**Run the health check script first:**
 ```bash
 cd /Users/ryanranft/nba-simulator-aws
 conda activate nba-aws
-./scripts/shell/verify_setup.sh
+./scripts/shell/check_machine_health.sh
 ```
 
 This will identify most common issues automatically.
@@ -156,6 +156,45 @@ pip install boto3 pandas numpy psycopg2-binary sqlalchemy
 # Verify
 python -c "import boto3; print(boto3.__version__)"
 ```
+
+---
+
+### ❌ psycopg2 vs psycopg2-binary package name confusion
+
+**Symptom:**
+```bash
+# Health check script reports:
+❌ psycopg2 (NOT INSTALLED)
+
+# But package is actually installed:
+pip show psycopg2-binary
+# Shows: Name: psycopg2-binary, Version: 2.9.9
+```
+
+**Cause:** The package name is `psycopg2-binary`, not `psycopg2`. Scripts checking for "psycopg2" will fail.
+
+**Solution:**
+```bash
+# Always use the correct package name
+pip install psycopg2-binary
+
+# In Python imports, use:
+import psycopg2  # This works with psycopg2-binary
+
+# When checking installations:
+pip show psycopg2-binary  # Correct
+pip show psycopg2         # Will fail if only binary version installed
+```
+
+**Why psycopg2-binary:**
+- `psycopg2-binary` is pre-compiled, no need for PostgreSQL dev libraries
+- `psycopg2` requires compiling from source with `libpq-dev` installed
+- For development, `psycopg2-binary` is recommended
+- Import name remains `psycopg2` regardless of which package is installed
+
+**When updating scripts:**
+- Change package checks from "psycopg2" to "psycopg2-binary"
+- Keep Python imports as `import psycopg2`
 
 **For psycopg2 installation errors:**
 ```bash
@@ -904,7 +943,7 @@ SELECT * FROM player_game_stats WHERE player_id = 12345;
 
 ```bash
 # Verify environment
-./scripts/shell/verify_setup.sh
+./scripts/shell/check_machine_health.sh
 
 # Check AWS access
 aws sts get-caller-identity
@@ -957,7 +996,7 @@ logger.info("Debug message here")
 ```bash
 # Environment
 conda activate nba-aws
-./scripts/shell/verify_setup.sh
+./scripts/shell/check_machine_health.sh
 
 # AWS
 aws sts get-caller-identity

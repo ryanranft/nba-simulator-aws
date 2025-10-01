@@ -13,8 +13,8 @@ cd /Users/ryanranft/nba-simulator-aws
 # 2. Activate environment
 conda activate nba-aws
 
-# 3. Verify setup (first time each session)
-./scripts/shell/verify_setup.sh
+# 3. Run health check (recommended at start of each session)
+./scripts/shell/check_machine_health.sh
 
 # 4. Check Git status
 git status
@@ -105,7 +105,7 @@ log_solution Fixed by updating AWS credentials
 │   └── adr/                     # Architecture decisions
 ├── scripts/
 │   ├── shell/
-│   │   ├── verify_setup.sh      # Verify environment
+│   │   ├── check_machine_health.sh  # Comprehensive health check
 │   │   ├── log_command.sh       # Command logging
 │   │   └── sanitize_command_log.sh  # Security sanitization
 │   ├── aws/
@@ -121,7 +121,7 @@ log_solution Fixed by updating AWS credentials
 
 ### Is my environment set up correctly?
 ```bash
-./scripts/shell/verify_setup.sh
+./scripts/shell/check_machine_health.sh
 ```
 
 ### Can I access AWS?
@@ -218,7 +218,7 @@ git push origin main
 
 ## Getting Help
 
-1. **Environment issues?** → `./scripts/shell/verify_setup.sh`
+1. **Environment issues?** → `./scripts/shell/check_machine_health.sh`
 2. **Common errors?** → `docs/TROUBLESHOOTING.md`
 3. **How to...?** → `docs/SETUP.md` or `PROGRESS.md`
 4. **Why did we...?** → `docs/adr/README.md`

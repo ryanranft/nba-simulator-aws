@@ -21,6 +21,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Session Initialization (Proactive):**
 1. **Always run at start of each session:**
+   - **FIRST:** Ask user: "Please run the session startup checklist from MACHINE_SPECS.md and share the output so I can verify software versions"
    - `make verify-all` - Check environment, AWS, and files
    - `make git-status` - Review recent commits
    - `make check-costs` - Check current AWS costs
@@ -126,6 +127,7 @@ The following documentation requires MANUAL updates (cannot be automated):
 
 | Document | Update When | How to Update |
 |----------|-------------|---------------|
+| **MACHINE_SPECS.md** | Daily (start of each session) | Run session startup checklist, update version table with current software versions |
 | **PROGRESS.md** | After completing phase/task | Change ⏸️ PENDING → ✅ COMPLETE, update "Last Updated" |
 | **PROGRESS.md** | After creating AWS resources | Run `make check-costs`, update cost estimates with actuals |
 | **TROUBLESHOOTING.md** | After solving new error | Add new section with problem/solution, run `make inventory` |
@@ -175,7 +177,7 @@ The following documentation requires MANUAL updates (cannot be automated):
 **Environment & Setup:**
 - **Setup Guide** (`docs/SETUP.md`) - Fresh environment setup (11 steps)
 - **Environment Variables** (`.env.example`) - 35 variables, NEVER commit `.env`
-- **verify_setup.sh** - Quick health check script
+- **check_machine_health.sh** - Comprehensive 14-point health check script (replaces verify_setup.sh)
 
 **Operational:**
 - **QUICKSTART.md** - Daily commands, file locations, quick fixes
@@ -196,6 +198,11 @@ NBA Game Simulator & ML Platform - A Python-based AWS data pipeline that:
 - Trains ML prediction models using SageMaker
 
 **Current Status:** Phase 1 Complete - S3 data lake operational with 119 GB uploaded
+
+**Development Machine:** MacBook Pro 16-inch, 2023 (M2 Max, 96GB RAM, macOS Sequoia 15.6.1)
+- See `MACHINE_SPECS.md` for complete hardware/software specifications
+- Code is optimized for Apple Silicon (ARM64) architecture
+- Uses Homebrew for system packages and Miniconda for Python environment
 
 ## Essential Setup
 
@@ -222,10 +229,11 @@ aws s3 ls s3://nba-sim-raw-data-lake/
 - **S3 Bucket:** `s3://nba-sim-raw-data-lake` (146,115 files)
 - **Conda Env:** `/Users/ryanranft/miniconda3/envs/nba-aws`
 - **Quick Reference:** `QUICKSTART.md` (one-page command reference)
+- **Machine Specs:** `MACHINE_SPECS.md` (hardware, software versions, compatibility notes)
 - **File Inventory:** `FILE_INVENTORY.md` (auto-generated summaries of 28 documented files)
 - **Config Files:** `config/aws_config.yaml` (AWS resource definitions - minimal, to be populated in Phase 2+)
 - **Maintenance Scripts:** `scripts/maintenance/` (generate_inventory.py, sync_progress.py, update_docs.sh)
-- **Shell Utilities:** `scripts/shell/` (log_command.sh, verify_setup.sh, sanitize_command_log.sh)
+- **Shell Utilities:** `scripts/shell/` (check_machine_health.sh, log_command.sh, sanitize_command_log.sh)
 - **AWS Scripts:** `scripts/aws/` (check_costs.sh)
 - **Cost Tracking:** `scripts/aws/check_costs.sh` (AWS spending monitor)
 
