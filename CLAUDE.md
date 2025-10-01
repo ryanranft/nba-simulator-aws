@@ -445,6 +445,83 @@ s3://nba-sim-raw-data-lake/
 - ALWAYS run `sanitize_command_log.sh` before committing COMMAND_LOG.md
 - Backup before destructive operations (provide backup command)
 
+**Credential Rotation Schedule:**
+
+Follow these security best practices for credential rotation:
+
+| Credential Type | Rotation Frequency | How to Rotate | Priority |
+|-----------------|-------------------|---------------|----------|
+| **AWS Access Keys** | Every 90 days | AWS Console → IAM → Users → Security Credentials | 🔴 High |
+| **AWS Secret Keys** | Every 90 days | Generate new key, update ~/.aws/credentials, delete old | 🔴 High |
+| **SSH Keys** | Annually | Generate new keypair, update GitHub, delete old | 🟡 Medium |
+| **Database Passwords** | Every 90 days (when RDS created) | AWS Console → RDS → Modify → New password | 🔴 High |
+| **API Tokens** | Every 90 days | Regenerate in service, update .env | 🟡 Medium |
+
+**Rotation Reminders:**
+- Set calendar reminders for 85 days after each rotation
+- Use AWS IAM Access Analyzer to identify unused credentials
+- Check: `aws iam get-credential-report` to see key ages
+- Document last rotation date in MACHINE_SPECS.md
+
+**Emergency Rotation (if compromised):**
+1. Immediately deactivate compromised credential
+2. Generate new credential
+3. Update all systems using old credential
+4. Delete compromised credential
+5. Review CloudTrail logs for unauthorized access
+6. Document incident in TROUBLESHOOTING.md
+
+**GitHub Secret Scanning Setup:**
+
+GitHub provides free secret scanning for public repositories. To enable for this project:
+
+1. **Enable Secret Scanning (if public):**
+   - Go to: https://github.com/ryanranft/nba-simulator-aws/settings/security_analysis
+   - Enable "Secret scanning"
+   - Enable "Push protection" (blocks pushes with secrets)
+
+2. **What GitHub Detects:**
+   - AWS credentials (access keys, secret keys, session tokens)
+   - GitHub Personal Access Tokens (PATs)
+   - Azure, Google Cloud, Slack tokens
+   - Database connection strings with passwords
+   - 200+ partner patterns
+
+3. **How It Works:**
+   - Scans all commits in history
+   - Alerts on Settings → Security → Secret scanning alerts
+   - Push protection blocks new secrets from being pushed
+   - Partners (like AWS) are notified of leaked credentials
+
+4. **Local Git Hooks (Already Implemented):**
+   - Pre-commit hook: Blocks commits with secrets
+   - Pre-push hook: Scans last 5 commits before push
+   - Commit template: Reminds about security in every commit
+   - Located in: `.git/hooks/pre-commit`, `.git/hooks/pre-push`
+
+5. **Testing the Protection:**
+   ```bash
+   # Try to commit a test secret (will be blocked):
+   echo "aws_access_key_id=AWS_ACCESS_KEYIOSFODNN7EXAMPLE" > test.txt
+   git add test.txt
+   git commit -m "test"  # Should be blocked by pre-commit hook
+   rm test.txt
+   ```
+
+6. **If Secret Is Detected:**
+   - Immediately rotate the compromised credential
+   - Review GitHub alert for details
+   - Check AWS CloudTrail for unauthorized usage
+   - Update all systems using the old credential
+
+**Layered Security Summary:**
+- ✅ Layer 1: .gitignore (prevents staging sensitive files)
+- ✅ Layer 2: Pre-commit hook (blocks commits with secrets)
+- ✅ Layer 3: Pre-push hook (scans recent commit history)
+- ✅ Layer 4: Commit template (reminds about security)
+- ✅ Layer 5: GitHub secret scanning (cloud-based detection)
+- ✅ Layer 6: Credential rotation schedule (90-day intervals)
+
 ## Next Steps
 
 See `PROGRESS.md` for detailed phase-by-phase implementation plan with time estimates, cost breakdowns, and step-by-step instructions.

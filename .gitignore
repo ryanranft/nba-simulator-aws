@@ -20,11 +20,31 @@ build/
 .venv
 conda-env/
 
-# AWS
+# AWS & Credentials
 *.pem
 *.key
+*.ppk           # PuTTY private keys
+*.p12           # PKCS12 certificates
+*.pfx           # Windows certificates
 config/credentials.yaml
 config/*credentials*
+.aws/           # AWS config if accidentally in project
+**/credentials  # Any file named credentials
+
+# SSH Keys
+id_rsa*
+id_ed25519*
+id_ecdsa*
+*.pub           # Public keys (usually safe but better to exclude)
+
+# Secrets & Passwords
+secrets/
+vault/
+*.kdb           # KeePass databases
+*.kdbx          # KeePass databases
+password*
+*password*
+.secrets
 
 # Data files (too large for git)
 data/

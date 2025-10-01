@@ -1,0 +1,17 @@
+# Summary (50 chars max)
+
+
+# Detailed description (wrap at 72 chars)
+
+
+# ⚠️ SECURITY REMINDER:
+# - Never paste credentials or API keys in commit messages
+# - Remove sensitive data from code before committing
+# - Use environment variables for secrets (.env file)
+# - No IP addresses (private or public)
+# - No AWS account IDs or resource ARNs with account numbers
+# - Check with: git diff --cached (review before committing)
+
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>
