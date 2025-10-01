@@ -29,6 +29,7 @@ ADRs help:
 | [002](002-data-extraction-strategy.md) | 10% Data Extraction | 2025-09-29 | Accepted | Extract only 10% of JSON fields to reduce storage from 119 GB → 12 GB |
 | [003](003-python-version.md) | Python 3.11 | 2025-09-29 | Accepted | Use Python 3.11 for AWS Glue compatibility and performance |
 | [005](005-git-ssh-authentication.md) | Git SSH Auth | 2025-09-30 | Resolved | Use SSH instead of HTTPS for GitHub authentication |
+| [006](006-session-initialization-automation.md) | Session Init Automation | 2025-10-01 | Accepted | Automated session startup and post-commit version tracking |
 
 ### Superseded ADRs
 
@@ -83,7 +84,7 @@ cp template.md 00X-your-decision.md
 - **Consequences:** What are the trade-offs?
 
 ### 3. Number Sequentially
-- Next ADR: 006
+- Next ADR: 007
 - Use format: `00X-brief-title.md`
 
 ### 4. Update This README
@@ -106,6 +107,9 @@ Add entry to index table above
 ### Data Architecture
 - ADR-002: 10% Data Extraction Strategy
 
+### Development Workflow
+- ADR-006: Session Initialization Automation
+
 ### Process
 - ADR-004: Git Without GitHub Push (superseded)
 - ADR-005: Git SSH Authentication
@@ -120,6 +124,7 @@ Some ADRs have scheduled review dates:
 | 002 | After initial ETL completion | TBD |
 | 003 | AWS Glue adds Python 3.12 support | ~2026 |
 | 005 | No review needed | N/A |
+| 006 | Session startup slow or credential issues | 2025-04-01 |
 
 ## Related Documentation
 
@@ -189,6 +194,6 @@ See [template.md](template.md) for the full template structure:
 
 ---
 
-**Last Updated:** 2025-09-30
-**Total ADRs:** 5 (4 active, 1 superseded)
-**Next ADR Number:** 006
+**Last Updated:** 2025-10-01
+**Total ADRs:** 6 (5 active, 1 superseded)
+**Next ADR Number:** 007
