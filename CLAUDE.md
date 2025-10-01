@@ -25,6 +25,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    - `make git-status` - Review recent commits
    - `make check-costs` - Check current AWS costs
    - Identify current phase from PROGRESS.md
+   - Ask: "Any new work since last session that needs documenting?"
 
 2. **Ask user if they want to run (based on time since last update):**
    - If Monday or 7+ days since last update: "Would you like me to run `make update-docs` for weekly maintenance?"
@@ -32,10 +33,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    - If new AWS resources may exist: "Should I run `make sync-progress` to check if PROGRESS.md matches AWS?"
    - If any .md files modified: "After these changes, should I run `make inventory` to update FILE_INVENTORY.md?"
 
-3. **Remind user at end of session:**
+3. **Check for stale documentation needing manual updates:**
+   - **FILE_INVENTORY.md:** If 7+ days old or new files created → suggest `make inventory`
+   - **PROGRESS.md Phase Status:** If current phase completed but still shows ⏸️ PENDING → suggest updating status to ✅ COMPLETE
+   - **PROGRESS.md Cost Estimates:** After creating AWS resources → ask "Should I run `make check-costs` and update PROGRESS.md with actual costs?"
+   - **TROUBLESHOOTING.md:** After solving new error → ask "Should I add this solution to TROUBLESHOOTING.md?"
+   - **ADRs:** After architectural decision → ask "Should I create ADR-00X for this decision? (see docs/adr/template.md)"
+   - **QUICKSTART.md:** If workflow changed → ask "Should we update QUICKSTART.md with these new commands?"
+   - **STYLE_GUIDE.md:** If code style preference emerges → ask "Should we document this style preference in STYLE_GUIDE.md?"
+
+4. **Remind user at end of session:**
    - If COMMAND_LOG.md was modified: "Remember to review COMMAND_LOG.md for sensitive data before committing"
    - If multiple files changed: "Consider running `make backup` to create a backup"
    - If documentation changed: "Consider running `make inventory` to update file summaries"
+   - If phase completed: "Phase complete! Update PROGRESS.md status to ✅ COMPLETE and run `make sync-progress`"
 
 **CRITICAL - Progress Tracking Protocol:**
 
@@ -108,6 +119,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    - Replace sensitive IPs/endpoints with placeholders
    - Remove or redact any Personal Access Tokens (PATs)
    - Remind user to review before any `git add` or `git commit` that includes COMMAND_LOG.md
+
+**Documentation Update Triggers:**
+
+The following documentation requires MANUAL updates (cannot be automated):
+
+| Document | Update When | How to Update |
+|----------|-------------|---------------|
+| **PROGRESS.md** | After completing phase/task | Change ⏸️ PENDING → ✅ COMPLETE, update "Last Updated" |
+| **PROGRESS.md** | After creating AWS resources | Run `make check-costs`, update cost estimates with actuals |
+| **TROUBLESHOOTING.md** | After solving new error | Add new section with problem/solution, run `make inventory` |
+| **ADRs** | After architectural decision | Create `docs/adr/00X-name.md` from template, update `docs/adr/README.md` |
+| **STYLE_GUIDE.md** | When code style preference emerges | Add rule with example, explain reasoning |
+| **QUICKSTART.md** | When daily workflow changes | Update relevant command section |
+| **TESTING.md** | When testing strategy evolves | Update approach, add examples |
+| **.env.example** | When new env variables needed | Add variable with description |
+| **COMMAND_LOG.md** | After every significant command | Use `log_cmd`, `log_note`, `log_solution` |
+
+**Automated Documentation (run weekly):**
+- `make update-docs` - Updates timestamps, costs, stats, validates links
+- `make sync-progress` - Checks PROGRESS.md vs actual AWS resources
+- `make inventory` - Updates FILE_INVENTORY.md with file summaries
+- `make check-costs` - Reports current AWS spending
+
+**Monthly Documentation Review Checklist:**
+1. Run all automation: `make update-docs`, `make sync-progress`, `make check-costs`
+2. Review stale files (30+ days old) - update or mark as reviewed
+3. Verify PROGRESS.md phases match reality (✅/⏸️ status)
+4. Check cost estimates vs actuals in PROGRESS.md
+5. Commit: `git commit -m "Monthly documentation refresh - $(date +%Y-%m)"`
 
 **Documentation System (Quick Reference):**
 
