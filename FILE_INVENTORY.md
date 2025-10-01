@@ -1,6 +1,6 @@
 # FILE_INVENTORY.md
 
-**Auto-generated:** 2025-10-01 10:19:22
+**Auto-generated:** 2025-10-01 12:00:33
 
 **Purpose:** Comprehensive inventory of all project files with automatic summaries.
 
@@ -10,7 +10,7 @@
 
 ### CLAUDE.md
 
-**Type:** Markdown documentation (450 lines)
+**Type:** Markdown documentation (462 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -28,9 +28,15 @@
 
 ### FILE_INVENTORY.md
 
-**Type:** Markdown documentation (249 lines)
-**Last Modified:** 2025-09-30
-**Purpose:** **Auto-generated:** 2025-09-30 20:22:47
+**Type:** Markdown documentation (255 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** **Auto-generated:** 2025-10-01 10:19:22
+
+### MACHINE_SPECS.md
+
+**Type:** Markdown documentation (3586 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** **Last Updated:** 2025-10-01
 
 ### PROGRESS.md
 
@@ -41,7 +47,7 @@
 ### QUICKSTART.md
 
 **Type:** Markdown documentation (229 lines)
-**Last Modified:** 2025-09-30
+**Last Modified:** 2025-10-01
 **Purpose:** **One-page reference for common tasks**
 
 ### README.md
@@ -68,6 +74,20 @@
 
 ## Scripts - Shell Utilities
 
+### scripts/shell/check_machine_health.sh
+
+**Type:** Bash script (446 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** Master health check script for NBA Simulator AWS project
+**Key Functions:**
+- `check_pass()`
+- `check_fail()`
+- `check_warn()`
+- `check_info()`
+- `separator()`
+**Dependencies:** AWS CLI, PostgreSQL client, Conda, Git
+**Usage:** `./scripts/shell/check_machine_health.sh`
+
 ### scripts/shell/log_command.sh
 
 **Type:** Bash script (197 lines)
@@ -88,17 +108,6 @@
 **Last Modified:** 2025-09-30
 **Purpose:** sanitize_command_log.sh
 **Usage:** `#   ./scripts/shell/sanitize_command_log.sh`
-
-### scripts/shell/verify_setup.sh
-
-**Type:** Bash script (170 lines)
-**Last Modified:** 2025-09-30
-**Purpose:** scripts/shell/verify_setup.sh
-**Key Functions:**
-- `check_command()`
-- `check_version()`
-**Dependencies:** AWS CLI, Conda, Git
-**Usage:** `./scripts/shell/verify_setup.sh`
 
 ---
 
@@ -170,8 +179,8 @@
 
 ### docs/TROUBLESHOOTING.md
 
-**Type:** Markdown documentation (981 lines)
-**Last Modified:** 2025-09-30
+**Type:** Markdown documentation (1020 lines)
+**Last Modified:** 2025-10-01
 **Purpose:** **Project:** NBA Game Simulator & ML Platform
 
 ### docs/adr/README.md
@@ -240,11 +249,11 @@
 
 ## Summary Statistics
 
-**Total files documented:** 29
-**Total lines of code/docs:** 9,432
+**Total files documented:** 30
+**Total lines of code/docs:** 13,351
 
 **Files by type:**
-- Markdown documentation: 20
+- Markdown documentation: 21
 - Bash script: 5
 - Python script: 2
 - File: 1
