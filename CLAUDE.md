@@ -281,23 +281,37 @@ Phase 5 (⏸️): SageMaker ML Pipeline
 Before running `git commit`, ALWAYS perform automatic security scan:
 
 ```bash
-# Step 1: Check staged files for sensitive data
-git diff --staged | grep -E "(AWS_ACCESS_KEY|aws_secret|secret_access_key|password|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -i
+# Step 1: Check staged files for sensitive data (comprehensive pattern)
+git diff --staged | grep -E "(AWS_ACCESS_KEY[A-Z0-9]{16}|aws_secret|secret_access_key|aws_session_token|password|api[_-]?key|Bearer [A-Za-z0-9_-]+|BEGIN [REDACTED] KEY|ghp_[A-Za-z0-9]{36}|github_pat|postgres:|postgresql://.*:.*@|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)" -i
 
-# Step 2: If ANY matches found:
+# Step 2: Check commit message for sensitive data
+grep -E "(AWS_ACCESS_KEY|aws_secret|password|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)" .git/COMMIT_EDITMSG -i
+
+# Step 3: If ANY matches found:
 #   - STOP immediately
 #   - Show matches to user
-#   - Ask user to verify if safe (e.g., 8.8.8.8 is public DNS, safe)
-#   - Remove private IPs (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
-#   - Remove credentials or get explicit user approval
+#   - NEVER commit AWS keys, secrets, or private IPs under any circumstances
+#   - Remove sensitive data or abort commit
 
-# Step 3: What to check for:
-#   ❌ AWS access keys (AWS_ACCESS_KEY...)
+# Step 4: What to check for:
+#   ❌ AWS access keys (AWS_ACCESS_KEY[A-Z0-9]{16})
 #   ❌ AWS secret keys (aws_secret_access_key)
+#   ❌ AWS session tokens (aws_session_token)
 #   ❌ Private IP addresses (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
-#   ❌ Passwords, tokens, API keys
-#   ❌ AWS account IDs (12-digit numbers in context of credentials)
-#   ✅ Public IPs (8.8.8.8, 1.1.1.1) - OK if just for reference
+#   ❌ ANY IP addresses (per user requirement)
+#   ❌ Passwords, API keys, Bearer tokens
+#   ❌ SSH private keys (BEGIN [REDACTED] KEY)
+#   ❌ GitHub tokens (ghp_..., github_pat_...)
+#   ❌ Database connection strings with passwords (postgresql://user:pass@host)
+```
+
+**Whitelist - Safe patterns (don't trigger false positives):**
+```bash
+# These are OK in documentation:
+✅ Placeholder examples: "AWS_ACCESS_KEY****************", "your-access-key-here"
+✅ Documentation keywords: describing what to check for (like this list)
+✅ Redacted credentials: [REDACTED], [Private network], [Router]
+✅ Public DNS: Not allowed per user requirement (remove ALL IPs)
 ```
 
 **Security Check Protocol:**
