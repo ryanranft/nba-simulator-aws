@@ -417,6 +417,16 @@ s3://nba-sim-raw-data-lake/
 - Region: us-east-1
 - IAM User: iam (AdministratorAccess)
 
+**AWS Credentials Storage (CRITICAL):**
+- **Primary Location:** `~/.aws/credentials` (AWS CLI standard, chmod 600)
+- **Backup Location:** Store encrypted backups outside project directory (never commit)
+- **NEVER:**
+  - Copy credentials into project directory
+  - Store credentials in environment variables
+  - Reference credentials in code (boto3 auto-reads from ~/.aws/credentials)
+  - Commit credential files to Git
+  - Document exact paths to credential backups (security risk)
+
 **Critical Constraints:**
 - AWS CLI is system-wide, NOT in conda (do not `pip install awscli`)
 - Data folder (119 GB) is gitignored - never commit to Git
