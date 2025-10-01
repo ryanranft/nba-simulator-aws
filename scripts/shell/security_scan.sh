@@ -76,16 +76,15 @@ else
     echo -e "${YELLOW}⚠ WARN ($COUNT found - check if removed)${NC}"
 fi
 
-# 7. Credential backup paths
-echo -n "7. Credential Paths (<credential-path>, aws_ranft)...... "
-COUNT1=$(git log --all -p | grep -c "<credential-path>" | tr -d ' ')
-COUNT2=$(git log --all -p | grep -c "aws_ranft" | tr -d ' ')
-TOTAL=$((COUNT1 + COUNT2))
-if [ "$TOTAL" -eq 0 ]; then
+# 7. Credential backup paths (checking for actual sensitive paths, not placeholders)
+echo -n "7. Credential Paths (sensitive locations)............ "
+# This check looks for any credential path leaks (skip placeholders and this script)
+COUNT=$(git log --all -p | grep -E "/(aws_ranft|credentials_backup|\.credentials)" | grep -v "security_scan" | grep -v "credential-path" | wc -l | tr -d ' ')
+if [ "$COUNT" -eq 0 ]; then
     echo -e "${GREEN}✓ PASS (0 found)${NC}"
 else
-    echo -e "${RED}✗ FAIL ($TOTAL found)${NC}"
-    ISSUES_FOUND=$((ISSUES_FOUND + TOTAL))
+    echo -e "${RED}✗ FAIL ($COUNT found)${NC}"
+    ISSUES_FOUND=$((ISSUES_FOUND + COUNT))
 fi
 
 echo ""

@@ -21,10 +21,39 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Session Initialization (Proactive):**
 1. **Always run at start of each session:**
-   - **FIRST:** Ask user: "Please run the session startup checklist from MACHINE_SPECS.md and share the output so I can verify software versions"
-   - `make verify-all` - Check environment, AWS, and files
-   - `make git-status` - Review recent commits
-   - `make check-costs` - Check current AWS costs
+   - **FIRST:** Ask user: "Have you loaded your credentials file? Please share the path to your credentials file (e.g., ~/project-credentials.env)"
+   - **After user shares path:**
+     1. Read the credentials file to understand available environment variables and extract the actual path values
+     2. **IMPORTANT:** Environment variables don't persist across separate bash commands in Claude's shell. Extract the actual paths from the file and use absolute paths for verification.
+     3. Verify all paths exist using the absolute paths extracted from the file:
+        - `test -d "<path-from-CREDENTIAL_BACKUP_PATH-variable>" && echo "✓ Credential backup directory exists" || echo "✗ missing"`
+        - `test -f "<path-from-AWS_ACCESS_KEY_FILE-variable>" && echo "✓ Access key file exists" || echo "✗ missing"`
+        - `test -f "<path-from-AWS_SECRET_KEY_FILE-variable>" && echo "✓ Secret key file exists" || echo "✗ missing"`
+        - `test -f "<path-from-AWS_CREDENTIALS_PATH-variable>" && echo "✓ AWS credentials file exists" || echo "✗ missing"`
+     4. Report verification results (all ✓ means ready to proceed, any ✗ means alert user)
+     5. Note: User will have already run `source /path/to/credentials.env` in their terminal, so environment variables will be available to them for the session
+     6. **When running commands that need credentials:** Use the wrapper script at `~/run_with_credentials.sh` to execute commands with environment variables loaded
+        - Example: `~/run_with_credentials.sh aws s3 ls s3://bucket-name`
+        - Example: `~/run_with_credentials.sh echo '$CREDENTIAL_BACKUP_PATH'`
+        - This ensures all AWS CLI commands and credential-dependent operations have access to environment variables
+   - **SECOND:** Automatically run session startup checklist (don't ask user, just do it):
+     1. Get hardware info:
+        ```bash
+        system_profiler SPHardwareDataType | grep -E "Model Name|Model Identifier|Chip|Total Number of Cores|Memory"
+        ```
+     2. Run combined startup command to verify all software versions:
+        ```bash
+        echo "=== SYSTEM INFO ===" && sw_vers && echo "" && echo "=== HOMEBREW ===" && brew --version && which brew && echo "" && echo "=== CONDA ===" && conda --version && conda info --base && conda env list | grep nba-aws && echo "" && echo "=== PYTHON ===" && python --version && which python && echo "" && echo "=== AWS CLI ===" && aws --version && which aws && echo "" && echo "=== GIT ===" && git --version && which git && echo "" && echo "=== KEY PACKAGES ===" && pip show boto3 pandas numpy 2>/dev/null | grep -E "^(Name|Version):"
+        ```
+     3. Run `git status` to check current changes
+     4. Present summary in compact format showing only key versions and git status
+     5. **Append session info to `.session-history.md`** with:
+        - Current date/time
+        - Hardware info (Model, Chip, Cores, Memory)
+        - Software versions (macOS, Homebrew, Conda, Python, AWS CLI, Git, key packages)
+        - Git status (branch, modified files, untracked files)
+        - Leave "Work Summary" blank for user to fill in later
+     6. Do NOT show full command output - extract and present only the important info
    - Identify current phase from PROGRESS.md
    - Ask: "Any work completed since last session that should be marked ✅ COMPLETE in PROGRESS.md?"
 
