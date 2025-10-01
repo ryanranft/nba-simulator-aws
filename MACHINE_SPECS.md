@@ -11,9 +11,88 @@
 
 **Device:** MacBook Pro 16-inch, 2023
 **Processor:** Apple M2 Max chip
-**Memory:** 96 GB
+**Memory:** 96 GB unified memory (shared between CPU and GPU)
 **Storage:** Macintosh HD - 1.71 TB available of 4 TB
 **Operating System:** macOS Sequoia Version 15.6.1
+
+---
+
+## Memory Configuration
+
+**Capacity:** 96 GB unified memory
+**Type:** Unified Memory Architecture (UMA)
+**Significance:** Shared between CPU and GPU, eliminates PCIe bottleneck for data transfers
+
+### Current Memory Status
+
+**Measured memory usage (2025-10-01):**
+
+| Metric | Value | Status |
+|--------|-------|--------|
+| Total Memory | 96.0 GB | ✅ Available |
+| Free Memory | 4.57 GB | ✅ Adequate buffer |
+| Active Memory | 34.93 GB | ✅ Normal usage |
+| Inactive Memory | 49.43 GB | ✅ Available for reuse |
+| Wired Memory | 2.97 GB | ✅ System reserved |
+| Compressed Memory | 1.19 GB | ✅ Minimal compression |
+| Available Memory | 54.00 GB (Free+Inactive) | ✅ 56% available |
+| Used Memory | 37.90 GB (Active+Wired) | ✅ 39.5% pressure |
+| Swap Usage | 0.00 GB | ✅ No swapping |
+
+### Memory Pressure Thresholds
+
+**Understanding macOS memory pressure:**
+- **Green (Healthy):** <60% pressure, no swap usage
+- **Yellow (Warning):** 60-80% pressure, minimal swap, may slow down
+- **Red (Critical):** >80% pressure, heavy swap usage, significant slowdown
+
+**Current system:** 39.5% pressure = **Green (Healthy)**
+
+**Recommended thresholds for this project:**
+
+| Operation Type | Memory Required | Safe to Run? | Notes |
+|----------------|-----------------|--------------|-------|
+| **Basic development** | <5 GB | ✅ Always safe | VS Code, terminal, light testing |
+| **Loading full dataset** | 12-15 GB | ✅ Safe (119 GB JSON → ~12 GB in memory) | Use chunked loading |
+| **ETL processing** | 20-30 GB | ✅ Safe | Process in batches of 10K files |
+| **ML training (local)** | 40-60 GB | ⚠️ Monitor closely | Watch for yellow pressure |
+| **Large simulations** | 50-80 GB | ⚠️ Close other apps | May trigger swap if >70 GB |
+| **Multiple Jupyter kernels** | 10-20 GB each | ⚠️ Limit to 2-3 kernels | Each kernel can grow large |
+
+**Warning signs to watch for:**
+- Memory pressure exceeds 70% → Close unnecessary applications
+- Swap usage > 5 GB → Restart memory-intensive applications
+- Inactive memory < 10 GB → System may start evicting cached data
+- Compressed memory > 10 GB → System is struggling to find free memory
+
+**Monitoring commands:**
+```bash
+# Quick memory check
+vm_stat | head -6
+
+# Memory pressure percentage
+# Calculate: (Active + Wired) / Total * 100
+
+# Swap usage
+sysctl vm.swapusage
+
+# Top memory consumers
+top -o MEM -n 10 -l 1
+```
+
+**macOS Memory Management:**
+- **Unified Memory:** Shared between CPU and GPU (no discrete GPU memory)
+- **Inactive memory:** Previously used, available for reuse (acts like a cache)
+- **Compressed memory:** macOS compresses unused memory before swapping to disk
+- **No swap by default:** macOS creates swap files on-demand in `/private/var/vm/`
+- **Memory pressure algorithm:** macOS uses multiple factors (not just % used)
+
+**Project-specific guidance:**
+- **146K JSON files:** Don't load all at once, use generators or chunking
+- **Pandas DataFrames:** Can use 2-3x the CSV file size in memory
+- **AWS Glue:** Runs on AWS, doesn't consume local memory
+- **RDS queries:** Result sets consume memory, use LIMIT for testing
+- **SageMaker training:** Runs on AWS, but downloading results uses local memory
 
 ---
 
@@ -40,6 +119,50 @@
 - **Local file enumeration** (146,115 JSON files): ~30-60 seconds
 - **Sequential read of entire dataset:** ~20-30 seconds at peak speeds (theoretical)
 - **Practical read with processing:** 2-5 minutes depending on CPU operations
+
+### Actual File Processing Benchmarks (Measured 2025-10-01)
+
+**JSON File Operations:**
+
+| Operation | Result | Details |
+|-----------|--------|---------|
+| **Single JSON file read** | 3.80 ms | 738 KB file, includes parsing |
+| **100 files sequential** | 0.25 seconds | 2.52 ms avg per file, 398 files/sec |
+| **1,000 files sequential** | 0.35 seconds | 0.35 ms avg per file, 2,863 files/sec |
+| **Estimated 146K files** | ~51 seconds | Extrapolated from 1K benchmark |
+
+**Pandas DataFrame Operations (10,000 rows, 5 columns):**
+
+| Operation | Result | Speed |
+|-----------|--------|-------|
+| **Create DataFrame** | 3.11 ms | N/A |
+| **Write CSV (0.16 MB)** | 8.48 ms | 18.9 MB/s |
+| **Read CSV (0.16 MB)** | 1.82 ms | 87.8 MB/s |
+
+**Key Insights:**
+1. **JSON parsing is fast:** 2,863 files/second means the entire 146K dataset can be read in ~51 seconds
+2. **Disk is NOT the bottleneck:** File I/O is extremely fast on NVMe
+3. **CPU parsing overhead:** JSON deserialization takes more time than disk read
+4. **Pandas CSV read is faster than write:** Read at 87.8 MB/s vs Write at 18.9 MB/s
+5. **Memory consideration:** Loading all 146K files at once would require ~12-15 GB RAM
+
+**Project-Specific Estimates:**
+
+| Task | Estimated Time | Bottleneck |
+|------|----------------|------------|
+| **Read all 146K JSON files** | ~51 seconds | CPU (JSON parsing) |
+| **Process to Pandas DataFrame** | 2-5 minutes | CPU (transformation logic) |
+| **Write processed data to CSV** | 1-2 minutes | CPU (CSV formatting) |
+| **Upload to S3 (119 GB)** | 40-100 minutes | Network bandwidth |
+| **Download from S3 (12 GB processed)** | 4-10 minutes | Network bandwidth |
+| **Load processed data into PostgreSQL** | 5-15 minutes | Database I/O + network |
+
+**Optimization Strategies:**
+- Use `multiprocessing` to parallelize file reading (12 cores available)
+- Process files in batches of 10,000 to manage memory
+- Use generators instead of loading all files at once
+- Consider `ijson` for streaming large JSON files
+- Use Pandas `chunksize` parameter for large CSV operations
 
 **AWS S3 Operations:**
 - **Upload speed bottleneck:** Network bandwidth (NOT disk I/O)
