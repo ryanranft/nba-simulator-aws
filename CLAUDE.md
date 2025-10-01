@@ -1,4 +1,4 @@
-I store # CLAUDE.md
+# CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -275,6 +275,39 @@ Phase 5 (⏸️): SageMaker ML Pipeline
 - See `QUICKSTART.md` lines 56-73 for common commands
 - See `docs/TROUBLESHOOTING.md` lines 336-508 for Git issues
 - See `ADR-005` for full SSH vs HTTPS rationale
+
+**CRITICAL - Security Protocol Before ANY Git Commit:**
+
+Before running `git commit`, ALWAYS perform automatic security scan:
+
+```bash
+# Step 1: Check staged files for sensitive data
+git diff --staged | grep -E "(AWS_ACCESS_KEY|aws_secret|secret_access_key|password|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -i
+
+# Step 2: If ANY matches found:
+#   - STOP immediately
+#   - Show matches to user
+#   - Ask user to verify if safe (e.g., 8.8.8.8 is public DNS, safe)
+#   - Remove private IPs (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
+#   - Remove credentials or get explicit user approval
+
+# Step 3: What to check for:
+#   ❌ AWS access keys (AWS_ACCESS_KEY...)
+#   ❌ AWS secret keys (aws_secret_access_key)
+#   ❌ Private IP addresses (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
+#   ❌ Passwords, tokens, API keys
+#   ❌ AWS account IDs (12-digit numbers in context of credentials)
+#   ✅ Public IPs (8.8.8.8, 1.1.1.1) - OK if just for reference
+```
+
+**Security Check Protocol:**
+1. Run grep scan BEFORE staging files
+2. If matches found: STOP and ask user
+3. Remove or redact sensitive data
+4. Re-run scan to confirm clean
+5. Only then proceed with commit
+
+**NEVER commit without this security check.**
 
 **Commit format (include co-authorship footer):**
 ```bash
