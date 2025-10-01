@@ -49,8 +49,45 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    - If new AWS resources may exist: "Should I run `make sync-progress` to check if PROGRESS.md matches AWS?"
    - If any .md files modified: "After these changes, should I run `make inventory` to update FILE_INVENTORY.md?"
 
-3. **Check for stale documentation needing manual updates:**
-   - **FILE_INVENTORY.md:** If 7+ days old or new files created → suggest `make inventory`
+3. **File Inventory & Documentation (CRITICAL - Do Automatically):**
+
+   **ALWAYS update FILE_INVENTORY.md when creating/modifying files:**
+
+   - **Before `git add .`:** Run `make inventory` to update FILE_INVENTORY.md with new/changed files
+   - **After running `make inventory`:** Review git diff to see what files changed, then document:
+     - **What you created/modified:** List each file path
+     - **Why you made the change:** Purpose and problem being solved
+     - **What error you were resolving:** If fixing a bug, document the error
+   - **Format for documentation:**
+     ```markdown
+     ## File Changes - [Date] [Brief Description]
+
+     **Files Created/Modified:**
+     - `path/to/file1.py` - Purpose: Created X function to solve Y problem
+     - `path/to/file2.md` - Purpose: Documented Z decision (ADR-00X)
+     - `scripts/shell/file3.sh` - Purpose: Automated W task
+
+     **Problem/Error Being Resolved:**
+     - Error message: [actual error if applicable]
+     - Root cause: [why it was happening]
+     - Solution approach: [how files address it]
+
+     **Changes Made:**
+     1. File1: Added/modified X (lines 10-50)
+     2. File2: Updated Y section with Z information
+     3. File3: Created new script to automate W
+     ```
+
+   - **Where to document:** Add to COMMAND_LOG.md (for code changes) and ensure FILE_INVENTORY.md is updated
+
+   **Workflow:**
+   1. Create/modify files
+   2. Run `make inventory` (updates FILE_INVENTORY.md automatically)
+   3. Run `git status` to see all changes
+   4. Document in COMMAND_LOG.md what you changed and why
+   5. Then `git add .` and commit
+
+4. **Check for stale documentation needing manual updates:**
    - **PROGRESS.md Phase Status:** If current phase completed but still shows ⏸️ PENDING → suggest updating status to ✅ COMPLETE
    - **PROGRESS.md Cost Estimates:** After creating AWS resources → ask "Should I run `make check-costs` and update PROGRESS.md with actual costs?"
    - **TROUBLESHOOTING.md:** After solving new error → ask "Should I add this solution to TROUBLESHOOTING.md?"
