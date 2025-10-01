@@ -54,6 +54,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    - **PROGRESS.md Phase Status:** If current phase completed but still shows ⏸️ PENDING → suggest updating status to ✅ COMPLETE
    - **PROGRESS.md Cost Estimates:** After creating AWS resources → ask "Should I run `make check-costs` and update PROGRESS.md with actual costs?"
    - **TROUBLESHOOTING.md:** After solving new error → ask "Should I add this solution to TROUBLESHOOTING.md?"
+     - **When to add to TROUBLESHOOTING.md:**
+       - ✅ Errors that took >10 minutes to solve
+       - ✅ Non-obvious solutions (wouldn't find with quick Google search)
+       - ✅ Environment-specific issues (conda, AWS, macOS-specific)
+       - ✅ Recurring errors (seen multiple times in session)
+       - ✅ Errors with misleading messages (actual cause different from error text)
+     - **When NOT to add:**
+       - ❌ Typos or syntax errors (obvious from error message)
+       - ❌ One-time issues (unlikely to recur)
+       - ❌ Already documented in official docs
    - **ADRs:** After architectural decision → ask "Should I create ADR-00X for this decision? (see docs/adr/template.md)"
      - **When to create ADRs:**
        - ✅ Significant architectural decisions (database choice, service selection, framework adoption)
@@ -68,7 +78,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
        - ❌ Obvious choices with no alternatives (using JSON for config, Git for version control)
        - ❌ Easily reversible decisions with no consequences (UI colors, log message format)
    - **QUICKSTART.md:** If workflow changed → ask "Should we update QUICKSTART.md with these new commands?"
+     - **When to update QUICKSTART.md:**
+       - ✅ New daily commands added (scripts, make targets, common operations)
+       - ✅ File locations changed (moved scripts, reorganized directories)
+       - ✅ Workflow shortcuts discovered (aliases, one-liners that save time)
+       - ✅ Common troubleshooting steps identified (frequently used fixes)
+     - **When NOT to update:**
+       - ❌ Rarely-used commands (less than weekly usage)
+       - ❌ One-time setup steps (belongs in docs/SETUP.md instead)
+       - ❌ Experimental commands (not proven yet)
    - **STYLE_GUIDE.md:** If code style preference emerges → ask "Should we document this style preference in STYLE_GUIDE.md?"
+     - **When to update STYLE_GUIDE.md:**
+       - ✅ Consistent pattern used 3+ times (establishes precedent)
+       - ✅ Readability improvements (type hints, docstring formats)
+       - ✅ Team conventions (naming patterns, file structure)
+       - ✅ Language-specific best practices (Python PEP 8, SQL style)
+       - ✅ Code organization principles (module structure, import order)
+     - **When NOT to update:**
+       - ❌ Personal preferences without rationale
+       - ❌ One-off exceptions (context-specific choices)
+       - ❌ Already covered in official language guides
 
 4. **Remind user at end of session:**
    - If COMMAND_LOG.md was modified: "Remember to review COMMAND_LOG.md for sensitive data before committing"
