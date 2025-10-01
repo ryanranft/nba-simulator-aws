@@ -1,6 +1,6 @@
 # FILE_INVENTORY.md
 
-**Auto-generated:** 2025-10-01 18:23:25
+**Auto-generated:** 2025-10-01 18:26:15
 
 **Purpose:** Comprehensive inventory of all project files with automatic summaries.
 
@@ -16,7 +16,7 @@
 
 ### .session-history.md
 
-**Type:** Markdown documentation (451 lines)
+**Type:** Markdown documentation (509 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** <!-- AUTO-UPDATE TRIGGER: Run `bash scripts/shell/session_startup.sh >> .session-history.md` AFTER every commit -->
 
@@ -40,9 +40,9 @@
 
 ### FILE_INVENTORY.md
 
-**Type:** Markdown documentation (305 lines)
+**Type:** Markdown documentation (315 lines)
 **Last Modified:** 2025-10-01
-**Purpose:** **Auto-generated:** 2025-10-01 18:15:06
+**Purpose:** **Auto-generated:** 2025-10-01 18:23:25
 
 ### MACHINE_SPECS.md
 
@@ -230,7 +230,7 @@
 
 ### docs/adr/README.md
 
-**Type:** Markdown documentation (199 lines)
+**Type:** Markdown documentation (202 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** This directory contains Architecture Decision Records for the NBA Game Simulator & ML Platform project.
 
@@ -280,6 +280,12 @@
 **Last Modified:** 2025-10-01
 **Purpose:** **Date:** 2025-10-01
 
+### docs/adr/007-documentation-trigger-system.md
+
+**Type:** Markdown documentation (234 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** **Date:** 2025-10-01
+
 ---
 
 ## Configuration
@@ -300,11 +306,11 @@
 
 ## Summary Statistics
 
-**Total files documented:** 37
-**Total lines of code/docs:** 16,230
+**Total files documented:** 38
+**Total lines of code/docs:** 16,535
 
 **Files by type:**
-- Markdown documentation: 24
+- Markdown documentation: 25
 - Bash script: 9
 - Python script: 2
 - File: 1

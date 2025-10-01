@@ -30,6 +30,7 @@ ADRs help:
 | [003](003-python-version.md) | Python 3.11 | 2025-09-29 | Accepted | Use Python 3.11 for AWS Glue compatibility and performance |
 | [005](005-git-ssh-authentication.md) | Git SSH Auth | 2025-09-30 | Resolved | Use SSH instead of HTTPS for GitHub authentication |
 | [006](006-session-initialization-automation.md) | Session Init Automation | 2025-10-01 | Accepted | Automated session startup and post-commit version tracking |
+| [007](007-documentation-trigger-system.md) | Documentation Trigger System | 2025-10-01 | Accepted | HTML comment triggers + central registry for automatic documentation updates |
 
 ### Superseded ADRs
 
@@ -84,7 +85,7 @@ cp template.md 00X-your-decision.md
 - **Consequences:** What are the trade-offs?
 
 ### 3. Number Sequentially
-- Next ADR: 007
+- Next ADR: 008
 - Use format: `00X-brief-title.md`
 
 ### 4. Update This README
@@ -109,6 +110,7 @@ Add entry to index table above
 
 ### Development Workflow
 - ADR-006: Session Initialization Automation
+- ADR-007: Documentation Trigger System
 
 ### Process
 - ADR-004: Git Without GitHub Push (superseded)
@@ -125,6 +127,7 @@ Some ADRs have scheduled review dates:
 | 003 | AWS Glue adds Python 3.12 support | ~2026 |
 | 005 | No review needed | N/A |
 | 006 | Session startup slow or credential issues | 2025-04-01 |
+| 007 | Documentation maintenance becomes burdensome | 2026-01-01 |
 
 ## Related Documentation
 
@@ -195,5 +198,5 @@ See [template.md](template.md) for the full template structure:
 ---
 
 **Last Updated:** 2025-10-01
-**Total ADRs:** 6 (5 active, 1 superseded)
-**Next ADR Number:** 007
+**Total ADRs:** 7 (6 active, 1 superseded)
+**Next ADR Number:** 008
