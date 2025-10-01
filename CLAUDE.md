@@ -25,7 +25,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    - `make git-status` - Review recent commits
    - `make check-costs` - Check current AWS costs
    - Identify current phase from PROGRESS.md
-   - Ask: "Any new work since last session that needs documenting?"
+   - Ask: "Any work completed since last session that should be marked ✅ COMPLETE in PROGRESS.md?"
 
 2. **Ask user if they want to run (based on time since last update):**
    - If Monday or 7+ days since last update: "Would you like me to run `make update-docs` for weekly maintenance?"
@@ -156,6 +156,7 @@ The following documentation requires MANUAL updates (cannot be automated):
   - ADR-001: Redshift exclusion (saves $200-600/month)
   - ADR-002: 10% data extraction (119 GB → 12 GB)
   - ADR-003: Python 3.11 (Glue compatibility)
+  - ADR-004: Git without GitHub push (superseded by ADR-005)
   - ADR-005: Git SSH authentication
   - Use `docs/adr/template.md` for new decisions
 
@@ -221,7 +222,11 @@ aws s3 ls s3://nba-sim-raw-data-lake/
 - **S3 Bucket:** `s3://nba-sim-raw-data-lake` (146,115 files)
 - **Conda Env:** `/Users/ryanranft/miniconda3/envs/nba-aws`
 - **Quick Reference:** `QUICKSTART.md` (one-page command reference)
-- **Maintenance Scripts:** `scripts/maintenance/` (doc automation)
+- **File Inventory:** `FILE_INVENTORY.md` (auto-generated summaries of 28 documented files)
+- **Config Files:** `config/aws_config.yaml` (AWS resource definitions - minimal, to be populated in Phase 2+)
+- **Maintenance Scripts:** `scripts/maintenance/` (generate_inventory.py, sync_progress.py, update_docs.sh)
+- **Shell Utilities:** `scripts/shell/` (log_command.sh, verify_setup.sh, sanitize_command_log.sh)
+- **AWS Scripts:** `scripts/aws/` (check_costs.sh)
 - **Cost Tracking:** `scripts/aws/check_costs.sh` (AWS spending monitor)
 
 ## Architecture
@@ -325,6 +330,10 @@ s3://nba-sim-raw-data-lake/
 └── team_stats/    # 44,828 files - team-level statistics per game
 ```
 
+**Note:** Local data folder names differ from S3 folder names:
+- Local: `data/nba_box_score/`, `data/nba_pbp/`, `data/nba_schedule_json/`, `data/nba_team_stats/`
+- S3: `box_scores/`, `pbp/`, `schedule/`, `team_stats/`
+
 **Data Extraction Strategy:**
 - **Box Scores:** Extract player_id, player_name, team_id, position, minutes, points, rebounds, assists, steals, blocks, turnovers, FG/3PT/FT stats
 - **Play-by-Play:** Extract game_id, period, clock, play_type, scoring_play, player_id, team_id, scores
@@ -332,6 +341,14 @@ s3://nba-sim-raw-data-lake/
 - **Team Stats:** Extract team_id, game_id, aggregate statistics
 
 **Exclude:** Commentary, photos, broadcast details, video links, historical narratives
+
+**Data File Characteristics:**
+- **File Size:** Each JSON file is ~700KB and contains 17,000-19,000 lines
+- **Content Warning:** Files contain full ESPN web scraping data including:
+  - CDN paths, JavaScript chunks, CSS assets (majority of file size)
+  - Actual game data embedded within web page metadata
+- **ETL Implication:** Glue ETL must parse deeply nested JSON to extract relevant game statistics
+- **First file date:** 131105001.json (November 5, 2013 season start)
 
 ## Important Notes
 
@@ -345,6 +362,8 @@ s3://nba-sim-raw-data-lake/
 - Data folder (119 GB) is gitignored - never commit to Git
 - Python 3.11 required for AWS Glue 4.0 compatibility
 - Git/GitHub configured with SSH authentication (operational)
+- **Python Dependencies:** 10 packages in requirements.txt (boto3, pandas, numpy, pyarrow, psycopg2-binary, sqlalchemy, pytest, jupyter, python-dotenv, pyyaml, tqdm)
+- **Key Libraries:** boto3 (AWS SDK), pandas (data processing), pytest (testing), jupyter (analysis)
 
 **Cost Awareness (IMPORTANT):**
 - **Current:** $2.74/month (S3 storage only)
@@ -407,6 +426,9 @@ make check-costs
 # View all available commands
 make help
 
+# Note: Run `make help` to see currently implemented commands
+# Some commands listed below may be added in future phases
+
 # File inventory and summaries
 make inventory              # Generate FILE_INVENTORY.md with file summaries
 make describe FILE=path     # Show detailed info about specific file
@@ -424,3 +446,9 @@ make git-status             # Show git status and recent commits
 ```
 
 **PyCharm performance tip:** Mark `data/` folder as "Excluded" in Project Structure settings to prevent indexing 146K+ files.
+
+## Known Documentation Gaps
+
+- **README.md:** Currently empty - should contain project overview for GitHub visitors
+  - Suggest: Quick description, setup link, architecture diagram, current status
+  - Recommend creating after Phase 2 completion for more complete project overview

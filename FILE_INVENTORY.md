@@ -1,6 +1,6 @@
 # FILE_INVENTORY.md
 
-**Auto-generated:** 2025-09-30 20:22:47
+**Auto-generated:** 2025-10-01 10:19:22
 
 **Purpose:** Comprehensive inventory of all project files with automatic summaries.
 
@@ -10,8 +10,8 @@
 
 ### CLAUDE.md
 
-**Type:** Markdown documentation (426 lines)
-**Last Modified:** 2025-09-30
+**Type:** Markdown documentation (450 lines)
+**Last Modified:** 2025-10-01
 **Purpose:** This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ### COMMAND_LOG.example.md
@@ -28,9 +28,9 @@
 
 ### FILE_INVENTORY.md
 
-**Type:** Markdown documentation (243 lines)
+**Type:** Markdown documentation (249 lines)
 **Last Modified:** 2025-09-30
-**Purpose:** **Auto-generated:** 2025-09-30 20:13:29
+**Purpose:** **Auto-generated:** 2025-09-30 20:22:47
 
 ### PROGRESS.md
 
@@ -208,6 +208,12 @@
 **Last Modified:** 2025-09-30
 **Purpose:** **Date:** September 29, 2025
 
+### docs/adr/004-git-without-github-push.md
+
+**Type:** Markdown documentation (114 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** **Date:** September 30, 2025
+
 ### docs/adr/005-git-ssh-authentication.md
 
 **Type:** Markdown documentation (320 lines)
@@ -234,11 +240,11 @@
 
 ## Summary Statistics
 
-**Total files documented:** 28
-**Total lines of code/docs:** 9,288
+**Total files documented:** 29
+**Total lines of code/docs:** 9,432
 
 **Files by type:**
-- Markdown documentation: 19
+- Markdown documentation: 20
 - Bash script: 5
 - Python script: 2
 - File: 1
