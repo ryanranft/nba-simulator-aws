@@ -177,7 +177,7 @@ git push -u origin main
 ```
 
 **Cause:**
-- Remote had GitHub's initial commit (f026047)
+- Remote had GitHub's initial commit (c965e4e)
 - Local had two commits not based on remote
 - Git histories had diverged
 
@@ -188,9 +188,9 @@ git push -u origin main
 ```
 
 **Result:** All three commits now in proper order:
-- f026047: Initial commit (GitHub)
-- 5457d5a: Initial project setup
-- 2f019c1: Add documentation
+- c965e4e: Initial commit (GitHub)
+- 8dce343: Initial project setup
+- abbb707: Add documentation
 
 ## Final Configuration
 
@@ -202,7 +202,7 @@ git remote -v
 
 # Branch tracking
 git branch -vv
-# * main b418883 [origin/main] Update PROGRESS.md
+# * main 5e1e039 [origin/main] Update PROGRESS.md
 
 # Repository
 # Web: https://github.com/ryanranft/nba-simulator-aws
