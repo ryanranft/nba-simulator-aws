@@ -21,22 +21,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Session Initialization (Proactive):**
 1. **Always run at start of each session:**
-   - **FIRST:** Ask user: "Have you loaded your credentials file? Please share the path to your credentials file (e.g., ~/project-credentials.env)"
-   - **After user shares path:**
-     1. Read the credentials file to understand available environment variables and extract the actual path values
-     2. **IMPORTANT:** Environment variables don't persist across separate bash commands in Claude's shell. Extract the actual paths from the file and use absolute paths for verification.
-     3. Verify all paths exist using the absolute paths extracted from the file:
-        - `test -d "<path-from-CREDENTIAL_BACKUP_PATH-variable>" && echo "✓ Credential backup directory exists" || echo "✗ missing"`
-        - `test -f "<path-from-AWS_ACCESS_KEY_FILE-variable>" && echo "✓ Access key file exists" || echo "✗ missing"`
-        - `test -f "<path-from-AWS_SECRET_KEY_FILE-variable>" && echo "✓ Secret key file exists" || echo "✗ missing"`
-        - `test -f "<path-from-AWS_CREDENTIALS_PATH-variable>" && echo "✓ AWS credentials file exists" || echo "✗ missing"`
-     4. Report verification results (all ✓ means ready to proceed, any ✗ means alert user)
-     5. Note: User will have already run `source /path/to/credentials.env` in their terminal, so environment variables will be available to them for the session
-     6. **When running commands that need credentials:** Use the wrapper script at `~/run_with_credentials.sh` to execute commands with environment variables loaded
-        - Example: `~/run_with_credentials.sh aws s3 ls s3://bucket-name`
-        - Example: `~/run_with_credentials.sh echo '$CREDENTIAL_BACKUP_PATH'`
-        - This ensures all AWS CLI commands and credential-dependent operations have access to environment variables
-   - **SECOND:** Automatically run session startup checklist (don't ask user, just do it):
+   - **Credentials:** Auto-loaded from ~/.zshrc when entering project directory (no verification needed)
+   - **Startup checklist** - Automatically run (don't ask user, just do it):
      1. Get hardware info:
         ```bash
         system_profiler SPHardwareDataType | grep -E "Model Name|Model Identifier|Chip|Total Number of Cores|Memory"
