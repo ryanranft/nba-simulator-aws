@@ -1,6 +1,11 @@
 
 # MACHINE_SPECS.md
 
+<!-- AUTO-UPDATE TRIGGER: Run session_startup.sh at start of EVERY session -->
+<!-- LAST VERIFIED: 2025-10-01 -->
+<!-- UPDATE FREQUENCY: Daily (session start) -->
+<!-- REMINDER: Hardware/software specs should match session_startup.sh output -->
+
 **Last Updated:** 2025-10-01
 
 **Purpose:** Track development machine specifications and software versions to ensure Claude generates code compatible with the actual environment.

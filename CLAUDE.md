@@ -19,6 +19,38 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Instructions for Claude
 
+**Documentation Trigger System:**
+
+This project uses an automated documentation update trigger system. Each key documentation file has an embedded HTML comment trigger that signals when it needs updating.
+
+**Read these files to understand the system:**
+1. `.documentation-triggers.md` - Central registry of all documentation update triggers
+2. `session_startup.sh` output - Shows documentation status checks automatically
+
+**Key documentation files with triggers:**
+- `COMMAND_LOG.md` - Update after EVERY code change
+- `FILE_INVENTORY.md` - Run `make inventory` before every `git add .`
+- `PROGRESS.md` - Update after completing ANY task
+- `.session-history.md` - Append after every commit
+- `MACHINE_SPECS.md` - Verify at session start
+
+**The triggers tell you:**
+- ✅ When each file should be updated (triggering event)
+- ✅ How often (frequency)
+- ✅ What command to run (if automated)
+- ✅ Last update date
+
+**At session start, `session_startup.sh` automatically checks:**
+- FILE_INVENTORY.md age (warns if > 7 days)
+- Session history status
+- Command log status
+- PROGRESS.md task counts
+- Stale documentation (> 30 days)
+
+**See `.documentation-triggers.md` for complete documentation trigger system reference.**
+
+---
+
 **Session Initialization (Proactive):**
 1. **Always run at start of each session:**
    - **Credentials:** Auto-loaded from ~/.zshrc when entering project directory (no verification needed)
@@ -33,6 +65,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
        - Python: Version, location, key packages (boto3, pandas, numpy) with install paths
        - AWS CLI: Version and location
        - Git: Version, location, status (branch, modified/untracked files), recent commits
+       - **Documentation status:** FILE_INVENTORY.md age, session history, command log, PROGRESS.md tasks, stale docs
      - **Output format:** Clean, organized sections with all diagnostic details preserved
      - **Session start:** Show output to user for review
      - **After EVERY commit:** Append to `.session-history.md` with:
@@ -41,6 +74,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
        ```
        This creates a version snapshot for each commit, allowing user to correlate git history with exact software versions used
    - Identify current phase from PROGRESS.md
+   - Review documentation status warnings from `session_startup.sh` output
    - Ask: "Any work completed since last session that should be marked ✅ COMPLETE in PROGRESS.md?"
 
 2. **Ask user if they want to run (based on time since last update):**

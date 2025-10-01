@@ -1,5 +1,10 @@
 # Command Execution Log
 
+<!-- AUTO-UPDATE TRIGGER: After EVERY code file creation/modification, failed command, or error resolution -->
+<!-- LAST UPDATED: 2025-10-01 -->
+<!-- ENTRIES THIS SESSION: 0 -->
+<!-- REMINDER: Document ALL code changes with file path, purpose, outcome, and lessons learned -->
+
 **Purpose:** Track all terminal commands executed during project development, including outputs, errors, and solutions. This log helps future LLM instances learn from past mistakes and successes.
 
 ---

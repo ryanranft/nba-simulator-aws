@@ -1,5 +1,10 @@
 # Troubleshooting Guide
 
+<!-- AUTO-UPDATE TRIGGER: After solving new error that took >10 minutes OR has non-obvious solution -->
+<!-- LAST UPDATED: 2025-10-01 -->
+<!-- FREQUENCY: As needed (when encountering new errors) -->
+<!-- REMINDER: Add errors with: environment-specific issues, misleading messages, recurring problems, non-obvious solutions -->
+
 **Project:** NBA Game Simulator & ML Platform
 **Purpose:** Common issues and solutions for development and AWS operations
 

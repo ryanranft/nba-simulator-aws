@@ -1,5 +1,10 @@
 # NBA Game Simulator & ML Platform - Setup Progress Log
 
+<!-- AUTO-UPDATE TRIGGER: After completing ANY task, mark ✅ COMPLETE immediately -->
+<!-- LAST STATUS CHANGE: 2025-10-01 -->
+<!-- CURRENT PHASE: Phase 1 Complete, Phase 2 Pending -->
+<!-- REMINDER: Update costs after creating AWS resources, run `make sync-progress` after phase completion -->
+
 **Date Started:** September 29, 2025  
 **Project Goal:** Configure NBA Game Simulator & ML Platform on AWS with proper local development environment
 

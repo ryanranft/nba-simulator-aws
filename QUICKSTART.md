@@ -1,5 +1,10 @@
 # Quick Start Guide
 
+<!-- AUTO-UPDATE TRIGGER: When daily workflow changes (new commands, file locations, workflow shortcuts) -->
+<!-- LAST UPDATED: 2025-10-01 -->
+<!-- FREQUENCY: As needed (when workflow evolves) -->
+<!-- REMINDER: Update when new daily commands added, file locations changed, or common troubleshooting steps identified -->
+
 **One-page reference for common tasks**
 
 ---

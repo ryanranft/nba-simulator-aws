@@ -1,5 +1,10 @@
 # Code Style Guide
 
+<!-- AUTO-UPDATE TRIGGER: When code style pattern used 3+ times (establishes precedent) -->
+<!-- LAST UPDATED: 2025-10-01 -->
+<!-- FREQUENCY: As needed (when patterns emerge) -->
+<!-- REMINDER: Add rules for: consistent patterns, readability improvements, team conventions, language-specific best practices -->
+
 **Project:** NBA Game Simulator & ML Platform
 **Purpose:** Consistent code style for maintainability and LLM code generation
 
