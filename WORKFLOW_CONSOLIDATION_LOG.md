@@ -275,11 +275,12 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## Future Workflows to Consolidate
 
-2. **Archive & Preservation Workflows** (PENDING)
-   - archive_gitignored_files.sh
-   - archive_chat_log.sh
-   - generate_commit_logs.sh
-   - archive_chat_by_next_sha.sh
+2. **Archive & Preservation Workflows** (IN PROGRESS - Draft complete)
+   - archive_gitignored_files.sh (151 lines)
+   - archive_chat_log.sh (148 lines)
+   - generate_commit_logs.sh (229 lines)
+   - archive_chat_by_next_sha.sh (separate conversation archiving approach)
+   - create_sanitized_archive.sh (additional sanitization utility)
 
 3. **Pre-Push Inspection Workflow** (PENDING)
    - Currently documented in CLAUDE.md, needs automation script
@@ -305,3 +306,295 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 9. **File Deletion & Cleanup** (PENDING)
    - Pre-deletion archiving workflow automation
+
+---
+
+## Workflow #2: Archive & Preservation Consolidation
+
+**Status:** 📝 DRAFT COMPLETE - Ready for implementation
+**Date Started:** 2025-10-02
+
+### Summary
+
+Consolidate four separate archive and preservation scripts into a unified `archive_manager.sh` with multiple modes for different archiving scenarios.
+
+### Scripts to Consolidate
+
+1. **archive_gitignored_files.sh** (151 lines)
+   - Archives .gitignored documentation files by commit SHA
+   - Creates git-info.txt with metadata
+   - Updates archive README.md index
+   - Commits to local archive git repo
+   - Auto-detects sport from project directory
+   - Archives: COMMAND_LOG.md, operational status files, log files
+
+2. **archive_chat_log.sh** (148 lines)
+   - Archives CHAT_LOG.md to commit SHA directory
+   - Creates both ORIGINAL (with credentials) and SANITIZED versions
+   - Supports multi-session appending for same SHA
+   - Python-based credential redaction (AWS keys, passwords, tokens)
+   - Clears CHAT_LOG.md after archiving
+   - Commits to archive git repo
+
+3. **generate_commit_logs.sh** (229 lines)
+   - Auto-generates three analysis logs per commit:
+     - ERRORS_LOG.md (extracts errors from logs and COMMAND_LOG.md)
+     - CHANGES_SUMMARY.md (git diff stats, file-by-file breakdown)
+     - COMMAND_HISTORY.md (all commands executed)
+   - Updates git-info.txt with log references
+   - Commits to archive git repo
+
+4. **archive_chat_by_next_sha.sh** (separate approach)
+   - Archives conversation AFTER commit with new SHA
+   - Different file naming: chat-{SHA}-original.md, chat-{SHA}-sanitized.md
+   - Stores in conversations/ subdirectory
+   - Interactive overwrite prompts
+   - Creates mapping files for conversation tracking
+
+5. **create_sanitized_archive.sh** (utility)
+   - Additional sanitization utility
+   - May have overlapping functionality with archive_chat_log.sh
+
+### Analysis: Overlapping Functionality
+
+**Common patterns across all scripts:**
+1. Auto-detect sport from project directory (`nba-simulator-aws` → `nba`)
+2. Get current git SHA and commit metadata
+3. Create archive directory structure
+4. Commit to local archive git repo (NEVER push to GitHub)
+5. Update index/metadata files
+6. Python-based credential sanitization
+
+**Differences to preserve:**
+1. **archive_gitignored_files.sh** - archives operational files
+2. **archive_chat_log.sh** - archives conversations with sanitization
+3. **generate_commit_logs.sh** - creates analysis logs from git history
+4. **archive_chat_by_next_sha.sh** - different storage location and naming
+
+###  Proposed Unified Script: `archive_manager.sh`
+
+**Modes:**
+- `gitignored` - Archive .gitignored operational files (replaces archive_gitignored_files.sh)
+- `conversation` - Archive CHAT_LOG.md with sanitization (replaces archive_chat_log.sh)
+- `analyze` - Generate commit analysis logs (replaces generate_commit_logs.sh)
+- `full` - Run all three modes in sequence (complete archiving)
+- `status` - Show archive status for current commit
+
+**Usage:**
+```bash
+# Archive gitignored files only
+bash scripts/maintenance/archive_manager.sh gitignored
+
+# Archive conversation only
+bash scripts/maintenance/archive_manager.sh conversation
+
+# Generate analysis logs only
+bash scripts/maintenance/archive_manager.sh analyze
+
+# Do everything (gitignored + conversation + analysis)
+bash scripts/maintenance/archive_manager.sh full
+
+# Check archive status
+bash scripts/maintenance/archive_manager.sh status
+```
+
+### Rationale for Consolidation
+
+**Before:** Four separate scripts with overlapping code
+- Must run multiple scripts manually in correct order
+- Shared configuration duplicated across files
+- Same sport detection logic in every script
+- Same git repo commit logic repeated
+- Inconsistent output formatting
+
+**After:** Single unified interface
+- One script with clear modes for different archiving needs
+- Shared configuration defined once
+- Shared utility functions (detect_sport, get_git_info, commit_to_archive)
+- Consistent output format and error handling
+- Single entry point for all archiving operations
+
+### Decision: Keep archive_chat_by_next_sha.sh Separate
+
+**Why:**
+- Serves different use case (post-commit conversation archiving)
+- Different storage structure (conversations/ vs SHA-based)
+- Different file naming convention
+- Interactive prompts for overwrite (different UX)
+- May be deprecated in favor of archive_chat_log.sh approach
+
+**Action:** Document both approaches but don't consolidate until user decides which to keep
+
+### Key Features to Preserve
+
+**100% Functionality Must Be Maintained:**
+- ✅ Sport auto-detection from directory name
+- ✅ Git SHA and metadata extraction
+- ✅ Archive directory creation with SHA-based naming
+- ✅ Python-based credential sanitization
+- ✅ Multi-session conversation appending
+- ✅ Index file updating (README.md, git-info.txt)
+- ✅ Local git repo commits (NEVER push to GitHub)
+- ✅ Error pattern extraction (errors, exceptions, tracebacks)
+- ✅ Git diff analysis with file-by-file breakdown
+- ✅ CHAT_LOG.md clearing after archive
+- ✅ All emoji indicators and color coding
+- ✅ All user prompts and warnings
+
+### Shared Utility Functions
+
+**Functions to extract and reuse:**
+1. `detect_sport()` - Extract sport from project directory name
+2. `get_git_info()` - Get SHA, branch, commit message, date
+3. `create_archive_dir()` - Create SHA-based archive directory
+4. `sanitize_credentials()` - Python-based credential redaction
+5. `commit_to_archive_git()` - Commit to local archive git repo
+6. `update_git_info()` - Update git-info.txt with new entries
+7. `update_index()` - Update README.md with new commit entry
+
+### File Structure
+
+**New unified script:**
+```
+scripts/maintenance/archive_manager.sh
+├─ Configuration section (sport detection, archive paths)
+├─ Shared utility functions
+├─ Mode: gitignored
+├─ Mode: conversation
+├─ Mode: analyze
+├─ Mode: full
+├─ Mode: status
+└─ Main execution logic
+```
+
+**Estimated size:** 600-700 lines (vs 528 lines across 3 scripts currently)
+
+### Benefits
+
+1. **Simplified User Experience:**
+   - One command for all archiving needs
+   - Clear mode selection based on what needs archiving
+   - Consistent workflow across all archiving types
+
+2. **Easier Maintenance:**
+   - Shared configuration defined once
+   - Shared utility functions reduce duplication
+   - Single file to update when adding new archive features
+
+3. **Better Integration:**
+   - Can be called from post-commit hook with different modes
+   - Easy to extend with new archiving modes
+   - Consistent error handling across all operations
+
+4. **Preserved Flexibility:**
+   - Can still run individual archiving modes
+   - Or run everything at once with `full` mode
+   - Works with existing post-commit automation
+
+### Implementation Plan
+
+1. **Create archive_manager.sh with shared utilities**
+2. **Implement `gitignored` mode** (from archive_gitignored_files.sh)
+3. **Implement `conversation` mode** (from archive_chat_log.sh)
+4. **Implement `analyze` mode** (from generate_commit_logs.sh)
+5. **Implement `full` mode** (runs all three in sequence)
+6. **Implement `status` mode** (show what's archived for current commit)
+7. **Test each mode individually**
+8. **Test `full` mode integration**
+9. **Update CLAUDE.md references**
+10. **Update post-commit hook to use new script**
+
+### Testing Checklist
+
+- [x] Test `gitignored` mode
+  - [x] Verify sport auto-detection ✅
+  - [x] Verify SHA-based directory creation ✅
+  - [x] Verify operational file archiving ✅ (16 files)
+  - [x] Verify git-info.txt creation ✅
+  - [x] Verify README.md index update ✅
+  - [x] Verify git repo commit ✅
+  - [x] Verify new help messages display ✅
+
+- [x] Test `conversation` mode
+  - [x] Verify CHAT_LOG.md detection ✅
+  - [x] Verify credential sanitization ✅
+  - [x] Verify ORIGINAL vs SANITIZED creation ✅
+  - [x] Verify multi-session appending ✅
+  - [x] Verify CHAT_LOG.md clearing ✅
+  - [x] Verify git repo commit ✅
+
+- [x] Test `analyze` mode
+  - [x] Verify ERRORS_LOG.md generation ✅
+  - [x] Verify CHANGES_SUMMARY.md generation ✅
+  - [x] Verify COMMAND_HISTORY.md generation ✅
+  - [x] Verify git diff analysis ✅
+  - [x] Verify error pattern extraction ✅
+  - [x] Verify git repo commit ✅
+
+- [ ] Test `full` mode
+  - [ ] Verify all three modes run in sequence
+  - [ ] Verify no errors from mode interactions
+  - [ ] Verify single git commit at end
+
+- [x] Test `status` mode
+  - [x] Verify shows what's archived for current SHA ✅
+  - [x] Verify file counts and sizes ✅
+  - [x] Verify shows missing archives ✅
+
+- [ ] Test integration
+  - [ ] Test with post-commit hook
+  - [ ] Test CLAUDE.md references
+  - [ ] Test archive git repo integrity
+
+### Test Results
+
+**Date Tested:** 2025-10-02 17:15:00 - 17:17:30
+**Status:** ✅ ALL INDIVIDUAL MODE TESTS PASSED
+
+**`status` mode:**
+- ✅ Shows commit SHA and archive directory correctly
+- ✅ Reports archive exists with file count (22 files, 392K)
+- ✅ Lists all key files with checkmarks
+- ✅ Clean, organized output
+
+**`gitignored` mode:**
+- ✅ Sport auto-detected: nba
+- ✅ SHA-based directory created correctly
+- ✅ 16 files archived (9 documentation + 7 log files)
+- ✅ git-info.txt created with metadata
+- ✅ README.md index updated
+- ✅ New help messages display correctly
+- ✅ Committed to local archive git repo
+
+**`analyze` mode:**
+- ✅ ERRORS_LOG.md created successfully
+- ✅ CHANGES_SUMMARY.md created with git diff stats
+- ✅ COMMAND_HISTORY.md created
+- ✅ All files generated in correct archive directory
+- ✅ Committed to local archive git repo
+
+**`conversation` mode:**
+- ✅ CHAT_LOG.md detected from previous session
+- ✅ Multi-session appending worked (added new session header)
+- ✅ Credential sanitization completed
+- ✅ ORIGINAL and SANITIZED versions both created
+- ✅ CHAT_LOG.md cleared after archiving
+- ✅ Committed to local archive git repo
+
+### Files to Create
+
+1. **Created:**
+   - `/Users/ryanranft/nba-simulator-aws/scripts/maintenance/archive_manager.sh` (600-700 lines)
+
+2. **Updated:**
+   - `/Users/ryanranft/nba-simulator-aws/CLAUDE.md` (update archive references)
+   - `/Users/ryanranft/nba-simulator-aws/.git/hooks/post-commit` (use new script)
+
+3. **Deprecated (kept for reference, not deleted):**
+   - `scripts/maintenance/archive_gitignored_files.sh` (original 151 lines)
+   - `scripts/maintenance/archive_chat_log.sh` (original 148 lines)
+   - `scripts/maintenance/generate_commit_logs.sh` (original 229 lines)
+
+4. **Keep as-is (separate use case):**
+   - `scripts/maintenance/archive_chat_by_next_sha.sh` (different approach, may be deprecated later)
+   - `scripts/maintenance/create_sanitized_archive.sh` (evaluate if still needed)
