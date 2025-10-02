@@ -17,22 +17,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3. Don't attempt multiple fixes automatically
 4. Log solution with `log_solution` after resolving
 
-**CRITICAL - Conversation Archiving:**
+**CRITICAL - Workflow Documentation System:**
 
-User will provide specific archiving instructions when needed. All conversation archive methodology and procedures are documented in local-only files (never committed to GitHub) for security.
+User will provide specific instructions when needed. All workflow documentation methodology and procedures are documented in local-only files (never committed to GitHub) for security.
 
-**CONVERSATION ARCHIVE SYSTEM:**
+**WORKFLOW AUTOMATION SYSTEM:**
 
-When user asks about previous development work or conversations:
+This project uses an automated workflow documentation system for tracking development sessions and generating summaries.
 
 **Instructions are stored locally only (NEVER on GitHub):**
 - Read: `~/sports-simulator-archives/nba/conversations/mappings/CLAUDE_INSTRUCTIONS.md`
-- This file contains complete instructions for accessing and decoding conversation archives
-- All methodology details are kept local for security
+- This file contains complete instructions for the workflow automation and log aggregation system
+- All implementation details are kept local for security
+
+**When user references past work:**
+- User may say: "Check the workflow from October" or "Review the automation logs"
+- Follow the instructions in CLAUDE_INSTRUCTIONS.md to access the workflow documentation system
+- The system uses a reference examples repository (recipe-manager-dev-logs) with example workflow patterns
+- Local index files translate references to actual workflow execution logs
 
 **Quick reference:**
-- User will provide you with specific instructions when needed
-- Never assume methodology - always ask user for guidance
+- Public repository: https://github.com/ryanranft/recipe-manager-dev-logs (example patterns only)
+- Local index files: Connect public examples to real workflow logs
+- User will provide access to configuration guide when needed
 
 **CRITICAL - Before EVERY git commit:**
 1. **ALWAYS run security scan** and show results to user
@@ -527,10 +534,31 @@ grep -E "(AWS_ACCESS_KEY|aws_secret|password|192\.168\.|10\.|172\.(1[6-9]|2[0-9]
 
 **Security Check Protocol:**
 1. Run grep scan BEFORE staging files
-2. If matches found: STOP and ask user
-3. Remove or redact sensitive data
-4. Re-run scan to confirm clean
-5. Only then proceed with commit
+2. **If matches found: STOP immediately and show user:**
+   ```bash
+   # Save diff to temp file
+   git diff --staged > /tmp/staged_diff.txt
+
+   # Show ALL flagged lines with line numbers
+   grep -n -E "(pattern)" -i /tmp/staged_diff.txt
+
+   # Show FULL CONTEXT (10 lines before/after each match)
+   grep -E "(pattern)" -i -B 10 -A 10 /tmp/staged_diff.txt
+   ```
+3. **Present to user:**
+   - Show flagged line numbers
+   - Show full context around each match
+   - Explain what was detected (pattern definitions vs actual secrets)
+   - Explain if deletions (safe) or additions (review needed)
+   - **Ask explicitly:** "Do you approve bypassing pre-commit hook? [YES/NO]"
+4. **Wait for user's explicit YES or NO response**
+5. Only proceed with `--no-verify` if user responds YES
+6. NEVER assume approval - always ask first
+
+**CRITICAL: NEVER use --no-verify without:**
+- ✅ Showing user ALL flagged lines with full context
+- ✅ Explaining what was flagged and why
+- ✅ Getting explicit YES approval from user
 
 **NEVER commit without this security check.**
 
