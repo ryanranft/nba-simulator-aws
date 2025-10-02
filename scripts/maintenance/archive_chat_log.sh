@@ -81,20 +81,24 @@ fi
 # Create sanitized version with credentials redacted
 # Re-sanitize the ENTIRE original log file (including all appended sessions)
 echo "  🔒 Sanitizing complete archive..."
-python3 << 'PYTHON_EOF' > "$SANITIZED_LOG"
+python3 - "$ORIGINAL_LOG" "$SANITIZED_LOG" << 'PYTHON_EOF'
 import re
 import sys
 
+# Get filenames from command line arguments
+original_file = sys.argv[1]
+sanitized_file = sys.argv[2]
+
 # Read the complete ORIGINAL log (which may have multiple sessions appended)
-with open("$ORIGINAL_LOG", 'r') as f:
+with open(original_file, 'r') as f:
     content = f.read()
 
-# Redact patterns (credentials only, no IP patterns per security policy)
+# Redact patterns - Updated regex to match real AWS credential formats
 redactions = [
-    (r'AWS_ACCESS_KEY[A-Z0-9]{16}', 'AWS_ACCESS_KEY[REDACTED]'),
-    (r'aws_secret_access_key=[^\s]+', 'aws_secret_access_key=[REDACTED]'),
-    (r'aws_session_token=[^\s]+', 'aws_session_token=[REDACTED]'),
-    (r'(Password|password|PASSWORD):\s*[^\s]+', r'\1: [REDACTED]'),
+    (r'AWS_ACCESS_KEY[A-Z0-9_]*=\S+', 'AWS_ACCESS_KEY[REDACTED]'),
+    (r'aws_secret_access_key=\S+', 'aws_secret_access_key=[REDACTED]'),
+    (r'aws_session_token=\S+', 'aws_session_token=[REDACTED]'),
+    (r'(Password|password|PASSWORD):\s*\S+', r'\1: [REDACTED]'),
     (r'Bearer [A-Za-z0-9_-]+', 'Bearer [REDACTED]'),
     (r'ghp_[A-Za-z0-9]{36}', 'ghp_[REDACTED]'),
     (r'github_pat_[A-Za-z0-9_]+', 'github_pat_[REDACTED]'),
@@ -105,7 +109,9 @@ redactions = [
 for pattern, replacement in redactions:
     content = re.sub(pattern, replacement, content)
 
-print(content, end='')
+# Write sanitized content
+with open(sanitized_file, 'w') as f:
+    f.write(content)
 PYTHON_EOF
 
 # Update git-info.txt to include chat logs
@@ -126,3 +132,7 @@ echo ""
 echo "⚠️  Security Note:"
 echo "   - ORIGINAL: Contains passwords - keep local only"
 echo "   - SANITIZED: Safe to share or commit to private repo"
+echo ""
+echo "  🧹 Clearing CHAT_LOG.md for next conversation..."
+> "$CHAT_LOG_SOURCE"
+echo "  ✓ CHAT_LOG.md cleared (ready for next export)"
