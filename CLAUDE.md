@@ -58,6 +58,75 @@ This project uses an automated workflow documentation system for tracking develo
    - Only push with --no-verify if user explicitly approves
 4. **NEVER assume prior approval applies to new pushes** - always ask each time
 
+**CRITICAL - Conversation Archiving Workflow:**
+
+**System Overview:**
+This project automatically archives Claude conversations with each git commit, linking conversation history to code history. Each commit SHA gets its own archive directory containing the conversation that led to those code changes.
+
+**The Automated Workflow:**
+1. **Claude monitors context usage** during session (automatic)
+2. **At 75% context (150K tokens)**, Claude automatically:
+   - Writes verbatim conversation transcript to `CHAT_LOG.md`
+   - Notifies user: "⚠️ Context at 75% - conversation saved to CHAT_LOG.md"
+   - Suggests user commit soon to archive before context resets
+3. **At 90% context (180K tokens)**, Claude:
+   - Updates CHAT_LOG.md with latest exchanges
+   - Strongly recommends immediate commit: "🚨 Context at 90% - commit NOW to preserve conversation"
+4. **User commits:** `git commit -m "message"`
+5. **Pre-commit hook** runs:
+   - Checks if CHAT_LOG.md exists (should exist from auto-save)
+   - Runs security scan (blocks if secrets detected)
+6. **Commit creates new SHA** (e.g., abc123...)
+7. **Post-commit hook** automatically:
+   - Creates archive directory: `~/sports-simulator-archives/nba/abc123.../`
+   - Archives CHAT_LOG.md → CHAT_LOG_ORIGINAL.md (with credentials)
+   - Creates CHAT_LOG_SANITIZED.md (credentials redacted)
+   - Clears CHAT_LOG.md (ready for next session)
+
+**Manual Override:**
+- User can say "save this conversation" anytime to trigger manual save
+- Useful for important decision points or before ending session early
+
+**Key Points:**
+- ✅ Automatic conversation saving at 75% and 90% context thresholds
+- ✅ Each commit SHA = one archive directory with conversation
+- ✅ Automatic archiving (no manual script execution needed)
+- ✅ Automatic clearing (prevents old conversations mixing)
+- ✅ SHA-based searchable history (link conversation to code)
+- ✅ Zero conversation loss - Claude monitors and saves proactively
+
+**Context Monitoring Thresholds:**
+- **0-74% (0-148K tokens):** Normal operation, no warnings
+- **75-89% (150K-179K tokens):** 🟡 Auto-save triggered, commit suggested
+- **90-100% (180K-200K tokens):** 🔴 Auto-update triggered, commit urgent
+- **100%+ (>200K tokens):** Conversation will be truncated, data loss possible
+
+**How to Find Past Conversations:**
+```bash
+# Find commit by topic
+git log --oneline --grep="authentication"
+# Output: abc1234 Add user authentication
+
+# Read conversation for that commit
+cat ~/sports-simulator-archives/nba/abc1234*/CHAT_LOG_SANITIZED.md
+
+# Search all conversations for keyword
+grep -r "AWS error" ~/sports-simulator-archives/nba/*/CHAT_LOG_*.md
+```
+
+**Claude's Role:**
+- ✅ Monitors context usage throughout session
+- ✅ Automatically writes verbatim transcripts to CHAT_LOG.md at thresholds
+- ✅ Can write transcript on-demand when user requests
+- ✅ Can read archived conversations from `~/sports-simulator-archives/nba/<SHA>/`
+- ✅ Proactively warns before conversation loss
+
+**When Claude Auto-Saves:**
+- At 75% context (150K tokens) - first automatic save
+- At 90% context (180K tokens) - urgent update
+- When user says "save this conversation" (manual trigger)
+- Before context window truncation to prevent data loss
+
 ## Instructions for Claude
 
 **Documentation Trigger System:**
