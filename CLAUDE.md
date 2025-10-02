@@ -380,7 +380,7 @@ This project uses an automated documentation update trigger system. Each key doc
 
 **Read these files to understand the system:**
 1. `.documentation-triggers.md` - Central registry of all documentation update triggers
-2. `session_startup.sh` output - Shows documentation status checks automatically
+2. `session_manager.sh start` output - Shows documentation status checks automatically
 
 **Key documentation files with triggers:**
 - `CHAT_LOG.md` - **Auto-updated at 75% and 90% context** (Claude handles automatically)
@@ -396,7 +396,7 @@ This project uses an automated documentation update trigger system. Each key doc
 - ✅ What command to run (if automated)
 - ✅ Last update date
 
-**At session start, `session_startup.sh` automatically checks:**
+**At session start, `session_manager.sh start` automatically checks:**
 - FILE_INVENTORY.md age (warns if > 7 days)
 - Session history status
 - Command log status
@@ -412,7 +412,7 @@ This project uses an automated documentation update trigger system. Each key doc
    - **Credentials:** Auto-loaded from ~/.zshrc when entering project directory (no verification needed)
    - **Startup checklist** - Automatically run (don't ask user, just do it):
      ```bash
-     bash scripts/shell/session_startup.sh
+     source scripts/shell/session_manager.sh start
      ```
      - **What it checks:**
        - Hardware: Model, Chip, Cores, Memory
@@ -422,11 +422,13 @@ This project uses an automated documentation update trigger system. Each key doc
        - AWS CLI: Version and location
        - Git: Version, location, status (branch, modified/untracked files), recent commits
        - **Documentation status:** FILE_INVENTORY.md age, session history, command log, PROGRESS.md tasks, stale docs
+       - **Conversation logging:** Offers terminal session logging setup
+       - **Command logging:** Auto-sources log_command.sh functions
      - **Output format:** Clean, organized sections with all diagnostic details preserved
      - **Session start:** Show output to user for review
      - **After EVERY commit:** Append to `.session-history.md` with:
        ```bash
-       bash scripts/shell/session_startup.sh >> .session-history.md
+       bash scripts/shell/session_manager.sh start >> .session-history.md
        ```
        This creates a version snapshot for each commit, allowing user to correlate git history with exact software versions used
    - **Check conversation status:**
@@ -434,7 +436,7 @@ This project uses an automated documentation update trigger system. Each key doc
      - If context approaching 75%: Proactively mention auto-save is coming soon
      - CHAT_LOG.md is auto-managed - no user action needed
    - Identify current phase from PROGRESS.md
-   - Review documentation status warnings from `session_startup.sh` output
+   - Review documentation status warnings from `session_manager.sh start` output
    - Ask: "Any work completed since last session that should be marked ✅ COMPLETE in PROGRESS.md?"
 
 2. **Ask user if they want to run (based on time since last update):**
@@ -766,7 +768,7 @@ aws s3 ls s3://nba-sim-raw-data-lake/
 - **File Inventory:** `FILE_INVENTORY.md` (auto-generated summaries of 28 documented files)
 - **Config Files:** `config/aws_config.yaml` (AWS resource definitions - minimal, to be populated in Phase 2+)
 - **Maintenance Scripts:** `scripts/maintenance/` (generate_inventory.py, sync_progress.py, update_docs.sh, archive_chat_log.sh)
-- **Shell Utilities:** `scripts/shell/` (check_machine_health.sh, log_command.sh, sanitize_command_log.sh, save_conversation.sh)
+- **Shell Utilities:** `scripts/shell/` (session_manager.sh, log_command.sh, sanitize_command_log.sh, save_conversation.sh)
 - **AWS Scripts:** `scripts/aws/` (check_costs.sh)
 - **Cost Tracking:** `scripts/aws/check_costs.sh` (AWS spending monitor)
 
