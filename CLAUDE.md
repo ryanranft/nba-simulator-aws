@@ -69,6 +69,172 @@ This project uses TWO automated documentation systems:
 4. Wait for user confirmation before proceeding with commit
 
 **CRITICAL - Before EVERY git push:**
+
+**Step 1: Security Scan** (existing protocol)
+1. Check staged files for credentials/secrets
+2. Display any flagged lines to user
+3. Get explicit approval before proceeding
+
+**Step 2: Repository Inspection for Local-Only Files** (NEW)
+
+After security scan passes, Claude will inspect the entire repository for files that should be archived and removed before pushing to GitHub:
+
+```bash
+# Automated scan of all tracked files
+git ls-files | grep -E "\.(md|log|txt|json|csv)$"
+```
+
+**Categories Claude Should Flag:**
+
+1. **Operational/Status Files:**
+   - `*_STATUS.md`, `*_PROGRESS.md`, `*_SUMMARY.md`
+   - Files with timestamps or runtime data
+   - Process monitoring logs
+
+2. **Command/Execution Logs:**
+   - `COMMAND_LOG.md`, `COMMAND_HISTORY.md`
+   - Files with command outputs or terminal sessions
+
+3. **Temporary Documentation:**
+   - `COMMIT_VERIFICATION.md`, `EXTRACTION_*.md`
+   - Files created during automation/debugging
+   - Session-specific notes
+
+4. **Configuration with Sensitive Paths:**
+   - Files containing local absolute paths
+   - Machine-specific configurations
+   - Development-only settings
+
+5. **Large Data Files Accidentally Staged:**
+   - `.csv`, `.json`, `.parquet` files in data directories
+   - Database dumps or exports
+
+**Claude's Inspection Criteria:**
+
+✅ **Flag for Review:**
+- Contains timestamps or session-specific data
+- Shows command execution history
+- Has operational status information
+- Contains local absolute paths
+- Includes debugging/troubleshooting notes
+- Has machine-specific configuration
+- Duplicates information already in curated docs
+
+❌ **Do NOT Flag:**
+- Essential project documentation (CLAUDE.md, PROGRESS.md, README.md)
+- Curated documentation in docs/ directory
+- Production code in scripts/
+- Configuration templates (.env.example)
+- Version-controlled application code
+- Public-facing documentation
+
+**Step 3: Present Recommendations to User**
+
+Format:
+```
+📋 Pre-Push Inspection Results:
+
+Files Recommended for Deletion (Archive First):
+
+🔴 HIGH PRIORITY (likely contains sensitive/operational data):
+- path/to/file1.md (Reason: Contains command outputs with potential credentials)
+- path/to/file2.log (Reason: Runtime logs with timestamps)
+
+🟡 MEDIUM PRIORITY (operational data, no immediate risk):
+- path/to/file3.md (Reason: Status file with local paths)
+- path/to/file4.txt (Reason: Temporary notes from debugging)
+
+🟢 LOW PRIORITY (consider for cleanup):
+- path/to/file5.md (Reason: Redundant documentation)
+
+Files to KEEP on GitHub:
+✅ CLAUDE.md - Essential instructions
+✅ PROGRESS.md - Project roadmap
+✅ README.md - Public documentation
+✅ All files in docs/ - Curated documentation
+✅ All files in scripts/ - Reusable code
+
+Would you like to proceed with archiving and deleting the flagged files? [YES/NO]
+Or specify which files to keep: [file1, file2, ...]
+```
+
+**Step 4: User Confirmation**
+
+User responds with one of:
+- `YES` - Archive and delete all flagged files
+- `NO` - Skip deletion, proceed with push
+- `file1, file3` - Only delete specified files
+- `KEEP file2` - Remove file2 from deletion list
+
+**Step 5: Archive Before Deletion**
+
+For each confirmed file:
+
+```bash
+# Create inspection-based archive
+ARCHIVE_DIR=~/sports-simulator-archives/nba/pre-push-cleanup-$(date +%Y%m%d-%H%M%S)
+mkdir -p "$ARCHIVE_DIR"
+
+# Copy files to archive
+for file in $CONFIRMED_FILES; do
+    cp "$file" "$ARCHIVE_DIR/"
+done
+
+# Create cleanup record
+cat > "$ARCHIVE_DIR/CLEANUP_RECORD.md" << EOF
+# Pre-Push Cleanup Record
+
+**Date:** $(date)
+**Trigger:** Pre-push inspection
+**Reason:** Files identified as local-only during GitHub push review
+
+## Files Removed:
+
+[List each file with reason]
+
+## How to Access:
+
+- Pre-push archive: $ARCHIVE_DIR
+- Git history: git show <commit>:FILENAME
+- Archive git repo: git -C ~/sports-simulator-archives/nba log --all
+
+## Context:
+
+These files were flagged during automated pre-push inspection and confirmed
+for deletion by user before pushing to GitHub.
+EOF
+
+# Commit to archive git
+cd ~/sports-simulator-archives/nba
+git add pre-push-cleanup-*/
+git commit -m "Pre-push cleanup - archive files before GitHub push"
+cd -
+```
+
+**Step 6: Remove from Repository**
+
+```bash
+# Remove from git tracking (keep local)
+for file in $CONFIRMED_FILES; do
+    git rm --cached "$file"
+    echo "$file" >> .gitignore
+done
+
+# Commit removal
+git add .gitignore
+git commit -m "Remove local-only files identified in pre-push inspection
+
+Files archived to: $ARCHIVE_DIR
+
+[List files removed]
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+```
+
+**Step 7: Final Push Approval**
+
 1. **ALWAYS ask user "Ready to push to GitHub?" before attempting push**
 2. **NEVER run `git push` without explicit user approval first**
 3. **If pre-push hook blocks with security violations:**
@@ -78,6 +244,16 @@ This project uses TWO automated documentation systems:
    - Ask: "These appear to be [false positives/real secrets]. Bypass hook and push anyway? [y/N]"
    - Only push with --no-verify if user explicitly approves
 4. **NEVER assume prior approval applies to new pushes** - always ask each time
+
+**Complete Push Protocol Summary:**
+
+1. ✅ Security scan - Check for credentials/secrets
+2. ✅ Repository inspection - Identify local-only files
+3. ✅ User confirmation - Review and approve deletions
+4. ✅ Archive flagged files - Pre-push cleanup archive created
+5. ✅ Remove from tracking - git rm --cached + .gitignore update
+6. ✅ Ask "Ready to push?" - Final user approval
+7. ✅ Execute push - Only after all steps complete
 
 **CRITICAL - Conversation Archiving Workflow:**
 
@@ -868,10 +1044,70 @@ Before removing ANY file from git tracking, ALWAYS archive it first:
 - Preserves lessons learned and mistake patterns
 - Enables replication of successful approaches
 
-**Files are preserved in THREE places:**
-- Pre-deletion archive: `~/sports-simulator-archives/nba/pre-deletion-archive-YYYYMMDD/`
-- Git history: `git show <old-commit>:FILENAME`
-- Archive git repo: `git -C ~/sports-simulator-archives/nba log --all -- FILENAME`
+**File Preservation Layers:**
+
+Each deleted file is preserved in **FOUR** locations:
+
+1. **Pre-deletion archive:** `~/sports-simulator-archives/nba/pre-deletion-archive-YYYYMMDD/`
+   - Timestamped snapshot of files before removal
+   - Includes DELETION_RECORD.md with full context
+
+2. **GitHub history (until deletion commit):**
+   - `git show <old-commit>:FILENAME`
+   - Accessible from any commit before removal
+
+3. **Local archive git repo:**
+   - `git -C ~/sports-simulator-archives/nba log --all -- FILENAME`
+   - `git -C ~/sports-simulator-archives/nba grep "keyword" -- pre-deletion-archive*/`
+
+4. **Local working directory:**
+   - Files still exist at original paths
+   - Archived automatically with each future commit
+   - Just not tracked by GitHub anymore
+
+**Accessing Deleted Files:**
+
+```bash
+# Find when a file was deleted
+git log --all --oneline -- FILENAME
+
+# View file from last commit before deletion
+git show <last-commit-sha>:FILENAME
+
+# Search pre-deletion archives
+ls -la ~/sports-simulator-archives/nba/pre-deletion-archive-*/
+
+# Read deletion record for context
+cat ~/sports-simulator-archives/nba/pre-deletion-archive-*/DELETION_RECORD.md
+
+# Search across all deletion archives via git
+git -C ~/sports-simulator-archives/nba grep "keyword" -- "pre-deletion-archive*/*"
+```
+
+**Integration with Post-Commit Workflow:**
+
+The deletion process integrates seamlessly with existing automation:
+
+1. **Pre-deletion archive created** → Manual step (before git rm)
+2. **Files removed from GitHub** → `git rm --cached`
+3. **User commits changes** → Normal commit process
+4. **Post-commit hook triggers:**
+   - Archives gitignored files (including deleted files still on disk)
+   - Creates CHAT_LOG_SANITIZED.md
+   - Generates ERRORS_LOG.md, CHANGES_SUMMARY.md, COMMAND_HISTORY.md
+   - Commits everything to local archive git repo
+
+**Result:** Complete historical record with zero GitHub exposure.
+
+**Why This Matters for Future Sport Simulators:**
+
+When deploying MLB, NFL, NHL, or other sport simulators, you can reference deleted files to:
+
+- **See complete operational history:** What files were created during overnight automation, ETL processing, error logging
+- **Learn from removal decisions:** Why certain files were kept local vs GitHub
+- **Understand error patterns:** COMMAND_LOG.md shows every error encountered and how it was resolved
+- **Replicate successful patterns:** Copy proven approaches from archived operational files
+- **Avoid past mistakes:** See what didn't work and why it was removed
 
 **Archive System:**
 - **Location:** `~/sports-simulator-archives/nba/` (local only, NEVER pushed to GitHub)
