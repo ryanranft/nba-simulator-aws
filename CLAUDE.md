@@ -17,6 +17,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3. Don't attempt multiple fixes automatically
 4. Log solution with `log_solution` after resolving
 
+**CRITICAL - Before EVERY git commit:**
+1. **ALWAYS run security scan** and show results to user
+2. **ALWAYS display flagged lines** for user review
+3. **NEVER commit without showing scan results first**
+4. Wait for user confirmation before proceeding with commit
+
 ## Instructions for Claude
 
 **Documentation Trigger System:**
