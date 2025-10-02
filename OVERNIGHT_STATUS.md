@@ -1,183 +1,214 @@
-# Overnight S3 Partitioning Status
+# Overnight Extraction & Schema Update Status
 
-**Started:** 2025-10-01 22:19:42
-**Process ID:** 48440 (wrapper script), 48453 (Python partitioning)
-**Log File:** `partition_overnight.log`
+**Date Started:** October 2, 2025 12:35 AM
 
 ---
 
 ## What's Running
 
-The automated overnight partitioning script is successfully running and will:
+### 1. Schema Update (PID 51309) - IN PROGRESS
+**Script:** `scripts/etl/complete_schema_update.py`
+**Log:** `schema_update.log`
+**Status:** Adding 25 missing columns to games table
+**Progress:** 4/25 columns added (as of 12:50 AM)
+- ✅ away_team_record_summary
+- ✅ away_team_standing_summary
+- ✅ away_team_location
+- ✅ away_team_is_winner
+- ⏳ 21 remaining columns
 
-1. ✅ **Partition Schedule Data** (11,633 files) - **IN PROGRESS**
-   - Currently on: Year 1993 (100+ of 129 files completed)
-   - Estimated: ~10-15 minutes remaining
+**Estimated Completion:** ~1:00 AM (~1 minute per column)
 
-2. ⏸️ **Partition PBP Data** (44,826 files)
-   - Will start automatically after schedule completes
-   - Estimated: ~45-60 minutes
+### 2. Play-by-Play Extraction - IN PROGRESS
+**Script:** `scripts/etl/extract_pbp_local.py`
+**Log:** `extract_pbp_1997_2021.log`
+**Years:** 1997-2021
+**Current Year:** 2013
+**Progress:**
+- 2012: ✅ 706,290 plays inserted
+- 2013: ⏳ 639,227 plays extracted, ready to insert
 
-3. ⏸️ **Partition Box Scores Data** (44,828 files)
-   - Will start automatically after PBP completes
-   - Estimated: ~45-60 minutes
+**Estimated Remaining:** 8 more years (2014-2021)
 
-4. ⏸️ **Partition Team Stats Data** (44,828 files)
-   - Will start automatically after box_scores completes
-   - Estimated: ~45-60 minutes
+### 3. Box Scores Extraction - IN PROGRESS
+**Script:** `scripts/etl/extract_boxscores_local.py`
+**Log:** `extract_boxscores_1997_2021.log`
+**Years:** 1997-2021
+**Current Year:** 2011
+**Progress:** 1997-2010 complete, 2011 in progress
 
-**Total Estimated Time:** 2-3 hours for all 146,115 files
+**Estimated Remaining:** 10 more years (2012-2021)
+
+### 4. Enhanced Schedule Extraction - WAITING
+**Script:** `scripts/etl/extract_schedule_local.py`
+**Status:** ⏸️ NOT STARTED - Waiting for schema update to complete
+**Reason:** Requires all 53 fields in games table
+**Will Start:** Automatically after schema update completes (~1:00 AM)
 
 ---
 
 ## Progress Check Commands
 
-To monitor progress throughout the night or in the morning:
+### Monitor Extraction Progress
 
 ```bash
-# Watch live progress (Ctrl+C to exit)
-tail -f partition_overnight.log
+# Check schema update progress
+tail -50 schema_update.log
 
-# Check last 50 lines
-tail -50 partition_overnight.log
+# Check PBP extraction
+tail -20 extract_pbp_1997_2021.log
 
-# Count year folders created (should show 33 per data type when complete)
-aws s3 ls s3://nba-sim-raw-data-lake/schedule/ | grep "year=" | wc -l
-aws s3 ls s3://nba-sim-raw-data-lake/pbp/ | grep "year=" | wc -l
-aws s3 ls s3://nba-sim-raw-data-lake/box_scores/ | grep "year=" | wc -l
-aws s3 ls s3://nba-sim-raw-data-lake/team_stats/ | grep "year=" | wc -l
+# Check box scores extraction
+tail -20 extract_boxscores_1997_2021.log
+
+# Check enhanced schedule extraction (will start after schema completes)
+tail -20 extract_schedule_full_1993_2025.log
 
 # Check if processes are still running
-ps aux | grep partition | grep -v grep
-
-# Check process status by PID
-ps -p 48440 48453
+ps aux | grep python | grep extract
+ps -p 51309  # Schema update process
 ```
 
----
-
-## Expected Final Output
-
-When complete, the log file will show:
-
-```
-✅ SUCCESS: schedule partitioning completed
-✅ SUCCESS: pbp partitioning completed
-✅ SUCCESS: box_scores partitioning completed
-✅ SUCCESS: team_stats partitioning completed
-
-ALL PARTITIONING COMPLETE
-
-Verifying S3 structure...
-Schedule years: 33
-PBP years: 33
-Box scores years: 33
-Team stats years: 33
-
-✅ Partitioning complete! Ready to create year-based crawlers.
-```
-
----
-
-## S3 Structure Being Created
-
-```
-s3://nba-sim-raw-data-lake/
-├── schedule/
-│   ├── year=1993/ (129 files)
-│   ├── year=1994/ (365 files)
-│   ├── year=1995/ (365 files)
-│   └── ... (33 years total)
-├── pbp/
-│   ├── year=1997/ (~500 files)
-│   ├── year=1998/ (~500 files)
-│   └── ... (25 years total)
-├── box_scores/
-│   └── ... (same structure as pbp)
-└── team_stats/
-    └── ... (same structure as pbp)
-```
-
----
-
-## What Happens If There's an Error
-
-The script will:
-- Continue processing other data types (won't stop entirely)
-- Log the error in `partition_overnight.log`
-- Show failed data type in the summary
-
-To troubleshoot:
-1. Check the log file for error messages
-2. Run the failed data type manually:
-   ```bash
-   echo "yes" | python scripts/etl/partition_by_year.py --data-types <failed_type> --execute
-   ```
-
----
-
-## Next Steps (When Complete)
-
-After partitioning finishes successfully:
-
-### 1. Create Year-Based Crawlers (15-20 min)
+### Check for Completion
 
 ```bash
-# Create all 132 crawlers (33 years × 4 data types)
-./scripts/etl/create_year_crawlers.sh --all
+# Schema update should show:
+grep "Successfully added" schema_update.log
 
-# Or create one data type at a time:
-./scripts/etl/create_year_crawlers.sh --data-type schedule --years 1993-2025
+# PBP should show year 2021:
+grep "Processing Year: 2021" extract_pbp_1997_2021.log
+
+# Box scores should show year 2021:
+grep "Processing Year: 2021" extract_boxscores_1997_2021.log
+
+# Enhanced schedule should show year 2025:
+grep "Processing Year: 2025" extract_schedule_full_1993_2025.log
 ```
-
-### 2. Test One Crawler First
-
-```bash
-# Start a single crawler for testing
-aws glue start-crawler --name nba-schedule-1997-crawler
-
-# Monitor it
-aws glue get-crawler --name nba-schedule-1997-crawler
-
-# Check if table created
-aws glue get-tables --database-name nba_raw_data --query 'TableList[?Name==`schedule_year_1997`]'
-```
-
-### 3. Run All Crawlers (Can Parallelize)
-
-```bash
-# Start all schedule crawlers (33 crawlers)
-for year in {1993..2025}; do
-  aws glue start-crawler --name nba-schedule-${year}-crawler 2>/dev/null || true
-done
-
-# Monitor progress
-aws glue list-crawlers --query 'CrawlerNames[?contains(@, `schedule`)]' | \
-  xargs -I {} aws glue get-crawler --name {} --query 'Crawler.State'
-```
-
-### 4. Update PROGRESS.md
-
-Mark Phase 2.1 tasks as complete:
-- ✅ Partition S3 data by year
-- ✅ Create year-based crawlers
-- ⏳ Run crawlers (in progress)
 
 ---
 
-## Cost Impact
+## Expected Final Counts
 
-**S3 Operations:**
-- 146,115 copy operations (within same bucket)
-- Estimated cost: ~$0.10-0.15
-- No data transfer charges (same region, same bucket)
+When all extractions complete successfully:
 
-**Glue Crawlers (when you run them):**
-- 132 crawlers × ~5 min each = ~11 hours total
-- Can run 10 in parallel = ~1 hour real time
-- Estimated cost: ~$1.10 (132 crawlers × 5 min × $0.44/hour)
+**Database Tables:**
+- **games:** ~35,000-40,000 records (1993-2025, all 58 columns including 53 enhanced fields)
+- **play_by_play:** ~10,000,000+ plays (1997-2021)
+- **player_game_stats:** ~800,000+ records (1997-2021)
+- **team_game_stats:** ~80,000+ records (1997-2021)
 
-**Total additional monthly cost:** <$0.10 (one-time partitioning cost)
+**Column Count:**
+- **games table:** 58 total columns (33 original + 25 new)
+
+---
+
+## Data Completeness Summary
+
+### ✅ PBP Data (1997-2021)
+- All 9 fields from original script
+- Bonus field: scoring_play boolean
+- Matches user's original comprehensive extraction
+
+### ✅ Box Scores Data (1997-2021)
+- Team-level stats (all fields from original script)
+- Player-level stats (all fields from original script)
+- Matches user's original comprehensive extraction
+
+### ⏳ Schedule Data (1993-2025) - ENHANCED TO 53 FIELDS
+**User Requirement:** *"I would like the schedule to have all of the data and be as rich as possible"*
+
+**Delivered:** 53 total fields (up from 9 fields = 488% more data)
+
+**Fields by Category:**
+- Core (4): game_id, game_date, game_time, season
+- Home Team (14): id, abbrev, name, short_name, logo, color, alt_color, uid, record_summary, standing_summary, location, score, is_winner, leader (name + stat)
+- Away Team (14): (same as home team)
+- Venue (6): name, id, city, state, country, indoor
+- Status (4): game_status, status_id, status_state, status_detail
+- Broadcast (4): name, market, type, count
+- Metadata (7): completed, is_tie, periods, time_valid, game_link, header_postfix, has_tickets
+
+---
+
+## Next Steps (When Complete - Tomorrow Morning)
+
+### 1. Verify Schema Update Completed
+```bash
+tail -50 schema_update.log
+# Should show: "✅ Successfully added 25/25 columns"
+# Should show: "📊 Final games table has 58 columns"
+```
+
+### 2. Start Enhanced Schedule Extraction (if not auto-started)
+```bash
+source /Users/ryanranft/nba-sim-credentials.env && \
+nohup python -u scripts/etl/extract_schedule_local.py --year-range 1993-2025 \
+> extract_schedule_full_1993_2025.log 2>&1 & \
+echo $! > extract_schedule_full.pid
+```
+
+### 3. Verify All Extractions Complete
+```bash
+# Check final year in each log
+grep "Processing Year: 2021" extract_pbp_1997_2021.log
+grep "Processing Year: 2021" extract_boxscores_1997_2021.log
+grep "Processing Year: 2025" extract_schedule_full_1993_2025.log
+```
+
+### 4. Verify Data in Database
+```bash
+source /Users/ryanranft/nba-sim-credentials.env && python3 << 'EOF'
+import psycopg2
+import os
+
+conn = psycopg2.connect(
+    host=os.environ['DB_HOST'],
+    database=os.environ['DB_NAME'],
+    user=os.environ['DB_USER'],
+    password=os.environ['DB_PASSWORD'],
+    port=os.environ['DB_PORT']
+)
+cursor = conn.cursor()
+
+# Check row counts
+cursor.execute("SELECT COUNT(*) FROM games")
+print(f"Games: {cursor.fetchone()[0]:,}")
+
+cursor.execute("SELECT COUNT(*) FROM play_by_play")
+print(f"Plays: {cursor.fetchone()[0]:,}")
+
+cursor.execute("SELECT COUNT(*) FROM player_game_stats")
+print(f"Player stats: {cursor.fetchone()[0]:,}")
+
+cursor.execute("SELECT COUNT(*) FROM team_game_stats")
+print(f"Team stats: {cursor.fetchone()[0]:,}")
+
+# Check games table columns
+cursor.execute("""
+    SELECT COUNT(*)
+    FROM information_schema.columns
+    WHERE table_name = 'games'
+""")
+print(f"\nGames table columns: {cursor.fetchone()[0]} (should be 58)")
+
+cursor.close()
+conn.close()
+EOF
+```
+
+### 5. Update PROGRESS.md
+Mark Phase 2 tasks as complete and update actual counts/costs.
+
+### 6. Check AWS Costs
+```bash
+make check-costs
+```
+
+### 7. Backup Logs
+```bash
+mkdir -p backups
+cp *.log backups/
+```
 
 ---
 
@@ -185,12 +216,32 @@ Mark Phase 2.1 tasks as complete:
 
 When you wake up, verify:
 
-- [ ] Processes completed (check log file for "ALL PARTITIONING COMPLETE")
-- [ ] No error messages in log
-- [ ] 33 year folders exist for each data type in S3
-- [ ] Process IDs 48440 and 48453 are no longer running
-- [ ] Ready to create year-based crawlers
+- [ ] Schema update completed (25/25 columns, 58 total)
+- [ ] Enhanced schedule extraction started and completed (1993-2025)
+- [ ] PBP extraction completed (year 2021 processed)
+- [ ] Box scores extraction completed (year 2021 processed)
+- [ ] No error messages in any logs
+- [ ] Database row counts match expectations
+- [ ] Games table has 58 columns
+- [ ] All process PIDs are no longer running
 
 ---
 
-**Note:** This process will run to completion without user intervention. The `nohup` wrapper ensures it continues even if your terminal disconnects or your computer sleeps. The process writes all output to `partition_overnight.log` for review in the morning.
+## What to Watch For
+
+**Potential Issues:**
+1. **Schema update timeout** - If schema_update.log stops before 25/25 columns, run remaining ALTER TABLE commands manually
+2. **Enhanced schedule not auto-started** - If schema completes but schedule doesn't start, run command from Step 2 above
+3. **Database connection errors** - Check RDS instance status, security groups, and credentials
+4. **Disk space** - Log files may grow large; monitor disk usage
+
+**Success Indicators:**
+- ✅ All logs show final year completed
+- ✅ No "❌" or "ERROR" messages in logs
+- ✅ Database queries return expected row counts
+- ✅ Games table has all 58 columns
+- ✅ User requirement satisfied: Schedule data is "as rich as possible" with all 53 fields
+
+---
+
+**Note:** All processes run with `nohup` to continue even if terminal disconnects or computer sleeps. All output is captured in log files for morning review.
