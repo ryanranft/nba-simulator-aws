@@ -833,6 +833,46 @@ s3://nba-sim-raw-data-lake/
 - ALWAYS run `sanitize_command_log.sh` before committing COMMAND_LOG.md
 - Backup before destructive operations (provide backup command)
 
+**File Deletion Protocol (CRITICAL):**
+Before removing ANY file from git tracking, ALWAYS archive it first:
+
+1. **Create pre-deletion archive:**
+   ```bash
+   ARCHIVE_DIR=~/sports-simulator-archives/nba/pre-deletion-archive-$(date +%Y%m%d)
+   mkdir -p "$ARCHIVE_DIR"
+   cp <files-to-delete> "$ARCHIVE_DIR/"
+   ```
+
+2. **Create deletion record:**
+   - Document what files were removed, why, and when
+   - Include how to access them in future (git history, archive location)
+   - Explain purpose for future sport simulator deployments
+
+3. **Commit archive to local git:**
+   ```bash
+   cd ~/sports-simulator-archives/nba
+   git add pre-deletion-archive-*/
+   git commit -m "Archive files before GitHub removal - preserve complete history"
+   ```
+
+4. **Remove from git tracking (keep local):**
+   ```bash
+   git rm --cached <files-to-delete>
+   ```
+
+5. **Update .gitignore to prevent re-tracking**
+
+**Why this matters:**
+- Future sport simulators need complete deployment history with errors
+- Shows what operational files were created and why they were removed
+- Preserves lessons learned and mistake patterns
+- Enables replication of successful approaches
+
+**Files are preserved in THREE places:**
+- Pre-deletion archive: `~/sports-simulator-archives/nba/pre-deletion-archive-YYYYMMDD/`
+- Git history: `git show <old-commit>:FILENAME`
+- Archive git repo: `git -C ~/sports-simulator-archives/nba log --all -- FILENAME`
+
 **Archive System:**
 - **Location:** `~/sports-simulator-archives/nba/` (local only, NEVER pushed to GitHub)
 - **Storage Type:** Git-based with SHA-based directories
