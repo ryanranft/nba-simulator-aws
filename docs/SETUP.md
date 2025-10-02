@@ -415,6 +415,147 @@ log_cmd git status
 
 ---
 
+## Critical Paths
+
+### Project Directories
+
+- **Project Root:** `/Users/ryanranft/nba-simulator-aws`
+- **Original Data:** `/Users/ryanranft/0espn/data/nba/` (119 GB source files)
+- **Local Data Cache:** `data/` (gitignored, for testing)
+- **Conda Environment:** `/Users/ryanranft/miniconda3/envs/nba-aws`
+- **Conversation Archives:** `~/sports-simulator-archives/nba/<commit-sha>/`
+
+### AWS Resources
+
+- **S3 Bucket:** `s3://nba-sim-raw-data-lake` (146,115 files, 119 GB)
+- **Region:** us-east-1
+- **Account ID:** `<your-aws-account-id>`
+- **IAM User:** iam (AdministratorAccess)
+
+### Configuration Files
+
+- **AWS Credentials:** `~/.aws/credentials` (chmod 600, never commit)
+- **AWS Config:** `~/.aws/config`
+- **Project Config:** `config/aws_config.yaml` (minimal, to be populated in Phase 2+)
+- **Python Dependencies:** `requirements.txt` (10 packages)
+
+### Key Scripts
+
+- **Maintenance:** `scripts/maintenance/`
+  - generate_inventory.py - Auto-generates FILE_INVENTORY.md
+  - sync_progress.py - Syncs PROGRESS.md with AWS reality
+  - update_docs.sh - Updates documentation sections
+  - archive_manager.sh - Unified archiving (gitignored, conversation, analyze)
+
+- **Shell Utilities:** `scripts/shell/`
+  - session_manager.sh - Session initialization (start, end, status)
+  - pre_push_inspector.sh - Pre-push inspection (7-step workflow)
+  - log_command.sh - Command logging
+  - sanitize_command_log.sh - Sanitize logs before commit
+  - save_conversation.sh - Save conversation to CHAT_LOG.md
+
+- **AWS Scripts:** `scripts/aws/`
+  - check_costs.sh - AWS spending monitor
+
+### Documentation
+
+- **Quick Reference:** `QUICKSTART.md` (one-page command reference)
+- **Machine Specs:** `MACHINE_SPECS.md` (hardware, software versions)
+- **File Inventory:** `FILE_INVENTORY.md` (auto-generated summaries)
+- **Progress Tracking:** `PROGRESS.md` (phase-by-phase implementation plan)
+- **Detailed Docs:** `docs/` (23 documentation files)
+
+---
+
+## AWS Configuration
+
+### Account Setup
+
+- **Account:** AWS Free Tier or standard account
+- **Region:** us-east-1 (US East - N. Virginia)
+- **IAM User:** iam with AdministratorAccess policy
+- **Authentication:** Access key + secret key (stored in `~/.aws/credentials`)
+
+### Credentials Storage
+
+**Primary Location:** `~/.aws/credentials` (chmod 600)
+
+```ini
+[default]
+aws_access_key_id = YOUR_ACCESS_KEY
+aws_secret_access_key = YOUR_SECRET_KEY
+region = us-east-1
+```
+
+**CRITICAL SECURITY:**
+- NEVER commit AWS credentials to Git
+- NEVER copy credentials into project directory
+- NEVER store credentials in environment variables
+- NEVER reference credentials in code (boto3 auto-reads from ~/.aws/credentials)
+- NEVER document exact paths to credential backups
+
+See `docs/SECURITY_PROTOCOLS.md` for credential rotation schedules and emergency procedures.
+
+### S3 Bucket
+
+- **Name:** `nba-sim-raw-data-lake`
+- **Purpose:** Raw JSON data storage (146,115 files, 119 GB)
+- **Structure:**
+  ```
+  s3://nba-sim-raw-data-lake/
+  ├── box_scores/    # 44,828 files - player statistics per game
+  ├── pbp/           # 44,826 files - play-by-play sequences
+  ├── schedule/      # 11,633 files - game schedules by date
+  └── team_stats/    # 44,828 files - team-level statistics
+  ```
+
+---
+
+## Critical Constraints
+
+### Python Environment
+
+- **Python Version:** 3.11.13 (REQUIRED for AWS Glue 4.0 compatibility)
+- **Package Manager:** Conda (NOT venv)
+- **Environment Name:** nba-aws
+- **Dependencies:** 10 packages in requirements.txt
+
+**Key Libraries:**
+- boto3 (AWS SDK)
+- pandas (data processing)
+- numpy (numerical computing)
+- pyarrow (Parquet file handling)
+- psycopg2-binary (PostgreSQL connections)
+- sqlalchemy (ORM and database abstraction)
+- pytest (testing)
+- jupyter (analysis)
+- python-dotenv (environment variables)
+- pyyaml (YAML configuration)
+- tqdm (progress bars)
+
+### AWS CLI
+
+- **Version:** 2.x (system-wide installation)
+- **Installation:** Homebrew on macOS, package manager on Linux
+- **DO NOT:** Install via pip/conda (`pip install awscli` conflicts with system install)
+- **Verification:** `aws --version` should show AWS CLI 2.x
+
+### Data Folder
+
+- **Location:** `data/` (in project root)
+- **Size:** 119 GB (gitignored)
+- **Purpose:** Local cache of ESPN JSON files
+- **DO NOT:** Commit to Git (would exceed GitHub's file size limits)
+
+### Git Configuration
+
+- **Authentication:** SSH (not HTTPS)
+- **Remote:** `git@github.com:ryanranft/nba-simulator-aws.git`
+- **Branch:** main (tracks origin/main)
+- **SSH Keys:** Already configured in `~/.ssh/`
+
+---
+
 ## Verification Checklist
 
 Run this comprehensive verification:
