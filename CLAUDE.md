@@ -102,7 +102,14 @@ This project automatically archives Claude conversations with each git commit, l
    - Creates archive directory: `~/sports-simulator-archives/nba/abc123.../`
    - Archives CHAT_LOG.md → CHAT_LOG_ORIGINAL.md (with credentials)
    - Creates CHAT_LOG_SANITIZED.md (credentials redacted)
+   - Generates auto-logs: ERRORS_LOG.md, CHANGES_SUMMARY.md, COMMAND_HISTORY.md
    - Clears CHAT_LOG.md (ready for next session)
+8. **Archive git repo automatically commits:**
+   - Archives committed to local git repo: `~/sports-simulator-archives/nba/.git`
+   - Git tracks all changes to archived files (including sensitive files)
+   - Automatic storage compression (~85% space savings)
+   - **NEVER pushed to GitHub** - stays 100% local
+   - `.git/info/exclude` prevents sensitive files from remote operations
 
 **Manual Override:**
 - User can say "save this conversation" anytime to trigger manual save
@@ -115,6 +122,8 @@ This project automatically archives Claude conversations with each git commit, l
 - ✅ Automatic clearing (prevents old conversations mixing)
 - ✅ SHA-based searchable history (link conversation to code)
 - ✅ Zero conversation loss - Claude monitors and saves proactively
+- ✅ Git-based storage with automatic compression (~85% space savings)
+- ✅ Full version history of archived documentation
 
 **Context Monitoring Thresholds:**
 - **0-74% (0-148K tokens):** Normal operation, no warnings
@@ -123,6 +132,8 @@ This project automatically archives Claude conversations with each git commit, l
 - **100%+ (>200K tokens):** Conversation will be truncated, data loss possible
 
 **How to Find Past Conversations:**
+
+**Method 1: Using directory structure (direct access):**
 ```bash
 # Find commit by topic
 git log --oneline --grep="authentication"
@@ -133,6 +144,21 @@ cat ~/sports-simulator-archives/nba/abc1234*/CHAT_LOG_SANITIZED.md
 
 # Search all conversations for keyword
 grep -r "AWS error" ~/sports-simulator-archives/nba/*/CHAT_LOG_*.md
+```
+
+**Method 2: Using git-based search (more efficient):**
+```bash
+# Search all archived conversations via git
+git -C ~/sports-simulator-archives/nba grep "keyword" -- "*/CHAT_LOG_*.md"
+
+# View archive git history
+git -C ~/sports-simulator-archives/nba log --oneline
+
+# Read specific archived file from git
+git -C ~/sports-simulator-archives/nba show HEAD:<SHA>/CHAT_LOG_SANITIZED.md
+
+# Search for when a file was added to archive
+git -C ~/sports-simulator-archives/nba log --follow --oneline -- "*/<filename>"
 ```
 
 **Claude's Role:**
@@ -807,6 +833,40 @@ s3://nba-sim-raw-data-lake/
 - ALWAYS run `sanitize_command_log.sh` before committing COMMAND_LOG.md
 - Backup before destructive operations (provide backup command)
 
+**Archive System:**
+- **Location:** `~/sports-simulator-archives/nba/` (local only, NEVER pushed to GitHub)
+- **Storage Type:** Git-based with SHA-based directories
+- **Compression:** ~85% space savings (2.7M total, .git only 388K)
+- **Operation:** Fully automatic via post-commit hook
+- **Content:** Gitignored docs + sanitized conversation logs + auto-generated logs
+- **Git Repo:** Local only, no remote configured
+- **Sensitive Files:** Tracked locally in git, excluded from remote via `.git/info/exclude`
+- **Backup Recommendation:** Include archive directory in Time Machine or external backup system
+
+**Auto-Generated Commit Logs (NEW):**
+Each commit automatically generates detailed analysis logs in the archive directory:
+
+1. **ERRORS_LOG.md** - All errors encountered
+   - Extracts from COMMAND_LOG.md and log files
+   - Shows error messages, tracebacks, warnings
+   - Links errors to specific commands/files
+
+2. **CHANGES_SUMMARY.md** - Detailed file changes analysis
+   - Git diff stats and file-by-file breakdown
+   - Shows added/modified/deleted files
+   - Includes code diffs for each changed file
+
+3. **COMMAND_HISTORY.md** - Complete command execution record
+   - All commands from COMMAND_LOG.md
+   - Success/failure outcomes
+   - Timestamps and context
+
+**Key Benefits:**
+- ✅ Claude can read git history for ALL files (including sensitive ones)
+- ✅ Full local version control with searchable history
+- ✅ Auto-generated analysis of each commit's changes/errors
+- ✅ Zero risk of GitHub leaks (`.git/info/exclude` blocks remote push)
+
 **Credential Rotation Schedule:**
 
 Follow these security best practices for credential rotation:
@@ -918,6 +978,22 @@ make sync-progress
 
 # Monitor AWS costs
 make check-costs
+```
+
+**Archive Management:**
+```bash
+# View archive git history
+git -C ~/sports-simulator-archives/nba log --oneline
+
+# Search archived conversations
+git -C ~/sports-simulator-archives/nba grep "keyword" -- "*/CHAT_LOG_*.md"
+
+# Check archive storage size
+du -sh ~/sports-simulator-archives/nba
+du -sh ~/sports-simulator-archives/nba/.git
+
+# List all archived commits
+ls -1 ~/sports-simulator-archives/nba/ | grep -E '^[0-9a-f]{40}$'
 ```
 
 **Makefile Commands (Recommended):**
