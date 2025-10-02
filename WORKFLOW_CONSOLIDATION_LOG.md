@@ -598,3 +598,312 @@ scripts/maintenance/archive_manager.sh
 4. **Keep as-is (separate use case):**
    - `scripts/maintenance/archive_chat_by_next_sha.sh` (different approach, may be deprecated later)
    - `scripts/maintenance/create_sanitized_archive.sh` (evaluate if still needed)
+
+---
+
+## Workflow #3: Pre-Push Inspection Workflow
+
+**Status:** 📝 ANALYSIS COMPLETE - Ready for implementation
+**Date Started:** 2025-10-02
+
+### Summary
+
+Implement interactive pre-push inspection workflow to automate repository cleanup before pushing to GitHub. This consolidates the documented workflow from `docs/SECURITY_PROTOCOLS.md` (lines 13-199) into a working automation script.
+
+### Current State: What Exists
+
+**1. Git Hooks (Automated Guards):**
+- `.git/hooks/pre-commit` (110 lines) - Auto-runs on every commit
+  - Conversation log archiving reminder (checks CHAT_LOG.md age)
+  - Security scan for staged files
+  - Blocks commit if credentials/keys/IPs detected
+- `.git/hooks/pre-push` (53 lines) - Auto-runs on every push
+  - Scans last 5 commits for leaked secrets
+  - Blocks push if violations detected
+
+**2. Manual Security Audit Tool:**
+- `scripts/shell/security_scan.sh` (197 lines)
+  - Part 1: Git History Scan (7 checks)
+  - Part 2: Current Files Scan (5 checks)
+  - Part 3: Security Configurations (3 checks)
+  - Comprehensive 15-point security audit
+  - Color-coded output (✓ PASS, ✗ FAIL, ⚠ WARN)
+
+### What's Missing: Complete Pre-Push Workflow
+
+The documented 7-step workflow in `docs/SECURITY_PROTOCOLS.md` is **NOT AUTOMATED**:
+
+**Step 1: Security Scan** ✅ EXISTS
+- Handled by pre-commit hook + security_scan.sh
+
+**Step 2: Repository Inspection** ❌ MISSING
+- Scan all tracked files for local-only patterns
+- Categorize by risk level (operational, logs, temp docs, config, data)
+- Apply inspection criteria
+
+**Step 3: Present Recommendations** ❌ MISSING
+- Format with priority levels (🔴 HIGH, 🟡 MEDIUM, 🟢 LOW)
+- Show files to KEEP vs DELETE
+- Prompt for user confirmation
+
+**Step 4: User Confirmation** ❌ MISSING
+- Parse responses: YES/NO/file list/KEEP file
+- Flexible confirmation system
+
+**Step 5: Archive Before Deletion** ❌ MISSING
+- Create pre-push cleanup archive
+- Generate CLEANUP_RECORD.md
+- Commit to local archive git
+
+**Step 6: Remove from Repository** ❌ MISSING
+- `git rm --cached` for confirmed files
+- Update .gitignore
+- Commit removal
+
+**Step 7: Final Push Approval** ❌ PARTIALLY IMPLEMENTED
+- Ask "Ready to push?" before actual push
+- Explain pre-push hook output if blocked
+- Handle --no-verify bypass approval
+
+### Proposed Solution: `pre_push_inspector.sh`
+
+**Design Philosophy:**
+- **DO NOT replace** existing git hooks (they work as auto-guards)
+- **ADD new functionality** - Interactive pre-push inspection workflow
+- **Reuse patterns** from existing security_scan.sh
+- **Integrate with** archive_manager.sh for archiving
+
+**Modes:**
+
+1. **`security-scan`** - Run comprehensive security audit
+   - Reuses security_scan.sh logic (all 15 checks)
+   - Color-coded output
+
+2. **`inspect-repo`** - Scan for local-only files (NEW)
+   - Implements Step 2 from SECURITY_PROTOCOLS.md
+   - Categorizes: operational, logs, temp docs, config, data
+   - Returns flagged files list
+
+3. **`recommend`** - Present recommendations (NEW)
+   - Implements Step 3 from SECURITY_PROTOCOLS.md
+   - Priority levels: 🔴 HIGH 🟡 MEDIUM 🟢 LOW
+   - Shows files to KEEP
+   - Prompts for confirmation
+
+4. **`archive-cleanup`** - Archive flagged files (NEW)
+   - Implements Step 5 from SECURITY_PROTOCOLS.md
+   - Creates: `~/sports-simulator-archives/nba/pre-push-cleanup-YYYYMMDD-HHMMSS`
+   - Generates CLEANUP_RECORD.md
+   - Commits to archive git
+
+5. **`cleanup-repo`** - Remove from tracking (NEW)
+   - Implements Step 6 from SECURITY_PROTOCOLS.md
+   - Runs `git rm --cached` for each file
+   - Updates .gitignore
+   - Commits removal
+
+6. **`full`** - Complete workflow (NEW)
+   - Orchestrates Steps 1-7
+   - Interactive prompts at decision points
+   - Can abort at any step
+
+7. **`status`** - Preview what would be flagged (NEW)
+   - Dry-run mode
+   - No changes made
+   - Shows inspection results
+
+**Usage:**
+```bash
+# Full pre-push workflow (recommended before git push)
+bash scripts/shell/pre_push_inspector.sh full
+
+# Individual steps
+bash scripts/shell/pre_push_inspector.sh security-scan
+bash scripts/shell/pre_push_inspector.sh inspect-repo
+bash scripts/shell/pre_push_inspector.sh recommend
+bash scripts/shell/pre_push_inspector.sh status
+```
+
+### Key Features to Preserve
+
+**100% Functionality from docs/SECURITY_PROTOCOLS.md:**
+- ✅ All 7 workflow steps
+- ✅ All security patterns from security_scan.sh
+- ✅ All safe pattern exclusions
+- ✅ All file categorization criteria
+- ✅ All user confirmation options (YES/NO/list/KEEP)
+- ✅ All archive metadata requirements
+- ✅ All git operations (rm --cached, .gitignore, commit)
+- ✅ All color coding and emoji indicators
+
+**DO NOT MODIFY:**
+- ✅ `.git/hooks/pre-commit` (works as auto-guard)
+- ✅ `.git/hooks/pre-push` (works as auto-guard)
+- ✅ `scripts/shell/security_scan.sh` (comprehensive audit tool)
+
+### Shared Utility Functions
+
+**Extract and reuse from security_scan.sh:**
+
+1. **Security patterns** (lines 23-86):
+   ```bash
+   AKIA[A-Z0-9]{16}                    # AWS Access Keys
+   aws_secret_access_key.*[A-Za-z0-9/+=]{40}
+   BEGIN (RSA|OPENSSH|EC|DSA) PRIVATE KEY
+   gh[psor]_[A-Za-z0-9]{36}            # GitHub Tokens
+   postgresql://[^:]+:[^@]{8,}@
+   (192\.168\.|10\.)[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}
+   ```
+
+2. **Safe pattern exclusions**:
+   ```bash
+   grep -v "\*\*\*\*"                  # Redacted values
+   grep -v "PASSWORD\|your_password"   # Placeholders
+   grep -v "\.example"                 # Example files
+   ```
+
+**New utility functions needed:**
+
+3. `inspect_tracked_files()` - Categorize tracked files by risk
+4. `format_recommendations()` - Color-coded priority output
+5. `parse_user_response()` - Handle YES/NO/file list/KEEP
+6. `create_cleanup_archive()` - Pre-push cleanup archive creation
+7. `remove_from_tracking()` - git rm --cached + .gitignore update
+
+### File Structure
+
+**New script:**
+```
+scripts/shell/pre_push_inspector.sh
+├─ Configuration (security patterns, file categories)
+├─ Shared utility functions
+├─ Mode: security-scan (reuse 200 lines)
+├─ Mode: inspect-repo (NEW 150 lines)
+├─ Mode: recommend (NEW 100 lines)
+├─ Mode: archive-cleanup (NEW 100 lines)
+├─ Mode: cleanup-repo (NEW 100 lines)
+├─ Mode: full (NEW 150 lines)
+├─ Mode: status (NEW 100 lines)
+└─ Main execution logic
+```
+
+**Estimated size:** 600-800 lines
+
+### Benefits
+
+1. **Completes Security Workflow:**
+   - Implements all 7 steps from SECURITY_PROTOCOLS.md
+   - No more manual repository cleanup before push
+   - Automated archiving before deletion
+
+2. **Preserves Existing Infrastructure:**
+   - Git hooks remain as auto-guards
+   - security_scan.sh remains as audit tool
+   - No regression risk
+
+3. **Interactive & Flexible:**
+   - User has full control at each decision point
+   - Can run full workflow or individual steps
+   - Can preview with status mode
+
+4. **Consistent with Consolidation Pattern:**
+   - Multiple modes for different use cases
+   - Reuses existing patterns and functions
+   - Integrates with archive_manager.sh
+
+5. **Reduces Manual Work:**
+   - No more manual file inspection
+   - No more manual git rm --cached
+   - No more manual .gitignore updates
+
+### Implementation Plan
+
+1. ✅ **Analyze existing infrastructure** (security_scan.sh, git hooks)
+2. ✅ **Create WORKFLOW_3_COMPARISON.md** with gap analysis
+3. **Extract security patterns** from security_scan.sh
+4. **Implement inspect-repo mode** (file categorization)
+5. **Implement recommend mode** (formatted output + prompts)
+6. **Implement archive-cleanup mode** (integrate with archive system)
+7. **Implement cleanup-repo mode** (git operations)
+8. **Implement full mode** (orchestrate all steps)
+9. **Implement status mode** (dry-run preview)
+10. **Test each mode individually**
+11. **Test full workflow integration**
+12. **Update documentation** (SECURITY_PROTOCOLS.md, CLAUDE.md)
+
+### Testing Checklist
+
+- [ ] Test security-scan mode
+  - [ ] All 15 checks run correctly
+  - [ ] Color-coded output displays
+  - [ ] Exit codes correct (0=pass, 1=fail)
+
+- [ ] Test inspect-repo mode
+  - [ ] Correctly categorizes operational files
+  - [ ] Correctly categorizes command logs
+  - [ ] Correctly categorizes temporary docs
+  - [ ] Correctly identifies files to KEEP
+  - [ ] Correct risk level assignments
+
+- [ ] Test recommend mode
+  - [ ] Priority levels display with colors
+  - [ ] Files to KEEP list is accurate
+  - [ ] Prompts for user confirmation
+  - [ ] Explanation text is clear
+
+- [ ] Test archive-cleanup mode
+  - [ ] Creates pre-push cleanup archive directory
+  - [ ] CLEANUP_RECORD.md has correct metadata
+  - [ ] All flagged files copied to archive
+  - [ ] Commits to local archive git repo
+
+- [ ] Test cleanup-repo mode
+  - [ ] git rm --cached works for each file
+  - [ ] .gitignore updated correctly (no duplicates)
+  - [ ] Cleanup commit message is descriptive
+  - [ ] Files still exist locally (not deleted)
+
+- [ ] Test full workflow
+  - [ ] All steps run in sequence
+  - [ ] Interactive prompts work correctly
+  - [ ] Can abort at any step
+  - [ ] Final "Ready to push?" prompt
+
+- [ ] Test status mode
+  - [ ] Shows preview without making changes
+  - [ ] Accurate flagged file count
+  - [ ] Category breakdown correct
+
+### Files to Create
+
+1. **Created:**
+   - `/Users/ryanranft/nba-simulator-aws/scripts/shell/pre_push_inspector.sh` (600-800 lines)
+
+2. **Updated:**
+   - `/Users/ryanranft/nba-simulator-aws/docs/SECURITY_PROTOCOLS.md` (add script usage examples)
+   - `/Users/ryanranft/nba-simulator-aws/CLAUDE.md` (add pre-push workflow instructions)
+   - `/Users/ryanranft/nba-simulator-aws/QUICKSTART.md` (add to common commands)
+
+3. **Keep unchanged:**
+   - `.git/hooks/pre-commit` (auto-guard)
+   - `.git/hooks/pre-push` (auto-guard)
+   - `scripts/shell/security_scan.sh` (audit tool)
+
+### Rationale for This Approach
+
+**Why NOT consolidate existing scripts:**
+- Git hooks are defensive auto-guards (MUST remain as-is)
+- security_scan.sh is comprehensive audit tool (works standalone)
+- New workflow is ADDITIONAL interactive layer, not replacement
+
+**Why CREATE new script:**
+- Implements missing Steps 2-7 from SECURITY_PROTOCOLS.md
+- Provides interactive pre-push inspection
+- Automates manual cleanup workflow
+- Integrates all components into complete workflow
+
+**Why multiple modes:**
+- Flexibility (full workflow vs individual steps)
+- Reusability (can call from other scripts)
+- Testability (can test each mode independently)
+- Maintainability (clear separation of concerns)
