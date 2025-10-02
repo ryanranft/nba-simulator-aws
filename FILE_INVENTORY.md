@@ -1,6 +1,6 @@
 # FILE_INVENTORY.md
 
-**Auto-generated:** 2025-10-01 20:46:00
+**Auto-generated:** 2025-10-01 21:00:22
 
 **Purpose:** Comprehensive inventory of all project files with automatic summaries.
 
@@ -16,7 +16,7 @@
 
 ### .session-history.md
 
-**Type:** Markdown documentation (567 lines)
+**Type:** Markdown documentation (627 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** <!-- AUTO-UPDATE TRIGGER: Run `bash scripts/shell/session_startup.sh >> .session-history.md` AFTER every commit -->
 
@@ -34,15 +34,15 @@
 
 ### COMMAND_LOG.md
 
-**Type:** Markdown documentation (729 lines)
+**Type:** Markdown documentation (853 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** <!-- AUTO-UPDATE TRIGGER: After EVERY code file creation/modification, failed command, or error resolution -->
 
 ### FILE_INVENTORY.md
 
-**Type:** Markdown documentation (321 lines)
+**Type:** Markdown documentation (384 lines)
 **Last Modified:** 2025-10-01
-**Purpose:** **Auto-generated:** 2025-10-01 18:26:15
+**Purpose:** **Auto-generated:** 2025-10-01 20:46:00
 
 ### MACHINE_SPECS.md
 
@@ -52,7 +52,7 @@
 
 ### PROGRESS.md
 
-**Type:** Markdown documentation (1161 lines)
+**Type:** Markdown documentation (1174 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** <!-- AUTO-UPDATE TRIGGER: After completing ANY task, mark ✅ COMPLETE immediately -->
 
@@ -216,6 +216,18 @@
 **Last Modified:** 2025-10-01
 **Purpose:** <!-- AUTO-UPDATE TRIGGER: After encountering and solving any significant error or design decision -->
 
+### docs/PHASE_2.2_ETL_PLAN.md
+
+**Type:** Markdown documentation (614 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** **Created:** 2025-10-01
+
+### docs/RDS_CONNECTION.md
+
+**Type:** Markdown documentation (343 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** **Purpose:** Secure reference for RDS connection information
+
 ### docs/REPRODUCTION_GUIDE.md
 
 **Type:** Markdown documentation (573 lines)
@@ -368,11 +380,11 @@
 
 ## Summary Statistics
 
-**Total files documented:** 45
-**Total lines of code/docs:** 19,781
+**Total files documented:** 47
+**Total lines of code/docs:** 20,998
 
 **Files by type:**
-- Markdown documentation: 28
+- Markdown documentation: 30
 - Bash script: 9
 - Python script: 4
 - SQL script: 2

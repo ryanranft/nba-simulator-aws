@@ -490,7 +490,7 @@ aws rds create-db-instance \
   --engine postgres \
   --engine-version 15.14 \
   --master-username postgres \
-  --master-user-password 'NbaSimulator2025!' \
+  --master-user-password '[REDACTED]' \
   --allocated-storage 20 \
   --storage-type gp3 \
   --vpc-security-group-ids sg-079ed470e0caaca44 \
@@ -552,7 +552,7 @@ aws rds create-db-instance \
 InvalidParameterValue: The parameter MasterUserPassword is not a valid password.
 Only printable ASCII characters besides '/', '@', '"', ' ' may be used.
 ```
-**Solution:** Changed password to `NbaSimulator2025!` (removed `@` character)
+**Solution:** Changed password to `[REDACTED]` (removed `@` character)
 **Related:** docs/LESSONS_LEARNED.md Issue #2
 
 #### Error #2: FreeTierRestrictionError (db.t3.small)
@@ -707,6 +707,130 @@ Unknown options: --description, PostgreSQL access from home IP
 **Errors Resolved:** 5 (all documented)
 **Time Lost:** ~1.5 hours (Glue Crawler failure)
 **Time Saved for Future:** ~2 hours per sport (LESSONS_LEARNED.md + REPRODUCTION_GUIDE.md)
+
+---
+
+## Session 9: Phase 3.1 RDS PostgreSQL Setup - COMPLETE
+**Date:** 2025-10-01
+**Time:** ~20 minutes
+**Category:** AWS, DATABASE, INFRASTRUCTURE
+**Context:** Completing Phase 3.1 RDS setup - testing connection and creating database schema
+
+### [DATABASE] Test PostgreSQL Connection
+**Time:** 2025-10-01 20:50:00
+**Command:** `PGPASSWORD='[REDACTED]' psql -h nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com -U postgres -d nba_simulator -c "SELECT version();"`
+**Output:**
+```
+                                                 version
+----------------------------------------------------------------------------------------------------------
+ PostgreSQL 15.14 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 7.3.1 20180712 (Red Hat 7.3.1-17), 64-bit
+(1 row)
+```
+**Result:** ✅ SUCCESS
+**Notes:** RDS instance available and accepting connections
+
+### [DATABASE] Create Database Tables
+**Time:** 2025-10-01 20:51:00
+**Command:** `PGPASSWORD='[REDACTED]' psql -h nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com -U postgres -d nba_simulator -f sql/create_tables.sql`
+**Output:**
+```
+CREATE TABLE
+COMMENT
+CREATE TABLE
+COMMENT
+CREATE TABLE
+COMMENT
+CREATE TABLE
+COMMENT
+CREATE TABLE
+COMMENT
+CREATE TABLE
+COMMENT
+```
+**Result:** ✅ SUCCESS
+**Notes:** All 6 tables created successfully (teams, players, games, player_game_stats, plays, team_game_stats)
+
+### [DATABASE] Create Performance Indexes
+**Time:** 2025-10-01 20:52:00
+**Command:** `PGPASSWORD='[REDACTED]' psql -h nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com -U postgres -d nba_simulator -f sql/create_indexes.sql`
+**Output:**
+```
+CREATE INDEX
+CREATE INDEX
+... (25 times)
+```
+**Result:** ✅ SUCCESS
+**Notes:** 25 indexes created (23 performance indexes + 2 primary key indexes)
+
+### [DATABASE] Verify Schema
+**Time:** 2025-10-01 20:53:00
+**Command:** `PGPASSWORD='[REDACTED]' psql -h nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com -U postgres -d nba_simulator -c "\dt"`
+**Output:**
+```
+               List of relations
+ Schema |       Name        | Type  |  Owner
+--------+-------------------+-------+----------
+ public | games             | table | postgres
+ public | player_game_stats | table | postgres
+ public | players           | table | postgres
+ public | plays             | table | postgres
+ public | team_game_stats   | table | postgres
+ public | teams             | table | postgres
+(6 rows)
+```
+**Result:** ✅ SUCCESS
+
+### [DATABASE] Verify Indexes
+**Time:** 2025-10-01 20:54:00
+**Command:** `PGPASSWORD='[REDACTED]' psql -h nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com -U postgres -d nba_simulator -c "\di"`
+**Output:**
+```
+(33 rows showing all indexes including PKs, unique constraints, and performance indexes)
+```
+**Result:** ✅ SUCCESS
+**Notes:** Total 33 indexes confirmed (includes 10 auto-created for PKs/constraints + 23 performance indexes)
+
+### Session Summary
+
+**Phase 3.1 Status:** ✅ COMPLETE
+
+**What Was Accomplished:**
+1. RDS PostgreSQL instance confirmed available
+2. Database schema created (6 tables)
+3. Performance indexes created (33 total)
+4. Connection verified from local machine
+5. Schema validated via psql
+
+**Resources Created:**
+- **RDS Instance:** nba-sim-db (db.t3.small, PostgreSQL 15.14)
+- **Endpoint:** nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com
+- **Database:** nba_simulator
+- **Tables:** 6 (teams, players, games, player_game_stats, plays, team_game_stats)
+- **Indexes:** 33 (performance + constraints)
+
+**Cost Impact:**
+- Previous: $2.74/month (S3 only)
+- New: $31.74/month (S3 + RDS db.t3.small)
+- Monthly increase: +$29/month
+
+**Time Spent:**
+- Connection testing: 2 minutes
+- Schema creation: 3 minutes
+- Index creation: 2 minutes
+- Verification: 3 minutes
+- Total: ~10 minutes
+
+**Next Steps:**
+- Phase 2.2: Write Glue ETL script to populate database
+- Extract 10% of JSON fields from S3
+- Filter empty files (17% of dataset)
+- Transform and load into RDS PostgreSQL
+
+**Related Documentation:**
+- PROGRESS.md: Phase 3.1 marked ✅ COMPLETE
+- sql/create_tables.sql: Database schema definition
+- sql/create_indexes.sql: Performance index definitions
+- docs/DATA_STRUCTURE_GUIDE.md: JSON field extraction mapping
 
 ---
 

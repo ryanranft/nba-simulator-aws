@@ -345,7 +345,7 @@ Our original password `NbaS1m2025!SecureP@ss` contained `@` which is forbidden.
 
 #### Solution
 
-Changed password to: `NbaSimulator2025!`
+Changed password to: `[REDACTED]` (removed `@` character, used valid special characters)
 
 **Valid Special Characters:**
 ```
