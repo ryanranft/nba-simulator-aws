@@ -1,0 +1,26 @@
+# Test Archive System
+
+This is a test file to verify the conversation archiving system works correctly.
+
+Created: 2025-10-02
+Purpose: Test that conversations are being saved to appropriate directories with correct SHA mappings
+
+## What This Tests
+
+1. Conversation export to CHAT_LOG.md
+2. Archive script execution
+3. Creation of original/sanitized versions
+4. Proper directory structure
+5. SHA-based naming
+
+## Expected Result
+
+After committing this file and running the archive script:
+- chat-<NEW_SHA>-original.md should be created
+- chat-<NEW_SHA>-sanitized.md should be created
+- Files should be in ~/sports-simulator-archives/nba/conversations/
+- This NEW_SHA will be the actual commit SHA (post any git operations)
+
+## Cleanup
+
+This file can be deleted after testing is complete.
