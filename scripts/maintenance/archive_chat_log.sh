@@ -54,16 +54,39 @@ ORIGINAL_LOG="$ARCHIVE_DIR/CHAT_LOG_ORIGINAL.md"
 
 echo "  🔒 Creating sanitized version..."
 
-# Copy original first (will contain passwords)
-cp "$CHAT_LOG_SOURCE" "$ORIGINAL_LOG"
+# Check if archive files already exist (multiple sessions for same SHA)
+if [ -f "$ORIGINAL_LOG" ]; then
+    echo "  📌 Existing chat logs found - appending new conversation..."
+    echo "" >> "$ORIGINAL_LOG"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >> "$ORIGINAL_LOG"
+    echo "## Session: $(date '+%Y-%m-%d %H:%M:%S')" >> "$ORIGINAL_LOG"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >> "$ORIGINAL_LOG"
+    echo "" >> "$ORIGINAL_LOG"
+    cat "$CHAT_LOG_SOURCE" >> "$ORIGINAL_LOG"
+else
+    # First conversation for this SHA
+    echo "  📝 Creating new chat log for SHA: $SHORT_SHA"
+    echo "# Chat Log Archive for Commit: $SHORT_SHA" > "$ORIGINAL_LOG"
+    echo "" >> "$ORIGINAL_LOG"
+    echo "**Full SHA:** $CURRENT_SHA" >> "$ORIGINAL_LOG"
+    echo "**Created:** $(date '+%Y-%m-%d %H:%M:%S')" >> "$ORIGINAL_LOG"
+    echo "" >> "$ORIGINAL_LOG"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >> "$ORIGINAL_LOG"
+    echo "## Session: $(date '+%Y-%m-%d %H:%M:%S')" >> "$ORIGINAL_LOG"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >> "$ORIGINAL_LOG"
+    echo "" >> "$ORIGINAL_LOG"
+    cat "$CHAT_LOG_SOURCE" >> "$ORIGINAL_LOG"
+fi
 
 # Create sanitized version with credentials redacted
-# Using Python for sanitization to avoid triggering git security hooks
+# Re-sanitize the ENTIRE original log file (including all appended sessions)
+echo "  🔒 Sanitizing complete archive..."
 python3 << 'PYTHON_EOF' > "$SANITIZED_LOG"
 import re
 import sys
 
-with open("$CHAT_LOG_SOURCE", 'r') as f:
+# Read the complete ORIGINAL log (which may have multiple sessions appended)
+with open("$ORIGINAL_LOG", 'r') as f:
     content = f.read()
 
 # Redact patterns (credentials only, no IP patterns per security policy)

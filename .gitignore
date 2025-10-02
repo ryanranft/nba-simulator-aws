@@ -79,3 +79,5 @@ CHAT_LOG.md
 
 # Sanitized archives (optional - only commit to private repos)
 # archived-docs/
+# Sensitive archiving scripts (local only)
+scripts/maintenance/archive_chat_by_next_sha.sh

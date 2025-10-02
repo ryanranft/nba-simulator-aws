@@ -17,17 +17,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3. Don't attempt multiple fixes automatically
 4. Log solution with `log_solution` after resolving
 
+**CRITICAL - Conversation Archiving:**
+
+User will provide specific archiving instructions when needed. All conversation archive methodology and procedures are documented in local-only files (never committed to GitHub) for security.
+
+**CONVERSATION ARCHIVE SYSTEM:**
+
+When user asks about previous development work or conversations:
+
+**Instructions are stored locally only (NEVER on GitHub):**
+- Read: `~/sports-simulator-archives/nba/conversations/mappings/CLAUDE_INSTRUCTIONS.md`
+- This file contains complete instructions for accessing and decoding conversation archives
+- All methodology details are kept local for security
+
+**Quick reference:**
+- User will provide you with specific instructions when needed
+- Never assume methodology - always ask user for guidance
+
 **CRITICAL - Before EVERY git commit:**
-1. **ALWAYS archive conversation log first:**
-   - Run `bash scripts/maintenance/archive_chat_log.sh` to save conversation
-   - This creates CHAT_LOG_ORIGINAL.md and CHAT_LOG_SANITIZED.md in archive
-   - Archives to: `~/sports-simulator-archives/nba/$(git rev-parse HEAD)/`
-   - **Note:** Requires CHAT_LOG.md in project root (conversation export)
-   - If CHAT_LOG.md doesn't exist, remind user to export conversation first
-2. **ALWAYS run security scan** and show results to user
-3. **ALWAYS display flagged lines** for user review
-4. **NEVER commit without showing scan results first**
-5. Wait for user confirmation before proceeding with commit
+1. **ALWAYS run security scan** and show results to user
+2. **ALWAYS display flagged lines** for user review
+3. **NEVER commit without showing scan results first**
+4. Wait for user confirmation before proceeding with commit
 
 **CRITICAL - Before EVERY git push:**
 1. **ALWAYS ask user "Ready to push to GitHub?" before attempting push**
