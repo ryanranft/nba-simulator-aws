@@ -123,3 +123,54 @@ echo "╔═══════════════════════�
 echo "║ ✓ Diagnostics complete - ready to work                        ║"
 echo "╚═══════════════════════════════════════════════════════════════╝"
 echo ""
+
+# CONVERSATION LOGGING (if not already logging)
+if [ -z "$SCRIPT_LOGGING" ]; then
+    # Check if user wants to start conversation logging
+    PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+    PROJECT_NAME=$(basename "$PROJECT_DIR")
+    SPORT=$(echo "$PROJECT_NAME" | sed -E 's/^([a-z]+)-simulator.*/\1/')
+
+    ARCHIVE_BASE="${ARCHIVE_BASE:-$HOME/sports-simulator-archives/$SPORT}"
+    SESSION_DIR="$ARCHIVE_BASE/sessions"
+    SESSION_FILE="$SESSION_DIR/session-$(date +%Y%m%d-%H%M%S).log"
+
+    # Create session directory if needed
+    mkdir -p "$SESSION_DIR"
+
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "📝 CONVERSATION LOGGING"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "💡 Recommendation: Log this session to preserve conversation context"
+    echo ""
+    echo "   This prevents information loss if session is interrupted."
+    echo "   Log will be saved to: $SESSION_FILE"
+    echo ""
+    echo "⚠️  Log may contain credentials and sensitive data"
+    echo "   (saved outside git repo, never committed)"
+    echo ""
+    read -p "Start conversation logging? [Y/n]: " start_logging
+
+    if [[ ! $start_logging =~ ^[Nn]$ ]]; then
+        echo ""
+        echo "✅ Starting conversation logger..."
+        echo "📍 Log location: $SESSION_FILE"
+        echo ""
+        echo "💡 To stop logging and end session: type 'exit' or press Ctrl+D"
+        echo ""
+
+        # Export flag so we don't prompt again
+        export SCRIPT_LOGGING=1
+
+        # Start script recording
+        exec script -a "$SESSION_FILE"
+    else
+        echo ""
+        echo "⏭️  Skipping conversation logging"
+        echo ""
+        echo "💡 To start logging manually later:"
+        echo "   script -a ~/sports-simulator-archives/$SPORT/sessions/session-\$(date +%Y%m%d-%H%M%S).log"
+        echo ""
+    fi
+fi
