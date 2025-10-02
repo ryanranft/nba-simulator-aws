@@ -29,6 +29,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 4. **NEVER commit without showing scan results first**
 5. Wait for user confirmation before proceeding with commit
 
+**CRITICAL - Before EVERY git push:**
+1. **ALWAYS ask user "Ready to push to GitHub?" before attempting push**
+2. **NEVER run `git push` without explicit user approval first**
+3. **If pre-push hook blocks with security violations:**
+   - STOP immediately
+   - Show user the flagged lines from hook output
+   - Explain what was flagged (false positives vs real secrets)
+   - Ask: "These appear to be [false positives/real secrets]. Bypass hook and push anyway? [y/N]"
+   - Only push with --no-verify if user explicitly approves
+4. **NEVER assume prior approval applies to new pushes** - always ask each time
+
 ## Instructions for Claude
 
 **Documentation Trigger System:**
