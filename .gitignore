@@ -66,3 +66,12 @@ Thumbs.db
 *.log
 logs/
 .session-history.md
+*.pid
+
+# Temporary documentation with credentials
+COMMIT_VERIFICATION.md
+EXTRACTION_PROGRESS_SNAPSHOT.md
+EXTRACTION_STATUS.md
+OVERNIGHT_AUTOMATION_STATUS_old.md
+OVERNIGHT_EXTRACTION_STATUS.md
+PYCHARM_DATABASE_SETUP.md
