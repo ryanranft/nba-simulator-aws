@@ -18,13 +18,16 @@ cd /Users/ryanranft/nba-simulator-aws
 # 2. Activate environment
 conda activate nba-aws
 
-# 3. Run health check (recommended at start of each session)
-./scripts/shell/check_machine_health.sh
+# 3. Run session startup (recommended at start of each session)
+bash scripts/shell/session_startup.sh
 
 # 4. Check Git status
 git status
 
 # 5. Start working!
+
+# 6. At session end
+bash scripts/shell/session_end.sh
 ```
 
 ---
@@ -92,6 +95,31 @@ log_note This command lists all S3 folders
 log_solution Fixed by updating AWS credentials
 ```
 
+### Conversation Tracking
+```bash
+# RECOMMENDED WORKFLOW (captures conversation → commit linkage):
+
+# 1. Export Claude Code conversation
+#    - In Claude Code, export this conversation
+#    - Save as: CHAT_LOG.md in project root
+
+# 2. Commit your changes
+git add .
+git commit -m "Your commit message"
+
+# 3. Archive conversation with commit SHA
+bash scripts/maintenance/archive_chat_by_next_sha.sh
+#    - Saves as: chat-<SHA>-original.md (with credentials)
+#    - Saves as: chat-<SHA>-sanitized.md (safe to share)
+#    - Archive location: ~/sports-simulator-archives/nba/conversations/
+
+# 4. Clean up (optional)
+rm CHAT_LOG.md  # Remove temporary file
+
+# Session end checklist (shows reminders)
+bash scripts/shell/session_end.sh
+```
+
 ---
 
 ## Key File Locations
@@ -110,12 +138,15 @@ log_solution Fixed by updating AWS credentials
 │   └── adr/                     # Architecture decisions
 ├── scripts/
 │   ├── shell/
+│   │   ├── session_startup.sh    # Session initialization checklist
+│   │   ├── session_end.sh        # Session end reminder
+│   │   ├── check_chat_log.sh     # Verify CHAT_LOG.md before commits
 │   │   ├── check_machine_health.sh  # Comprehensive health check
-│   │   ├── log_command.sh       # Command logging
+│   │   ├── log_command.sh        # Command logging
 │   │   └── sanitize_command_log.sh  # Security sanitization
 │   ├── aws/
-│   │   └── check_costs.sh       # AWS cost tracking
-│   └── etl/                     # ETL scripts (⏸️ to be created)
+│   │   └── check_costs.sh        # AWS cost tracking
+│   └── etl/                      # ETL scripts (⏸️ to be created)
 ├── sql/                         # Database schemas (⏸️ to be created)
 └── tests/                       # Test files (⏸️ to be created)
 ```
@@ -231,4 +262,4 @@ git push origin main
 
 ---
 
-**Last Updated:** 2025-09-30
+**Last Updated:** 2025-10-02

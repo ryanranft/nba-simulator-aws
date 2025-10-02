@@ -124,6 +124,34 @@ echo "║ ✓ Diagnostics complete - ready to work                        ║"
 echo "╚═══════════════════════════════════════════════════════════════╝"
 echo ""
 
+# CHAT LOG REMINDER
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "💬 CLAUDE CODE CONVERSATION TRACKING"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+if [ -f "CHAT_LOG.md" ]; then
+    file_age_seconds=$(( $(date +%s) - $(stat -f %m CHAT_LOG.md) ))
+    file_age_hours=$(( file_age_seconds / 3600 ))
+
+    if [ $file_age_hours -lt 24 ]; then
+        echo "✓ CHAT_LOG.md found (updated $file_age_hours hours ago)"
+    else
+        file_age_days=$(( file_age_hours / 24 ))
+        echo "⚠️  CHAT_LOG.md is $file_age_days days old"
+        echo "   Consider exporting your latest Claude Code conversations"
+    fi
+else
+    echo "💡 Reminder: Export Claude Code conversations to CHAT_LOG.md"
+    echo ""
+    echo "   This preserves conversation context and enables pre-commit archiving."
+    echo "   Export from Claude Code and save as: CHAT_LOG.md"
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
 # CONVERSATION LOGGING (if not already logging)
 if [ -z "$SCRIPT_LOGGING" ]; then
     # Check if user wants to start conversation logging
