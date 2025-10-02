@@ -136,3 +136,13 @@ echo ""
 echo "  🧹 Clearing CHAT_LOG.md for next conversation..."
 > "$CHAT_LOG_SOURCE"
 echo "  ✓ CHAT_LOG.md cleared (ready for next export)"
+
+# Commit to local git repo (NEVER push to GitHub - stays local only)
+# This runs after archive_gitignored_files.sh, so we just amend/update the same commit
+if [ -d "$ARCHIVE_BASE/.git" ]; then
+    cd "$ARCHIVE_BASE"
+    git add . > /dev/null 2>&1
+    if git commit -m "Add chat logs to archive $SHORT_SHA" --quiet 2>/dev/null; then
+        echo "  ✓ Chat logs committed to local archive git repo"
+    fi
+fi

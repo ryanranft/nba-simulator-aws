@@ -135,6 +135,17 @@ echo ""
 echo "✅ Archive complete!"
 echo "📂 Location: $ARCHIVE_DIR"
 echo "📊 Files archived: $COUNT"
+
+# Commit to local git repo (NEVER push to GitHub - stays local only)
+if [ -d "$ARCHIVE_BASE/.git" ]; then
+    cd "$ARCHIVE_BASE"
+    git add . > /dev/null 2>&1
+    if git commit -m "Archive commit $SHORT_SHA from main repo: $COMMIT_MSG" --quiet 2>/dev/null; then
+        echo "  ✓ Committed to local archive git repo"
+    fi
+    cd "$PROJECT_DIR"
+fi
+
 echo ""
 echo "To view later: ls $ARCHIVE_DIR"
 echo "To see all archives: cat $INDEX_FILE"

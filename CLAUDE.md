@@ -11,6 +11,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 4. **Will it cost money?** → Warn user with estimate, get confirmation
 5. **Could it break something?** → Explain risk, suggest backup/test approach
 
+**During the session:**
+1. **Is context at 75%+?** → Auto-save conversation to CHAT_LOG.md immediately
+2. **Is context at 90%+?** → Strongly urge user to commit NOW
+3. **User says "save this conversation"?** → Write verbatim transcript to CHAT_LOG.md
+
 **When a command fails:**
 1. Check `TROUBLESHOOTING.md` for known solution
 2. If unknown, STOP and ask user for guidance
@@ -23,7 +28,23 @@ User will provide specific instructions when needed. All workflow documentation 
 
 **WORKFLOW AUTOMATION SYSTEM:**
 
-This project uses an automated workflow documentation system for tracking development sessions and generating summaries.
+This project uses TWO automated documentation systems:
+
+1. **Conversation Archiving** (see lines 66-155)
+   - Saves Claude conversations automatically at 75%/90% context
+   - Archives to SHA-based directories: `~/sports-simulator-archives/nba/<commit-sha>/`
+   - Zero conversation loss design (verbatim transcripts)
+   - Links conversations to code changes via commit SHA
+
+2. **Workflow Documentation** (local only, NEVER on GitHub)
+   - Read: `~/sports-simulator-archives/nba/conversations/mappings/CLAUDE_INSTRUCTIONS.md`
+   - Session summaries and aggregation logs
+   - Uses recipe-manager-dev-logs as example patterns
+   - Local index files translate references to actual workflow execution logs
+
+**These systems work together:**
+- **Conversation archiving** captures raw discussions (complete verbatim exchanges)
+- **Workflow documentation** provides curated summaries (high-level session reports)
 
 **Instructions are stored locally only (NEVER on GitHub):**
 - Read: `~/sports-simulator-archives/nba/conversations/mappings/CLAUDE_INSTRUCTIONS.md`
@@ -127,6 +148,28 @@ grep -r "AWS error" ~/sports-simulator-archives/nba/*/CHAT_LOG_*.md
 - When user says "save this conversation" (manual trigger)
 - Before context window truncation to prevent data loss
 
+**Conversation Recovery (If Something Goes Wrong):**
+
+**If conversation wasn't saved before commit:**
+1. Check if CHAT_LOG.md exists: `ls -lh CHAT_LOG.md`
+2. If empty, reconstruct from memory and save manually
+3. Run: `bash scripts/maintenance/archive_chat_log.sh`
+
+**If context truncated before save:**
+1. What was lost: Oldest exchanges (beginning of conversation)
+2. What's preserved: Recent exchanges (last ~50K tokens)
+3. Write what you remember of early conversation to CHAT_LOG.md
+4. Note at top: "⚠️ Partial conversation - context truncated"
+
+**To find conversations across commits:**
+```bash
+# Search all archives for a keyword
+grep -r "keyword" ~/sports-simulator-archives/nba/*/CHAT_LOG_SANITIZED.md
+
+# List all archived conversations chronologically
+ls -lt ~/sports-simulator-archives/nba/*/CHAT_LOG_SANITIZED.md
+```
+
 ## Instructions for Claude
 
 **Documentation Trigger System:**
@@ -138,6 +181,7 @@ This project uses an automated documentation update trigger system. Each key doc
 2. `session_startup.sh` output - Shows documentation status checks automatically
 
 **Key documentation files with triggers:**
+- `CHAT_LOG.md` - **Auto-updated at 75% and 90% context** (Claude handles automatically)
 - `COMMAND_LOG.md` - Update after EVERY code change
 - `FILE_INVENTORY.md` - Run `make inventory` before every `git add .`
 - `PROGRESS.md` - Update after completing ANY task
@@ -183,6 +227,10 @@ This project uses an automated documentation update trigger system. Each key doc
        bash scripts/shell/session_startup.sh >> .session-history.md
        ```
        This creates a version snapshot for each commit, allowing user to correlate git history with exact software versions used
+   - **Check conversation status:**
+     - If CHAT_LOG.md exists and is stale (>30 min): Remind user it will be overwritten at 75% context
+     - If context approaching 75%: Proactively mention auto-save is coming soon
+     - CHAT_LOG.md is auto-managed - no user action needed
    - Identify current phase from PROGRESS.md
    - Review documentation status warnings from `session_startup.sh` output
    - Ask: "Any work completed since last session that should be marked ✅ COMPLETE in PROGRESS.md?"
@@ -510,12 +558,13 @@ aws s3 ls s3://nba-sim-raw-data-lake/
 - **Original Data:** `/Users/ryanranft/0espn/data/nba/` (119 GB source)
 - **S3 Bucket:** `s3://nba-sim-raw-data-lake` (146,115 files)
 - **Conda Env:** `/Users/ryanranft/miniconda3/envs/nba-aws`
+- **Conversation Archives:** `~/sports-simulator-archives/nba/<commit-sha>/CHAT_LOG_*.md`
 - **Quick Reference:** `QUICKSTART.md` (one-page command reference)
 - **Machine Specs:** `MACHINE_SPECS.md` (hardware, software versions, compatibility notes)
 - **File Inventory:** `FILE_INVENTORY.md` (auto-generated summaries of 28 documented files)
 - **Config Files:** `config/aws_config.yaml` (AWS resource definitions - minimal, to be populated in Phase 2+)
-- **Maintenance Scripts:** `scripts/maintenance/` (generate_inventory.py, sync_progress.py, update_docs.sh)
-- **Shell Utilities:** `scripts/shell/` (check_machine_health.sh, log_command.sh, sanitize_command_log.sh)
+- **Maintenance Scripts:** `scripts/maintenance/` (generate_inventory.py, sync_progress.py, update_docs.sh, archive_chat_log.sh)
+- **Shell Utilities:** `scripts/shell/` (check_machine_health.sh, log_command.sh, sanitize_command_log.sh, save_conversation.sh)
 - **AWS Scripts:** `scripts/aws/` (check_costs.sh)
 - **Cost Tracking:** `scripts/aws/check_costs.sh` (AWS spending monitor)
 
