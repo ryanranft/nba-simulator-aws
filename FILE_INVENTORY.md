@@ -1,6 +1,6 @@
 # FILE_INVENTORY.md
 
-**Auto-generated:** 2025-10-01 22:12:56
+**Auto-generated:** 2025-10-01 23:10:49
 
 **Purpose:** Comprehensive inventory of all project files with automatic summaries.
 
@@ -16,7 +16,7 @@
 
 ### .session-history.md
 
-**Type:** Markdown documentation (744 lines)
+**Type:** Markdown documentation (802 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** <!-- AUTO-UPDATE TRIGGER: Run `bash scripts/shell/session_startup.sh >> .session-history.md` AFTER every commit -->
 
@@ -40,15 +40,27 @@
 
 ### FILE_INVENTORY.md
 
-**Type:** Markdown documentation (396 lines)
+**Type:** Markdown documentation (435 lines)
 **Last Modified:** 2025-10-01
-**Purpose:** **Auto-generated:** 2025-10-01 21:00:22
+**Purpose:** **Auto-generated:** 2025-10-01 22:12:56
 
 ### MACHINE_SPECS.md
 
 **Type:** Markdown documentation (4474 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** <!-- AUTO-UPDATE TRIGGER: Run session_startup.sh at start of EVERY session -->
+
+### OVERNIGHT_AUTOMATION_STATUS.md
+
+**Type:** Markdown documentation (283 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** **Started:** 2025-10-01 22:19:42 (partitioning), 22:25:27 (crawlers)
+
+### OVERNIGHT_STATUS.md
+
+**Type:** Markdown documentation (196 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** **Started:** 2025-10-01 22:19:42
 
 ### PROGRESS.md
 
@@ -99,6 +111,14 @@
 - `separator()`
 **Dependencies:** AWS CLI, PostgreSQL client, Conda, Git
 **Usage:** `./scripts/shell/check_machine_health.sh`
+
+### scripts/shell/check_partition_status.sh
+
+**Type:** Bash script (128 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** Check Overnight Partitioning Status
+**Dependencies:** AWS CLI
+**Usage:** `./scripts/shell/check_partition_status.sh`
 
 ### scripts/shell/log_command.sh
 
@@ -158,6 +178,13 @@
 
 ## Scripts - ETL
 
+### scripts/etl/create_glue_etl_job.py
+
+**Type:** Python script (126 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** Create AWS Glue ETL Job for NBA Schedule Data
+**Dependencies:** boto3
+
 ### scripts/etl/create_year_crawlers.sh
 
 **Type:** Bash script (209 lines)
@@ -182,6 +209,25 @@
 - `extract_year_from_filename()`
 **Usage:** `python scripts/etl/game_id_decoder.py`
 
+### scripts/etl/glue_etl_extract_schedule.py
+
+**Type:** Python script (203 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** AWS Glue ETL Job: Extract NBA Schedule Data
+**Key Functions:**
+- `extract_games()`
+**Dependencies:** pyspark.context, pyspark.sql.functions, awsglue.transforms, pyspark.sql.types, awsglue.context
+
+### scripts/etl/partition_all_overnight.sh
+
+**Type:** Bash script (93 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** Automated Overnight S3 Partitioning
+**Key Functions:**
+- `partition_data_type()`
+**Dependencies:** AWS CLI
+**Usage:** `nohup ./scripts/etl/partition_all_overnight.sh > partition_overnight.log 2>&1 &`
+
 ### scripts/etl/partition_by_year.py
 
 **Type:** Python script (286 lines)
@@ -190,8 +236,44 @@
 **Key Functions:**
 - `main()`
 - `S3YearPartitioner (class)`
-**Dependencies:** game_id_decoder, argparse, boto3, collections
+**Dependencies:** argparse, collections, game_id_decoder, boto3
 **Usage:** `python scripts/etl/partition_by_year.py`
+
+### scripts/etl/process_year_by_year.sh
+
+**Type:** Bash script (204 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** Year-by-Year S3 Partitioning and Crawler Execution
+**Key Functions:**
+- `partition_year()`
+- `crawl_year()`
+- `process_year()`
+**Dependencies:** AWS CLI
+**Usage:** `nohup ./scripts/etl/process_year_by_year.sh > year_by_year.log 2>&1 &`
+
+### scripts/etl/run_crawlers_overnight.sh
+
+**Type:** Bash script (233 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** Automated Overnight Glue Crawler Execution
+**Key Functions:**
+- `check_partition_ready()`
+- `create_crawler_if_missing()`
+- `start_crawler()`
+- `wait_for_crawlers()`
+- `process_data_type()`
+**Dependencies:** AWS CLI
+**Usage:** `nohup ./scripts/etl/run_crawlers_overnight.sh > crawler_overnight.log 2>&1 &`
+
+### scripts/etl/run_etl_all_years.sh
+
+**Type:** Bash script (171 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** Run Glue ETL Job for All Years (1993-2025)
+**Key Functions:**
+- `run_etl_year()`
+**Dependencies:** AWS CLI, PostgreSQL client
+**Usage:** `nohup ./scripts/etl/run_etl_all_years.sh > etl_all_years.log 2>&1 &`
 
 ---
 
@@ -359,6 +441,12 @@
 
 ## SQL Scripts
 
+### sql/create_games_table.sql
+
+**Type:** SQL script (72 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** NBA Simulator Database Schema
+
 ### sql/create_indexes.sql
 
 **Type:** SQL script (51 lines)
@@ -412,21 +500,21 @@
 - `check_team_stats_data()`
 - `check_schedule_data()`
 - `analyze_directory()`
-**Dependencies:** random, json
+**Dependencies:** json, random
 **Usage:** `python scripts/analysis/comprehensive_data_analysis.py`
 
 ---
 
 ## Summary Statistics
 
-**Total files documented:** 50
-**Total lines of code/docs:** 22,157
+**Total files documented:** 60
+**Total lines of code/docs:** 23,963
 
 **Files by type:**
-- Markdown documentation: 30
-- Bash script: 10
-- Python script: 6
-- SQL script: 2
+- Markdown documentation: 32
+- Bash script: 15
+- Python script: 8
+- SQL script: 3
 - File: 1
 - EXAMPLE file: 1
 
