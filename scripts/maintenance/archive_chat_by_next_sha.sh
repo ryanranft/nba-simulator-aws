@@ -108,7 +108,7 @@ cat "$CHAT_LOG_SOURCE" >> "$ORIGINAL_LOG"
 # Create sanitized version with credentials redacted
 echo "  🔒 Creating sanitized version..."
 
-python3 <<'PYTHON_EOF' "$ORIGINAL_LOG" "$SANITIZED_LOG"
+python3 - "$ORIGINAL_LOG" "$SANITIZED_LOG" <<'PYTHON_EOF'
 import re
 import sys
 
