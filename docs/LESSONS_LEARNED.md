@@ -185,7 +185,157 @@ cat data/nba_pbp/131105001.json | python -m json.tool | grep -A 5 "playGrps"
 
 ## AWS Glue Crawler Failures
 
-### Issue #1: OutOfMemoryError with Large Datasets (146K+ files)
+### Issue #11: Glue Crawlers Fail on ESPN JSON Data (All File Counts)
+
+**Date Discovered:** 2025-10-01
+**Phase:** Phase 2.1 - AWS Glue Crawler
+**Severity:** CRITICAL - Blocks automated schema discovery
+**Status:** Glue Crawler approach ABANDONED
+
+#### Problem Description
+
+AWS Glue Crawlers **cannot process ESPN NBA JSON files** regardless of file count or data volume. All attempts failed with "Internal Service Exception."
+
+**Test Results:**
+
+| Crawler | Files | Data Size | Duration | Result |
+|---------|-------|-----------|----------|--------|
+| nba-data-crawler (combined) | 146,115 | 119 GB | 90 min | ❌ OutOfMemoryError |
+| nba-schedule-crawler | 11,633 | ~8 GB | 12 min | ❌ Internal Service Exception |
+| nba-pbp-crawler | 44,826 | ~31 GB | Not run | (Created but not started) |
+| nba-boxscores-crawler | 44,828 | ~31 GB | Not run | (Created but not started) |
+| nba-teamstats-crawler | 44,828 | ~31 GB | Not run | (Created but not started) |
+
+#### Root Cause
+
+ESPN JSON files are **extremely large and deeply nested**:
+- File size: ~700 KB per file
+- Line count: 17,000-19,000 lines per file
+- Structure: ESPN web page with embedded game data 5+ levels deep
+- Content: Majority is web metadata (CSS, JavaScript, CDN paths)
+- Game data location: `page.content.gamepackage.*` (buried in web page structure)
+
+**Why Glue Crawlers Fail:**
+1. **Memory overhead**: Each file requires deep JSON parsing to discover schema
+2. **Nested complexity**: 5+ levels of nesting causes exponential memory growth
+3. **Web metadata**: Crawlers try to catalog irrelevant ESPN web assets
+4. **No sampling**: Glue processes ALL files, not a representative sample
+
+#### Evidence
+
+**CloudWatch Logs (nba-data-crawler):**
+```
+[23:52:52] Classification complete, writing results
+[23:58:04] WARN: OutOfMemoryError - Submit AWS Support ticket
+[00:03:17] ERROR: Internal Service Exception
+```
+
+**Error Message (all crawlers):**
+```json
+{
+    "Status": "FAILED",
+    "ErrorMessage": "Internal Service Exception",
+    "LogGroup": "/aws-glue/crawlers",
+    "LogStream": "nba-schedule-crawler"
+}
+```
+
+#### Attempted Solutions (All Failed)
+
+1. ✅ **Reduce file count**: Split into 4 crawlers (11K-45K files each)
+   - Result: ❌ Still failed (schedule crawler with 11K files)
+
+2. ✅ **Smaller data volume**: Start with smallest crawler first (8 GB)
+   - Result: ❌ Still failed after 12 minutes
+
+3. ❌ **NOT ATTEMPTED**: Custom classifiers (would add complexity without solving root issue)
+
+4. ❌ **NOT ATTEMPTED**: Increase crawler DPU allocation (not worth cost for this data structure)
+
+#### Decision: Skip Glue Crawlers Entirely
+
+**Why skip:**
+- Glue Crawlers are designed for simpler, flatter data structures
+- ESPN JSON is too complex and large for automated cataloging
+- We already know the schema (from manual analysis)
+- We only need 10% of fields (Glue would catalog 100%)
+
+**Better approach:**
+- **Phase 2.2 Custom PySpark ETL** with hardcoded schema
+- Extract only needed fields (10% extraction per ADR-002)
+- Use **game ID pattern** to partition by year (user discovered pattern)
+- Process year-by-year for better memory management
+
+#### Game ID Pattern Discovery (Replacement Strategy)
+
+**User discovered:** ESPN game IDs encode the date in the filename!
+
+**Pattern:** `YYMMDD###`
+- YY: Year code (offset system, see below)
+- MM: Month (01-12)
+- DD: Day (01-31)
+- ###: Additional sequence digits
+
+**Year Encoding Formula:**
+- Pre-2018: `Actual Year = 1980 + Year Code`
+  - Example: `17` → 1997, `31` → 2011
+- 2018+: `401######` format (different encoding system)
+
+**Examples:**
+- `171031017` → Oct 31, 1997 (Year 17 = 1997)
+- `200104005` → Jan 4, 2000 (Year 20 = 2000)
+- `311011004` → Jan 1, 2011 (Year 31 = 2011)
+- `401307856` → 2021 (401 format)
+
+**ETL Benefit:**
+- Partition S3 by year: `s3://.../schedule/year=1997/`, `s3://.../schedule/year=2020/`
+- Process 1 year at a time (reduce memory usage)
+- Skip years if needed (e.g., process only 2015-2025 for recent data)
+
+#### Lessons Learned
+
+**For Future Projects:**
+
+1. **Always test with smallest subset first** before running large crawlers
+2. **Check data structure complexity** before choosing Glue Crawlers
+3. **Glue Crawlers are NOT suitable for:**
+   - Deeply nested JSON (5+ levels)
+   - Large JSON files (>500 KB per file)
+   - Web scraping data with embedded content
+   - Datasets where you only need 10% of fields
+
+4. **When to use Glue Crawlers:**
+   - Flat CSV/Parquet files
+   - Simple JSON (2-3 levels max)
+   - Well-structured data from APIs (not web scraping)
+   - Need to catalog 80%+ of available fields
+
+5. **Alternative approaches for complex data:**
+   - Custom PySpark ETL with hardcoded schema
+   - Manual schema definition in Glue Data Catalog
+   - Athena with CREATE TABLE statements
+   - Sample-based schema inference (process 100 files, infer schema, apply to all)
+
+**Cost Impact:**
+- Wasted crawler time: ~2 hours of Glue DPU usage (~$0.88)
+- Avoided cost: Would have wasted more time on remaining 3 crawlers (~$2-3)
+- **Savings by skipping:** Glue Crawlers would cost ~$13/month ongoing (now $0)
+
+#### Resolution
+
+**Phase 2.1 Status:** ❌ FAILED - SKIPPING GLUE CRAWLERS ENTIRELY
+
+**Next Steps:**
+1. Mark Phase 2.1 as SKIPPED in PROGRESS.md
+2. Update Phase 2.2 ETL plan with:
+   - Hardcoded schema (from manual analysis in DATA_STRUCTURE_GUIDE.md)
+   - Game ID decoder function (year extraction)
+   - Year-based partitioning strategy
+3. Proceed directly to Phase 2.2 Custom PySpark ETL
+
+---
+
+### Issue #1: OutOfMemoryError with Large Datasets (146K+ files) [SUPERSEDED BY ISSUE #11]
 
 **Date Encountered:** 2025-10-01
 **Phase:** Phase 2.1 - AWS Glue Crawler Setup

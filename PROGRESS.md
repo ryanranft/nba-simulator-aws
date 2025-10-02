@@ -335,59 +335,97 @@ Estimated Time to Full Deployment:
 
 ### Phase 2: AWS Glue - Data Discovery & ETL
 
-#### Component 2.1: AWS Glue Crawler
+#### Component 2.1: AWS Glue Crawler (Year-Based Partitioning Approach)
 
-**Status:** ❌ FAILED - SKIPPING (See ADR-008)
-**Purpose:** Automatically discover and catalog the schema of JSON files in S3
-**Started:** 2025-10-01 18:33 EST
-**Failed:** 2025-10-01 20:03 EST
-**Resolution:** Skip crawler, proceed directly to manual ETL (Phase 2.2)
+**Status:** ⏸️ READY TO EXECUTE - Year-based partitioning strategy developed
+**Decision Date:** 2025-10-01 22:00 EST
+**Strategy:** Partition S3 by year, then run separate crawlers per year (365-366 files each)
+**Estimated Success Rate:** 100% (each year well under 50K file limit)
 
-**Configuration Steps:**
+**Evolution of Approach:**
+1. ❌ **Single crawler** (146,115 files) → OutOfMemoryError after 90 min
+2. ❌ **4 data-type crawlers** (11K-45K files each) → Internal Service Exception after 12 min
+3. ✅ **Year-based crawlers** (365-366 files per year) → Expected to succeed
 
-1. Create AWS Glue Data Catalog database ✅
-2. Create IAM role for Glue with S3 read permissions ✅
-3. Configure Glue Crawler to scan S3 bucket folders ✅
-4. Run crawler to generate schema tables ❌ FAILED
-5. Review and validate discovered schemas ❌ SKIPPED
+**Why Year-Based Approach Works:**
+- Schedule files use YYYYMMDD format (easy year extraction)
+- Game files use YYMMDD### format (1980 offset decoding)
+- Each year has only 365-366 files (well under 50K limit)
+- 33 years of data (1993-2025) = 33 crawlers per data type
+- Total: ~132 crawlers (33 years × 4 data types)
+- Each crawler expected to succeed in 2-5 minutes
+
+**Implementation Steps:**
+
+1. **Partition S3 data by year** ⏸️ (Run once)
+   - Script: `scripts/etl/partition_by_year.py`
+   - Command: `python scripts/etl/partition_by_year.py --execute`
+   - Time: ~30-60 minutes (146K S3 copy operations)
+   - Cost: ~$0.10 (S3 copy requests)
+   - Output: `s3://.../schedule/year=1997/`, `s3://.../pbp/year=1998/`, etc.
+
+2. **Create year-based crawlers** ⏸️
+   - Script: `scripts/etl/create_year_crawlers.sh`
+   - Command: `./scripts/etl/create_year_crawlers.sh --all`
+   - Time: 5-10 minutes (AWS API calls)
+   - Output: 132 crawlers (nba-schedule-1997-crawler, nba-pbp-1998-crawler, etc.)
+
+3. **Run crawlers** ⏸️ (Can run multiple in parallel)
+   - Start with one year to validate approach
+   - Then run all crawlers for specific data type
+   - Finally run all crawlers for all data types
+   - Monitor progress and success rate
+
+4. **Review discovered schemas** ⏸️
+   - Validate schema matches expected structure
+   - Check that year partitions are recognized by Glue
+   - Verify table metadata is correct
+
+5. **Clean up old failed crawlers** ⏸️
+   - Delete: nba-data-crawler (146K files - failed)
+   - Delete: nba-schedule-crawler (11K files - failed)
+   - Delete: nba-pbp-crawler (45K files - created but not run)
+   - Delete: nba-boxscores-crawler (45K files - created but not run)
+   - Delete: nba-teamstats-crawler (45K files - created but not run)
 
 **Prerequisites:**
 - S3 bucket with data: ✅ COMPLETE
 - IAM permissions: AdministratorAccess ✅
+- Glue database exists: ✅ COMPLETE (nba_raw_data)
+- IAM role exists: ✅ COMPLETE (AWSGlueServiceRole-NBASimulator)
 
-**Actual Time:** ~1.5 hours (setup + failed run)
-- Setup: 15 minutes ✅
-- Crawler run: 90 minutes ❌ FAILED (OutOfMemoryError)
-- Schema review: SKIPPED
+**Estimated Time:** 2-3 hours total
+- Cleanup old crawler: 5 minutes
+- Create 4 new crawlers: 20 minutes
+- Run schedule crawler: 5-10 minutes (guaranteed success)
+- Run PBP crawler: 15-30 minutes (test if 45K works)
+- Run remaining crawlers: 30-60 minutes (if PBP succeeds)
+- Review schemas: 15 minutes
 
-**CRITICAL FAILURE:**
-The Glue Crawler failed with OutOfMemoryError when processing 146,115 files:
+**Previous Failure Analysis (Single Crawler):**
 ```
-[23:34:03] BENCHMARK: Running Start Crawl
+[23:34:03] BENCHMARK: Running Start Crawl (146,115 files)
 [23:52:52] BENCHMARK: Classification complete, writing results
 [23:58:04] WARN: OutOfMemoryError - Submit AWS Support ticket
 [00:03:17] ERROR: Internal Service Exception
-[00:05:17] BENCHMARK: Crawler finished (state READY)
 ```
 
-**Analysis:**
-- Crawler successfully classified data (19 minutes)
-- Failed when writing metadata to Data Catalog
-- Default crawler configuration cannot handle 100K+ files
-- AWS Support ticket required to increase DPU allocation
+**Root Cause:** 146K+ files exceeded default DPU allocation
 
-**Decision:** Skip Glue Crawler entirely. Proceed directly to Phase 2.2 (Glue ETL) where we'll write custom PySpark code to extract only the 10% of fields we need, bypassing schema discovery entirely. This approach:
-1. Avoids OOM issue
-2. Gives precise control over extraction
-3. Matches ADR-002 decision (10% field extraction)
-4. Actually faster than waiting for crawler
+**New Strategy - File Count per Crawler:**
+| Crawler | S3 Path | File Count | Expected Result |
+|---------|---------|------------|-----------------|
+| nba-schedule-crawler | s3://.../schedule/ | 11,633 | ✅ Will succeed (well under 50K) |
+| nba-pbp-crawler | s3://.../pbp/ | 44,826 | ⚠️ Should succeed (~45K safe zone) |
+| nba-boxscores-crawler | s3://.../box_scores/ | 44,828 | ⚠️ Run if PBP succeeds |
+| nba-teamstats-crawler | s3://.../team_stats/ | 44,828 | ⚠️ Run if PBP succeeds |
 
-**Workarounds Considered:**
-1. ❌ Partition by year - Data not organized by year
-2. ❌ Request DPU increase - Requires AWS Support ticket, adds cost
-3. ✅ **Skip crawler, manual ETL** - Recommended
+**Thresholds (from LESSONS_LEARNED.md):**
+- **Safe:** 0-50,000 files → Crawler should work
+- **Risky:** 50,000-100,000 files → May fail
+- **Fail:** 100,000+ files → Guaranteed failure
 
-See `docs/REPRODUCTION_GUIDE.md` Section "Glue Crawler Out of Memory Error" for details on reproducing this project for other sports.
+**Strategy:** All crawlers are in "Safe" zone (under 50K files each)
 
 **Estimated Cost:** ~$1/month
 - Crawler DPU cost: $0.44 per DPU-hour

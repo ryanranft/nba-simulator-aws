@@ -1,6 +1,6 @@
 # FILE_INVENTORY.md
 
-**Auto-generated:** 2025-10-01 21:00:22
+**Auto-generated:** 2025-10-01 22:12:56
 
 **Purpose:** Comprehensive inventory of all project files with automatic summaries.
 
@@ -16,7 +16,7 @@
 
 ### .session-history.md
 
-**Type:** Markdown documentation (627 lines)
+**Type:** Markdown documentation (744 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** <!-- AUTO-UPDATE TRIGGER: Run `bash scripts/shell/session_startup.sh >> .session-history.md` AFTER every commit -->
 
@@ -40,9 +40,9 @@
 
 ### FILE_INVENTORY.md
 
-**Type:** Markdown documentation (384 lines)
+**Type:** Markdown documentation (396 lines)
 **Last Modified:** 2025-10-01
-**Purpose:** **Auto-generated:** 2025-10-01 20:46:00
+**Purpose:** **Auto-generated:** 2025-10-01 21:00:22
 
 ### MACHINE_SPECS.md
 
@@ -52,7 +52,7 @@
 
 ### PROGRESS.md
 
-**Type:** Markdown documentation (1174 lines)
+**Type:** Markdown documentation (1212 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** <!-- AUTO-UPDATE TRIGGER: After completing ANY task, mark ✅ COMPLETE immediately -->
 
@@ -156,6 +156,45 @@
 
 ---
 
+## Scripts - ETL
+
+### scripts/etl/create_year_crawlers.sh
+
+**Type:** Bash script (209 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** Create Year-Based Glue Crawlers
+**Key Functions:**
+- `create_crawler()`
+- `create_crawlers_for_type()`
+**Dependencies:** AWS CLI
+**Usage:** `#   ./scripts/etl/create_year_crawlers.sh --data-type schedule --years 1997-2021`
+
+### scripts/etl/game_id_decoder.py
+
+**Type:** Python script (346 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** ESPN NBA Game ID Decoder
+**Key Functions:**
+- `decode_game_id()`
+- `_decode_standard_format()`
+- `_decode_schedule_format()`
+- `_decode_401_format()`
+- `extract_year_from_filename()`
+**Usage:** `python scripts/etl/game_id_decoder.py`
+
+### scripts/etl/partition_by_year.py
+
+**Type:** Python script (286 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** Partition S3 Data by Year for Glue Crawler Processing
+**Key Functions:**
+- `main()`
+- `S3YearPartitioner (class)`
+**Dependencies:** game_id_decoder, argparse, boto3, collections
+**Usage:** `python scripts/etl/partition_by_year.py`
+
+---
+
 ## Scripts - Maintenance
 
 ### scripts/maintenance/generate_inventory.py
@@ -212,7 +251,7 @@
 
 ### docs/LESSONS_LEARNED.md
 
-**Type:** Markdown documentation (853 lines)
+**Type:** Markdown documentation (1003 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** <!-- AUTO-UPDATE TRIGGER: After encountering and solving any significant error or design decision -->
 
@@ -224,7 +263,7 @@
 
 ### docs/RDS_CONNECTION.md
 
-**Type:** Markdown documentation (343 lines)
+**Type:** Markdown documentation (344 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** **Purpose:** Secure reference for RDS connection information
 
@@ -373,20 +412,20 @@
 - `check_team_stats_data()`
 - `check_schedule_data()`
 - `analyze_directory()`
-**Dependencies:** json, random
+**Dependencies:** random, json
 **Usage:** `python scripts/analysis/comprehensive_data_analysis.py`
 
 ---
 
 ## Summary Statistics
 
-**Total files documented:** 47
-**Total lines of code/docs:** 20,998
+**Total files documented:** 50
+**Total lines of code/docs:** 22,157
 
 **Files by type:**
 - Markdown documentation: 30
-- Bash script: 9
-- Python script: 4
+- Bash script: 10
+- Python script: 6
 - SQL script: 2
 - File: 1
 - EXAMPLE file: 1
