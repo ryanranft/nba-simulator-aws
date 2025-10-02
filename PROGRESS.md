@@ -1,8 +1,8 @@
 # NBA Game Simulator & ML Platform - Setup Progress Log
 
 <!-- AUTO-UPDATE TRIGGER: After completing ANY task, mark ✅ COMPLETE immediately -->
-<!-- LAST STATUS CHANGE: 2025-10-01 -->
-<!-- CURRENT PHASE: Phase 1 Complete, Phase 2 Pending -->
+<!-- LAST STATUS CHANGE: 2025-10-02 -->
+<!-- CURRENT PHASE: Phase 1 & 2 Complete, Phase 3 (RDS) Complete, Phase 4+ Pending -->
 <!-- REMINDER: Update costs after creating AWS resources, run `make sync-progress` after phase completion -->
 
 **Date Started:** September 29, 2025  
@@ -29,7 +29,8 @@
 
 ## EXECUTIVE SUMMARY
 
-**Project Status:** Phase 1 Complete - S3 Data Lake Operational
+**Project Status:** Phase 1 & 2 COMPLETE - S3 Data Lake + Local ETL Extraction Operational
+**Date Completed:** October 2, 2025
 
 ### INSTRUCTIONS FOR LLM CONTINUING THIS PROJECT:
 
@@ -102,12 +103,33 @@ pip list | grep pandas
 - Do not install awscli via pip (causes conflicts)
 - Data folder MUST remain in .gitignore (too large for GitHub)
 
+### Phase 2 Completion Summary (October 2, 2025):
+
+**Approach Taken:** Implemented local Python extraction scripts (bypassing AWS Glue ETL) to extract data directly from S3 to RDS PostgreSQL.
+
+**Results Achieved:**
+- ✅ **Schedule Data:** 46,595 games with 53 fields (1993-2025) - **488% increase** from original 9 fields
+- ✅ **Play-by-Play Data:** 6,781,155 plays (1997-2021)
+- ✅ **Box Scores Data:** 408,833 player stats + 15,900 team stats (1997-2021)
+- ✅ **Schema Enhancement:** 58 columns in games table (25 new columns added)
+- ✅ **Automation Success:** All 4 overnight processes completed with zero critical errors
+- ✅ **User Requirement Fulfilled:** Schedule data made "as rich as possible" with full metadata extraction
+
+**Cost Impact:** No AWS Glue charges (saved $13/month), RDS operational at ~$29/month
+
+**Database Final State:**
+- games: 44,828 rows with 58 columns
+- play_by_play: 6,781,155 rows
+- teams: 87 rows
+
+See `OVERNIGHT_SUCCESS_SUMMARY.md` for complete extraction details.
+
 ### Next Immediate Steps:
 
-1. Set up AWS Glue Crawler to discover data schema
-2. Create Glue ETL job to extract 10% of relevant fields
-3. Provision RDS PostgreSQL database (adds ~$29/month)
-4. Begin data transformation and loading
+1. ~~Set up AWS Glue Crawler to discover data schema~~ (Bypassed - using local extraction)
+2. ~~Create Glue ETL job to extract 10% of relevant fields~~ (Bypassed - using local extraction)
+3. ✅ Provision RDS PostgreSQL database (operational)
+4. ✅ Complete data transformation and loading (Phase 2 COMPLETE)
 
 ### Key Decisions Made:
 
@@ -126,22 +148,32 @@ pip list | grep pandas
 
 ### ✅ COMPLETED WORK
 
-**Infrastructure:**
+**Phase 1 - Infrastructure:**
 - Local development environment (Python 3.11, conda)
 - AWS S3 raw data lake with 146,115 files (119 GB)
 - Project directory structure
-- Git repository (local)
+- Git repository with GitHub sync (SSH authentication)
 
-**Configuration:**
+**Phase 1 - Configuration:**
 - AWS CLI verified and configured
 - IAM permissions confirmed (AdministratorAccess)
 - Conda environment `nba-aws` created
 - PyCharm project initialized
 
-**Data:**
+**Phase 1 - Data:**
 - All NBA data (1999-2025) uploaded to S3
 - Local data copy maintained
 - Backup strategy established
+
+**Phase 2 - Local ETL Extraction (October 2, 2025):**
+- ✅ RDS PostgreSQL database created (db.t3.small, 58-column schema)
+- ✅ Enhanced schedule extraction: 46,595 games with 53 fields (1993-2025)
+- ✅ Play-by-play extraction: 6,781,155 plays (1997-2021)
+- ✅ Box scores extraction: 408,833 player stats + 15,900 team stats (1997-2021)
+- ✅ Schema enhancement: 25 new columns added to games table
+- ✅ Automated overnight pipeline with auto-start monitoring
+- ✅ Zero critical errors across all 4 extraction processes
+- ✅ User requirement fulfilled: Schedule data "as rich as possible" (488% increase)
 
 ### ⏸️ PENDING WORK
 
@@ -1113,16 +1145,17 @@ aws sagemaker delete-notebook-instance --notebook-instance-name nba-ml-notebook
 
 ## TOTAL ESTIMATED COSTS SUMMARY
 
-### Current Actual Cost:
+### Current Actual Cost (October 2, 2025):
 - S3 Storage (raw data): $2.74/month
-- **Total: $2.74/month**
+- RDS db.t3.small (operational): $29/month
+- **Total: $31.74/month**
 
-### After Phase 2 & 3 (Development Mode):
+### After Phase 2 & 3 (Development Mode) - BYPASSED GLUE:
 - S3 Storage: $2.74
-- Glue Crawler: $1
-- Glue ETL (monthly runs): $13
+- ~~Glue Crawler: $1~~ (Not used - local extraction)
+- ~~Glue ETL (monthly runs): $13~~ (Not used - local extraction)
 - RDS db.t3.small: $29
-- **Total: $45.74/month**
+- **Total: $31.74/month** (Saved $14/month by using local extraction)
 
 ### Minimum Monthly Cost (Occasional Use):
 - S3 Storage: $3
