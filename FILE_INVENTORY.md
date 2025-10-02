@@ -1,6 +1,6 @@
 # FILE_INVENTORY.md
 
-**Auto-generated:** 2025-10-01 18:26:15
+**Auto-generated:** 2025-10-01 20:46:00
 
 **Purpose:** Comprehensive inventory of all project files with automatic summaries.
 
@@ -16,7 +16,7 @@
 
 ### .session-history.md
 
-**Type:** Markdown documentation (509 lines)
+**Type:** Markdown documentation (567 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** <!-- AUTO-UPDATE TRIGGER: Run `bash scripts/shell/session_startup.sh >> .session-history.md` AFTER every commit -->
 
@@ -34,15 +34,15 @@
 
 ### COMMAND_LOG.md
 
-**Type:** Markdown documentation (399 lines)
+**Type:** Markdown documentation (729 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** <!-- AUTO-UPDATE TRIGGER: After EVERY code file creation/modification, failed command, or error resolution -->
 
 ### FILE_INVENTORY.md
 
-**Type:** Markdown documentation (315 lines)
+**Type:** Markdown documentation (321 lines)
 **Last Modified:** 2025-10-01
-**Purpose:** **Auto-generated:** 2025-10-01 18:23:25
+**Purpose:** **Auto-generated:** 2025-10-01 18:26:15
 
 ### MACHINE_SPECS.md
 
@@ -52,7 +52,7 @@
 
 ### PROGRESS.md
 
-**Type:** Markdown documentation (1127 lines)
+**Type:** Markdown documentation (1161 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** <!-- AUTO-UPDATE TRIGGER: After completing ANY task, mark ✅ COMPLETE immediately -->
 
@@ -198,11 +198,29 @@
 **Last Modified:** 2025-10-01
 **Purpose:** This project includes an automated sanitization system that removes sensitive information from `COMMAND_LOG.md` before Git commits.
 
+### docs/DATA_STRUCTURE_GUIDE.md
+
+**Type:** Markdown documentation (542 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** <!-- AUTO-UPDATE TRIGGER: When discovering new JSON structures or updating ETL field mappings -->
+
 ### docs/DOCUMENTATION_MAINTENANCE.md
 
 **Type:** Markdown documentation (439 lines)
 **Last Modified:** 2025-10-01
 **Purpose:** **Purpose:** Keep documentation synchronized with actual project state
+
+### docs/LESSONS_LEARNED.md
+
+**Type:** Markdown documentation (853 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** <!-- AUTO-UPDATE TRIGGER: After encountering and solving any significant error or design decision -->
+
+### docs/REPRODUCTION_GUIDE.md
+
+**Type:** Markdown documentation (573 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** <!-- AUTO-UPDATE TRIGGER: When adapting this project for new sports (NHL, NCAA Basketball, etc.) -->
 
 ### docs/SETUP.md
 
@@ -288,6 +306,22 @@
 
 ---
 
+## SQL Scripts
+
+### sql/create_indexes.sql
+
+**Type:** SQL script (51 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** Performance Indexes for NBA Simulator Database
+
+### sql/create_tables.sql
+
+**Type:** SQL script (139 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** NBA Simulator Database Schema
+
+---
+
 ## Configuration
 
 ### .env.example
@@ -302,17 +336,46 @@
 **Last Modified:** 2025-09-30
 **Purpose:** No description available
 
+### scripts/analysis/check_data_availability.py
+
+**Type:** Python script (363 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** Analyze data availability across NBA JSON files.
+**Key Functions:**
+- `check_pbp_file()`
+- `check_box_score_file()`
+- `check_schedule_file()`
+- `check_team_stats_file()`
+- `analyze_directory()`
+**Dependencies:** json
+**Usage:** `python scripts/analysis/check_data_availability.py`
+
+### scripts/analysis/comprehensive_data_analysis.py
+
+**Type:** Python script (297 lines)
+**Last Modified:** 2025-10-01
+**Purpose:** Comprehensive data quality analysis across all NBA JSON file types.
+**Key Functions:**
+- `check_pbp_data()`
+- `check_box_score_data()`
+- `check_team_stats_data()`
+- `check_schedule_data()`
+- `analyze_directory()`
+**Dependencies:** json, random
+**Usage:** `python scripts/analysis/comprehensive_data_analysis.py`
+
 ---
 
 ## Summary Statistics
 
-**Total files documented:** 38
-**Total lines of code/docs:** 16,535
+**Total files documented:** 45
+**Total lines of code/docs:** 19,781
 
 **Files by type:**
-- Markdown documentation: 25
+- Markdown documentation: 28
 - Bash script: 9
-- Python script: 2
+- Python script: 4
+- SQL script: 2
 - File: 1
 - EXAMPLE file: 1
 

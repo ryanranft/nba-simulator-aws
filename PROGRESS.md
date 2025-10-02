@@ -337,25 +337,57 @@ Estimated Time to Full Deployment:
 
 #### Component 2.1: AWS Glue Crawler
 
-**Status:** ⏸️ Not Started  
+**Status:** ❌ FAILED - SKIPPING (See ADR-008)
 **Purpose:** Automatically discover and catalog the schema of JSON files in S3
+**Started:** 2025-10-01 18:33 EST
+**Failed:** 2025-10-01 20:03 EST
+**Resolution:** Skip crawler, proceed directly to manual ETL (Phase 2.2)
 
 **Configuration Steps:**
 
-1. Create AWS Glue Data Catalog database
-2. Create IAM role for Glue with S3 read permissions
-3. Configure Glue Crawler to scan S3 bucket folders
-4. Run crawler to generate schema tables
-5. Review and validate discovered schemas
+1. Create AWS Glue Data Catalog database ✅
+2. Create IAM role for Glue with S3 read permissions ✅
+3. Configure Glue Crawler to scan S3 bucket folders ✅
+4. Run crawler to generate schema tables ❌ FAILED
+5. Review and validate discovered schemas ❌ SKIPPED
 
 **Prerequisites:**
 - S3 bucket with data: ✅ COMPLETE
 - IAM permissions: AdministratorAccess ✅
 
-**Estimated Time:** 30-45 minutes
-- Setup via console: 15 minutes
-- First crawler run: 10-15 minutes (scanning 146,115 files)
-- Schema review: 10 minutes
+**Actual Time:** ~1.5 hours (setup + failed run)
+- Setup: 15 minutes ✅
+- Crawler run: 90 minutes ❌ FAILED (OutOfMemoryError)
+- Schema review: SKIPPED
+
+**CRITICAL FAILURE:**
+The Glue Crawler failed with OutOfMemoryError when processing 146,115 files:
+```
+[23:34:03] BENCHMARK: Running Start Crawl
+[23:52:52] BENCHMARK: Classification complete, writing results
+[23:58:04] WARN: OutOfMemoryError - Submit AWS Support ticket
+[00:03:17] ERROR: Internal Service Exception
+[00:05:17] BENCHMARK: Crawler finished (state READY)
+```
+
+**Analysis:**
+- Crawler successfully classified data (19 minutes)
+- Failed when writing metadata to Data Catalog
+- Default crawler configuration cannot handle 100K+ files
+- AWS Support ticket required to increase DPU allocation
+
+**Decision:** Skip Glue Crawler entirely. Proceed directly to Phase 2.2 (Glue ETL) where we'll write custom PySpark code to extract only the 10% of fields we need, bypassing schema discovery entirely. This approach:
+1. Avoids OOM issue
+2. Gives precise control over extraction
+3. Matches ADR-002 decision (10% field extraction)
+4. Actually faster than waiting for crawler
+
+**Workarounds Considered:**
+1. ❌ Partition by year - Data not organized by year
+2. ❌ Request DPU increase - Requires AWS Support ticket, adds cost
+3. ✅ **Skip crawler, manual ETL** - Recommended
+
+See `docs/REPRODUCTION_GUIDE.md` Section "Glue Crawler Out of Memory Error" for details on reproducing this project for other sports.
 
 **Estimated Cost:** ~$1/month
 - Crawler DPU cost: $0.44 per DPU-hour
@@ -503,33 +535,35 @@ aws glue delete-job --job-name nba-etl-job
 
 #### Component 3.1: RDS PostgreSQL Database
 
-**Status:** ⏸️ Not Started  
+**Status:** ⏳ IN PROGRESS (Instance Creating)
 **Purpose:** Relational database for simulation queries and analytics (OLTP + OLAP)
+**Started:** 2025-10-01 19:13 EST
+**Expected Completion:** 2025-10-01 19:25 EST (~12 minutes)
 
 **Configuration Steps:**
 
-1. Create SQL schema files locally (1 hour)
-2. Launch RDS PostgreSQL instance via AWS Console (20 min)
-3. Configure security group rules (15 min)
-4. Test connection from local machine (10 min)
-5. Run SQL scripts to create tables (15 min)
-6. Create indexes for performance (15 min)
-7. Configure automated backups (5 min)
-8. Document connection details (5 min)
+1. Create SQL schema files locally (1 hour) ✅
+2. Launch RDS PostgreSQL instance via AWS Console (20 min) ⏳
+3. Configure security group rules (15 min) ✅
+4. Test connection from local machine (10 min) ⏸️
+5. Run SQL scripts to create tables (15 min) ⏸️
+6. Create indexes for performance (15 min) ⏸️
+7. Configure automated backups (5 min) ✅ (auto-enabled)
+8. Document connection details (5 min) ⏸️
 
 **Prerequisites:**
 - VPC configuration: Use default VPC ✅
-- SQL schema design: Need to create
+- SQL schema design: ✅ COMPLETE (see sql/create_tables.sql, sql/create_indexes.sql)
 - psql client installed locally: Check with `psql --version`
 
-**Estimated Time:** 2-3 hours
-- SQL script creation: 1 hour
-- RDS instance creation: 20 minutes (AWS provisioning time)
-- Security configuration: 30 minutes
-- Testing and validation: 30 minutes
-- Documentation: 30 minutes
+**Actual Time So Far:** 45 minutes
+- SQL script creation: 30 minutes ✅
+- Security group creation: 10 minutes ✅
+- RDS instance launch: In progress ⏳
+- First attempt (db.t3.micro): Deleted due to account upgrade
+- Second attempt (db.t3.small): Currently creating
 
-**Estimated Cost:** ~$29-60/month (depending on instance size)
+**Estimated Cost:** ~$29/month (db.t3.small)
 
 **Option A: db.t3.small (Recommended for Development)**
 - 2 vCPUs, 2 GB RAM
