@@ -86,3 +86,8 @@ COMMAND_LOG.md
 # archived-docs/
 # Sensitive archiving scripts (local only)
 scripts/maintenance/archive_chat_by_next_sha.sh
+
+# Pre-push cleanup - files archived 2025-10-02
+.test_archive_system.txt
+CHAT_LOG_INSTRUCTIONS.md
+COMMAND_LOG.example.md
