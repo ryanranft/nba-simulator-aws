@@ -93,6 +93,11 @@ All detailed workflow descriptions are located in: `/docs/claude_workflows/workf
 30. **Code Snippet Logging** → `30_code_snippet_logging.md` (every code change)
 31. **QUICKSTART Update** → `31_quickstart_update.md` (when daily workflows change)
 
+### Testing & Deployment (Pre-Production)
+
+35. **Pre-Deployment Testing** → `35_pre_deployment_testing.md` (before deploying AWS resources)
+36. **Pre-Push Repository Cleanup** → `36_pre_push_repo_cleanup.md` (before pushing to GitHub)
+
 ### AWS Operations & Troubleshooting
 
 32. **RDS Connection** → `32_rds_connection.md` (when connecting to PostgreSQL)
@@ -186,19 +191,21 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
 - Connect to RDS database? → `32`
 - Adapt for another sport? → `33`
 - Avoid known pitfalls? → `34`
+- Pre-deployment testing? → `35`
+- Repository cleanup before push? → `36`
 
 ---
 
 ## 📊 Workflow Statistics
 
-- **Total workflows**: 34
+- **Total workflows**: 36
 - **Total size**: ~500 KB
-- **Average workflow**: ~15 KB
+- **Average workflow**: ~14 KB
 - **Largest workflow**: `24_aws_resource_setup.md` (92 KB)
 - **Smallest workflow**: `04_plan_change_protocol.md` (595 bytes)
 
 **Old system**: 1 file, 9,533 lines, 284 KB (unreadable by Claude)
-**New system**: 34 files, average 280 lines per file (fully readable)
+**New system**: 36 files, average 265 lines per file (fully readable)
 
 **Workflow additions:**
 - **Batch 1 (27-31):** Code quality workflows
@@ -212,6 +219,10 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
   - 🔗 RDS Connection - Database connection procedures
   - 🏀 Multi-Sport Reproduction - Adapt pipeline for new sports
   - 📚 Lessons Learned Review - Avoid repeating known mistakes
+
+- **Batch 3 (35-36):** Testing & deployment workflows
+  - 🧪 Pre-Deployment Testing - Phase-specific testing checklists
+  - 🧹 Pre-Push Repository Cleanup - Automated cleanup before push
 
 ---
 
