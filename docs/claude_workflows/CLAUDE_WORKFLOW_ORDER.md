@@ -93,6 +93,12 @@ All detailed workflow descriptions are located in: `/docs/claude_workflows/workf
 30. **Code Snippet Logging** → `30_code_snippet_logging.md` (every code change)
 31. **QUICKSTART Update** → `31_quickstart_update.md` (when daily workflows change)
 
+### AWS Operations & Troubleshooting
+
+32. **RDS Connection** → `32_rds_connection.md` (when connecting to PostgreSQL)
+33. **Multi-Sport Reproduction** → `33_multi_sport_reproduction.md` (when adapting for new sport)
+34. **Lessons Learned Review** → `34_lessons_learned_review.md` (before similar tasks to avoid known pitfalls)
+
 ---
 
 ## 📋 How to Use This System
@@ -177,26 +183,35 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
 - Apply code style rules? → `29`
 - Log code changes? → `30`
 - Update daily commands? → `31`
+- Connect to RDS database? → `32`
+- Adapt for another sport? → `33`
+- Avoid known pitfalls? → `34`
 
 ---
 
 ## 📊 Workflow Statistics
 
-- **Total workflows**: 31
-- **Total size**: ~400 KB
-- **Average workflow**: ~13 KB
+- **Total workflows**: 34
+- **Total size**: ~500 KB
+- **Average workflow**: ~15 KB
 - **Largest workflow**: `24_aws_resource_setup.md` (92 KB)
 - **Smallest workflow**: `04_plan_change_protocol.md` (595 bytes)
 
 **Old system**: 1 file, 9,533 lines, 284 KB (unreadable by Claude)
-**New system**: 31 files, average 310 lines per file (fully readable)
+**New system**: 34 files, average 280 lines per file (fully readable)
 
-**New workflows added (27-31):**
-- 🧪 TDD Workflow - Test-driven development practice
-- 📝 ADR Creation - Document architectural decisions
-- 🎨 Style Enforcement - Code quality and consistency
-- 📋 Code Snippet Logging - Track code changes and outcomes
-- ⚡ QUICKSTART Update - Maintain daily command reference
+**Workflow additions:**
+- **Batch 1 (27-31):** Code quality workflows
+  - 🧪 TDD Workflow - Test-driven development practice
+  - 📝 ADR Creation - Document architectural decisions
+  - 🎨 Style Enforcement - Code quality and consistency
+  - 📋 Code Snippet Logging - Track code changes and outcomes
+  - ⚡ QUICKSTART Update - Maintain daily command reference
+
+- **Batch 2 (32-34):** AWS operations & troubleshooting workflows
+  - 🔗 RDS Connection - Database connection procedures
+  - 🏀 Multi-Sport Reproduction - Adapt pipeline for new sports
+  - 📚 Lessons Learned Review - Avoid repeating known mistakes
 
 ---
 
