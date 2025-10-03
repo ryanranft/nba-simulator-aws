@@ -1,8 +1,55 @@
 # NBA Game Simulator & ML Platform - Progress Index
 
+**System Version:** 2.0 (Modular Documentation System)
 **Date Started:** September 29, 2025
-**Current Phase:** Phase 3 Complete, Phase 4+ Pending
-**Last Updated:** October 2, 2025
+**Current Phase:** Phase 4 Complete, Phase 5-6 Pending
+**Last Updated:** October 3, 2025
+
+> 💡 **For Claude Code Users:** See `CLAUDE.md` for detailed instructions on how to navigate this file, read phase files efficiently, and execute workflows. Start every session by reading CLAUDE.md first.
+
+---
+
+## Quick Start for New Sessions
+
+**If you're Claude Code starting a new session:**
+1. Read `CLAUDE.md` completely (understand navigation patterns)
+2. Read this file (PROGRESS.md) to identify current phase
+3. Check "Current Session Context" section below
+4. Read the specific phase file for the current task
+5. Follow workflow references in the phase file
+
+**If you're a human developer:**
+- Check "Current Session Context" section below for what's in progress
+- See phase files in `docs/phases/` for detailed implementation steps
+- All workflows are in `docs/claude_workflows/workflow_descriptions/`
+
+---
+
+## Current Session Context
+
+**Last session ended:** October 3, 2025 (early morning)
+**Last completed:** Phase 4 (Simulation Engine) complete - EC2 instance deployed, Monte Carlo simulation scripts developed and tested, RDS connection verified.
+**Next to work on:** Phase 5 (Machine Learning - SageMaker) or Phase 6 (Optional Enhancements)
+**Phase status:** Phases 1-4 complete, Phases 5-6 pending
+
+> **Note for Claude:** Update this section at the end of every session (Workflow #14)
+
+---
+
+## For Returning Users
+
+**If you're coming back after a break:**
+
+1. **Read "Current Session Context" above** - see what was last worked on
+2. **Check phase status** - see which phases are complete (✅), in progress (🔄), or pending (⏸️)
+3. **Review recent commits** - `git log --oneline -10` to see what changed
+4. **Check COMMAND_LOG.md** - see what commands were run recently
+5. **Pick up where you left off** - or choose a new task from pending phases
+
+**Common return scenarios:**
+- "Continue where we left off" → Work on first 🔄 or ⏸️ sub-phase
+- "Start Phase X" → Read PHASE_X file, ask about workflow additions
+- "Review what's done" → Check ✅ phases, read phase file summaries
 
 ---
 
@@ -13,7 +60,7 @@
 - ✅ [Phase 1: S3 Data Lake](docs/phases/PHASE_1_S3_DATA_LAKE.md) - **COMPLETE** (Oct 1)
 - ✅ [Phase 2: AWS Glue ETL](docs/phases/PHASE_2_AWS_GLUE.md) - **COMPLETE** (Oct 2)
 - ✅ [Phase 3: Database Infrastructure](docs/phases/PHASE_3_DATABASE.md) - **COMPLETE** (Oct 1)
-- ⏸️ [Phase 4: Simulation Engine](docs/phases/PHASE_4_SIMULATION_ENGINE.md) - **PENDING**
+- ✅ [Phase 4: Simulation Engine](docs/phases/PHASE_4_SIMULATION_ENGINE.md) - **COMPLETE** (Oct 3)
 - ⏸️ [Phase 5: Machine Learning](docs/phases/PHASE_5_MACHINE_LEARNING.md) - **PENDING**
 - ⏸️ [Phase 6: Optional Enhancements](docs/phases/PHASE_6_ENHANCEMENTS.md) - **PENDING**
 
@@ -31,9 +78,9 @@
 
 ## 📊 Executive Summary
 
-**Status:** Phases 1-3 Complete, Data Pipeline Operational
-**Completed Date:** October 2, 2025
-**Current Cost:** $31.74/month (S3 + RDS)
+**Status:** Phases 1-4 Complete, Simulation Engine Operational
+**Completed Date:** October 3, 2025
+**Current Cost:** $38.33/month (S3 + RDS + EC2)
 **Full Deployment Cost:** $50-150/month (when all phases complete)
 
 ### What's Accomplished
@@ -46,18 +93,23 @@
 - ✅ **Phase 3:** RDS PostgreSQL operational - Oct 1
   - db.t3.small, 58-column schema
   - All data loaded and indexed
+- ✅ **Phase 4:** EC2 simulation engine deployed - Oct 3
+  - t3.small instance (i-0b8bbe4cdff7ae2d2)
+  - Monte Carlo simulation scripts
+  - RDS connection verified
+  - Test simulations successful
 
 ### Current State
 
-- **Working:** S3 bucket + RDS database fully populated
+- **Working:** S3 bucket + RDS database + EC2 simulation engine
 - **Environment:** Conda env `nba-aws`, Python 3.11.13
 - **Git:** Repository synced with GitHub (SSH auth)
-- **Cost:** $31.74/month ($2.74 S3 + $29 RDS)
+- **Cost:** $38.33/month ($2.74 S3 + $29 RDS + $6.59 EC2)
 
 ### Next Actions
 
-1. **Deploy simulation engine** → See [Phase 4](docs/phases/PHASE_4_SIMULATION_ENGINE.md)
-2. **Or develop ML models** → See [Phase 5](docs/phases/PHASE_5_MACHINE_LEARNING.md)
+1. **Develop ML models** → See [Phase 5](docs/phases/PHASE_5_MACHINE_LEARNING.md)
+2. **Or add analytics** → See [Phase 6](docs/phases/PHASE_6_ENHANCEMENTS.md)
 3. **Monitor costs** → Run `make check-costs` weekly
 
 ---
@@ -91,14 +143,13 @@ Phase 3 (RDS Database) ✅
 | 1. S3 Data Lake | ✅ COMPLETE | Oct 1 | $2.74 | 2 days | [View](docs/phases/PHASE_1_S3_DATA_LAKE.md) |
 | 2. ETL (Local) | ✅ COMPLETE | Oct 2 | $0 | 1 day | [View](docs/phases/PHASE_2_AWS_GLUE.md) |
 | 3. Database (RDS) | ✅ COMPLETE | Oct 1 | $29 | 1.6 hrs | [View](docs/phases/PHASE_3_DATABASE.md) |
-| 4. Simulation (EC2) | ⏸️ PENDING | TBD | $5-15 | 2-3 hrs | [View](docs/phases/PHASE_4_SIMULATION_ENGINE.md) |
+| 4. Simulation (EC2) | ✅ COMPLETE | Oct 3 | $6.59 | 3 hrs | [View](docs/phases/PHASE_4_SIMULATION_ENGINE.md) |
 | 5. ML (SageMaker) | ⏸️ PENDING | TBD | $7-75 | 6-12 hrs | [View](docs/phases/PHASE_5_MACHINE_LEARNING.md) |
 | 6. Enhancements | ⏸️ PENDING | TBD | $4-10 | 3-5 hrs | [View](docs/phases/PHASE_6_ENHANCEMENTS.md) |
 
-**Current total:** $31.74/month
-**After Phase 4:** $41.74/month (+EC2)
-**After Phase 5:** $58.74/month (+SageMaker)
-**After Phase 6:** $62.74/month (+Analytics)
+**Current total:** $38.33/month
+**After Phase 5:** $58.33/month (+SageMaker)
+**After Phase 6:** $62.33/month (+Analytics)
 **Budget target:** <$150/month
 
 ---
@@ -108,7 +159,8 @@ Phase 3 (RDS Database) ✅
 ### Current Monthly Costs
 - S3 Storage: $2.74 (119 GB)
 - RDS db.t3.small: $29.00
-- **Total: $31.74/month**
+- EC2 t3.small (8hrs/day): $6.59
+- **Total: $38.33/month**
 
 ### Projected Costs (Full Deployment)
 - S3: $2.74
@@ -237,10 +289,10 @@ Execute steps
 - [x] All tables created
 - [x] Cost: $29/month
 
-### Phase 4 ⏸️
-- [ ] EC2 instance running
-- [ ] Simulation code deployed
-- [ ] Test simulation successful
+### Phase 4 ✅
+- [x] EC2 instance running
+- [x] Simulation code deployed
+- [x] Test simulation successful
 
 ### Phase 5 ⏸️
 - [ ] SageMaker notebook operational
@@ -344,6 +396,6 @@ bash scripts/shell/session_manager.sh start
 
 ---
 
-*Last updated: 2025-10-02*
-*System: 6 phases, 36 workflows, 7 ADRs*
-*Status: 3 phases complete, 3 phases pending*
+*Last updated: 2025-10-03*
+*System: 6 phases, 37 workflows, 7 ADRs*
+*Status: 4 phases complete, 2 phases pending*
