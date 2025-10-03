@@ -53,22 +53,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **How workflows integrate with PROGRESS.md:**
 
-**Current structure:**
-- PROGRESS.md contains high-level phase descriptions
-- Each phase references which workflow(s) to use by name or number
+**✅ NEW MODULAR STRUCTURE (Implemented Oct 2, 2025):**
+- PROGRESS.md is now a lightweight index (~350 lines, was 1,244 lines)
+- Individual phase files in `docs/phases/` contain detailed implementation steps
+- Phase files explicitly reference workflow numbers (e.g., "Follow workflow #24")
+- Clear hierarchy: PROGRESS.md → Phase file → Workflow file
 
-**Future structure (planned):**
-- PROGRESS.md will become a directory/index
-- Individual phase files (e.g., `phases/PHASE_2.2_ETL.md`) will contain detailed instructions
-- Phase files will explicitly reference workflow numbers (e.g., "Follow workflow #24")
-- This creates a clear hierarchy: PROGRESS.md → Phase file → Workflow file
+**Phase files:**
+- PHASE_1_S3_DATA_LAKE.md (complete)
+- PHASE_2_AWS_GLUE.md (complete)
+- PHASE_3_DATABASE.md (complete)
+- PHASE_4_SIMULATION_ENGINE.md (pending)
+- PHASE_5_MACHINE_LEARNING.md (pending)
+- PHASE_6_ENHANCEMENTS.md (optional)
 
 **Benefits:**
-- ✅ Read only what you need (not 9,533 lines at once)
-- ✅ Faster file operations (average 367 lines per workflow)
+- ✅ Read only what you need (72% reduction in PROGRESS.md size)
+- ✅ Faster file operations (350 lines vs 1,244)
 - ✅ Reduced context usage (90%+ savings)
-- ✅ Easier maintenance (update one workflow without affecting others)
-- ✅ Scalable (easy to add new workflows)
+- ✅ Easier maintenance (update one phase without affecting others)
+- ✅ Scalable (easy to add new phases)
 - ✅ Clear separation of concerns
 
 ## Critical Workflows (See Detailed Docs)
