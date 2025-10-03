@@ -2,25 +2,74 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Quick Decision Tree
+## Workflow Order - Follow This Sequence
 
-**When user asks to do something:**
-1. **Is it the next pending task in PROGRESS.md?** → Proceed
-2. **Is it skipping ahead?** → Check prerequisites first, warn if missing
-3. **Is it changing the plan?** → Update PROGRESS.md first, get approval
-4. **Will it cost money?** → Warn user with estimate, get confirmation
-5. **Could it break something?** → Explain risk, suggest backup/test approach
+**See `docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md` for workflow index and execution order.**
 
-**During the session:**
-1. **Is context at 75%+?** → Auto-save conversation to CHAT_LOG.md immediately
-2. **Is context at 90%+?** → Strongly urge user to commit NOW
-3. **User says "save this conversation"?** → Write verbatim transcript to CHAT_LOG.md
+**All detailed workflows are in: `docs/claude_workflows/workflow_descriptions/`**
 
-**When a command fails:**
-1. Check `TROUBLESHOOTING.md` for known solution
-2. If unknown, STOP and ask user for guidance
-3. Don't attempt multiple fixes automatically
-4. Log solution with `log_solution` after resolving
+**System now contains 26 modular workflows:**
+- 🚀 Session Start & End workflows
+- 📋 Decision & Plan Change workflows
+- 💻 Task Execution & File Creation workflows
+- 🔒 Git Commit & Push workflows (security protocols)
+- 🧪 Testing workflows (TDD, unit, integration, pre-deployment)
+- 🔧 Environment Setup & Verification workflows
+- 💰 Cost Management workflows (before creating, tracking, optimization)
+- 💾 Backup & Recovery workflows
+- 🔄 Maintenance Schedule workflows (weekly, monthly)
+- 📊 Data Validation workflows (pre-ETL, pre-simulation, pre-ML)
+- 🔍 Systematic Troubleshooting Protocol
+- 🔐 Credential Rotation workflows
+- ☁️ AWS Resource Setup workflows (Glue, RDS, EC2, SageMaker)
+- 🗄️ Database Migration workflows
+- 🔧 Makefile Quick Reference
+
+**Navigation pattern:**
+```
+1. Read PROGRESS.md (identify current task/phase)
+2. Read docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md (find relevant workflow number)
+3. Read docs/claude_workflows/workflow_descriptions/XX_workflow_name.md (get detailed steps)
+4. Execute workflow steps
+```
+
+**Quick reference - Every session follows this order:**
+1. Initialize session (`session_manager.sh start`) - show output to user
+2. Orient to current state (read PROGRESS.md)
+3. Ask about completed work
+4. Wait for user's task request
+5. Follow decision workflow (check plan, prerequisites, costs, risks)
+6. Execute task → Document outcome → Wait for confirmation
+7. Update PROGRESS.md → Suggest next action
+8. Follow security protocol for commits/pushes
+9. Monitor context (auto-save at 75%, warn at 90%)
+
+**Critical decision points:**
+- **Skipping ahead?** → Check prerequisites, warn if missing
+- **Changing the plan?** → Update PROGRESS.md first, get approval
+- **Will it cost money?** → Warn with estimate, get confirmation
+- **Could it break something?** → Explain risk, suggest backup/test approach
+- **Command fails?** → Check TROUBLESHOOTING.md, stop, ask for guidance
+
+**How workflows integrate with PROGRESS.md:**
+
+**Current structure:**
+- PROGRESS.md contains high-level phase descriptions
+- Each phase references which workflow(s) to use by name or number
+
+**Future structure (planned):**
+- PROGRESS.md will become a directory/index
+- Individual phase files (e.g., `phases/PHASE_2.2_ETL.md`) will contain detailed instructions
+- Phase files will explicitly reference workflow numbers (e.g., "Follow workflow #24")
+- This creates a clear hierarchy: PROGRESS.md → Phase file → Workflow file
+
+**Benefits:**
+- ✅ Read only what you need (not 9,533 lines at once)
+- ✅ Faster file operations (average 367 lines per workflow)
+- ✅ Reduced context usage (90%+ savings)
+- ✅ Easier maintenance (update one workflow without affecting others)
+- ✅ Scalable (easy to add new workflows)
+- ✅ Clear separation of concerns
 
 ## Critical Workflows (See Detailed Docs)
 
@@ -87,94 +136,23 @@ See `README.md` for complete 5-phase pipeline architecture and key architectural
 
 ## Git & GitHub Configuration
 
-See `QUICKSTART.md` for Git commands and `docs/SECURITY_PROTOCOLS.md` for security procedures.
+See `QUICKSTART.md` for Git commands and `docs/SECURITY_PROTOCOLS.md` for complete security procedures.
 
-**CRITICAL - Security Protocol Before ANY Git Commit:**
+**CRITICAL - Before ANY Git Operation:**
 
-Before running `git commit`, ALWAYS perform automatic security scan:
+- **Before commit:** Run security scan (see `docs/SECURITY_PROTOCOLS.md` for scan commands and protocols)
+- **Before push:** Run `scripts/shell/pre_push_inspector.sh full` (7-step automated workflow)
+- **NEVER commit without security scan** - check for AWS keys, secrets, IPs, passwords
+- **NEVER push without user approval** - always ask "Ready to push to GitHub?"
+- **If hook blocks commit/push:** Show user flagged lines, explain findings, get explicit bypass approval
 
-```bash
-# Step 1: Check staged files for sensitive data (comprehensive pattern)
-git diff --staged | grep -E "(AWS_ACCESS_KEY[A-Z0-9]{16}|aws_secret|secret_access_key|aws_session_token|password|api[_-]?key|Bearer [A-Za-z0-9_-]+|BEGIN [REDACTED] KEY|ghp_[A-Za-z0-9]{36}|github_pat|postgres:|postgresql://.*:.*@|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)" -i
-
-# Step 2: Check commit message for sensitive data
-grep -E "(AWS_ACCESS_KEY|aws_secret|password|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)" .git/COMMIT_EDITMSG -i
-
-# Step 3: If ANY matches found:
-#   - STOP immediately
-#   - Show matches to user
-#   - NEVER commit AWS keys, secrets, or private IPs under any circumstances
-#   - Remove sensitive data or abort commit
-
-# Step 4: What to check for:
-#   ❌ AWS access keys (AWS_ACCESS_KEY[A-Z0-9]{16})
-#   ❌ AWS secret keys (aws_secret_access_key)
-#   ❌ AWS session tokens (aws_session_token)
-#   ❌ Private IP addresses (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
-#   ❌ ANY IP addresses (per user requirement)
-#   ❌ Passwords, API keys, Bearer tokens
-#   ❌ SSH private keys (BEGIN + PRIVATE + KEY)
-#   ❌ GitHub tokens (ghp_..., github_pat_...)
-#   ❌ Database connection strings with passwords (postgresql://user:pass@host)
-```
-
-**Whitelist - Safe patterns (don't trigger false positives):**
-```bash
-# These are OK in documentation:
-✅ Placeholder examples: "<YOUR_AWS_ACCESS_KEY_HERE>", "your-access-key-here", "<INSERT_KEY_HERE>"
-✅ Documentation keywords: describing what to check for (like this list)
-✅ Redacted credentials: [REDACTED], [Private network], [Router]
-✅ Environment variable format: AWS_ACCESS_KEY_ID= (without value)
-✅ Public DNS: Not allowed per user requirement (remove ALL IPs)
-
-# NEVER use these placeholders (trigger security scanners):
-❌ AWS_ACCESS_KEY**************** (still contains AWS_ACCESS_KEY prefix)
-❌ Any pattern starting with AWS_ACCESS_KEY, even if redacted
-```
-
-**Security Check Protocol:**
-1. Run grep scan BEFORE staging files
-2. **If matches found: STOP immediately and show user:**
-   ```bash
-   # Save diff to temp file
-   git diff --staged > /tmp/staged_diff.txt
-
-   # Show ALL flagged lines with line numbers
-   grep -n -E "(pattern)" -i /tmp/staged_diff.txt
-
-   # Show FULL CONTEXT (10 lines before/after each match)
-   grep -E "(pattern)" -i -B 10 -A 10 /tmp/staged_diff.txt
-   ```
-3. **Present to user:**
-   - Show flagged line numbers
-   - Show full context around each match
-   - Explain what was detected (pattern definitions vs actual secrets)
-   - Explain if deletions (safe) or additions (review needed)
-   - **Ask explicitly:** "Do you approve bypassing pre-commit hook? [YES/NO]"
-4. **Wait for user's explicit YES or NO response**
-5. Only proceed with `--no-verify` if user responds YES
-6. NEVER assume approval - always ask first
-
-**CRITICAL: NEVER use --no-verify without:**
-- ✅ Showing user ALL flagged lines with full context
-- ✅ Explaining what was flagged and why
-- ✅ Getting explicit YES approval from user
-
-**NEVER commit without this security check.**
-
-**Commit format (include co-authorship footer):**
-```bash
-git commit -m "$(cat <<'EOF'
-Brief description of changes
-
-Detailed explanation if needed
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)"
-```
+See `docs/SECURITY_PROTOCOLS.md` for:
+- Complete security scan bash commands
+- Whitelist patterns (safe vs unsafe)
+- Security check protocol (step-by-step)
+- Pre-push inspection workflow (repository cleanup)
+- Credential rotation schedules
+- GitHub secret scanning setup
 
 ## Common Commands
 
