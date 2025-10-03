@@ -85,6 +85,14 @@ All detailed workflow descriptions are located in: `/docs/claude_workflows/workf
 
 26. **Makefile Reference** → `26_makefile_reference.md`
 
+### Code Quality & Development Practices
+
+27. **TDD Workflow** → `27_tdd_workflow.md` (when writing new code)
+28. **ADR Creation** → `28_adr_creation.md` (after architectural decisions)
+29. **Style Enforcement** → `29_style_enforcement.md` (when writing/reviewing code)
+30. **Code Snippet Logging** → `30_code_snippet_logging.md` (every code change)
+31. **QUICKSTART Update** → `31_quickstart_update.md` (when daily workflows change)
+
 ---
 
 ## 📋 How to Use This System
@@ -164,19 +172,31 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
 - Create AWS resources? → `24`
 - Migrate database? → `25`
 - Find make command? → `26`
+- Write tests first (TDD)? → `27`
+- Document architectural decision? → `28`
+- Apply code style rules? → `29`
+- Log code changes? → `30`
+- Update daily commands? → `31`
 
 ---
 
 ## 📊 Workflow Statistics
 
-- **Total workflows**: 26
-- **Total size**: ~284 KB
-- **Average workflow**: ~11 KB
+- **Total workflows**: 31
+- **Total size**: ~400 KB
+- **Average workflow**: ~13 KB
 - **Largest workflow**: `24_aws_resource_setup.md` (92 KB)
 - **Smallest workflow**: `04_plan_change_protocol.md` (595 bytes)
 
 **Old system**: 1 file, 9,533 lines, 284 KB (unreadable by Claude)
-**New system**: 26 files, average 367 lines per file (fully readable)
+**New system**: 31 files, average 310 lines per file (fully readable)
+
+**New workflows added (27-31):**
+- 🧪 TDD Workflow - Test-driven development practice
+- 📝 ADR Creation - Document architectural decisions
+- 🎨 Style Enforcement - Code quality and consistency
+- 📋 Code Snippet Logging - Track code changes and outcomes
+- ⚡ QUICKSTART Update - Maintain daily command reference
 
 ---
 
