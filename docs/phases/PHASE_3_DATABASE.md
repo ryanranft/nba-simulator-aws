@@ -44,8 +44,21 @@ Before starting this phase:
 **Actual Time:** 30 minutes
 
 **Follow these workflows:**
+- Workflow #3 ([Decision Workflow](../claude_workflows/workflow_descriptions/03_decision_workflow.md))
+  - **When to run:** When making schema design decisions (58 columns, index strategy, foreign keys)
+  - **Purpose:** Document schema architecture decisions as ADRs
+
+- Workflow #6 ([File Creation](../claude_workflows/workflow_descriptions/06_file_creation.md))
+  - **When to run:** When creating SQL files (`create_tables.sql`, `create_indexes.sql`)
+  - **Purpose:** Follow file creation best practices for SQL scripts, ensure proper structure and documentation
+
 - Workflow #25 ([Database Migration](../claude_workflows/workflow_descriptions/25_database_migration.md))
+  - **When to run:** Before writing SQL scripts
+  - **Purpose:** Follow database migration best practices, plan rollback procedures
+
 - Workflow #29 ([Style Enforcement](../claude_workflows/workflow_descriptions/29_style_enforcement.md))
+  - **When to run:** After writing SQL scripts
+  - **Purpose:** Ensure SQL follows naming conventions, formatting standards
 
 **Completed tasks:**
 1. ✅ Created `sql/create_tables.sql` (6 tables)
@@ -75,9 +88,26 @@ Before starting this phase:
 **Actual Time:** 25 minutes (includes one retry)
 
 **Follow these workflows:**
-- Workflow #24 ([AWS Resource Setup](../claude_workflows/workflow_descriptions/24_aws_resource_setup.md))
-- Workflow #18 ([Cost Management](../claude_workflows/workflow_descriptions/18_cost_management.md))
 - Workflow #34 ([Lessons Learned Review](../claude_workflows/workflow_descriptions/34_lessons_learned_review.md))
+  - **When to run:** BEFORE creating RDS instance
+  - **Purpose:** Read LESSONS_LEARNED.md Issues #2-7 to avoid known RDS configuration problems
+  - **Key lessons:** PostgreSQL 15.14 (not 16), password character restrictions, security group setup
+
+- Workflow #18 ([Cost Management](../claude_workflows/workflow_descriptions/18_cost_management.md))
+  - **When to run:** BEFORE creating RDS instance
+  - **Purpose:** Estimate monthly costs (~$29/month for db.t3.small), get user approval
+
+- Workflow #24 ([AWS Resource Setup](../claude_workflows/workflow_descriptions/24_aws_resource_setup.md))
+  - **When to run:** When creating RDS instance
+  - **Purpose:** Follow best practices for RDS provisioning (encryption, backups, Multi-AZ evaluation)
+
+- Workflow #28 ([ADR Creation](../claude_workflows/workflow_descriptions/28_adr_creation.md))
+  - **When to run:** After making RDS configuration decisions (db.t3.small vs micro, Single-AZ vs Multi-AZ, PostgreSQL 15.14)
+  - **Purpose:** Document infrastructure decisions as ADRs
+
+- Workflow #2 ([Command Logging](../claude_workflows/workflow_descriptions/02_command_logging.md))
+  - **When to run:** After running AWS CLI commands to create RDS instance
+  - **Purpose:** Log RDS creation commands to COMMAND_LOG.md for reproducibility
 
 **Configuration attempts:**
 1. ❌ First attempt: db.t3.micro (deleted during account upgrade)
@@ -113,7 +143,16 @@ Before starting this phase:
 
 **Follow these workflows:**
 - Workflow #24 ([AWS Resource Setup](../claude_workflows/workflow_descriptions/24_aws_resource_setup.md))
+  - **When to run:** When creating security group
+  - **Purpose:** Configure security group with proper rules (port 5432, specific IP, not 0.0.0.0/0)
+
 - Workflow #23 ([Credential Rotation](../claude_workflows/workflow_descriptions/23_credential_rotation.md))
+  - **When to run:** After security group creation
+  - **Purpose:** Document current IP address, schedule IP rotation updates when home IP changes
+
+- Workflow #2 ([Command Logging](../claude_workflows/workflow_descriptions/02_command_logging.md))
+  - **When to run:** After creating security group and rules
+  - **Purpose:** Log security group commands for documentation
 
 **Completed tasks:**
 1. ✅ Created security group: `nba-rds-sg`
@@ -149,7 +188,20 @@ Source: <HOME_IP>/32 (your specific IP)
 
 **Follow these workflows:**
 - Workflow #32 ([RDS Connection](../claude_workflows/workflow_descriptions/32_rds_connection.md))
+  - **When to run:** Before connecting to RDS for first time
+  - **Purpose:** Verify connection methods (psql, Python), troubleshoot connection issues
+
 - Workflow #25 ([Database Migration](../claude_workflows/workflow_descriptions/25_database_migration.md))
+  - **When to run:** When executing SQL scripts on RDS
+  - **Purpose:** Apply migrations safely, verify objects created, plan rollback if needed
+
+- Workflow #2 ([Command Logging](../claude_workflows/workflow_descriptions/02_command_logging.md))
+  - **When to run:** After executing SQL scripts
+  - **Purpose:** Log SQL execution commands and results
+
+- Workflow #21 ([Data Validation](../claude_workflows/workflow_descriptions/21_data_validation.md))
+  - **When to run:** After creating tables and indexes
+  - **Purpose:** Validate schema creation, verify all objects exist, test basic queries
 
 **Completed tasks:**
 1. ✅ Connected via psql client
@@ -292,7 +344,8 @@ All criteria met:
 After completing this phase:
 1. ✅ Update PROGRESS.md status (marked complete Oct 1, 2025)
 2. ✅ Data loaded via Phase 2 local extraction (Oct 2, 2025)
-3. ⏸️ Proceed to [Phase 4: Simulation Engine](PHASE_4_SIMULATION_ENGINE.md)
+3. ✅ Follow Workflow #14 ([Session End](../claude_workflows/workflow_descriptions/14_session_end.md)) to properly end session and prepare for Phase 4
+4. ⏸️ Proceed to [Phase 4: Simulation Engine](PHASE_4_SIMULATION_ENGINE.md)
 
 **Phase 3 successfully completed. Database operational with 6.7M plays loaded.**
 
@@ -331,6 +384,20 @@ engine = create_engine(
 ```
 
 **See workflow #32 for complete connection procedures and troubleshooting.**
+
+---
+
+## Navigation
+
+**Return to:** [PROGRESS.md](../../PROGRESS.md) | **Workflows:** [Workflow Index](../claude_workflows/CLAUDE_WORKFLOW_ORDER.md)
+
+**Related phases:**
+- Previous: [Phase 2: AWS Glue ETL](PHASE_2_AWS_GLUE.md)
+- Next: [Phase 4: Simulation Engine](PHASE_4_SIMULATION_ENGINE.md) or [Phase 5: Machine Learning](PHASE_5_MACHINE_LEARNING.md)
+
+---
+
+*For Claude Code: See CLAUDE.md for navigation instructions and context management strategies.*
 
 ---
 

@@ -53,8 +53,15 @@ Originally planned to use AWS Glue Crawler and ETL jobs for schema discovery and
 **Time Estimate:** 2 hours
 
 **Follow these workflows:**
-- Workflow #21 ([Data Validation](../claude_workflows/workflow_descriptions/21_data_validation.md))
 - Workflow #34 ([Lessons Learned Review](../claude_workflows/workflow_descriptions/34_lessons_learned_review.md))
+  - **When to run:** BEFORE attempting AWS Glue Crawler setup
+  - **Purpose:** Read LESSONS_LEARNED.md Issue #11 to avoid known Glue Crawler failures
+  - **Decision:** Skip Glue Crawlers entirely for datasets with >100K files or deeply nested JSON
+
+- Workflow #21 ([Data Validation](../claude_workflows/workflow_descriptions/21_data_validation.md))
+  - **When to run:** Before extraction scripts development
+  - **Purpose:** Sample files to understand data quality (valid vs empty), identify pre-filter criteria
+  - **Expected outcome:** ~17% empty files in ESPN data
 
 **Completed tasks:**
 1. ✅ Analyzed 500 sample files from S3
@@ -77,9 +84,34 @@ Originally planned to use AWS Glue Crawler and ETL jobs for schema discovery and
 **Time Estimate:** 4 hours
 
 **Follow these workflows:**
+- Workflow #3 ([Decision Workflow](../claude_workflows/workflow_descriptions/03_decision_workflow.md))
+  - **When to run:** When deciding to abandon AWS Glue and pivot to local extraction
+  - **Purpose:** Document the architectural decision to bypass AWS Glue entirely (create ADR-008)
+  - **Key decision:** Save $14/month, gain full control over extraction process
+
+- Workflow #6 ([File Creation](../claude_workflows/workflow_descriptions/06_file_creation.md))
+  - **When to run:** When creating the extraction scripts
+  - **Purpose:** Follow file creation best practices for Python scripts, ensure proper structure and documentation
+
 - Workflow #27 ([TDD Workflow](../claude_workflows/workflow_descriptions/27_tdd_workflow.md))
-- Workflow #29 ([Style Enforcement](../claude_workflows/workflow_descriptions/29_style_enforcement.md))
+  - **When to run:** Before writing extraction scripts
+  - **Purpose:** Write tests first for data extraction logic, JSON parsing, and database writes
+
 - Workflow #32 ([RDS Connection](../claude_workflows/workflow_descriptions/32_rds_connection.md))
+  - **When to run:** Before testing database writes
+  - **Purpose:** Verify RDS connection from local machine, test credentials
+
+- Workflow #29 ([Style Enforcement](../claude_workflows/workflow_descriptions/29_style_enforcement.md))
+  - **When to run:** After writing scripts
+  - **Purpose:** Ensure code follows project style (black, flake8, type hints)
+
+- Workflow #16 ([Testing](../claude_workflows/workflow_descriptions/16_testing.md))
+  - **When to run:** After writing extraction scripts
+  - **Purpose:** Test scripts with sample data before running on full dataset
+
+- Workflow #30 ([Code Snippet Logging](../claude_workflows/workflow_descriptions/30_code_snippet_logging.md))
+  - **When to run:** After writing extraction scripts
+  - **Purpose:** Log code snippets and outcomes to COMMAND_LOG.md for future reference
 
 **Scripts created:**
 1. ✅ `scripts/etl/complete_schema_update.py` - Add 25 new columns to games table
@@ -103,8 +135,21 @@ Originally planned to use AWS Glue Crawler and ETL jobs for schema discovery and
 **Cost:** $0 (local compute, only S3 GET requests)
 
 **Follow these workflows:**
+- Workflow #2 ([Command Logging](../claude_workflows/workflow_descriptions/02_command_logging.md))
+  - **When to run:** Before starting extraction scripts
+  - **Purpose:** Log commands to COMMAND_LOG.md for tracking and debugging
+
 - Workflow #5 ([Task Execution](../claude_workflows/workflow_descriptions/05_task_execution.md))
+  - **When to run:** When launching overnight automation
+  - **Purpose:** Follow task execution checklist, ensure logging and error handling
+
+- Workflow #21 ([Data Validation](../claude_workflows/workflow_descriptions/21_data_validation.md))
+  - **When to run:** AFTER extraction completes
+  - **Purpose:** Verify row counts, data integrity, completeness of extracted data
+
 - Workflow #11 ([Error Handling](../claude_workflows/workflow_descriptions/11_error_handling.md))
+  - **When to run:** If extraction scripts encounter errors during overnight automation
+  - **Purpose:** Handle S3 read errors, RDS write failures, connection timeouts, resume failed extractions
 
 **Completed processes:**
 1. ✅ Schema enhancement: Added 25/25 columns (1:00 AM completion)
@@ -246,7 +291,10 @@ All criteria met:
 After completing this phase:
 1. ✅ Update PROGRESS.md status (marked complete Oct 2, 2025)
 2. ✅ Document lessons learned in `LESSONS_LEARNED.md`
-3. ⏸️ Proceed to [Phase 4: Simulation Engine](PHASE_4_SIMULATION_ENGINE.md)
+3. ✅ Follow Workflow #08 ([Git Commit](../claude_workflows/workflow_descriptions/08_git_commit.md)) to commit extraction scripts with proper security scanning
+4. ✅ Follow Workflow #10 ([Git Push](../claude_workflows/workflow_descriptions/10_git_push.md)) to push extraction scripts to remote repository
+5. ✅ Follow Workflow #14 ([Session End](../claude_workflows/workflow_descriptions/14_session_end.md)) to properly end session and prepare for Phase 4
+6. ⏸️ Proceed to [Phase 4: Simulation Engine](PHASE_4_SIMULATION_ENGINE.md)
    - Phase 3 (RDS) was completed as part of Phase 2
    - Database is operational with all data loaded
 
@@ -275,6 +323,20 @@ After completing this phase:
 - `docs/LESSONS_LEARNED.md` - Issues and solutions
 - `docs/DATA_STRUCTURE_GUIDE.md` - JSON field mappings
 - `docs/PHASE_2.2_ETL_PLAN.md` - Original AWS Glue plan (not executed)
+
+---
+
+## Navigation
+
+**Return to:** [PROGRESS.md](../../PROGRESS.md) | **Workflows:** [Workflow Index](../claude_workflows/CLAUDE_WORKFLOW_ORDER.md)
+
+**Related phases:**
+- Previous: [Phase 1: S3 Data Lake](PHASE_1_S3_DATA_LAKE.md)
+- Next: [Phase 3: Database Infrastructure](PHASE_3_DATABASE.md)
+
+---
+
+*For Claude Code: See CLAUDE.md for navigation instructions and context management strategies.*
 
 ---
 

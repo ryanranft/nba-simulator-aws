@@ -1,0 +1,1183 @@
+# Phase 7: Betting Odds Integration
+
+**Status:** ⏸️ PENDING
+**Prerequisites:** Phase 3 (RDS Database) complete
+**Estimated Time:** 6-8 hours
+**Estimated Cost:** $0-10/month (depending on API usage)
+
+---
+
+> **⚠️ IMPORTANT - Before Starting This Phase:**
+>
+> **Ask Claude:** "Should I add any workflows to this phase before beginning?"
+
+---
+
+## Overview
+
+Integrate real-time and historical betting odds from The Odds API into the NBA simulator platform. This adds actual sportsbook data (spreads, moneylines, over/under) to complement your ML predictions.
+
+**What this phase adds:**
+- Historical and real-time odds from 20+ sportsbooks
+- Database schema for storing odds data
+- ETL pipeline to fetch and store odds
+- Integration with existing game predictions
+- Cost-efficient API usage (500 free requests/month)
+
+---
+
+## Prerequisites
+
+**Required:**
+- [x] Phase 3 complete (RDS database operational)
+- [x] AWS credentials configured
+- [ ] The Odds API key (free tier: 500 requests/month)
+- [ ] Python packages: `requests`, `psycopg2-binary`, `boto3`
+
+**Recommended:**
+- [ ] Phase 5 complete (ML models for comparison)
+- [ ] Phase 6.4 complete (Prediction API for integration)
+
+---
+
+## The Odds API Overview
+
+**Website:** https://the-odds-api.com/
+**Free Tier:** 500 requests/month (resets monthly)
+**Cost:** $0.01-0.05 per request above free tier
+**Response Time:** ~200-500ms
+**Update Frequency:** Every 5-10 minutes
+
+**What you get:**
+- **Pre-game odds:** Spreads, moneylines, totals (over/under)
+- **Live odds:** Real-time updates during games
+- **20+ sportsbooks:** DraftKings, FanDuel, BetMGM, Caesars, etc.
+- **Historical odds:** Via separate historical API (paid)
+
+**Free tier request breakdown:**
+- 1 request = fetch odds for all NBA games on a date
+- ~82 games/day during season = ~1 request/day = ~30 requests/month
+- 500 requests = ~16 months of daily fetching (very generous)
+
+---
+
+## Database Schema
+
+### New Table: `betting_odds`
+
+```sql
+CREATE TABLE IF NOT EXISTS betting_odds (
+    -- Primary Key
+    odds_id SERIAL PRIMARY KEY,
+
+    -- Game Reference
+    game_id VARCHAR(20) NOT NULL REFERENCES games(game_id) ON DELETE CASCADE,
+
+    -- Odds Metadata
+    bookmaker VARCHAR(50) NOT NULL,  -- e.g., 'draftkings', 'fanduel'
+    market VARCHAR(20) NOT NULL,     -- 'spreads', 'h2h' (moneyline), 'totals'
+    last_update TIMESTAMP NOT NULL,  -- When odds were last updated by bookmaker
+
+    -- Home Team Odds
+    home_team_price INTEGER,         -- Moneyline odds (e.g., -110, +150)
+    home_team_point DECIMAL(4,1),    -- Spread (e.g., -5.5) or total point
+
+    -- Away Team Odds
+    away_team_price INTEGER,         -- Moneyline odds
+    away_team_point DECIMAL(4,1),    -- Spread (e.g., +5.5) or total point
+
+    -- Over/Under (for totals market)
+    over_price INTEGER,              -- Over odds (e.g., -110)
+    over_point DECIMAL(4,1),         -- Total line (e.g., 220.5)
+    under_price INTEGER,             -- Under odds (e.g., -110)
+    under_point DECIMAL(4,1),        -- Total line (same as over_point)
+
+    -- Metadata
+    fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- When we fetched this data
+    is_latest BOOLEAN DEFAULT TRUE,                  -- Track most recent odds
+
+    -- Indexes
+    CONSTRAINT unique_odds UNIQUE (game_id, bookmaker, market, last_update)
+);
+
+-- Indexes for common queries
+CREATE INDEX idx_odds_game_id ON betting_odds(game_id);
+CREATE INDEX idx_odds_bookmaker ON betting_odds(bookmaker);
+CREATE INDEX idx_odds_market ON betting_odds(market);
+CREATE INDEX idx_odds_latest ON betting_odds(is_latest) WHERE is_latest = TRUE;
+CREATE INDEX idx_odds_fetched_at ON betting_odds(fetched_at);
+
+-- Comments
+COMMENT ON TABLE betting_odds IS 'Betting odds from The Odds API (20+ sportsbooks)';
+COMMENT ON COLUMN betting_odds.market IS 'h2h = moneyline, spreads = point spread, totals = over/under';
+COMMENT ON COLUMN betting_odds.home_team_price IS 'American odds format (e.g., -110 = bet $110 to win $100)';
+COMMENT ON COLUMN betting_odds.is_latest IS 'TRUE for most recent odds fetch for this game/bookmaker/market';
+```
+
+### Schema Changes to Existing Tables
+
+**Option A: Add aggregated odds to `games` table (recommended)**
+
+```sql
+-- Add columns to games table for quick access to consensus odds
+ALTER TABLE games ADD COLUMN IF NOT EXISTS consensus_spread DECIMAL(4,1);
+ALTER TABLE games ADD COLUMN IF NOT EXISTS consensus_total DECIMAL(4,1);
+ALTER TABLE games ADD COLUMN IF NOT EXISTS consensus_home_ml INTEGER;
+ALTER TABLE games ADD COLUMN IF NOT EXISTS consensus_away_ml INTEGER;
+ALTER TABLE games ADD COLUMN IF NOT EXISTS odds_last_updated TIMESTAMP;
+
+COMMENT ON COLUMN games.consensus_spread IS 'Average spread across all bookmakers';
+COMMENT ON COLUMN games.consensus_total IS 'Average over/under across all bookmakers';
+COMMENT ON COLUMN games.consensus_home_ml IS 'Average home moneyline across all bookmakers';
+```
+
+**Option B: Keep odds separate (cleaner, but requires joins)**
+
+No changes to `games` table - query `betting_odds` table for all odds analysis.
+
+---
+
+## Implementation Steps
+
+### Sub-Phase 7.1: The Odds API Setup
+
+**Status:** ⏸️ PENDING
+**Time Estimate:** 30 minutes
+
+**Follow these workflows:**
+- Workflow #17 ([Environment Setup](../claude_workflows/workflow_descriptions/17_environment_setup.md))
+  - **When to run:** Before API integration
+  - **Purpose:** Install required Python packages
+
+#### Steps:
+
+1. **Sign up for The Odds API (free tier)**
+
+```bash
+# Visit: https://the-odds-api.com/
+# Sign up with email
+# Get API key from dashboard
+```
+
+2. **Add API key to credentials file**
+
+```bash
+# Edit credentials file
+nano ~/nba-sim-credentials.env
+
+# Add this line:
+export ODDS_API_KEY="your_api_key_here"
+
+# Source credentials
+source ~/nba-sim-credentials.env
+```
+
+3. **Install Python requests library (if not already installed)**
+
+```bash
+conda activate nba-aws
+pip install requests
+```
+
+4. **Test API connection**
+
+```bash
+# Test script
+python - << 'EOF'
+import os
+import requests
+
+API_KEY = os.environ.get('ODDS_API_KEY')
+url = f'https://api.the-odds-api.com/v4/sports/basketball_nba/odds/?apiKey={API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american'
+
+response = requests.get(url)
+print(f"Status: {response.status_code}")
+print(f"Remaining requests: {response.headers.get('x-requests-remaining')}")
+print(f"Used requests: {response.headers.get('x-requests-used')}")
+
+if response.status_code == 200:
+    data = response.json()
+    print(f"Games with odds: {len(data)}")
+    print("✅ API connection successful")
+else:
+    print(f"❌ Error: {response.text}")
+EOF
+```
+
+**Validation:**
+- [ ] API key stored in credentials file
+- [ ] Test connection successful (status 200)
+- [ ] Remaining requests displayed (should be ~500 for new account)
+
+---
+
+### Sub-Phase 7.2: Database Schema Setup
+
+**Status:** ⏸️ PENDING
+**Time Estimate:** 30 minutes
+
+**Follow these workflows:**
+- Workflow #26 ([Database Migration](../claude_workflows/workflow_descriptions/26_database_migration.md))
+  - **When to run:** Before loading odds data
+  - **Purpose:** Create betting_odds table
+
+#### Steps:
+
+1. **Create SQL migration file**
+
+```bash
+# File: sql/create_betting_odds_table.sql
+cat > sql/create_betting_odds_table.sql << 'EOF'
+-- Phase 7: Betting Odds Integration
+-- Create betting_odds table for storing sportsbook odds from The Odds API
+
+CREATE TABLE IF NOT EXISTS betting_odds (
+    odds_id SERIAL PRIMARY KEY,
+    game_id VARCHAR(20) NOT NULL REFERENCES games(game_id) ON DELETE CASCADE,
+    bookmaker VARCHAR(50) NOT NULL,
+    market VARCHAR(20) NOT NULL,
+    last_update TIMESTAMP NOT NULL,
+
+    home_team_price INTEGER,
+    home_team_point DECIMAL(4,1),
+    away_team_price INTEGER,
+    away_team_point DECIMAL(4,1),
+
+    over_price INTEGER,
+    over_point DECIMAL(4,1),
+    under_price INTEGER,
+    under_point DECIMAL(4,1),
+
+    fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_latest BOOLEAN DEFAULT TRUE,
+
+    CONSTRAINT unique_odds UNIQUE (game_id, bookmaker, market, last_update)
+);
+
+CREATE INDEX idx_odds_game_id ON betting_odds(game_id);
+CREATE INDEX idx_odds_bookmaker ON betting_odds(bookmaker);
+CREATE INDEX idx_odds_market ON betting_odds(market);
+CREATE INDEX idx_odds_latest ON betting_odds(is_latest) WHERE is_latest = TRUE;
+CREATE INDEX idx_odds_fetched_at ON betting_odds(fetched_at);
+
+-- Add consensus columns to games table (optional but recommended)
+ALTER TABLE games ADD COLUMN IF NOT EXISTS consensus_spread DECIMAL(4,1);
+ALTER TABLE games ADD COLUMN IF NOT EXISTS consensus_total DECIMAL(4,1);
+ALTER TABLE games ADD COLUMN IF NOT EXISTS consensus_home_ml INTEGER;
+ALTER TABLE games ADD COLUMN IF NOT EXISTS consensus_away_ml INTEGER;
+ALTER TABLE games ADD COLUMN IF NOT EXISTS odds_last_updated TIMESTAMP;
+
+COMMENT ON TABLE betting_odds IS 'Betting odds from The Odds API (20+ sportsbooks)';
+COMMENT ON COLUMN betting_odds.market IS 'h2h = moneyline, spreads = point spread, totals = over/under';
+COMMENT ON COLUMN betting_odds.is_latest IS 'Most recent odds for this game/bookmaker/market combination';
+EOF
+```
+
+2. **Run migration**
+
+```bash
+# Source credentials
+source ~/nba-sim-credentials.env
+
+# Run migration
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -f sql/create_betting_odds_table.sql
+
+# Verify table created
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\d betting_odds"
+```
+
+3. **Verify schema**
+
+```bash
+# Check table structure
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME << 'EOF'
+SELECT
+    table_name,
+    column_name,
+    data_type,
+    is_nullable
+FROM information_schema.columns
+WHERE table_name = 'betting_odds'
+ORDER BY ordinal_position;
+EOF
+```
+
+**Validation:**
+- [ ] `betting_odds` table created (15 columns)
+- [ ] Foreign key constraint to `games` table exists
+- [ ] 5 indexes created
+- [ ] Consensus columns added to `games` table (if using Option A)
+
+---
+
+### Sub-Phase 7.3: ETL Script - Fetch Current Odds
+
+**Status:** ⏸️ PENDING
+**Time Estimate:** 2-3 hours
+
+**Follow these workflows:**
+- Workflow #2 ([Command Logging](../claude_workflows/workflow_descriptions/02_command_logging.md))
+  - **When to run:** While developing/testing
+  - **Purpose:** Track all commands
+
+#### Steps:
+
+1. **Create ETL script to fetch current odds**
+
+Create file: `scripts/etl/fetch_odds_current.py`
+
+```python
+#!/usr/bin/env python3
+"""
+Fetch Current NBA Betting Odds from The Odds API
+
+Fetches today's NBA games with odds from 20+ sportsbooks.
+Stores data in RDS PostgreSQL betting_odds table.
+
+API Documentation: https://the-odds-api.com/liveapi/guides/v4/
+
+Usage:
+    python scripts/etl/fetch_odds_current.py
+    python scripts/etl/fetch_odds_current.py --dry-run
+    python scripts/etl/fetch_odds_current.py --date 2024-01-15
+
+Prerequisites:
+    - export ODDS_API_KEY in environment
+    - source ~/nba-sim-credentials.env
+
+Cost: 1 API request per run (free tier: 500/month)
+
+Author: Ryan Ranft
+Phase: 7.3 - Betting Odds ETL
+"""
+
+import os
+import sys
+import json
+import argparse
+from datetime import datetime, timedelta
+from typing import List, Dict, Optional
+import requests
+import psycopg2
+from psycopg2.extras import execute_values
+
+# Configuration
+ODDS_API_KEY = os.environ.get('ODDS_API_KEY')
+ODDS_API_BASE = 'https://api.the-odds-api.com/v4'
+SPORT = 'basketball_nba'
+REGIONS = 'us'  # US bookmakers
+MARKETS = 'h2h,spreads,totals'  # Moneyline, spreads, over/under
+ODDS_FORMAT = 'american'  # American odds format (-110, +150)
+
+# Database configuration
+DB_HOST = os.environ.get('DB_HOST')
+DB_NAME = os.environ.get('DB_NAME')
+DB_USER = os.environ.get('DB_USER')
+DB_PASSWORD = os.environ.get('DB_PASSWORD')
+DB_PORT = os.environ.get('DB_PORT', '5432')
+
+def validate_environment():
+    """Ensure required environment variables are set"""
+    required = {
+        'ODDS_API_KEY': ODDS_API_KEY,
+        'DB_HOST': DB_HOST,
+        'DB_NAME': DB_NAME,
+        'DB_USER': DB_USER,
+        'DB_PASSWORD': DB_PASSWORD
+    }
+
+    missing = [k for k, v in required.items() if not v]
+
+    if missing:
+        print("❌ ERROR: Required environment variables not set:")
+        for var in missing:
+            print(f"  - {var}")
+        print("\nRun: source ~/nba-sim-credentials.env")
+        sys.exit(1)
+
+def fetch_odds_from_api() -> Optional[Dict]:
+    """
+    Fetch current NBA odds from The Odds API
+
+    Returns:
+        API response dict with games and odds
+
+    Cost: 1 API request
+    """
+    url = (
+        f"{ODDS_API_BASE}/sports/{SPORT}/odds/"
+        f"?apiKey={ODDS_API_KEY}"
+        f"&regions={REGIONS}"
+        f"&markets={MARKETS}"
+        f"&oddsFormat={ODDS_FORMAT}"
+    )
+
+    print(f"Fetching odds from The Odds API...")
+    print(f"URL: {url.replace(ODDS_API_KEY, '***')}")
+
+    try:
+        response = requests.get(url, timeout=30)
+
+        # Check rate limits
+        remaining = response.headers.get('x-requests-remaining', 'unknown')
+        used = response.headers.get('x-requests-used', 'unknown')
+
+        print(f"\n📊 API Usage:")
+        print(f"  Requests used: {used}")
+        print(f"  Requests remaining: {remaining}")
+
+        if response.status_code == 200:
+            data = response.json()
+            print(f"\n✅ Success: {len(data)} games with odds")
+            return data
+        else:
+            print(f"\n❌ Error {response.status_code}: {response.text}")
+            return None
+
+    except Exception as e:
+        print(f"\n❌ Request failed: {e}")
+        return None
+
+def map_espn_team_to_odds_team(odds_team_name: str) -> Optional[str]:
+    """
+    Map The Odds API team names to ESPN team abbreviations
+
+    The Odds API uses full team names like "Los Angeles Lakers"
+    ESPN uses abbreviations like "LAL"
+
+    Returns:
+        ESPN team abbreviation (e.g., "LAL", "BOS")
+    """
+    team_mapping = {
+        # Full name -> ESPN abbreviation
+        'Atlanta Hawks': 'ATL',
+        'Boston Celtics': 'BOS',
+        'Brooklyn Nets': 'BKN',
+        'Charlotte Hornets': 'CHA',
+        'Chicago Bulls': 'CHI',
+        'Cleveland Cavaliers': 'CLE',
+        'Dallas Mavericks': 'DAL',
+        'Denver Nuggets': 'DEN',
+        'Detroit Pistons': 'DET',
+        'Golden State Warriors': 'GSW',
+        'Houston Rockets': 'HOU',
+        'Indiana Pacers': 'IND',
+        'Los Angeles Clippers': 'LAC',
+        'Los Angeles Lakers': 'LAL',
+        'Memphis Grizzlies': 'MEM',
+        'Miami Heat': 'MIA',
+        'Milwaukee Bucks': 'MIL',
+        'Minnesota Timberwolves': 'MIN',
+        'New Orleans Pelicans': 'NOP',
+        'New York Knicks': 'NYK',
+        'Oklahoma City Thunder': 'OKC',
+        'Orlando Magic': 'ORL',
+        'Philadelphia 76ers': 'PHI',
+        'Phoenix Suns': 'PHX',
+        'Portland Trail Blazers': 'POR',
+        'Sacramento Kings': 'SAC',
+        'San Antonio Spurs': 'SAS',
+        'Toronto Raptors': 'TOR',
+        'Utah Jazz': 'UTA',
+        'Washington Wizards': 'WAS',
+    }
+
+    return team_mapping.get(odds_team_name)
+
+def find_game_id_in_db(home_team_abbrev: str, away_team_abbrev: str,
+                       game_date: str, cursor) -> Optional[str]:
+    """
+    Find ESPN game_id in database by matching teams and date
+
+    Args:
+        home_team_abbrev: Home team abbreviation (e.g., "LAL")
+        away_team_abbrev: Away team abbreviation (e.g., "BOS")
+        game_date: Game date in ISO format (e.g., "2024-01-15")
+        cursor: Database cursor
+
+    Returns:
+        game_id from games table, or None if not found
+    """
+    query = """
+        SELECT game_id
+        FROM games
+        WHERE home_team_abbrev = %s
+          AND away_team_abbrev = %s
+          AND DATE(game_date) = %s
+        LIMIT 1
+    """
+
+    cursor.execute(query, (home_team_abbrev, away_team_abbrev, game_date))
+    result = cursor.fetchone()
+
+    return result[0] if result else None
+
+def parse_odds_data(api_response: Dict, cursor) -> List[Dict]:
+    """
+    Parse The Odds API response into database records
+
+    Args:
+        api_response: Raw API response (list of games)
+        cursor: Database cursor (for game_id lookups)
+
+    Returns:
+        List of betting_odds records ready for database insertion
+    """
+    records = []
+    games_matched = 0
+    games_not_matched = 0
+
+    for game in api_response:
+        game_id_api = game.get('id')
+        commence_time = game.get('commence_time')  # ISO timestamp
+        home_team = game.get('home_team')
+        away_team = game.get('away_team')
+
+        # Convert team names to ESPN abbreviations
+        home_abbrev = map_espn_team_to_odds_team(home_team)
+        away_abbrev = map_espn_team_to_odds_team(away_team)
+
+        if not home_abbrev or not away_abbrev:
+            print(f"  ⚠️  Unknown team: {home_team} vs {away_team}")
+            games_not_matched += 1
+            continue
+
+        # Find game_id in database
+        game_date = commence_time.split('T')[0]  # Extract date
+        game_id = find_game_id_in_db(home_abbrev, away_abbrev, game_date, cursor)
+
+        if not game_id:
+            print(f"  ⚠️  Game not in database: {home_abbrev} vs {away_abbrev} on {game_date}")
+            games_not_matched += 1
+            continue
+
+        games_matched += 1
+
+        # Parse bookmaker odds
+        bookmakers = game.get('bookmakers', [])
+
+        for bookmaker in bookmakers:
+            bookmaker_key = bookmaker.get('key')
+            last_update = bookmaker.get('last_update')
+
+            # Parse markets (h2h, spreads, totals)
+            markets = bookmaker.get('markets', [])
+
+            for market in markets:
+                market_key = market.get('key')  # 'h2h', 'spreads', 'totals'
+                outcomes = market.get('outcomes', [])
+
+                # Initialize record
+                record = {
+                    'game_id': game_id,
+                    'bookmaker': bookmaker_key,
+                    'market': market_key,
+                    'last_update': last_update,
+                    'home_team_price': None,
+                    'home_team_point': None,
+                    'away_team_price': None,
+                    'away_team_point': None,
+                    'over_price': None,
+                    'over_point': None,
+                    'under_price': None,
+                    'under_point': None,
+                }
+
+                # Parse outcomes based on market type
+                for outcome in outcomes:
+                    outcome_name = outcome.get('name')
+                    price = outcome.get('price')
+                    point = outcome.get('point')
+
+                    if market_key == 'h2h':
+                        # Moneyline
+                        if outcome_name == home_team:
+                            record['home_team_price'] = price
+                        elif outcome_name == away_team:
+                            record['away_team_price'] = price
+
+                    elif market_key == 'spreads':
+                        # Point spread
+                        if outcome_name == home_team:
+                            record['home_team_price'] = price
+                            record['home_team_point'] = point
+                        elif outcome_name == away_team:
+                            record['away_team_price'] = price
+                            record['away_team_point'] = point
+
+                    elif market_key == 'totals':
+                        # Over/Under
+                        if outcome_name == 'Over':
+                            record['over_price'] = price
+                            record['over_point'] = point
+                        elif outcome_name == 'Under':
+                            record['under_price'] = price
+                            record['under_point'] = point
+
+                records.append(record)
+
+    print(f"\n📊 Parsing Summary:")
+    print(f"  Games matched: {games_matched}")
+    print(f"  Games not matched: {games_not_matched}")
+    print(f"  Total odds records: {len(records)}")
+
+    return records
+
+def insert_odds_to_db(records: List[Dict], dry_run: bool = False):
+    """
+    Insert betting odds into database
+
+    Args:
+        records: List of betting_odds records
+        dry_run: If True, print records but don't insert
+    """
+    if dry_run:
+        print(f"\n🔍 DRY RUN: Would insert {len(records)} odds records")
+        if records:
+            print("\nSample record:")
+            print(json.dumps(records[0], indent=2, default=str))
+        return
+
+    if not records:
+        print("\n⚠️  No records to insert")
+        return
+
+    try:
+        # Connect to database
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            database=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            port=DB_PORT
+        )
+        cursor = conn.cursor()
+
+        # Mark old odds as not latest for these games
+        game_ids = list(set(r['game_id'] for r in records))
+
+        cursor.execute("""
+            UPDATE betting_odds
+            SET is_latest = FALSE
+            WHERE game_id = ANY(%s)
+        """, (game_ids,))
+
+        print(f"  ✓ Marked old odds as not latest for {len(game_ids)} games")
+
+        # Insert new odds
+        insert_query = """
+            INSERT INTO betting_odds (
+                game_id, bookmaker, market, last_update,
+                home_team_price, home_team_point,
+                away_team_price, away_team_point,
+                over_price, over_point,
+                under_price, under_point,
+                is_latest
+            ) VALUES %s
+            ON CONFLICT (game_id, bookmaker, market, last_update) DO NOTHING
+        """
+
+        values = [
+            (
+                r['game_id'], r['bookmaker'], r['market'], r['last_update'],
+                r['home_team_price'], r['home_team_point'],
+                r['away_team_price'], r['away_team_point'],
+                r['over_price'], r['over_point'],
+                r['under_price'], r['under_point'],
+                True  # is_latest
+            )
+            for r in records
+        ]
+
+        execute_values(cursor, insert_query, values)
+        conn.commit()
+
+        print(f"\n✅ Inserted {len(records)} odds records into database")
+
+        # Update consensus odds in games table
+        update_consensus_odds(cursor, game_ids)
+        conn.commit()
+
+        cursor.close()
+        conn.close()
+
+    except Exception as e:
+        print(f"\n❌ Database error: {e}")
+        if 'conn' in locals():
+            conn.rollback()
+            conn.close()
+
+def update_consensus_odds(cursor, game_ids: List[str]):
+    """
+    Calculate and update consensus odds in games table
+
+    Consensus = average of all bookmaker odds for each game
+    """
+    for game_id in game_ids:
+        # Calculate average spread
+        cursor.execute("""
+            UPDATE games
+            SET
+                consensus_spread = (
+                    SELECT AVG(home_team_point)
+                    FROM betting_odds
+                    WHERE game_id = %s
+                      AND market = 'spreads'
+                      AND is_latest = TRUE
+                      AND home_team_point IS NOT NULL
+                ),
+                consensus_total = (
+                    SELECT AVG(over_point)
+                    FROM betting_odds
+                    WHERE game_id = %s
+                      AND market = 'totals'
+                      AND is_latest = TRUE
+                      AND over_point IS NOT NULL
+                ),
+                consensus_home_ml = (
+                    SELECT AVG(home_team_price)
+                    FROM betting_odds
+                    WHERE game_id = %s
+                      AND market = 'h2h'
+                      AND is_latest = TRUE
+                      AND home_team_price IS NOT NULL
+                ),
+                consensus_away_ml = (
+                    SELECT AVG(away_team_price)
+                    FROM betting_odds
+                    WHERE game_id = %s
+                      AND market = 'h2h'
+                      AND is_latest = TRUE
+                      AND away_team_price IS NOT NULL
+                ),
+                odds_last_updated = CURRENT_TIMESTAMP
+            WHERE game_id = %s
+        """, (game_id, game_id, game_id, game_id, game_id))
+
+    print(f"  ✓ Updated consensus odds for {len(game_ids)} games")
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Fetch current NBA betting odds from The Odds API'
+    )
+    parser.add_argument(
+        '--dry-run',
+        action='store_true',
+        help='Show what would be done without inserting'
+    )
+
+    args = parser.parse_args()
+
+    print("="*80)
+    print("FETCH CURRENT NBA BETTING ODDS")
+    print("="*80)
+    print()
+
+    # Validate environment
+    validate_environment()
+
+    # Fetch odds from API (costs 1 request)
+    api_response = fetch_odds_from_api()
+
+    if not api_response:
+        print("\n❌ Failed to fetch odds from API")
+        sys.exit(1)
+
+    # Connect to database for game lookups
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT
+    )
+    cursor = conn.cursor()
+
+    # Parse odds data
+    records = parse_odds_data(api_response, cursor)
+
+    cursor.close()
+    conn.close()
+
+    # Insert into database
+    insert_odds_to_db(records, dry_run=args.dry_run)
+
+    print("\n" + "="*80)
+    print("ODDS FETCH COMPLETE")
+    print("="*80)
+    print()
+
+if __name__ == '__main__':
+    main()
+```
+
+2. **Make script executable**
+
+```bash
+chmod +x scripts/etl/fetch_odds_current.py
+```
+
+3. **Test with dry run**
+
+```bash
+source ~/nba-sim-credentials.env
+python scripts/etl/fetch_odds_current.py --dry-run
+```
+
+4. **Run for real (costs 1 API request)**
+
+```bash
+python scripts/etl/fetch_odds_current.py
+```
+
+**Validation:**
+- [ ] Script runs without errors
+- [ ] API usage displayed (requests remaining)
+- [ ] Odds records inserted into `betting_odds` table
+- [ ] Consensus odds updated in `games` table
+
+---
+
+### Sub-Phase 7.4: Historical Odds Backfill (Optional)
+
+**Status:** ⏸️ PENDING
+**Time Estimate:** 2 hours (if doing backfill)
+**Cost:** $0.50-5.00 depending on how much history
+
+**Note:** The Odds API historical data requires paid plan ($10-50/month for access). Free tier only has current/upcoming games.
+
+**If you want historical odds:**
+1. Upgrade to paid plan
+2. Use historical endpoint: `/v4/historical/sports/{sport}/odds`
+3. Modify `fetch_odds_current.py` to accept date range parameters
+4. Batch fetch by date (1 request per date)
+
+**Alternative:** Use Odds API only for future games, skip historical backfill.
+
+---
+
+### Sub-Phase 7.5: Scheduled Odds Updates (Automation)
+
+**Status:** ⏸️ PENDING
+**Time Estimate:** 1 hour
+
+**Follow these workflows:**
+- Workflow #27 ([Scheduled Tasks Setup](../claude_workflows/workflow_descriptions/27_scheduled_tasks.md))
+  - **When to run:** After ETL script working
+  - **Purpose:** Automate daily odds fetching
+
+#### Option A: Cron Job (Local/EC2)
+
+```bash
+# Edit crontab
+crontab -e
+
+# Add daily odds fetch at 9am EST (before games start)
+0 9 * * * source ~/nba-sim-credentials.env && /Users/ryanranft/miniconda3/envs/nba-aws/bin/python /Users/ryanranft/nba-simulator-aws/scripts/etl/fetch_odds_current.py >> /tmp/odds_fetch.log 2>&1
+
+# Add pre-game update at 6pm EST (closer to tipoff)
+0 18 * * * source ~/nba-sim-credentials.env && /Users/ryanranft/miniconda3/envs/nba-aws/bin/python /Users/ryanranft/nba-simulator-aws/scripts/etl/fetch_odds_current.py >> /tmp/odds_fetch.log 2>&1
+```
+
+#### Option B: AWS Lambda + EventBridge (More scalable)
+
+1. **Package Lambda function**
+
+```bash
+# Create deployment package
+mkdir -p lambda/odds_fetcher
+cp scripts/etl/fetch_odds_current.py lambda/odds_fetcher/lambda_function.py
+
+# Modify for Lambda (add handler function)
+# ... (details in Sub-Phase 7.5 implementation)
+
+# Deploy to Lambda
+aws lambda create-function \
+  --function-name nba-odds-fetcher \
+  --runtime python3.11 \
+  --role arn:aws:iam::ACCOUNT_ID:role/lambda-execution-role \
+  --handler lambda_function.lambda_handler \
+  --zip-file fileb://function.zip
+```
+
+2. **Create EventBridge rule**
+
+```bash
+# Daily at 9am EST
+aws events put-rule \
+  --name nba-odds-daily-fetch \
+  --schedule-expression "cron(0 14 * * ? *)"  # 9am EST = 2pm UTC
+
+# Add Lambda as target
+aws events put-targets \
+  --rule nba-odds-daily-fetch \
+  --targets "Id"="1","Arn"="arn:aws:lambda:us-east-1:ACCOUNT_ID:function:nba-odds-fetcher"
+```
+
+**Cost:** $0.20-1.00/month (Lambda + EventBridge)
+
+**Validation:**
+- [ ] Cron job or EventBridge rule created
+- [ ] Test manual trigger
+- [ ] Verify odds update in database
+
+---
+
+### Sub-Phase 7.6: Query & Analysis Tools
+
+**Status:** ⏸️ PENDING
+**Time Estimate:** 1-2 hours
+
+#### Create analysis queries
+
+**File: `sql/queries/odds_analysis.sql`**
+
+```sql
+-- Odds Analysis Queries
+-- Phase 7: Betting Odds Integration
+
+-- 1. Get latest odds for all games today
+SELECT
+    g.game_id,
+    g.game_date,
+    g.home_team_abbrev,
+    g.away_team_abbrev,
+    g.consensus_spread,
+    g.consensus_total,
+    g.consensus_home_ml,
+    g.consensus_away_ml,
+    COUNT(DISTINCT bo.bookmaker) as num_bookmakers
+FROM games g
+LEFT JOIN betting_odds bo ON g.game_id = bo.game_id AND bo.is_latest = TRUE
+WHERE DATE(g.game_date) = CURRENT_DATE
+GROUP BY g.game_id, g.game_date, g.home_team_abbrev, g.away_team_abbrev,
+         g.consensus_spread, g.consensus_total, g.consensus_home_ml, g.consensus_away_ml
+ORDER BY g.game_date;
+
+-- 2. Compare odds across bookmakers for a specific game
+SELECT
+    bookmaker,
+    market,
+    home_team_price,
+    home_team_point,
+    away_team_price,
+    away_team_point,
+    last_update
+FROM betting_odds
+WHERE game_id = '401468215'  -- Replace with actual game_id
+  AND is_latest = TRUE
+ORDER BY market, bookmaker;
+
+-- 3. Find line movement (odds changes over time)
+SELECT
+    game_id,
+    bookmaker,
+    market,
+    home_team_point,
+    last_update,
+    LAG(home_team_point) OVER (PARTITION BY game_id, bookmaker, market ORDER BY last_update) as previous_line,
+    home_team_point - LAG(home_team_point) OVER (PARTITION BY game_id, bookmaker, market ORDER BY last_update) as line_movement
+FROM betting_odds
+WHERE game_id = '401468215'  -- Replace with actual game_id
+  AND market = 'spreads'
+ORDER BY bookmaker, last_update;
+
+-- 4. Compare ML predictions vs betting odds
+SELECT
+    g.game_id,
+    g.game_date,
+    g.home_team_abbrev,
+    g.away_team_abbrev,
+    g.home_score,
+    g.away_score,
+    g.consensus_spread,
+    -- Add ML prediction columns when available
+    (g.home_score - g.away_score) as actual_margin,
+    (g.home_score - g.away_score) - g.consensus_spread as spread_diff
+FROM games g
+WHERE g.completed = TRUE
+  AND g.consensus_spread IS NOT NULL
+  AND DATE(g.game_date) >= CURRENT_DATE - INTERVAL '7 days'
+ORDER BY g.game_date DESC;
+
+-- 5. Best odds finder (line shopping)
+WITH best_odds AS (
+    SELECT
+        game_id,
+        market,
+        MAX(home_team_price) as best_home_price,
+        MIN(away_team_price) as best_away_price,
+        MAX(over_price) as best_over_price,
+        MIN(under_price) as best_under_price
+    FROM betting_odds
+    WHERE is_latest = TRUE
+    GROUP BY game_id, market
+)
+SELECT
+    g.home_team_abbrev,
+    g.away_team_abbrev,
+    bo.bookmaker,
+    bo.market,
+    bo.home_team_price,
+    bo.away_team_price,
+    CASE
+        WHEN bo.market = 'h2h' AND bo.home_team_price = b.best_home_price THEN '✓ Best Home'
+        WHEN bo.market = 'h2h' AND bo.away_team_price = b.best_away_price THEN '✓ Best Away'
+        ELSE ''
+    END as is_best
+FROM betting_odds bo
+JOIN games g ON bo.game_id = g.game_id
+JOIN best_odds b ON bo.game_id = b.game_id AND bo.market = b.market
+WHERE bo.is_latest = TRUE
+  AND DATE(g.game_date) = CURRENT_DATE
+ORDER BY g.game_id, bo.market, bo.bookmaker;
+```
+
+**Validation:**
+- [ ] Query files created
+- [ ] Queries run without errors
+- [ ] Results match expected format
+
+---
+
+## Integration with Existing Systems
+
+### With Prediction API (Phase 6.4)
+
+Modify Lambda function to include odds:
+
+```python
+# In lambda/prediction_api/lambda_function_lightweight.py
+
+def lambda_handler(event, context):
+    # ... existing prediction code ...
+
+    # Add odds lookup
+    if game_id:
+        odds = get_consensus_odds(game_id)
+        response['consensus_odds'] = odds
+
+    return response
+
+def get_consensus_odds(game_id):
+    """Fetch consensus odds from RDS"""
+    # Query betting_odds table
+    # Return consensus spread, total, moneyline
+    pass
+```
+
+### With Feature Engineering (Phase 5.2)
+
+Add odds as ML features:
+
+```python
+# In scripts/ml/generate_features.py
+
+# Add odds features
+features['consensus_spread'] = row['consensus_spread']
+features['consensus_total'] = row['consensus_total']
+features['implied_home_win_prob'] = american_odds_to_probability(row['consensus_home_ml'])
+features['implied_away_win_prob'] = american_odds_to_probability(row['consensus_away_ml'])
+
+def american_odds_to_probability(odds):
+    """Convert American odds to implied probability"""
+    if odds > 0:
+        return 100 / (odds + 100)
+    else:
+        return abs(odds) / (abs(odds) + 100)
+```
+
+---
+
+## Cost Analysis
+
+### The Odds API Costs
+
+**Free Tier:**
+- 500 requests/month
+- 1 request = all games for a day
+- Enough for 500 days of daily fetches (very generous)
+
+**Paid Plans (if needed):**
+- Starter: $10/month (1,000 requests)
+- Pro: $50/month (10,000 requests)
+- Historical data: Included in paid plans
+
+### AWS Costs (if using Lambda automation)
+
+- Lambda: $0.20/month (1,000 invocations)
+- EventBridge: $0.00 (first 1M events free)
+- RDS storage: +$0.10-0.50/month (small table)
+
+**Total monthly cost:** $0-10/month
+
+---
+
+## Success Criteria
+
+- [ ] The Odds API account created and key stored
+- [ ] `betting_odds` table created in RDS
+- [ ] ETL script fetches and stores odds successfully
+- [ ] Consensus odds calculated and stored in `games` table
+- [ ] Scheduled automation configured (cron or Lambda)
+- [ ] Query tools created for analysis
+- [ ] Integration with prediction API complete (optional)
+- [ ] API usage under 500 requests/month (free tier)
+
+---
+
+## Next Steps
+
+After Phase 7 complete:
+
+1. **Add odds to ML models** → Retrain with odds as features (see Phase 5)
+2. **Build odds comparison dashboard** → QuickSight or Jupyter notebook
+3. **Implement betting alerts** → SNS notifications when odds move significantly
+4. **Line shopping tool** → Find best odds across bookmakers
+5. **Historical analysis** → Backtest predictions vs actual odds performance
+
+---
+
+## Troubleshooting
+
+### API Issues
+
+**Problem:** API returns 401 Unauthorized
+- **Fix:** Check ODDS_API_KEY environment variable is set correctly
+
+**Problem:** API returns 429 Too Many Requests
+- **Fix:** Exceeded free tier (500 requests/month), wait for reset or upgrade
+
+**Problem:** No games returned
+- **Fix:** NBA season may be offseason, check `https://the-odds-api.com/sports-odds-data/basketball-nba/`
+
+### Database Issues
+
+**Problem:** Foreign key constraint fails
+- **Fix:** Game not in `games` table yet, run schedule ETL first (Phase 2)
+
+**Problem:** Team mapping fails
+- **Fix:** Update `map_espn_team_to_odds_team()` function with new team names
+
+### Data Quality Issues
+
+**Problem:** Odds seem stale (last_update > 1 hour ago)
+- **Fix:** Bookmakers update odds irregularly, this is normal
+
+**Problem:** Different bookmakers have very different odds
+- **Fix:** This is normal, use consensus odds for most reliable estimates
+
+---
+
+## Related Documentation
+
+- **The Odds API Docs:** https://the-odds-api.com/liveapi/guides/v4/
+- **Phase 2:** ETL extraction (games table required)
+- **Phase 5:** ML models (can use odds as features)
+- **Phase 6.4:** Prediction API (integrate odds into responses)
+
+---
+
+*Last updated: 2025-10-03*
+*Estimated completion time: 6-8 hours*
+*Estimated cost: $0-10/month*

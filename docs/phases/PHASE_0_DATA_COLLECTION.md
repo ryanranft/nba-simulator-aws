@@ -1,77 +1,60 @@
-# ⚠️ THIS FILE HAS MOVED
+# Phase 0: Data Collection & Initial Upload
 
-**Date:** October 4, 2025
-**Reason:** Phase reorganization (ADR-008)
-
----
-
-> **🔴 THIS CONTENT HAS BEEN REORGANIZED:**
->
-> This file (Phase 1: S3 Data Lake Setup) has been **moved to Phase 0** as of October 4, 2025.
->
-> **The new phase structure is:**
-> - **Phase 0:** [Data Collection & Initial Upload](PHASE_0_DATA_COLLECTION.md) ← This is where the S3 upload content went
-> - **Phase 1:** [Data Quality & Gap Analysis](PHASE_1_DATA_QUALITY.md) ← New Phase 1 content
->
-> **Why the change?**
-> - Logical data flow: Collect (Phase 0) → Analyze (Phase 1) → Extract (Phase 2) → Store (Phase 3)
-> - Phase 0 is now about getting data into S3 (one-time setup)
-> - Phase 1 is now about analyzing quality and filling gaps
-> - See `docs/adr/008-phase-reorganization.md` for full rationale
->
-> **⚠️ DO NOT USE THIS FILE - IT IS DEPRECATED**
->
-> **For new sessions:**
-> 1. Read [Phase 0: Data Collection](PHASE_0_DATA_COLLECTION.md) for S3 upload instructions
-> 2. Then read [Phase 1: Data Quality](PHASE_1_DATA_QUALITY.md) for quality analysis
->
-> **Backup of old content:** `PHASE_1_S3_DATA_LAKE.md.backup`
-
----
-
-# OLD CONTENT BELOW (DEPRECATED)
-
----
-
-# Phase 1: S3 Data Lake Setup
-
-**Status:** ❌ DEPRECATED (see new Phase 0 above)
+**Status:** ✅ COMPLETE
 **Prerequisites:** None (foundational phase)
 **Estimated Time:** 2 days
-**Estimated Cost:** $2.74/month
+**Estimated Cost:** $2.74/month (S3 storage)
 **Started:** September 29, 2025
 **Completed:** October 1, 2025
 
 ---
 
+> **📌 NOTE - Phase Reorganization:**
+>
+> This is the NEW Phase 0 as of October 4, 2025 (ADR-008).
+> Previously, this content was in Phase 1 (S3 Data Lake Setup).
+>
+> **Old structure:** Phase 0 = Data Verification → Phase 1 = S3 Upload
+> **New structure:** Phase 0 = Data Collection → Phase 1 = Quality Analysis
+>
+> See `docs/adr/008-phase-reorganization.md` for rationale.
+
+---
+
 ## Overview
 
-Set up AWS S3 as the raw data lake foundation for the NBA simulator pipeline. This phase involves uploading all historical NBA game data (1999-2025) from local storage to S3 for cloud-based processing.
+Get raw data from local storage into AWS S3 (one-time setup). This is the **foundation phase** for the entire NBA simulator pipeline - all subsequent phases depend on data being available in S3.
 
 **This phase includes:**
 - Local development environment setup
 - AWS S3 bucket creation
-- Data upload (146,115 JSON files, 119 GB)
-- Cost optimization and monitoring
+- Initial upload of existing ESPN data to S3
+- Upload verification and data integrity checks
+
+**What happens in this phase:**
+- Take 146,115 JSON files (119GB) from local storage
+- Upload to S3 for cloud-based processing
+- Establish S3 as the single source of truth for raw data
 
 ---
 
 ## Prerequisites
 
 Before starting this phase:
-- [x] AWS account created
-- [x] AWS CLI installed and configured
-- [x] Local NBA data available (`/Users/ryanranft/0espn/data/nba/`)
-- [x] Python 3.11 environment
-- [x] Sufficient local disk space for data
+- [ ] AWS account created
+- [ ] AWS CLI installed
+- [ ] Local NBA data available (`/Users/ryanranft/0espn/data/nba/`)
+- [ ] Python 3.11 environment
+- [ ] Sufficient local disk space for data
 
-**See workflow #17 (Environment Setup) for complete setup verification.**
+**For NBA:** Existing ESPN scraper output at `/Users/ryanranft/0espn/data/nba/`
+**For other sports:** Local data files or API dumps ready for upload
 
 ---
 
 ## Implementation Steps
 
-### Sub-Phase 1.1: Local Environment Setup
+### Sub-Phase 0.1: Local Environment Setup
 
 **Status:** ✅ COMPLETE
 **Time Estimate:** 4 hours
@@ -100,6 +83,23 @@ Before starting this phase:
 4. ✅ Configured AWS credentials
 5. ✅ Set up Git repository with SSH authentication (ADR-005)
 
+**Commands used:**
+```bash
+# Create conda environment
+conda create -n nba-aws python=3.11.13
+conda activate nba-aws
+
+# Install dependencies
+pip install boto3 pandas numpy pytest psycopg2-binary python-dotenv
+
+# Verify AWS CLI
+aws --version
+aws sts get-caller-identity
+
+# Configure Git
+git remote add origin git@github.com:username/nba-simulator-aws.git
+```
+
 **Validation:**
 - [x] `conda activate nba-aws` works
 - [x] `aws sts get-caller-identity` returns account info
@@ -108,7 +108,7 @@ Before starting this phase:
 
 ---
 
-### Sub-Phase 1.2: S3 Bucket Creation
+### Sub-Phase 0.2: S3 Bucket Creation
 
 **Status:** ✅ COMPLETE
 **Time Estimate:** 30 minutes
@@ -140,20 +140,27 @@ Before starting this phase:
 
 **Commands used:**
 ```bash
+# Create bucket
 aws s3 mb s3://nba-sim-raw-data-lake --region us-east-1
+
+# Enable encryption
 aws s3api put-bucket-encryption \
   --bucket nba-sim-raw-data-lake \
   --server-side-encryption-configuration \
   '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
+
+# Verify public access block (enabled by default)
+aws s3api get-public-access-block --bucket nba-sim-raw-data-lake
 ```
 
 **Validation:**
 - [x] Bucket exists: `aws s3 ls | grep nba-sim`
 - [x] Encryption enabled: `aws s3api get-bucket-encryption --bucket nba-sim-raw-data-lake`
+- [x] Public access blocked (default)
 
 ---
 
-### Sub-Phase 1.3: Data Upload to S3
+### Sub-Phase 0.3: Initial Data Upload to S3
 
 **Status:** ✅ COMPLETE
 **Time Estimate:** 1.5 days (overnight upload)
@@ -172,10 +179,6 @@ aws s3api put-bucket-encryption \
   - **When to run:** After running `aws s3 sync` commands
   - **Purpose:** Log upload commands for documentation and future reference
 
-- Workflow #21 ([Data Validation](../claude_workflows/workflow_descriptions/21_data_validation.md))
-  - **When to run:** AFTER upload completes
-  - **Purpose:** Verify file count, sizes, and data integrity (compare S3 vs local)
-
 - Workflow #11 ([Error Handling](../claude_workflows/workflow_descriptions/11_error_handling.md))
   - **When to run:** If upload fails or is interrupted
   - **Purpose:** Handle AWS CLI errors, network interruptions, resume failed uploads using `aws s3 sync`
@@ -183,8 +186,7 @@ aws s3api put-bucket-encryption \
 **Completed tasks:**
 1. ✅ Backed up local data to external drive
 2. ✅ Uploaded 146,115 JSON files to S3
-3. ✅ Verified file count and sizes
-4. ✅ Documented data structure in `docs/DATA_STRUCTURE_GUIDE.md`
+3. ✅ Documented data structure in `docs/DATA_STRUCTURE_GUIDE.md`
 
 **Data uploaded:**
 - **Schedule files:** 11,633 files → `s3://nba-sim-raw-data-lake/schedule/`
@@ -196,22 +198,65 @@ aws s3api put-bucket-encryption \
 ```bash
 # Upload by data type
 aws s3 sync /Users/ryanranft/0espn/data/nba/schedule/ \
-  s3://nba-sim-raw-data-lake/schedule/
+  s3://nba-sim-raw-data-lake/schedule/ \
+  --exclude "*" --include "*.json"
 
 aws s3 sync /Users/ryanranft/0espn/data/nba/pbp/ \
-  s3://nba-sim-raw-data-lake/pbp/
+  s3://nba-sim-raw-data-lake/pbp/ \
+  --exclude "*" --include "*.json"
 
 aws s3 sync /Users/ryanranft/0espn/data/nba/box_scores/ \
-  s3://nba-sim-raw-data-lake/box_scores/
+  s3://nba-sim-raw-data-lake/box_scores/ \
+  --exclude "*" --include "*.json"
 
 aws s3 sync /Users/ryanranft/0espn/data/nba/team_stats/ \
-  s3://nba-sim-raw-data-lake/team_stats/
+  s3://nba-sim-raw-data-lake/team_stats/ \
+  --exclude "*" --include "*.json"
+```
+
+**Why `aws s3 sync`?**
+- Automatically resumes if interrupted
+- Only uploads new/changed files
+- Skips files that already exist in S3
+- Safe to run multiple times
+
+---
+
+### Sub-Phase 0.4: Verify Upload Completeness
+
+**Status:** ✅ COMPLETE
+**Time Estimate:** 30 minutes
+
+**Follow these workflows:**
+- Workflow #21 ([Data Validation](../claude_workflows/workflow_descriptions/21_data_validation.md))
+  - **When to run:** AFTER upload completes
+  - **Purpose:** Verify file count, sizes, and data integrity (compare S3 vs local)
+
+**Completed tasks:**
+1. ✅ Verified file counts match local source
+2. ✅ Verified total size matches (119GB)
+3. ✅ Spot-checked sample files for valid JSON
+
+**Validation commands:**
+```bash
+# Count files in S3
+aws s3 ls s3://nba-sim-raw-data-lake/ --recursive | wc -l
+# Expected: 146,115
+
+# Check total size
+aws s3 ls s3://nba-sim-raw-data-lake/ --recursive --summarize | grep "Total Size"
+# Expected: ~119 GB
+
+# Download and verify sample file
+aws s3 cp s3://nba-sim-raw-data-lake/schedule/20230410.json /tmp/test.json
+python -m json.tool /tmp/test.json > /dev/null && echo "Valid JSON"
 ```
 
 **Validation:**
-- [x] File count matches: `aws s3 ls s3://nba-sim-raw-data-lake/ --recursive | wc -l` → 146,115
-- [x] Total size matches: `aws s3 ls s3://nba-sim-raw-data-lake/ --recursive --summarize` → 119 GB
-- [x] Sample files downloadable and valid JSON
+- [x] File count matches: 146,115 files
+- [x] Total size matches: 119 GB
+- [x] Sample files are valid JSON
+- [x] All 4 data types uploaded successfully
 
 ---
 
@@ -249,6 +294,35 @@ aws s3 sync /Users/ryanranft/0espn/data/nba/team_stats/ \
 
 ---
 
+## Multi-Sport Replication
+
+**For future sports (NFL, MLB, NHL, Soccer):**
+
+This phase is **sport-agnostic** - follow the same steps:
+
+1. **Sub-Phase 0.1:** Set up environment (same conda env can be reused)
+2. **Sub-Phase 0.2:** Create sport-specific S3 bucket (e.g., `s3://nfl-sim-raw-data-lake`)
+3. **Sub-Phase 0.3:** Upload sport data from local source
+4. **Sub-Phase 0.4:** Verify upload
+
+**Example for NFL:**
+```bash
+# Create bucket
+aws s3 mb s3://nfl-sim-raw-data-lake --region us-east-1
+
+# Upload data
+aws s3 sync /Users/ryanranft/0espn/data/nfl/ \
+  s3://nfl-sim-raw-data-lake/schedule/ \
+  --exclude "*" --include "*.json"
+
+# Verify
+aws s3 ls s3://nfl-sim-raw-data-lake/ --recursive | wc -l
+```
+
+**Then proceed to Phase 1 (Data Quality & Gap Analysis) for the new sport.**
+
+---
+
 ## Troubleshooting
 
 **Common issues encountered:**
@@ -264,6 +338,14 @@ aws s3 sync /Users/ryanranft/0espn/data/nba/team_stats/ \
 3. **PyCharm slow with data folder**
    - Solution: Mark `/data/` as "Excluded" in PyCharm
    - Prevents indexing of 146K+ files
+
+4. **Permission denied errors**
+   - Check AWS credentials: `aws sts get-caller-identity`
+   - Verify IAM user has S3 write permissions
+
+5. **Bucket already exists error**
+   - S3 bucket names are globally unique
+   - Use different bucket name or region
 
 ---
 
@@ -288,6 +370,7 @@ All criteria met:
 - **ADR-002:** Extract 10% of JSON fields (save 90% storage)
 - **ADR-003:** Use Python 3.11 (AWS Glue 4.0 compatibility)
 - **ADR-005:** Git SSH authentication (security)
+- **ADR-008:** Phase reorganization (logical data flow)
 
 **See `docs/adr/README.md` for complete ADRs.**
 
@@ -296,12 +379,12 @@ All criteria met:
 ## Next Steps
 
 After completing this phase:
-1. ✅ Update PROGRESS.md status (marked complete Oct 1, 2025)
-2. ✅ Follow Workflow #14 ([Session End](../claude_workflows/workflow_descriptions/14_session_end.md)) to properly end session and prepare for Phase 2
-3. ✅ Proceed to [Phase 2: AWS Glue ETL](PHASE_2_AWS_GLUE.md)
-4. ✅ Monitor S3 costs: `make check-costs`
+1. ✅ S3 bucket operational with all data uploaded
+2. ✅ Update PROGRESS.md status (marked complete Oct 1, 2025)
+3. ✅ Follow Workflow #14 ([Session End](../claude_workflows/workflow_descriptions/14_session_end.md))
+4. → Proceed to [Phase 1: Data Quality & Gap Analysis](PHASE_1_DATA_QUALITY.md)
 
-**Phase 1 successfully completed. Data lake operational.**
+**Phase 0 successfully completed. S3 data lake operational.**
 
 ---
 
@@ -321,7 +404,8 @@ After completing this phase:
 
 **Related phases:**
 - Previous: None (first phase)
-- Next: [Phase 2: AWS Glue ETL](PHASE_2_AWS_GLUE.md)
+- Next: [Phase 1: Data Quality & Gap Analysis](PHASE_1_DATA_QUALITY.md)
+- Formerly: This was Phase 1 before ADR-008 reorganization
 
 ---
 
@@ -329,6 +413,6 @@ After completing this phase:
 
 ---
 
-*Last updated: 2025-10-02*
-*Completed by: Phase 1 team*
+*Last updated: 2025-10-04 (reorganized per ADR-008)*
+*Completed by: Phase 0 team*
 *Total time: 2 days*

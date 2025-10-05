@@ -9,6 +9,14 @@
 
 ---
 
+> **⚠️ IMPORTANT - Before Starting This Phase:**
+>
+> **Ask Claude:** "Should I add any workflows to this phase before beginning?"
+>
+> This allows Claude to review the current workflow references and recommend any missing workflows that would improve implementation guidance. Phases 1-3 were enhanced with comprehensive workflow instructions - this phase should receive the same treatment before starting work.
+
+---
+
 ## Overview
 
 Optional enhancements to improve analytics capabilities, monitoring, and operational efficiency. These components are not required for core functionality but add value for production deployments.
@@ -40,8 +48,21 @@ Before starting this phase:
 **Cost:** $0.50-5/month
 
 **Follow these workflows:**
+- Workflow #18 ([Cost Management](../claude_workflows/workflow_descriptions/18_cost_management.md))
+  - **When to run:** BEFORE setting up analytics lake
+  - **Purpose:** Estimate storage costs for simulation outputs, determine retention policy
+
 - Workflow #24 ([AWS Resource Setup](../claude_workflows/workflow_descriptions/24_aws_resource_setup.md))
+  - **When to run:** When configuring S3 structure and partitioning
+  - **Purpose:** Follow S3 best practices (partitioning strategy, lifecycle policies, compression)
+
 - Workflow #21 ([Data Validation](../claude_workflows/workflow_descriptions/21_data_validation.md))
+  - **When to run:** After writing simulation outputs to S3
+  - **Purpose:** Validate Parquet files are readable, partitioning works, compression effective
+
+- Workflow #11 ([Error Handling](../claude_workflows/workflow_descriptions/11_error_handling.md))
+  - **When to run:** If Parquet file writes fail or S3 uploads error
+  - **Purpose:** Troubleshoot file format issues, S3 permissions, compression errors
 
 **Purpose:**
 Store simulation results in Parquet format for efficient analytical queries without loading data into RDS.
@@ -97,7 +118,25 @@ print(f"Results saved to {output_path}")
 **Cost:** $0.50-2/month (pay-per-query)
 
 **Follow these workflows:**
+- Workflow #18 ([Cost Management](../claude_workflows/workflow_descriptions/18_cost_management.md))
+  - **When to run:** BEFORE using Athena extensively
+  - **Purpose:** Understand pay-per-query pricing, estimate monthly query costs
+
 - Workflow #24 ([AWS Resource Setup](../claude_workflows/workflow_descriptions/24_aws_resource_setup.md))
+  - **When to run:** When creating Athena database and tables
+  - **Purpose:** Follow Athena best practices (table definition, partitioning, query optimization)
+
+- Workflow #16 ([Testing](../claude_workflows/workflow_descriptions/16_testing.md))
+  - **When to run:** After creating tables
+  - **Purpose:** Test queries, validate results, check performance (<10 seconds)
+
+- Workflow #2 ([Command Logging](../claude_workflows/workflow_descriptions/02_command_logging.md))
+  - **When to run:** After running setup SQL commands
+  - **Purpose:** Log Athena table definitions to COMMAND_LOG.md for documentation
+
+- Workflow #11 ([Error Handling](../claude_workflows/workflow_descriptions/11_error_handling.md))
+  - **When to run:** If Athena queries fail or partition loading errors occur
+  - **Purpose:** Troubleshoot Athena query errors, partition mismatches, S3 path issues
 
 **Purpose:**
 Run SQL queries directly on S3 data without loading into RDS. Cheaper for occasional analytical queries.
@@ -173,7 +212,28 @@ LIMIT 10;
 
 **Follow these workflows:**
 - Workflow #18 ([Cost Management](../claude_workflows/workflow_descriptions/18_cost_management.md))
-- Workflow #11 ([Error Handling](../claude_workflows/workflow_descriptions/11_error_handling.md))
+  - **When to run:** When setting up cost alarms
+  - **Purpose:** Configure budget thresholds ($150/month target), set up proactive alerts
+
+- Workflow #24 ([AWS Resource Setup](../claude_workflows/workflow_descriptions/24_aws_resource_setup.md))
+  - **When to run:** When creating CloudWatch dashboards and alarms
+  - **Purpose:** Follow CloudWatch best practices (alarm thresholds, SNS topics, dashboard layouts)
+
+- Workflow #16 ([Testing](../claude_workflows/workflow_descriptions/16_testing.md))
+  - **When to run:** After creating alarms
+  - **Purpose:** Test alarm triggers (set low threshold temporarily), verify notifications
+
+- Workflow #35 ([Pre-Deployment Testing](../claude_workflows/workflow_descriptions/35_pre_deployment_testing.md))
+  - **When to run:** Before considering Phase 6 complete
+  - **Purpose:** Final validation that all enhancements work together
+
+- Workflow #2 ([Command Logging](../claude_workflows/workflow_descriptions/02_command_logging.md))
+  - **When to run:** After running CloudWatch setup commands
+  - **Purpose:** Log dashboard and alarm configurations to COMMAND_LOG.md
+
+- Workflow #14 ([Session End](../claude_workflows/workflow_descriptions/14_session_end.md))
+  - **When to run:** After completing Phase 6
+  - **Purpose:** Properly end session, update documentation, prepare for next session
 
 **Purpose:**
 Monitor AWS resource usage, costs, and performance. Set up alarms for budget overruns and operational issues.
@@ -345,6 +405,20 @@ After completing this phase:
    - Visual data preparation
    - No-code transformations
    - Data quality rules
+
+---
+
+## Navigation
+
+**Return to:** [PROGRESS.md](../../PROGRESS.md) | **Workflows:** [Workflow Index](../claude_workflows/CLAUDE_WORKFLOW_ORDER.md)
+
+**Related phases:**
+- Previous: [Phase 5: Machine Learning](PHASE_5_MACHINE_LEARNING.md)
+- Next: None (final optional phase)
+
+---
+
+*For Claude Code: See CLAUDE.md for navigation instructions and context management strategies.*
 
 ---
 
