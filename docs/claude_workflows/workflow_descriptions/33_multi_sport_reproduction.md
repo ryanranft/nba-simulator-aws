@@ -122,7 +122,7 @@ find . -type f -name "*.md" -exec sed -i '' 's/NBA/<SPORT>/g' {} +
 
 ---
 
-## Phase 2: S3 Data Lake Setup
+## Phase 0: Data Collection & S3 Upload
 
 **Time:** 4-8 hours (depends on data volume)
 **Cost:** ~$2-5/month

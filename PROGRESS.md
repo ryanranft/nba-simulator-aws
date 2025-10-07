@@ -3,7 +3,7 @@
 **System Version:** 2.0 (Modular Documentation System)
 **Date Started:** September 29, 2025
 **Current Phase:** Core Project Complete - Production Ready
-**Last Updated:** October 3, 2025
+**Last Updated:** October 6, 2025
 **Project Status:** ✅ COMPLETE
 
 > 💡 **For Claude Code Users:** See `CLAUDE.md` for detailed instructions on how to navigate this file, read phase files efficiently, and execute workflows. Start every session by reading CLAUDE.md first.
@@ -28,13 +28,15 @@
 
 ## Current Session Context
 
-**Last session ended:** October 3, 2025 (evening)
-**Last completed:** Phase 6 COMPLETE - All optional enhancements implemented:
-  - Sub-Phase 6.1: S3 Analytics Lake (100 predictions in Parquet format)
-  - Sub-Phase 6.2: AWS Athena (database, partitioned table, test queries successful)
-  - Sub-Phase 6.3: CloudWatch monitoring (SNS, alarms, dashboard)
-**Next to work on:** Project complete - all 6 phases operational and production-ready
-**Phase status:** ALL PHASES COMPLETE ✅ (Phases 1-6)
+**Last session ended:** October 6, 2025
+**Last completed:** Advanced planning documentation created:
+  - Multi-source data integration plan (209 features from 5 sources)
+  - ML_FEATURE_CATALOG.md (complete feature breakdown)
+  - IMPLEMENTATION_CHECKLIST.md (28-hour roadmap)
+  - QUICK_START_MULTI_SOURCE.md (quick reference)
+  - ADVANCED_SIMULATION_FRAMEWORK.md (econometric simulation architecture)
+**Next to work on:** Implement multi-source data integration (Week 1: Basketball Reference + NBA.com Stats)
+**Phase status:** Core phases complete ✅ - Advanced features ready to implement
 
 > **Note for Claude:** Update this section at the end of every session (Workflow #14)
 
@@ -61,15 +63,23 @@
 
 ### Phase Details
 
-- ✅ [Phase 1: S3 Data Lake](docs/phases/PHASE_1_S3_DATA_LAKE.md) - **COMPLETE** (Oct 1)
+- ✅ [Phase 0: Data Collection & Initial Upload](docs/phases/PHASE_0_DATA_COLLECTION.md) - **COMPLETE** (Oct 1)
+- ⏸️ [Phase 1: Data Quality & Gap Analysis](docs/phases/PHASE_1_DATA_QUALITY.md) - **READY TO IMPLEMENT** (multi-source integration planned)
+  - 📖 [Multi-Source Implementation Plan](docs/PHASE_1_MULTI_SOURCE_PLAN.md) - 28 hours, 209 features
+  - 📋 [ML Feature Catalog](docs/ML_FEATURE_CATALOG.md) - Complete feature breakdown
+  - ⚡ [Quick Start Guide](docs/QUICK_START_MULTI_SOURCE.md) - Week-by-week implementation
+  - ✅ [Implementation Checklist](docs/IMPLEMENTATION_CHECKLIST.md) - Track progress
 - ✅ [Phase 2: AWS Glue ETL](docs/phases/PHASE_2_AWS_GLUE.md) - **COMPLETE** (Oct 2)
 - ✅ [Phase 3: Database Infrastructure](docs/phases/PHASE_3_DATABASE.md) - **COMPLETE** (Oct 1)
 - ✅ [Phase 4: Simulation Engine](docs/phases/PHASE_4_SIMULATION_ENGINE.md) - **COMPLETE** (Oct 3)
+  - 🚀 [Advanced Simulation Framework](docs/ADVANCED_SIMULATION_FRAMEWORK.md) - Econometric models planned
 - ✅ [Phase 5: Machine Learning](docs/phases/PHASE_5_MACHINE_LEARNING.md) - **COMPLETE** (Oct 3)
 - ✅ [Phase 6: Optional Enhancements](docs/phases/PHASE_6_ENHANCEMENTS.md) - **COMPLETE** (Oct 3)
+- ⏸️ [Phase 7: Betting Odds Integration](docs/phases/PHASE_7_BETTING_ODDS.md) - **PENDING** (optional future enhancement)
 
 ### Reference Documentation
 
+- **📊 Project Status:** [PROJECT_STATUS.md](PROJECT_STATUS.md) - High-level summary for quick reference
 - **Workflows:** [docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md](docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md) (36 workflows)
 - **Architecture decisions:** [docs/adr/README.md](docs/adr/README.md) (7 ADRs)
 - **Setup instructions:** [docs/SETUP.md](docs/SETUP.md)
@@ -77,6 +87,11 @@
 - **Troubleshooting:** [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
 - **Testing:** [docs/TESTING.md](docs/TESTING.md)
 - **LLM guidelines:** [CLAUDE.md](CLAUDE.md)
+
+### Enhancement Planning (October 6, 2025)
+
+- **Next Steps Decision Guide:** [docs/NEXT_STEPS_OPTIONS.md](docs/NEXT_STEPS_OPTIONS.md) - Compare multi-source vs simulation paths
+- **Session Summary:** [docs/SESSION_SUMMARY_2025_10_06_CONTINUED.md](docs/SESSION_SUMMARY_2025_10_06_CONTINUED.md) - Planning integration recap
 
 ---
 
@@ -89,7 +104,8 @@
 
 ### What's Accomplished
 
-- ✅ **Phase 1:** S3 data lake with 146,115 files (119 GB) - Oct 1
+- ✅ **Phase 0:** Data Collection - S3 data lake with 146,115 files (119 GB) - Oct 1
+- ⏸️ **Phase 1:** Data Quality - Verification sources not yet defined (pending)
 - ✅ **Phase 2:** Local ETL extraction (bypassed AWS Glue) - Oct 2
   - 44,828 games with 53 fields (1993-2025, schedules only)
   - 6,781,155 plays extracted (2004-2021)
@@ -124,20 +140,24 @@
 **Execution order:**
 
 ```
-Phase 1 (S3 Data Lake) ✅
+Phase 0 (Data Collection) ✅
+    ↓
+Phase 1 (Data Quality) ⏸️ [OPTIONAL - multi-source integration]
     ↓
 Phase 2 (ETL Extraction) ✅
     ↓
 Phase 3 (RDS Database) ✅
     ↓
-    ├─→ Phase 4 (EC2 Simulation) ⏸️
+    ├─→ Phase 4 (EC2 Simulation) ✅
     │
-    └─→ Phase 5 (SageMaker ML) ⏸️
-            ↓
-        Phase 6 (Enhancements) ⏸️ [OPTIONAL]
+    ├─→ Phase 5 (SageMaker ML) ✅
+    │       ↓
+    │   Phase 6 (Enhancements) ✅ [OPTIONAL]
+    │
+    └─→ Phase 7 (Betting Odds) ⏸️ [OPTIONAL]
 ```
 
-**Note:** Phases 4 and 5 can run in parallel (both depend on Phase 3).
+**Note:** Phase 1 is optional for multi-source data integration (209 features). Phases 4, 5, and 7 can all run in parallel (all depend on Phase 3). Phase 6 depends on Phase 5.
 
 ---
 
@@ -145,16 +165,18 @@ Phase 3 (RDS Database) ✅
 
 | Phase | Status | Completed | Cost/Month | Time | Details |
 |-------|--------|-----------|------------|------|---------|
-| 1. S3 Data Lake | ✅ COMPLETE | Oct 1 | $2.74 | 2 days | [View](docs/phases/PHASE_1_S3_DATA_LAKE.md) |
+| 0. Data Collection | ✅ COMPLETE | Oct 1 | $2.74 | 2 days | [View](docs/phases/PHASE_0_DATA_COLLECTION.md) |
+| 1. Data Quality | ⏸️ PENDING | - | $0-10 | 4-8 hrs | [View](docs/phases/PHASE_1_DATA_QUALITY.md) |
 | 2. ETL (Local) | ✅ COMPLETE | Oct 2 | $0 | 1 day | [View](docs/phases/PHASE_2_AWS_GLUE.md) |
 | 3. Database (RDS) | ✅ COMPLETE | Oct 1 | $29 | 1.6 hrs | [View](docs/phases/PHASE_3_DATABASE.md) |
 | 4. Simulation (EC2) | ✅ COMPLETE | Oct 3 | $6.59 | 3 hrs | [View](docs/phases/PHASE_4_SIMULATION_ENGINE.md) |
 | 5. ML (SageMaker) | ✅ COMPLETE | Oct 3 | $0 | 4 hrs | [View](docs/phases/PHASE_5_MACHINE_LEARNING.md) |
 | 6. Enhancements | ✅ COMPLETE | Oct 3 | $3 | 2 hrs | [View](docs/phases/PHASE_6_ENHANCEMENTS.md) |
+| 7. Betting Odds | ⏸️ PENDING | - | $0-10 | 6-8 hrs | [View](docs/phases/PHASE_7_BETTING_ODDS.md) |
 
-**Current total:** $38.33/month
-**After Phase 5:** $58.33/month (+SageMaker)
-**After Phase 6:** $62.33/month (+Analytics)
+**Current total:** $38.33/month (excluding optional phases 1 & 7)
+**With Phase 1:** $43-46/month (multi-source integration)
+**With Phase 7:** $38-48/month (betting odds API)
 **Budget target:** <$150/month
 
 ---
@@ -393,15 +415,41 @@ bash scripts/shell/session_manager.sh start
 
 ## 🎯 Next Steps
 
-**Immediate:**
-1. Choose next phase: Simulation (Phase 4) or ML (Phase 5)
-2. Read corresponding phase file for detailed steps
-3. Follow referenced workflows
-4. Update this file when phase complete
+**Immediate: Multi-Source Data Integration (Phase 1 Enhancement)**
 
-**Weekly:**
+**Week 1 (12 hours):**
+1. Basketball Reference scraper (8 hrs) → 47 advanced features
+   - See `docs/IMPLEMENTATION_CHECKLIST.md` Sub-Phase 1.10
+   - TOS compliance: 1 request per 3 seconds
+   - Features: True Shooting %, PER, BPM, Win Shares, Four Factors
+2. NBA.com Stats expansion (4 hrs) → 92 tracking features
+   - See `docs/IMPLEMENTATION_CHECKLIST.md` Sub-Phase 1.7
+   - Add 11 API endpoints (tracking, hustle, defense)
+   - Features: Movement, touches, shot quality, defensive impact
+
+**Week 2 (8 hours):**
+3. Kaggle historical data (4 hrs) → 12 historical features
+4. Multi-source storage setup (4 hrs) → Database schema updates
+
+**Week 3 (6 hours):**
+5. Feature engineering pipeline (4 hrs) → 209-feature vectors
+6. Quality dashboard (2 hrs) → Validation metrics
+
+**Week 4 (2 hours):**
+7. SageMaker validation (2 hrs) → ML-ready dataset
+
+**Alternative: Advanced Simulation Framework (Phase 4 Enhancement)**
+
+**Weeks 1-8 (6-8 weeks):**
+- Panel data models → Team fixed effects estimation
+- Cluster equations → Simultaneous equation systems
+- Non-linear dynamics → Momentum, fatigue, regime-switching
+- Hierarchical Bayesian → Multi-level player/team modeling
+- See `docs/ADVANCED_SIMULATION_FRAMEWORK.md` for detailed roadmap
+
+**Weekly Maintenance:**
 - Run `make check-costs` to monitor AWS spending
-- Review CloudWatch dashboards (when Phase 6 complete)
+- Review CloudWatch dashboards
 - Update documentation if workflows change
 
 **Monthly:**
@@ -420,6 +468,6 @@ bash scripts/shell/session_manager.sh start
 
 ---
 
-*Last updated: 2025-10-03*
-*System: 6 phases, 36 workflows, 7 ADRs*
-*Status: All 6 phases complete - production ready*
+*Last updated: 2025-10-06*
+*System: 8 phases (0-7), 36 workflows, 7 ADRs*
+*Status: 6 core phases complete, 2 optional phases pending (1 with enhancement plans) - production ready*

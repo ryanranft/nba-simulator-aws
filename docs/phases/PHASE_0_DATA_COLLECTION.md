@@ -12,7 +12,7 @@
 > **📌 NOTE - Phase Reorganization:**
 >
 > This is the NEW Phase 0 as of October 4, 2025 (ADR-008).
-> Previously, this content was in Phase 1 (S3 Data Lake Setup).
+> Previously, this content was in OLD Phase 1 (S3 Data Lake Setup).
 >
 > **Old structure:** Phase 0 = Data Verification → Phase 1 = S3 Upload
 > **New structure:** Phase 0 = Data Collection → Phase 1 = Quality Analysis

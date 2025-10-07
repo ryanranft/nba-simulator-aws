@@ -1,8 +1,8 @@
 # CLAUDE.md
 
 **Version:** 2.0 (Modular Documentation System)
-**Last Updated:** October 2, 2025
-**System Status:** 6 phases, 36 workflows, 97 workflow references
+**Last Updated:** October 6, 2025
+**System Status:** 8 phases (2 with enhancement plans), 36 workflows, 97 workflow references
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -64,12 +64,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Clear hierarchy: PROGRESS.md → Phase file → Workflow file
 
 **Phase files:**
-- PHASE_1_S3_DATA_LAKE.md (complete)
+- PHASE_0_DATA_COLLECTION.md (complete)
+- PHASE_1_DATA_QUALITY.md (ready to implement - multi-source integration planned)
 - PHASE_2_AWS_GLUE.md (complete)
 - PHASE_3_DATABASE.md (complete)
-- PHASE_4_SIMULATION_ENGINE.md (pending)
-- PHASE_5_MACHINE_LEARNING.md (pending)
-- PHASE_6_ENHANCEMENTS.md (optional)
+- PHASE_4_SIMULATION_ENGINE.md (complete - advanced simulation framework planned)
+- PHASE_5_MACHINE_LEARNING.md (complete)
+- PHASE_6_ENHANCEMENTS.md (complete)
+- PHASE_7_BETTING_ODDS.md (pending - optional future enhancement)
 
 **Benefits:**
 - ✅ Read only what you need (72% reduction in PROGRESS.md size)

@@ -821,7 +821,7 @@ echo "✅ RDS instance available at: $ENDPOINT"
 
 | Resource | When Created | Monthly Cost | Can Be Stopped? |
 |----------|--------------|--------------|-----------------|
-| S3 Bucket | Phase 1 | $2.74 | ❌ No (storage) |
+| S3 Bucket | Phase 0 | $2.74 | ❌ No (storage) |
 | Glue Database | Phase 2.1 | $0 | N/A (metadata) |
 | IAM Role | Phase 2.1 | $0 | N/A |
 | Glue Crawler | Phase 2.1 | $0 (failed) | N/A |

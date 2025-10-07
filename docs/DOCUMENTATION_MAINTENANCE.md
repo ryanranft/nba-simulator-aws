@@ -41,7 +41,7 @@ python scripts/maintenance/sync_progress.py
 ```
 
 **What it checks:**
-- ✅ S3 bucket status (Phase 1)
+- ✅ S3 bucket status (Phase 0)
 - ✅ RDS database status (Phase 3.1)
 - ✅ Glue crawler status (Phase 2.1)
 - ✅ Glue ETL job status (Phase 2.2)

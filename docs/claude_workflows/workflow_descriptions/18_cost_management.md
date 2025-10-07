@@ -103,7 +103,7 @@ Provides context-aware optimization tips:
 
 **Low costs (<$10/month):**
 ```
-✅ Costs are low (Phase 1: S3 only)
+✅ Costs are low (Phase 0: S3 only)
 ```
 
 **Moderate costs ($10-50/month):**

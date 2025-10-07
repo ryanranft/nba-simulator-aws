@@ -1,7 +1,7 @@
 # Phase 2: AWS Glue ETL (Modified Approach)
 
 **Status:** ✅ COMPLETE (via local extraction scripts)
-**Prerequisites:** Phase 1 complete (S3 data lake operational)
+**Prerequisites:** Phase 0 complete (S3 data uploaded)
 **Estimated Time:** 1 day
 **Estimated Cost:** $0/month (bypassed AWS Glue)
 **Started:** October 1, 2025
@@ -331,7 +331,7 @@ After completing this phase:
 **Return to:** [PROGRESS.md](../../PROGRESS.md) | **Workflows:** [Workflow Index](../claude_workflows/CLAUDE_WORKFLOW_ORDER.md)
 
 **Related phases:**
-- Previous: [Phase 1: S3 Data Lake](PHASE_1_S3_DATA_LAKE.md)
+- Previous: [Phase 0: Data Collection](PHASE_0_DATA_COLLECTION.md) | [Phase 1: Data Quality](PHASE_1_DATA_QUALITY.md)
 - Next: [Phase 3: Database Infrastructure](PHASE_3_DATABASE.md)
 
 ---

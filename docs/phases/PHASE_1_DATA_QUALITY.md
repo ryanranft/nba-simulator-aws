@@ -1,9 +1,9 @@
 # Phase 1: Data Quality & Gap Analysis
 
-**Status:** ⏸️ PENDING (verification sources not yet defined)
+**Status:** ⏸️ READY TO IMPLEMENT (multi-source integration planned - 209 features)
 **Prerequisites:** Phase 0 complete (data in S3)
-**Estimated Time:** 4-8 hours (per sport)
-**Estimated Cost:** $0-10/month (depending on API choices)
+**Estimated Time:** 28 hours over 4 weeks
+**Estimated Cost:** $5-8/month (additional sources)
 
 ---
 
@@ -19,21 +19,37 @@
 
 ---
 
+> **🚀 ENHANCEMENT PLANNING COMPLETE (October 6, 2025):**
+>
+> This phase now has comprehensive multi-source integration planning:
+> - **209 features** from 5 data sources (ESPN, Basketball Reference, NBA.com Stats, Kaggle, Derived)
+> - **28-hour implementation roadmap** over 4 weeks
+> - **Complete documentation:** See links in PROGRESS.md Phase Details section
+>
+> Key documents:
+> - [ML_FEATURE_CATALOG.md](../ML_FEATURE_CATALOG.md) - All 209 features cataloged
+> - [IMPLEMENTATION_CHECKLIST.md](../IMPLEMENTATION_CHECKLIST.md) - Week-by-week tasks
+> - [QUICK_START_MULTI_SOURCE.md](../QUICK_START_MULTI_SOURCE.md) - Quick start guide
+> - [PHASE_1_MULTI_SOURCE_PLAN.md](PHASE_1_MULTI_SOURCE_PLAN.md) - Detailed roadmap
+
+---
+
 ## Overview
 
-Analyze S3 data quality, identify coverage gaps, and establish baseline metrics. This phase ensures data completeness and accuracy before extraction (Phase 2) and database loading (Phase 3).
+Integrate multiple data sources to maximize ML granularity. Originally planned as simple data quality verification, this phase has evolved into comprehensive multi-source data integration to extract **209 features** for machine learning.
 
-**This phase establishes:**
-- Data quality baseline metrics (completeness, accuracy, freshness)
-- Coverage gap identification (missing dates, empty files)
-- Verification source selection and setup
-- Automated gap-filling workflows
+**This phase delivers:**
+- **ESPN data (58 features):** Already in S3 - basic box scores, play-by-play
+- **Basketball Reference (47 features):** Advanced metrics - TS%, PER, BPM, Win Shares, Four Factors
+- **NBA.com Stats (92 features):** Player tracking - movement, touches, shot quality, hustle, defense
+- **Kaggle (12 features):** Historical data - fill 1946-1998 gap
+- **Derived features (20+ features):** Efficiency, momentum, contextual metrics
 
-**Why Phase 1 matters:**
-- Bad data = bad predictions (garbage in, garbage out)
-- Multiple sources catch errors and fill gaps
-- Quality metrics enable continuous improvement
-- Standardized process for multi-sport replication
+**Why multi-source integration matters:**
+- ML accuracy boost: 63% → 75-80% (estimated +15-20%)
+- Enables defensive impact metrics (not in ESPN)
+- Historical coverage: 1946-2025 (vs 1999-2025)
+- Confidence scoring for data quality
 
 ---
 
@@ -372,6 +388,69 @@ echo 'NBA_STATS_USER_AGENT="Mozilla/5.0"' >> ~/nba-sim-credentials.env
 
 **When adding a new sport (NFL, MLB, NHL, Soccer):**
 
+### Sport-Specific Implementation Registry
+
+**Current implementations:**
+
+#### NBA (Basketball)
+**Status:** ⏸️ PENDING (verification sources not yet defined)
+**Primary Source:** ESPN JSON files (146,115 files, 119GB, S3)
+- Coverage: 1999-2025
+- Data quality: 83% valid files
+- Missing: 17% empty files (~24,507)
+- Fields extracted: 53 (games), play-by-play, player stats, team stats
+
+**Verification Sources:** (User must specify - see options in Sub-Phase 1.6)
+- [ ] NBA.com Stats API
+- [ ] Basketball Reference
+- [ ] SportsData.io
+- [ ] balldontlie API
+- [ ] Other: ________________
+
+**Critical Fields to Verify:**
+- [ ] Game scores (home_score, away_score)
+- [ ] Game dates/times
+- [ ] Team IDs/names
+- [ ] Player stats
+
+**Started:** September 29, 2025
+**Primary ETL Complete:** October 2, 2025
+**Verification Status:** Pending user input
+
+---
+
+#### NFL (American Football)
+**Status:** ⏸️ NOT STARTED
+**Primary Sources:** (To be defined by user)
+**Verification Sources:** (To be defined by user)
+
+**Note:** ESPN scraper code exists at `/Users/ryanranft/0espn/espn/nfl/` - ready to activate
+
+---
+
+#### MLB (Baseball)
+**Status:** ⏸️ NOT STARTED
+**Primary Sources:** (To be defined by user)
+**Verification Sources:** (To be defined by user)
+
+---
+
+#### NHL (Hockey)
+**Status:** ⏸️ NOT STARTED
+**Primary Sources:** (To be defined by user)
+**Verification Sources:** (To be defined by user)
+
+**Note:** ESPN scraper code exists at `/Users/ryanranft/0espn/espn/nhl/` - ready to activate
+
+---
+
+#### Soccer (Football)
+**Status:** ⏸️ NOT STARTED
+**Primary Sources:** (To be defined by user)
+**Verification Sources:** (To be defined by user)
+
+---
+
 ### Step 1: Ask User for Sport-Specific Data Sources
 
 **Claude must ask:**
@@ -381,21 +460,30 @@ Great! Let's set up data quality analysis for [SPORT]. I need to know:
 1. Do you already have data in S3 for [SPORT]?
    (If not, complete Phase 0 first)
 
-2. What verification/validation source do you prefer?
+2. Primary data source details:
+   - What format is the data? (JSON files, API, CSV, database, HTML scraping)
+   - How much data? (file count, GB, date range)
+   - What's the quality? (completeness %, known gaps)
+   - What fields are included? (list of all available fields)
+   - What's missing? (fields you need but don't have)
+
+3. What verification/validation source do you prefer?
    Options for [SPORT]:
    - Official league API ([SPORT].com)
    - Sports Reference sites
    - Commercial API (SportsData.io, etc.)
    - Community API
+   - Multiple sources (recommended)
 
-3. What fields are most critical to verify?
+4. What fields are most critical to verify?
    - Game scores (always)
    - Player stats
    - Team stats
    - Betting odds
+   - Venue information
    - Other: ___________
 
-4. Auto-fix or manual review?
+5. Auto-fix or manual review?
    - Auto-fix everything (fast, risky)
    - Auto-fix low severity, review high/critical (recommended)
    - Manual review all (slow, safe)
@@ -404,16 +492,136 @@ Great! Let's set up data quality analysis for [SPORT]. I need to know:
 ### Step 2: Run Sub-Phases 1.1-1.6 for New Sport
 
 Same process as NBA:
-1. Analyze S3 coverage
-2. Identify gaps
-3. Upload local data (if applicable)
-4. Run automated gap filling (adapt Workflow #38 for sport)
-5. Establish quality baseline
-6. Set up verification sources
+1. **Sub-Phase 1.1:** Analyze S3 coverage
+2. **Sub-Phase 1.2:** Identify gaps
+3. **Sub-Phase 1.3:** Upload local data (if applicable)
+4. **Sub-Phase 1.4:** Run automated gap filling (adapt Workflow #38 for sport)
+5. **Sub-Phase 1.5:** Establish quality baseline
+6. **Sub-Phase 1.6:** Set up verification sources
 
 ### Step 3: Document Sport-Specific Findings
 
-Create `docs/sports/{sport}/QUALITY_BASELINE.md`
+Create `docs/sports/{sport}/QUALITY_BASELINE.md` with:
+- Total files count
+- Date range coverage
+- % valid vs empty files
+- Quality metrics (completeness, accuracy, freshness, consistency)
+- Known issues and gaps
+- Verification source details
+
+---
+
+### Data Quality Metrics (Sport-Agnostic Formulas)
+
+**Every sport implementation should track:**
+
+#### 1. Completeness
+```python
+completeness = (records_with_data / total_expected_records) * 100
+
+# Example (NBA):
+# Expected: ~82 games/team/season * 30 teams = ~2,460 games/season
+# Actual: Check S3 files vs expected
+
+# Example (NFL):
+# Expected: ~17 games/team/season * 32 teams / 2 = ~272 games/season
+```
+
+#### 2. Accuracy
+```python
+accuracy = (matching_records / verified_records) * 100
+
+# Example (NBA):
+# Verified 1,000 random games against NBA.com
+# 987 scores matched exactly
+# Accuracy = 98.7%
+```
+
+#### 3. Freshness
+```python
+freshness = days_since_last_update
+
+# Example (NBA):
+# Last game added: 2025-04-10
+# Today: 2025-10-04
+# Freshness: 177 days (offseason, acceptable)
+
+# NBA offseason: acceptable if < 180 days
+# NBA season: should be < 1 day
+```
+
+#### 4. Consistency
+```python
+consistency = (records_without_conflicts / total_records) * 100
+
+# Example (NBA):
+# Team name variations: "LA Lakers" vs "Los Angeles Lakers"
+# Player name variations: "LeBron James" vs "Lebron James"
+# Consistency check: canonical names exist for all
+```
+
+---
+
+### Database Schema for Verification (Sport-Agnostic)
+
+**These tables work for ANY sport:**
+
+#### verification_runs
+```sql
+CREATE TABLE IF NOT EXISTS verification_runs (
+    run_id SERIAL PRIMARY KEY,
+    sport VARCHAR(20) NOT NULL,          -- 'NBA', 'NFL', 'MLB', etc.
+    run_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_source VARCHAR(50) NOT NULL,    -- 'nba_stats', 'nfl_api', etc.
+    records_checked INTEGER DEFAULT 0,
+    discrepancies_found INTEGER DEFAULT 0,
+    status VARCHAR(20) DEFAULT 'running',
+    notes TEXT
+);
+```
+
+#### {sport}_discrepancies
+```sql
+-- Example: game_discrepancies (NBA), match_discrepancies (Soccer)
+CREATE TABLE IF NOT EXISTS game_discrepancies (
+    discrepancy_id SERIAL PRIMARY KEY,
+    run_id INTEGER REFERENCES verification_runs(run_id),
+    record_id VARCHAR(50) NOT NULL,      -- game_id, match_id, etc.
+    record_type VARCHAR(20),             -- 'game', 'player_stat', 'team', etc.
+
+    field_name VARCHAR(50) NOT NULL,
+    primary_value TEXT,                  -- Value from primary source
+    verification_value TEXT,             -- Value from verification source
+
+    discrepancy_type VARCHAR(30),        -- 'mismatch', 'missing_primary', 'missing_verification'
+    severity VARCHAR(10),                -- 'low', 'medium', 'high', 'critical'
+
+    resolved BOOLEAN DEFAULT FALSE,
+    resolution_action VARCHAR(100),
+    resolved_at TIMESTAMP,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### data_quality_metrics
+```sql
+CREATE TABLE IF NOT EXISTS data_quality_metrics (
+    metric_id SERIAL PRIMARY KEY,
+    sport VARCHAR(20) NOT NULL,
+    run_id INTEGER REFERENCES verification_runs(run_id),
+
+    metric_name VARCHAR(50) NOT NULL,    -- 'completeness', 'accuracy', 'consistency'
+    metric_value DECIMAL(5,2),           -- 0.00 to 100.00
+    metric_details JSONB,                -- Flexible JSON for sport-specific details
+
+    total_records INTEGER,
+    valid_records INTEGER,
+    invalid_records INTEGER,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
 
 ---
 
@@ -471,15 +679,66 @@ After completing this phase:
 
 ---
 
+## Data Source Options Reference
+
+**Use this table to choose verification sources for any sport:**
+
+### Basketball (NBA)
+
+| Source | Type | Cost | Coverage | Quality | Notes |
+|--------|------|------|----------|---------|-------|
+| **ESPN** | JSON/API | Free | 1999-present | ⭐⭐⭐⭐ | Primary (your current source) |
+| **NBA.com Stats** | API | Free | 1996-present | ⭐⭐⭐⭐⭐ | Official, rate-limited |
+| **Basketball Reference** | HTML | Free | 1946-present | ⭐⭐⭐⭐⭐ | Most comprehensive |
+| **SportsData.io** | API | $19/mo | 1999-present | ⭐⭐⭐⭐ | Clean API |
+| **balldontlie** | API | Free | 1979-present | ⭐⭐⭐ | Community |
+
+### Football (NFL)
+
+| Source | Type | Cost | Coverage | Quality | Notes |
+|--------|------|------|----------|---------|-------|
+| **ESPN** | JSON/API | Free | 2000-present | ⭐⭐⭐⭐ | Similar to NBA |
+| **NFL.com** | API | Free | 2009-present | ⭐⭐⭐⭐⭐ | Official |
+| **Pro Football Reference** | HTML | Free | 1920-present | ⭐⭐⭐⭐⭐ | Comprehensive |
+| **SportsData.io** | API | $29/mo | 2000-present | ⭐⭐⭐⭐ | |
+
+### Baseball (MLB)
+
+| Source | Type | Cost | Coverage | Quality | Notes |
+|--------|------|------|----------|---------|-------|
+| **ESPN** | JSON/API | Free | 2000-present | ⭐⭐⭐⭐ | |
+| **MLB Stats API** | API | Free | 2008-present | ⭐⭐⭐⭐⭐ | Official |
+| **Baseball Reference** | HTML | Free | 1871-present | ⭐⭐⭐⭐⭐ | Historical gold mine |
+| **SportsData.io** | API | $19/mo | 2000-present | ⭐⭐⭐⭐ | |
+
+### Hockey (NHL)
+
+| Source | Type | Cost | Coverage | Quality | Notes |
+|--------|------|------|----------|---------|-------|
+| **ESPN** | JSON/API | Free | 2000-present | ⭐⭐⭐⭐ | |
+| **NHL.com API** | API | Free | 2010-present | ⭐⭐⭐⭐⭐ | Official |
+| **Hockey Reference** | HTML | Free | 1917-present | ⭐⭐⭐⭐⭐ | |
+| **SportsData.io** | API | $29/mo | 2000-present | ⭐⭐⭐⭐ | |
+
+### Soccer (Multiple Leagues)
+
+| Source | Type | Cost | Coverage | Quality | Notes |
+|--------|------|------|----------|---------|-------|
+| **ESPN** | JSON/API | Free | 2010-present | ⭐⭐⭐⭐ | Multiple leagues |
+| **API-Football** | API | $0-30/mo | 2010-present | ⭐⭐⭐⭐⭐ | 900+ leagues |
+| **TheSportsDB** | API | Free | 2000-present | ⭐⭐⭐ | Community |
+| **FBref** | HTML | Free | 2010-present | ⭐⭐⭐⭐ | Advanced stats |
+
+---
+
 ## Additional Resources
 
-**Data Source Options Reference** - see old Phase 0 backup for complete tables
-
 **Multi-sport data quality templates available for:**
-- NFL (American Football)
+- NFL (American Football) - ESPN scraper code exists at `/Users/ryanranft/0espn/espn/nfl/`
 - MLB (Baseball)
-- NHL (Hockey)
+- NHL (Hockey) - ESPN scraper code exists at `/Users/ryanranft/0espn/espn/nhl/`
 - Soccer (Multiple Leagues)
+- NCAAM, NCAAW, CFB, WNBA (ESPN scraper code exists)
 
 ---
 

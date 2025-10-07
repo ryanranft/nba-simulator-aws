@@ -262,7 +262,7 @@ aws s3 ls s3://nba-sim-raw-data-lake/ --recursive --summarize
 - ✅ **complete** - Bucket exists AND contains 146,115 objects
 - ⏸️ **pending** - Bucket missing OR object count doesn't match
 
-**Mapped to:** Phase 1 - S3 Data Lake Setup
+**Mapped to:** Phase 0 - Data Collection & Initial Upload
 
 #### Step 2: Check RDS Database Status
 
@@ -330,9 +330,9 @@ Test files: 5
 ============================================================
 
 💡 Suggested Updates:
-   ✅ Phase 1 (S3 Data Lake) appears complete
-   ⏸️ Phase 2.1 (Glue Crawler) pending
-   ⏸️ Phase 3.1 (RDS Database) pending
+   ✅ Phase 0 (Data Collection) appears complete
+   ⏸️ Phase 2 (ETL Extraction) pending
+   ⏸️ Phase 3 (Database) pending
    ⏸️ Phase 2.2 (Glue ETL Job) pending
 
 💾 To apply updates, manually edit PROGRESS.md
@@ -354,10 +354,9 @@ Test files: 5
    Glue ETL Job: complete
 
 💡 Suggested Updates:
-   ✅ Phase 1 (S3 Data Lake) appears complete
-   ✅ Phase 2.1 (Glue Crawler) appears complete
-   ✅ Phase 3.1 (RDS Database) appears complete
-   ✅ Phase 2.2 (Glue ETL Job) appears complete
+   ✅ Phase 0 (Data Collection) appears complete
+   ✅ Phase 2 (ETL Extraction) appears complete
+   ✅ Phase 3 (Database) appears complete
 ```
 
 **Action:** Verify PROGRESS.md shows all phases as `✅ COMPLETED`
@@ -371,8 +370,8 @@ Test files: 5
    Glue ETL Job: pending
 
 💡 Suggested Updates:
-   ✅ Phase 1 (S3 Data Lake) appears complete
-   ⏸️ Phase 3.1 (RDS Database) pending
+   ✅ Phase 0 (Data Collection) appears complete
+   ⏸️ Phase 3 (Database) pending
 ```
 
 **Action:** This matches expected state - RDS is Phase 3 (comes after Phase 2 Glue setup)
