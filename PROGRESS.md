@@ -28,23 +28,38 @@
 
 ## Current Session Context
 
-**Last session ended:** October 7, 2025 - 10:05 AM
-**Last completed:** NBA API Scraper - Fixed Player Tracking Bug & Restarted
-  - ✅ Checked overnight scraper status (Workflow #38)
-    - Found 89% error rate (490/551 API calls failing)
-    - Missing `team_id` parameter in player tracking endpoints
-    - Preserved 5,857 files (114 MB) before stopping
-  - ✅ Fixed player tracking bug
-    - Added `team_id` lookup from player roster data
-    - Filter to only active players with teams (ROSTERSTATUS=1, TEAM_ID≠0)
-    - Tested successfully with 2024 season data
-  - ✅ Restarted scraper with fix (PID 14497, started 10:04 AM)
+**Last session ended:** October 7, 2025 - 5:43 PM
+**Last completed:** NBA API Cross-Validation & Overnight Scraper Launch
+  - ✅ Created NBA API possession panel from 975 games (1996-97 season)
+    - **Total possessions:** 229,102
+    - **Average possessions/game:** 235.2
+    - **Validation vs pbpstats:** Only +6.9% difference (excellent accuracy!)
+  - ✅ Cross-validated Kaggle vs NBA API (876 overlapping games)
+    - **Finding:** NBA API detects 85% more possessions (235 vs 127 per game)
+    - **Root cause:** Event-type classification vs text pattern matching
+    - **Conclusion:** Kaggle systematically undercounts by ~50%
+  - ✅ Updated baseline documentation
+    - Added NBA API section to `docs/DATA_SOURCE_BASELINES.md`
+    - Created comprehensive cross-validation report: `/tmp/cross_validation_report.md`
+    - Documented technical differences and ML recommendations
+  - ✅ Created focused play-by-play scraper for overnight data collection
+    - Script: `scripts/etl/scrape_nba_api_playbyplay_only.py`
+    - Runner: `scripts/etl/overnight_nba_api_playbyplay.sh`
+    - Much faster than comprehensive scraper (3-4 hours vs 750+ hours)
 
 **Overnight jobs running:**
-  - **NBA API Comprehensive Scraper**: PID 14497, started 10:04 AM, ETA 4-5 hours
-    - Coverage: 30 seasons (1996-2025), Tier 1 endpoints enabled
-    - Output: `/tmp/nba_api_comprehensive/`
-    - S3: `s3://nba-sim-raw-data-lake/nba_api_comprehensive/`
+  - **NBA API Play-by-Play Scraper**: PIDs 99697/99764, started 5:39 PM, ETA 8:40-9:40 PM
+    - Coverage: 29 seasons (1996-2024), PlayByPlayV2 endpoint only
+    - Expected output: ~30,000 games, ~7 million possessions
+    - Local: `/tmp/nba_api_playbyplay/play_by_play/`
+    - S3: `s3://nba-sim-raw-data-lake/nba_api_playbyplay/`
+    - Monitor: `tail -f /tmp/nba_api_playbyplay_overnight.log`
+    - **Next step (when complete):** Generate possession panels with high-accuracy data
+
+**Previous session:** October 7, 2025 - 4:54 PM - Possession Panel Validation
+  - ✅ Generated Kaggle possession panel (3.8M possessions, 127.5/game)
+  - ✅ Validated data quality (100% complete, consistent distribution)
+  - ✅ Established baseline metrics for cross-validation
     - Log: `/tmp/nba_api_comprehensive_restart.log`
     - Testing limits: 100 games, 50 players per season
     - **Fix applied:** Player tracking now includes team_id parameter
