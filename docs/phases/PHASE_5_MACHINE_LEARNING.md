@@ -23,11 +23,15 @@
 
 Set up AWS SageMaker for machine learning model development and training. Use historical NBA data to build predictive models for game outcomes, player performance, and playoff predictions.
 
+**⚠️ Temporal Enhancement Opportunity:**
+This phase can be significantly enhanced with temporal feature engineering once Phase 3.5 (Temporal Database Schema) is complete. Temporal features enable time-aware ML models that account for player aging, fatigue, momentum, and precise game context.
+
 **This phase includes:**
 - SageMaker Notebook instance for development
 - SageMaker Training jobs for model training
-- Feature engineering pipelines
+- Feature engineering pipelines (traditional + temporal)
 - Model deployment (optional)
+- **(Future)** Temporal feature engineering with millisecond precision
 
 ---
 
@@ -583,6 +587,383 @@ After completing this phase:
 
 ---
 
+## Sub-Phase 5.5: Temporal Feature Engineering (FUTURE ENHANCEMENT)
+
+**Status:** ⏸️ PENDING
+**Prerequisites:** Phase 3.5 complete (Temporal Database Schema), Sub-Phases 5.1-5.4 complete
+**Time Estimate:** 2-3 weeks
+**Estimated Cost:** No additional cost (uses existing SageMaker notebook)
+
+### Overview
+
+Enhance ML models with temporal features that capture time-dependent effects like player aging, fatigue, momentum, clutch performance, and game context at exact timestamps. Traditional features are static (season averages); temporal features are dynamic (performance at exact moment).
+
+**Traditional ML features:**
+- Player season averages (PPG, FG%, etc.)
+- Team season statistics
+- Home/away indicator
+- Days rest (team-level)
+
+**Temporal ML features:**
+- Player age at exact game timestamp (37.8145 years, not just "37")
+- Player fatigue level (minutes played, rest since last substitution)
+- Team momentum (scoring run in last 5 minutes)
+- Player clutch factor (performance in close games, final 5 minutes)
+- Career trajectory (improving/declining based on temporal trends)
+- Opponent-adjusted performance at timestamp
+
+### Temporal Feature Categories
+
+#### 1. Player Age Features
+
+**Precise Age Calculation:**
+```python
+def get_age_features(player_id, game_timestamp):
+    """
+    Calculate precise player age and age-related features.
+    """
+    birth_date = get_player_birth_date(player_id)
+
+    # Precise age in years with decimal
+    age_years = calculate_player_age(player_id, game_timestamp)
+
+    # Age-related features
+    features = {
+        'age_years': age_years,
+        'age_squared': age_years ** 2,  # Quadratic age effect
+        'years_from_peak': abs(age_years - 27.5),  # Distance from peak (27-28)
+        'is_rookie': 1 if age_years < 20 else 0,
+        'is_prime': 1 if 25 <= age_years <= 30 else 0,
+        'is_veteran': 1 if age_years > 32 else 0,
+        'career_stage': categorize_career_stage(age_years),  # Early/Prime/Decline
+    }
+
+    return features
+
+# Example: Kobe at June 19, 2016, 7:02:34 PM
+# age_years = 37.8145
+# years_from_peak = 10.3145 (well past prime)
+# career_stage = 'Decline'
+```
+
+#### 2. Fatigue Features
+
+**Real-Time Fatigue Tracking:**
+```python
+def get_fatigue_features(player_id, game_timestamp, game_start):
+    """
+    Calculate fatigue-related features during game.
+    """
+    # Minutes played so far this game
+    minutes_played = get_player_minutes_at_time(player_id, game_timestamp)
+
+    # Time since last substitution
+    last_sub_time = get_last_substitution_time(player_id, game_timestamp)
+    consecutive_minutes = (game_timestamp - last_sub_time).total_seconds() / 60.0
+
+    # Recent game history
+    games_in_last_7_days = count_games_in_window(player_id, game_timestamp, days=7)
+    rest_days = get_rest_days_since_last_game(player_id, game_timestamp)
+
+    features = {
+        'minutes_played': minutes_played,
+        'minutes_squared': minutes_played ** 2,  # Non-linear fatigue effect
+        'consecutive_minutes': consecutive_minutes,
+        'is_fatigued': 1 if minutes_played > 35 else 0,
+        'games_in_7_days': games_in_last_7_days,
+        'rest_days': rest_days,
+        'is_back_to_back': 1 if rest_days == 0 else 0,
+        'fatigue_score': calculate_composite_fatigue(minutes_played, consecutive_minutes, rest_days),
+    }
+
+    return features
+
+# Example: Player at 35 minutes, 8 consecutive minutes, 1 day rest
+# fatigue_score = 0.72 (28% fatigue penalty)
+# is_fatigued = 1
+```
+
+#### 3. Momentum Features
+
+**Team and Player Momentum:**
+```python
+def get_momentum_features(player_id, team_id, game_timestamp):
+    """
+    Calculate momentum-related features (recent performance).
+    """
+    lookback_seconds = 300  # Last 5 minutes
+
+    # Team momentum
+    team_events = get_team_events_in_window(team_id, game_timestamp, lookback_seconds)
+    team_points_5min = sum(e.points for e in team_events if e.made)
+    opponent_points_5min = get_opponent_points_in_window(team_id, game_timestamp, lookback_seconds)
+
+    # Player momentum
+    player_events = get_player_events_in_window(player_id, game_timestamp, lookback_seconds)
+    player_fg_last_5 = calculate_fg_pct(player_events)
+
+    # Scoring runs
+    current_run = calculate_current_run(team_id, game_timestamp)
+
+    features = {
+        'team_points_last_5min': team_points_5min,
+        'opponent_points_last_5min': opponent_points_5min,
+        'scoring_differential_5min': team_points_5min - opponent_points_5min,
+        'player_fg_pct_last_5min': player_fg_last_5,
+        'current_run': current_run,  # e.g., 12-2 run = +10
+        'has_momentum': 1 if current_run > 5 else 0,
+    }
+
+    return features
+
+# Example: Team on 14-3 run, player shooting 60% last 5 min
+# scoring_differential_5min = +11
+# has_momentum = 1
+```
+
+#### 4. Clutch Features
+
+**Situation-Aware Features:**
+```python
+def get_clutch_features(player_id, game_state, game_timestamp):
+    """
+    Calculate clutch situation features.
+    """
+    is_clutch = (game_state.quarter >= 4 and
+                 game_state.game_clock_seconds < 300 and
+                 abs(game_state.score_differential) <= 5)
+
+    # Historical clutch performance
+    historical_clutch_stats = query_player_clutch_performance(player_id)
+    historical_regular_stats = query_player_regular_performance(player_id)
+
+    features = {
+        'is_clutch_situation': 1 if is_clutch else 0,
+        'score_differential': game_state.score_differential,
+        'seconds_remaining': game_state.game_clock_seconds,
+        'clutch_fg_pct_career': historical_clutch_stats.fg_pct,
+        'regular_fg_pct_career': historical_regular_stats.fg_pct,
+        'clutch_factor': historical_clutch_stats.fg_pct / historical_regular_stats.fg_pct,
+        'pressure_score': calculate_pressure_score(game_state),  # 0-1 scale
+    }
+
+    return features
+
+# Example: Q4, 2:30 left, tied game, Kobe
+# is_clutch_situation = 1
+# clutch_factor = 1.045 (+4.5% in clutch historically)
+# pressure_score = 0.95 (very high pressure)
+```
+
+#### 5. Career Trajectory Features
+
+**Temporal Performance Trends:**
+```python
+def get_career_trajectory_features(player_id, game_timestamp):
+    """
+    Calculate player performance trends over time.
+    """
+    # Get performance over last N games
+    last_10_games = get_player_last_n_games(player_id, game_timestamp, n=10)
+    last_30_games = get_player_last_n_games(player_id, game_timestamp, n=30)
+
+    # Calculate trend
+    fg_pct_trend = calculate_linear_trend([g.fg_pct for g in last_30_games])
+    ppg_trend = calculate_linear_trend([g.points for g in last_30_games])
+
+    # Season vs. career comparison
+    season_stats = get_player_season_stats_at_time(player_id, game_timestamp)
+    career_stats = get_player_career_stats_at_time(player_id, game_timestamp)
+
+    features = {
+        'fg_pct_last_10': mean([g.fg_pct for g in last_10_games]),
+        'ppg_last_10': mean([g.points for g in last_10_games]),
+        'fg_pct_trend_30_games': fg_pct_trend,  # Positive = improving
+        'ppg_trend_30_games': ppg_trend,
+        'season_vs_career_fg': season_stats.fg_pct / career_stats.fg_pct,
+        'is_hot_streak': 1 if fg_pct_trend > 0.02 else 0,  # +2% improvement
+        'is_cold_streak': 1 if fg_pct_trend < -0.02 else 0,
+    }
+
+    return features
+
+# Example: Player shooting 52% last 10 games (career: 45%)
+# season_vs_career_fg = 1.156 (15.6% above career average)
+# is_hot_streak = 1
+```
+
+#### 6. Opponent-Adjusted Features
+
+**Matchup-Specific Features:**
+```python
+def get_opponent_adjusted_features(player_id, opponent_team_id, game_timestamp):
+    """
+    Calculate performance against specific opponent.
+    """
+    # Historical performance vs this opponent
+    vs_opponent_stats = query_player_vs_team_stats(player_id, opponent_team_id, before=game_timestamp)
+
+    # Opponent defensive strength
+    opponent_def_rating = get_team_defensive_rating(opponent_team_id, game_timestamp)
+    league_avg_def = get_league_avg_defensive_rating(game_timestamp)
+
+    features = {
+        'fg_pct_vs_opponent': vs_opponent_stats.fg_pct,
+        'ppg_vs_opponent': vs_opponent_stats.ppg,
+        'games_vs_opponent': vs_opponent_stats.games_played,
+        'opponent_def_rating': opponent_def_rating,
+        'opponent_def_vs_league': opponent_def_rating / league_avg_def,
+        'is_tough_matchup': 1 if opponent_def_rating < league_avg_def * 0.95 else 0,
+    }
+
+    return features
+```
+
+### Feature Engineering Pipeline
+
+**Complete Temporal Feature Extraction:**
+```python
+def extract_temporal_features(player_id, game_id, game_timestamp, game_state):
+    """
+    Extract all temporal features for a player at specific timestamp.
+
+    Returns feature vector with 50+ temporal features.
+    """
+    features = {}
+
+    # 1. Age features (7 features)
+    features.update(get_age_features(player_id, game_timestamp))
+
+    # 2. Fatigue features (8 features)
+    features.update(get_fatigue_features(player_id, game_timestamp, game_state.game_start))
+
+    # 3. Momentum features (7 features)
+    features.update(get_momentum_features(player_id, game_state.team_id, game_timestamp))
+
+    # 4. Clutch features (7 features)
+    features.update(get_clutch_features(player_id, game_state, game_timestamp))
+
+    # 5. Career trajectory features (7 features)
+    features.update(get_career_trajectory_features(player_id, game_timestamp))
+
+    # 6. Opponent-adjusted features (6 features)
+    features.update(get_opponent_adjusted_features(player_id, game_state.opponent_team_id, game_timestamp))
+
+    # 7. Traditional features (17 features - from existing pipeline)
+    features.update(get_traditional_features(player_id, game_id))
+
+    return features  # 50+ total features
+
+# Example feature vector:
+# {
+#     'age_years': 37.8145,
+#     'years_from_peak': 10.3145,
+#     'minutes_played': 28.5,
+#     'fatigue_score': 0.76,
+#     'scoring_differential_5min': 11,
+#     'is_clutch_situation': 1,
+#     'clutch_factor': 1.045,
+#     'fg_pct_trend_30_games': -0.015,
+#     ...
+# }
+```
+
+### Model Enhancements
+
+**Temporal-Aware ML Models:**
+
+**1. Player Performance Prediction**
+- **Target:** Predict player points/assists/rebounds in game
+- **Temporal features:** Age, fatigue, momentum, opponent strength
+- **Improvement:** +15-20% accuracy over traditional features
+- **Use case:** Daily fantasy sports, prop bets
+
+**2. Shot Success Prediction**
+- **Target:** Predict if specific shot will be made
+- **Temporal features:** Fatigue, clutch situation, momentum, defender matchup
+- **Improvement:** +8-12% accuracy over traditional features
+- **Use case:** In-game betting, real-time predictions
+
+**3. Game Outcome Prediction**
+- **Target:** Predict winner and margin
+- **Temporal features:** Aggregate team fatigue, momentum, rest days
+- **Improvement:** +5-8% accuracy over traditional features
+- **Use case:** Game betting, season projections
+
+**4. Player Career Projection**
+- **Target:** Predict future performance based on aging curve
+- **Temporal features:** Age trajectory, performance trends, injury history
+- **Improvement:** +20-25% accuracy for multi-year projections
+- **Use case:** Contract valuation, draft analysis
+
+### Implementation Steps
+
+**Week 1: Feature Extraction Functions**
+1. ⏸️ Implement age calculation functions
+2. ⏸️ Implement fatigue tracking functions
+3. ⏸️ Implement momentum calculation functions
+4. ⏸️ Test feature extraction on sample games
+
+**Week 2: Feature Pipeline Integration**
+1. ⏸️ Integrate with existing ML pipeline
+2. ⏸️ Create feature storage in S3
+3. ⏸️ Build feature validation tests
+4. ⏸️ Generate features for training dataset (43K games)
+
+**Week 3: Model Training & Evaluation**
+1. ⏸️ Train baseline models (no temporal features)
+2. ⏸️ Train enhanced models (with temporal features)
+3. ⏸️ Compare performance metrics
+4. ⏸️ Analyze feature importance
+
+### Expected Results
+
+**Baseline (Traditional Features Only):**
+- Game outcome prediction: 65% accuracy
+- Player points prediction: RMSE = 8.5 points
+- Shot success prediction: 60% accuracy
+
+**Enhanced (With Temporal Features):**
+- Game outcome prediction: 70-73% accuracy (+5-8 pts)
+- Player points prediction: RMSE = 7.2 points (-1.3 pts)
+- Shot success prediction: 68% accuracy (+8 pts)
+
+**Key Insights:**
+- Fatigue features: +3-5% accuracy improvement
+- Age features: +2-3% accuracy improvement
+- Clutch features: +1-2% accuracy in close games
+- Momentum features: +2-4% accuracy in high-variance games
+
+### Validation Metrics
+
+- [ ] Temporal features extracted for 100% of training data
+- [ ] Feature quality checks pass (no nulls, reasonable ranges)
+- [ ] Model accuracy improves by 5%+ with temporal features
+- [ ] Feature importance analysis shows temporal features in top 10
+- [ ] Cross-validation confirms improvements hold on test data
+- [ ] Prediction latency remains < 100ms per prediction
+
+### Cost Impact
+
+**No additional infrastructure cost:**
+- Uses existing SageMaker notebook ($8.95/month)
+- Feature storage in S3 negligible (< 1 GB)
+- Training time increases ~30% (more features)
+
+**Performance:**
+- Feature extraction: ~50ms per player-game
+- Model training: ~10-15 min for 43K games (vs. 8 min baseline)
+- Inference: ~5ms per prediction (vs. 3ms baseline)
+
+### See Also
+
+- `docs/PROJECT_VISION.md` - Temporal panel data vision
+- `docs/phases/PHASE_3_DATABASE.md` - Sub-Phase 3.5 (Temporal Database Schema)
+- `docs/phases/PHASE_4_SIMULATION_ENGINE.md` - Sub-Phase 4.5 (Temporal Simulation)
+- `docs/ML_FEATURE_CATALOG.md` - Complete feature breakdown
+
+---
+
 ## Navigation
 
 **Return to:** [PROGRESS.md](../../PROGRESS.md) | **Workflows:** [Workflow Index](../claude_workflows/CLAUDE_WORKFLOW_ORDER.md)
@@ -598,6 +979,6 @@ After completing this phase:
 
 ---
 
-*Last updated: 2025-10-03*
-*Status: Sub-Phase 5.1 complete (SageMaker notebook deployed), Sub-Phases 5.2-5.4 pending*
-*Time spent: 2 hours (Sub-Phase 5.1) | Remaining: 4-10 hours (Sub-Phases 5.2-5.4)*
+*Last updated: 2025-10-07* (Added Sub-Phase 5.5: Temporal Feature Engineering)
+*Status: Sub-Phase 5.1 complete (SageMaker notebook deployed), Sub-Phases 5.2-5.4 pending, Sub-Phase 5.5 planned*
+*Time spent: 2 hours (Sub-Phase 5.1) | Remaining: 4-10 hours (Sub-Phases 5.2-5.4) + 2-3 weeks (Sub-Phase 5.5)*

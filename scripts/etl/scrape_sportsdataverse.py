@@ -22,7 +22,8 @@ from pathlib import Path
 from datetime import datetime, timedelta
 
 try:
-    from sportsdataverse.nba import espn_nba_schedule, espn_nba_pbp, espn_nba_player_box
+    from sportsdataverse.nba import espn_nba_schedule, espn_nba_pbp
+    from sportsdataverse.nba import load_nba_player_boxscore, load_nba_team_boxscore
     HAS_SPORTSDATAVERSE = True
 except ImportError:
     HAS_SPORTSDATAVERSE = False
@@ -61,8 +62,23 @@ class SportsDataverseScraper:
         filepath = Path(filepath)
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
+        # Convert any non-serializable objects to strings
+        def convert_for_json(obj):
+            if isinstance(obj, (list, tuple)):
+                return [convert_for_json(item) for item in obj]
+            elif isinstance(obj, dict):
+                return {key: convert_for_json(value) for key, value in obj.items()}
+            elif hasattr(obj, 'to_list'):  # pandas Series
+                return obj.to_list()
+            elif hasattr(obj, '__dict__'):
+                return str(obj)
+            else:
+                return obj
+
+        cleaned_data = convert_for_json(data)
+
         with open(filepath, 'w') as f:
-            json.dump(data, f, indent=2)
+            json.dump(cleaned_data, f, indent=2, default=str)
 
     def upload_to_s3(self, local_path, s3_key):
         """Upload file to S3"""
@@ -86,15 +102,15 @@ class SportsDataverseScraper:
         print(f"📅 Scraping {season} season schedule via SportsDataverse...")
 
         try:
-            # Get schedule data
+            # Get schedule data (returns Polars DataFrame)
             schedule_df = espn_nba_schedule(dates=season)
 
             if schedule_df is None or len(schedule_df) == 0:
                 print(f"  ⚠️  No schedule data returned for {season}")
                 return None
 
-            # Convert to dict for JSON storage
-            schedule_data = schedule_df.to_dict('records')
+            # Convert Polars DataFrame to list of dicts
+            schedule_data = schedule_df.to_dicts()
 
             # Save schedule
             schedule_file = self.output_dir / 'schedules' / f"schedule_{season}.json"
@@ -125,15 +141,15 @@ class SportsDataverseScraper:
             game_id: ESPN game ID
         """
         try:
-            # Get play-by-play data
+            # Get play-by-play data (returns Polars DataFrame)
             pbp_df = espn_nba_pbp(game_id=str(game_id))
 
             if pbp_df is None or len(pbp_df) == 0:
                 print(f"    ⚠️  No play-by-play data for game {game_id}")
                 return None
 
-            # Convert to dict
-            pbp_data = pbp_df.to_dict('records')
+            # Convert Polars DataFrame to list of dicts
+            pbp_data = pbp_df.to_dicts()
 
             # Save
             pbp_file = self.output_dir / 'play_by_play' / f"{game_id}.json"
@@ -153,36 +169,44 @@ class SportsDataverseScraper:
             self.stats['errors'] += 1
             return None
 
-    def scrape_game_box_score(self, game_id):
+    def scrape_game_box_score(self, game_id, season):
         """
         Scrape box score for a game
 
         Args:
             game_id: ESPN game ID
+            season: Season year (required for loader functions)
         """
         try:
-            # Get box score data
-            box_df = espn_nba_player_box(game_id=str(game_id))
+            # Get player box score data
+            player_box_df = load_nba_player_boxscore(seasons=[season])
 
-            if box_df is None or len(box_df) == 0:
+            # Filter for this specific game
+            if player_box_df is not None and len(player_box_df) > 0:
+                game_box = player_box_df[player_box_df['game_id'] == str(game_id)]
+
+                if len(game_box) == 0:
+                    print(f"    ⚠️  No box score data for game {game_id}")
+                    return None
+
+                # Convert to dict
+                box_data = game_box.to_dict('records')
+
+                # Save
+                box_file = self.output_dir / 'box_scores' / f"{game_id}.json"
+                self.save_json(box_data, box_file)
+
+                self.stats['box_scores_scraped'] += 1
+
+                # Upload to S3
+                if self.s3_client:
+                    s3_key = f"sportsdataverse/box_scores/{game_id}.json"
+                    self.upload_to_s3(box_file, s3_key)
+
+                return box_data
+            else:
                 print(f"    ⚠️  No box score data for game {game_id}")
                 return None
-
-            # Convert to dict
-            box_data = box_df.to_dict('records')
-
-            # Save
-            box_file = self.output_dir / 'box_scores' / f"{game_id}.json"
-            self.save_json(box_data, box_file)
-
-            self.stats['box_scores_scraped'] += 1
-
-            # Upload to S3
-            if self.s3_client:
-                s3_key = f"sportsdataverse/box_scores/{game_id}.json"
-                self.upload_to_s3(box_file, s3_key)
-
-            return box_data
 
         except Exception as e:
             print(f"    ❌ Box score error for game {game_id}: {e}")
@@ -230,7 +254,7 @@ class SportsDataverseScraper:
 
             # Scrape box score
             if include_box:
-                self.scrape_game_box_score(game_id)
+                self.scrape_game_box_score(game_id, season)
 
             # Rate limiting (be respectful)
             time.sleep(0.5)

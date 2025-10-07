@@ -9,7 +9,8 @@ All detailed workflow descriptions are located in: `/docs/claude_workflows/workf
 ### Every Session (Mandatory)
 
 1. **Session Start** → `01_session_start.md`
-2. **Command Logging** → `02_command_logging.md` (automatic throughout session)
+2. **🌙 Overnight Scraper Check** → `38_overnight_scraper_handoff.md` (if overnight jobs running - check PROGRESS.md)
+3. **Command Logging** → `02_command_logging.md` (automatic throughout session)
 
 ### When User Requests Task (Decision Point)
 
@@ -193,12 +194,14 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
 - Avoid known pitfalls? → `34`
 - Pre-deployment testing? → `35`
 - Repository cleanup before push? → `36`
+- Credential management? → `37`
+- **🌙 Overnight scraper running?** → `38` (NEW - check at session start)
 
 ---
 
 ## 📊 Workflow Statistics
 
-- **Total workflows**: 36
+- **Total workflows**: 38
 - **Total size**: ~500 KB
 - **Average workflow**: ~14 KB
 - **Largest workflow**: `24_aws_resource_setup.md` (92 KB)
@@ -224,6 +227,10 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
   - 🧪 Pre-Deployment Testing - Phase-specific testing checklists
   - 🧹 Pre-Push Repository Cleanup - Automated cleanup before push
 
+- **Batch 4 (37-38):** Credential & scraper management
+  - 🔐 Credential Management - Add/update AWS credentials to .env
+  - 🌙 Overnight Scraper Handoff - Track and validate overnight jobs
+
 ---
 
-*Last updated: 2025-10-02*
+*Last updated: 2025-10-06*

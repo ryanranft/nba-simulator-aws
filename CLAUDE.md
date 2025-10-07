@@ -1,8 +1,8 @@
 # CLAUDE.md
 
 **Version:** 2.0 (Modular Documentation System)
-**Last Updated:** October 6, 2025
-**System Status:** 8 phases (2 with enhancement plans), 36 workflows, 97 workflow references
+**Last Updated:** October 6, 2025 - 11:30 PM
+**System Status:** 8 phases (2 with enhancement plans), 38 workflows, 97+ workflow references
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -12,8 +12,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **All detailed workflows are in: `docs/claude_workflows/workflow_descriptions/`**
 
-**System now contains 26 modular workflows:**
-- 🚀 Session Start & End workflows
+**System now contains 38 modular workflows:**
+- 🚀 Session Start & End workflows (#1, #14)
 - 📋 Decision & Plan Change workflows
 - 💻 Task Execution & File Creation workflows
 - 🔒 Git Commit & Push workflows (security protocols)
@@ -28,6 +28,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ☁️ AWS Resource Setup workflows (Glue, RDS, EC2, SageMaker)
 - 🗄️ Database Migration workflows
 - 🔧 Makefile Quick Reference
+- 🌙 **Overnight Scraper Handoff Protocol (#38)** - NEW
 
 **Navigation pattern:**
 ```
@@ -40,13 +41,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Quick reference - Every session follows this order:**
 1. Initialize session (`session_manager.sh start`) - show output to user
 2. Orient to current state (read PROGRESS.md)
-3. Ask about completed work
-4. Wait for user's task request
-5. Follow decision workflow (check plan, prerequisites, costs, risks)
-6. Execute task → Document outcome → Wait for confirmation
-7. Update PROGRESS.md → Suggest next action
-8. Follow security protocol for commits/pushes
-9. Monitor context (auto-save at 75%, warn at 90%)
+3. **🌙 Check overnight jobs** (if "Overnight jobs running" section exists in PROGRESS.md):
+   - Follow Workflow #38: Overnight Scraper Handoff Protocol
+   - Check process status, logs, output files
+   - Document results or failure
+4. Ask about completed work
+5. Wait for user's task request
+6. Follow decision workflow (check plan, prerequisites, costs, risks)
+7. Execute task → Document outcome → Wait for confirmation
+8. Update PROGRESS.md → Suggest next action
+9. Follow security protocol for commits/pushes
+10. Monitor context (auto-save at 75%, warn at 90%)
 
 **Critical decision points:**
 - **Skipping ahead?** → Check prerequisites, warn if missing
@@ -474,7 +479,14 @@ Session checklist:
 
 ## Project Overview
 
-See `README.md` for complete project description, architecture, current status, and development machine specifications.
+**This is a temporal panel data system, not a traditional sports analytics project.**
+
+See `docs/PROJECT_VISION.md` for the authoritative project vision and goals.
+See `README.md` for quick start, architecture, and current status.
+
+**Core capability:** Query cumulative NBA statistics at any exact moment in time with millisecond precision.
+
+**Example:** "What were Kobe Bryant's career statistics at exactly 7:02:34.56 PM CT on June 19, 2016?"
 
 ## Essential Setup
 

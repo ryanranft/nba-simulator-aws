@@ -1,11 +1,13 @@
 # Quick Start Guide
 
 <!-- AUTO-UPDATE TRIGGER: When daily workflow changes (new commands, file locations, workflow shortcuts) -->
-<!-- LAST UPDATED: 2025-10-01 -->
+<!-- LAST UPDATED: 2025-10-07 -->
 <!-- FREQUENCY: As needed (when workflow evolves) -->
 <!-- REMINDER: Update when new daily commands added, file locations changed, or common troubleshooting steps identified -->
 
-**One-page reference for common tasks**
+**One-page reference for common tasks - Now with temporal query examples!**
+
+> **🕐 NEW: Temporal Panel Data System** - Query NBA stats at exact timestamps with millisecond precision. See [Temporal Query Examples](#temporal-query-examples) below.
 
 ---
 
@@ -240,13 +242,184 @@ git push origin main
 
 ## Cost Tracking
 
-**Current:** ~$2.74/month (S3 storage only)
+**Current:** ~$38.33/month (S3 + RDS + EC2)
 
-**After Phase 2 & 3:** ~$46/month (+ Glue + RDS)
+**With temporal enhancement:** ~$57-75/month (+ temporal tables)
 
-**Full deployment:** $95-130/month
+**Full deployment:** $82-100/month (+ SageMaker)
 
 **Check costs:** `./scripts/aws/check_costs.sh`
+
+---
+
+## Temporal Query Examples
+
+**This project is a temporal panel data system - query NBA stats at exact timestamps with millisecond precision.**
+
+### Quick Temporal Queries
+
+**Connect to database:**
+```python
+import psycopg2
+from datetime import datetime
+import pytz
+
+conn = psycopg2.connect(
+    host="nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com",
+    database="nba_simulator",
+    user="your_user",
+    password="your_password"
+)
+cursor = conn.cursor()
+```
+
+**Example 1: Get player snapshot at exact timestamp**
+```python
+# "What were Kobe's stats at 7:02:34 PM on June 19, 2016?"
+cursor.execute("""
+    SELECT
+        snapshot_time,
+        games_played,
+        career_points,
+        career_rebounds,
+        career_assists
+    FROM
+        get_player_snapshot_at_time(
+            (SELECT player_id FROM players WHERE name = 'Kobe Bryant'),
+            '2016-06-19 19:02:34-05:00'::TIMESTAMPTZ
+        )
+""")
+
+result = cursor.fetchone()
+print(f"At {result[0]}, Kobe had {result[2]} career points")
+# Output: At 2016-06-19 19:02:34, Kobe had 33,636 career points
+```
+
+**Example 2: Calculate player age at exact moment**
+```python
+# "How old was Kobe when he scored his last point?"
+cursor.execute("""
+    SELECT calculate_player_age(
+        (SELECT player_id FROM players WHERE name = 'Kobe Bryant'),
+        '2016-06-19 22:30:00-05:00'::TIMESTAMPTZ
+    )
+""")
+
+age = cursor.fetchone()[0]
+print(f"Kobe's age: {age}")
+# Output: 37 years, 300 days, 10 hours, 30 minutes
+```
+
+**Example 3: Get all active games at timestamp**
+```python
+# "What games were playing at 9:00 PM ET on March 15, 2023?"
+cursor.execute("""
+    SELECT
+        g.home_team,
+        g.away_team,
+        gs.current_score_home,
+        gs.current_score_away,
+        gs.quarter
+    FROM
+        games g
+    JOIN
+        game_states gs ON g.game_id = gs.game_id
+    WHERE
+        gs.state_time = (
+            SELECT MAX(state_time)
+            FROM game_states
+            WHERE game_id = g.game_id
+              AND state_time <= '2023-03-15 21:00:00-04:00'::TIMESTAMPTZ
+        )
+        AND g.game_date = '2023-03-15'
+    ORDER BY
+        g.game_id
+""")
+
+for row in cursor.fetchall():
+    print(f"{row[1]} @ {row[0]}: {row[3]}-{row[2]} (Q{row[4]})")
+# Output: Lakers @ Warriors: 95-92 (Q3)
+```
+
+**Example 4: Filter by data precision**
+```python
+# "Get all second-precision data from 2020+"
+cursor.execute("""
+    SELECT
+        COUNT(*) AS events,
+        precision_level,
+        data_source
+    FROM
+        temporal_events
+    WHERE
+        precision_level IN ('millisecond', 'second')
+        AND wall_clock_utc >= '2020-01-01'
+    GROUP BY
+        precision_level, data_source
+""")
+
+for row in cursor.fetchall():
+    print(f"{row[2]}: {row[0]:,} events ({row[1]} precision)")
+# Output: nba_stats: 500,000 events (second precision)
+```
+
+**Complete guide:** See `docs/TEMPORAL_QUERY_GUIDE.md`
+
+---
+
+## Temporal Validation
+
+**Run validation test suite:**
+```bash
+# Full test suite (25 tests)
+pytest tests/test_temporal_queries.py -v
+
+# Specific test class
+pytest tests/test_temporal_queries.py::TestSnapshotQueries -v
+
+# Single test
+pytest tests/test_temporal_queries.py::TestSnapshotQueries::test_snapshot_query_performance -v
+```
+
+**Expected output:**
+```
+tests/test_temporal_queries.py::TestSnapshotQueries::test_get_player_snapshot_at_exact_time PASSED
+tests/test_temporal_queries.py::TestSnapshotQueries::test_snapshot_query_performance PASSED
+tests/test_temporal_queries.py::TestSnapshotQueries::test_snapshot_monotonicity PASSED
+======================== 25 passed in 45.2s ========================
+```
+
+**Validation guide:** See `docs/TEMPORAL_VALIDATION_GUIDE.md`
+
+---
+
+## Temporal Data Availability
+
+**Data precision by era:**
+
+| Era | Precision | Data Source | Use Cases |
+|-----|-----------|-------------|-----------|
+| 2020-2025 | Millisecond | NBA Live API (future) | Video sync, real-time tracking |
+| 2013-2019 | Second | NBA.com Stats | Temporal queries, ML features |
+| 1999-2012 | Minute | ESPN API | General analysis, trends |
+| 1946-1998 | Game-level | Basketball Reference | Career stats, historical analysis |
+
+**Check precision coverage:**
+```sql
+SELECT
+    precision_level,
+    COUNT(*) AS events,
+    MIN(wall_clock_utc) AS earliest,
+    MAX(wall_clock_utc) AS latest
+FROM
+    temporal_events
+GROUP BY
+    precision_level
+ORDER BY
+    earliest;
+```
+
+**Data sources:** See `docs/DATA_SOURCES.md` for complete temporal data quality matrix
 
 **Budget alerts:** Set up in AWS Console → Budgets
 

@@ -1,318 +1,461 @@
-# Scraper Test Results
+# Phase 1 Scraper Test Results
 
-**Date:** October 4, 2025
-**Status:** Ready for AWS Deployment
+**Date:** October 7, 2025 - 11:00 AM
+
+## Key Finding: SportsDataverse is Redundant
+
+**Both use `sportsdataverse` package:**
+- **hoopR**: `load_nba_*` bulk loaders → ✅ 653,437 records, 0 errors, 30 sec
+- **SportsDataverse**: `espn_nba_*` per-game → ❌ Multiple errors, slow
+
+**Recommendation: Use hoopR only. Delete SportsDataverse scraper.**
 
 ---
 
-## Test Summary
+## Test Results
 
-All 5 scrapers have been created and are ready for deployment. Due to local network connectivity issues, full integration testing should be done on AWS (EC2 or Lambda).
+| Scraper | Status | Data Points | Errors |
+|---------|--------|-------------|--------|
+| NBA API | ✅ Fixed | 5,857+ files | 0 (after fix) |
+| hoopR | ✅ Perfect | 653,437 | 0 |
+| SportsDataverse | ❌ Broken | Partial | Multiple |
+| Basketball Ref | ✅ Working | 54 games | 0 |
+
+**Working scrapers: 3 of 4 (SportsDataverse deprecated)**
 
 ---
 
-## 1. ESPN API Scraper
+## Details
 
-**Script:** `scripts/etl/scrape_missing_espn_data.py`
+### hoopR ✅
+- 614,447 play-by-play records
+- 35,028 player box scores
+- 2,640 team box scores
+- 1,322 games
+- Runtime: 30 seconds
+- **Perfect for bulk data collection**
 
-**Status:** ✅ SYNTAX VALID, ⚠️  NEEDS AWS DEPLOYMENT FOR FULL TEST
+### Basketball Reference ✅
+- Schedule: 54 games saved
+- Rate limit: 3.5s (TOS compliant)
+- **Best for advanced stats (47 features)**
+- Slow but reliable (30 hours for 30 seasons)
 
-**Basic connectivity test:**
-```bash
-# Direct API test - PASSED
-python -c "import requests; r = requests.get('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard', params={'dates': '20241201'}, timeout=30); print(f'Status: {r.status_code}, Games: {len(r.json().get(\"events\", []))}')"
-# Result: Status: 200, Games: 10
+### SportsDataverse ❌
+- PBP serialization errors
+- DataFrame filtering errors
+- **REDUNDANT - Use hoopR instead**
+
+---
+
+## Recommendation
+
+**Keep:**
+- `scrape_nba_api_comprehensive.py` ✅
+- `scrape_hoopr_nba_stats.py` ✅
+- `scrape_basketball_reference.py` ✅
+- `download_kaggle_database.py` ✅
+
+**Delete:**
+- `scrape_sportsdataverse.py` ❌ (redundant with hoopR)
+- `run_sportsdataverse_overnight.sh` ❌
+
+---
+
+## Failure Recovery Procedures
+
+### General Recovery Protocol
+
+**If scraper fails mid-run:**
+
+1. **Check process status**
+   ```bash
+   ps aux | grep [scraper_name]
+   # If still running, check logs
+   tail -100 /tmp/[scraper]_log.log
+   ```
+
+2. **Identify failure point**
+   ```bash
+   # Check output files
+   ls -lht /tmp/[output_dir]/ | head -20
+
+   # Check error logs
+   grep -i "error\|exception\|failed" /tmp/[scraper]_log.log
+   ```
+
+3. **Preserve partial results**
+   ```bash
+   # Count files before cleanup
+   ls /tmp/[output_dir]/ | wc -l
+
+   # Backup partial results to S3 (if valuable)
+   aws s3 sync /tmp/[output_dir]/ s3://nba-sim-raw-data-lake/[source]_partial/
+   ```
+
+4. **Fix issue and restart**
+   ```bash
+   # Stop failed process
+   kill -9 [PID]
+
+   # Fix code/config
+   # ...
+
+   # Restart scraper
+   bash scripts/etl/overnight_[scraper].sh
+   ```
+
+---
+
+### NBA API Comprehensive Scraper
+
+**Common failures:**
+
+#### Failure 1: Missing Team ID (Player Tracking Endpoints)
+
+**Symptom:**
+```
+400 Client Error: Bad Request
+Missing required parameter: team_id
 ```
 
-**Issues found:**
-- Initial timeout was 10s (too short for unstable connections)
-- **Fixed:** Increased to 30s timeout
+**Cause:** Player tracking endpoints require `team_id` parameter
 
-**Recommended test on AWS:**
+**Fix:**
+1. Add team_id lookup from roster data
+2. Filter to only active players (ROSTERSTATUS=1, TEAM_ID≠0)
+
+**Recovery:**
 ```bash
-# Test with 3 days
-python scripts/etl/scrape_missing_espn_data.py \
-  --start-date 2024-12-01 \
-  --end-date 2024-12-03 \
-  --upload-to-s3
+# Check how many files saved before failure
+ls /tmp/nba_api_comprehensive/ | wc -l
 
-# Expected: ~30 games, ~120 JSON files
+# If > 1000 files saved, preserve them
+aws s3 sync /tmp/nba_api_comprehensive/ s3://nba-sim-raw-data-lake/nba_api_partial/
+
+# Stop failed process
+ps aux | grep scrape_nba_api
+kill -9 [PID]
+
+# Fix: Edit scrape_nba_api_comprehensive.py
+# Add team_id parameter to player tracking endpoints
+
+# Restart
+bash scripts/etl/overnight_nba_api_comprehensive.sh
 ```
 
-**Deployment notes:**
-- Run on EC2 t3.small (stable network)
-- Or deploy as Lambda function (3-15 min execution)
-- Estimated runtime: ~3 seconds per day × 1,200 days = 1 hour total
+**Status:** ✅ Fixed (Oct 7, 10:04 AM)
 
 ---
 
-## 2. NBA.com Stats API Scraper
+#### Failure 2: Rate Limit Exceeded
 
-**Script:** `scripts/etl/scrape_nba_stats_api.py`
-
-**Status:** ✅ TESTED AND WORKING
-
-**Test results:**
-```bash
-# Direct API test - PASSED
-python -c "import requests; url='https://stats.nba.com/stats/scoreboardV2'; params={'GameDate':'12/01/2024','LeagueID':'00','DayOffset':'0'}; headers={'User-Agent':'Mozilla/5.0','x-nba-stats-origin':'stats','x-nba-stats-token':'true','Referer':'https://stats.nba.com/'}; r=requests.get(url,params=params,headers=headers,timeout=10); print(f'Status: {r.status_code}, Games: {len(r.json()[\"resultSets\"][0][\"rowSet\"])}')"
-# Result: Status: 200, Games: 10
+**Symptom:**
+```
+429 Too Many Requests
+Rate limit exceeded
 ```
 
-**Features:**
-- Rate-limited (3s between requests)
-- Proper User-Agent headers to avoid 403
-- Extracts scoreboard, box scores, play-by-play
+**Cause:** Too many API calls in short period
 
-**Recommended test on AWS:**
+**Recovery:**
 ```bash
-# Test with 2 days
-python scripts/etl/scrape_nba_stats_api.py \
-  --start-date 2024-12-01 \
-  --end-date 2024-12-02 \
-  --upload-to-s3
+# No code fix needed - rate limiter already at 600ms
+# Just restart after cooldown period
 
-# Expected: ~20 games, ~60 JSON files
+# Wait 5 minutes
+sleep 300
+
+# Restart scraper
+bash scripts/etl/overnight_nba_api_comprehensive.sh
 ```
 
-**Known issues:**
-- NBA.com may block requests from AWS IPs
-- If blocked, use rotating proxies or residential IPs
-- Alternative: Run from local machine with good connection
-
-**Deployment notes:**
-- Rate limit is conservative (3s) - can increase to 2s if needed
-- Use for verification only, not bulk scraping
-- Consider running monthly for spot-checks
+**Prevention:** Scraper already has 600ms delay between calls (1.67 req/sec)
 
 ---
 
-## 3. Kaggle Basketball Database Downloader
+#### Failure 3: Network Timeout
 
-**Script:** `scripts/etl/download_kaggle_database.py`
-
-**Status:** ✅ SYNTAX VALID, ⚠️  NOT TESTED (requires Kaggle account)
-
-**Prerequisites:**
-```bash
-# 1. Install kaggle package
-pip install kaggle
-
-# 2. Create Kaggle API token
-# - Go to https://www.kaggle.com/account
-# - Click "Create New API Token"
-# - Save kaggle.json to ~/.kaggle/kaggle.json
-# - chmod 600 ~/.kaggle/kaggle.json
+**Symptom:**
+```
+requests.exceptions.ConnectionError: Connection timeout
 ```
 
-**Recommended test on AWS:**
+**Recovery:**
 ```bash
-# Download and inspect database
-python scripts/etl/download_kaggle_database.py \
-  --download \
-  --inspect
+# Check network
+ping stats.nba.com
 
-# Extract all tables to JSON and upload to S3
-python scripts/etl/download_kaggle_database.py \
-  --all \
-  --extract-to-s3
+# If network OK, restart immediately
+bash scripts/etl/overnight_nba_api_comprehensive.sh
+
+# Scraper will skip already-downloaded files (checks existing .json)
 ```
 
-**Expected output:**
-- SQLite database (~2-5 GB)
-- 10-20 tables extracted to JSON
-- Upload to `s3://nba-sim-raw-data-lake/kaggle_nba/`
-
-**Deployment notes:**
-- One-time download (database is updated monthly)
-- Store SQLite file in S3 for future use
-- Re-run monthly to get latest data
+**Auto-recovery:** Scraper skips existing files, safe to restart anytime
 
 ---
 
-## 4. SportsDataverse Scraper
+### hoopR Scraper
 
-**Script:** `scripts/etl/scrape_sportsdataverse.py`
+**Common failures:**
 
-**Status:** ✅ SYNTAX VALID, ⚠️  NOT TESTED (requires sportsdataverse package)
+#### Failure 1: Memory Error (Large Datasets)
 
-**Prerequisites:**
-```bash
-pip install sportsdataverse
+**Symptom:**
+```
+MemoryError: Unable to allocate array
 ```
 
-**Recommended test on AWS:**
-```bash
-# Scrape 2024 season schedule
-python scripts/etl/scrape_sportsdataverse.py \
-  --season 2024 \
-  --upload-to-s3
+**Cause:** Loading 30 seasons at once (600K+ rows)
 
-# Expected: ~1,230 games in single JSON file
+**Recovery:**
+```bash
+# Reduce batch size: Edit scrape_hoopr_nba_stats.py
+# Change: seasons = range(2002, 2025)
+# To:     seasons = range(2002, 2010)  # Process in batches
+
+# Run batch 1 (2002-2009)
+python scripts/etl/scrape_hoopr_nba_stats.py --seasons 2002-2009
+
+# Run batch 2 (2010-2017)
+python scripts/etl/scrape_hoopr_nba_stats.py --seasons 2010-2017
+
+# Run batch 3 (2018-2025)
+python scripts/etl/scrape_hoopr_nba_stats.py --seasons 2018-2025
 ```
 
-**Features:**
-- Wrapper around ESPN and other APIs
-- Simpler interface than direct API calls
-- Good for prototyping and testing
-
-**Deployment notes:**
-- Use for cross-validation with ESPN
-- May have same limitations as ESPN API
-- Consider for multi-sport expansion (NFL, MLB)
-
 ---
 
-## 5. Basketball Reference Scraper
+#### Failure 2: sportsdataverse Package Error
 
-**Script:** `scripts/etl/scrape_basketball_reference.py`
-
-**Status:** ✅ SYNTAX VALID, ⚠️  NOT TESTED (HTML scraping)
-
-**Prerequisites:**
-```bash
-pip install beautifulsoup4 lxml pandas
+**Symptom:**
+```
+ModuleNotFoundError: No module named 'sportsdataverse'
 ```
 
-**Recommended test on AWS:**
+**Recovery:**
 ```bash
-# Scrape 2024 season (schedule + stats)
-python scripts/etl/scrape_basketball_reference.py \
-  --season 2024 \
-  --all \
-  --upload-to-s3
+# Reinstall package
+pip install --upgrade sportsdataverse
 
-# Expected: 3-5 JSON files (schedule, team stats, player stats)
+# Restart scraper
+bash scripts/etl/run_hoopr_overnight.sh
 ```
 
-**Rate limiting:**
-- 3.5 seconds between requests (respectful)
-- Identifies as research bot in User-Agent
-- Follows Basketball-Reference TOS
-
-**Deployment notes:**
-- Use for historical data (1946-1999)
-- Use for advanced statistics (PER, WS, BPM)
-- Run sparingly (respect their servers)
-- Consider caching results in S3
-
 ---
 
-## Deployment Recommendations
+### Basketball Reference Scraper
 
-### Option 1: Run on EC2 (Recommended for bulk scraping)
+**Common failures:**
 
-**Pros:**
-- Stable network connection
-- Can run for hours without timeout
-- Easy debugging
+#### Failure 1: Rate Limit Block (HTTP 429)
 
-**Setup:**
-```bash
-# SSH to EC2
-ssh -i nba-simulator-ec2-key.pem ec2-user@<ec2-ip>
-
-# Install dependencies
-pip install --user requests boto3 kaggle sportsdataverse beautifulsoup4 lxml pandas
-
-# Upload scrapers
-scp -i nba-simulator-ec2-key.pem scripts/etl/*.py ec2-user@<ec2-ip>:~/
-
-# Run scrapers
-python ~/scrape_missing_espn_data.py --start-date 2022-01-01 --end-date 2025-04-13 --upload-to-s3
+**Symptom:**
+```
+429 Too Many Requests
+Your IP has been temporarily blocked
 ```
 
-**Cost:** ~$0.10 for 3-hour scraping session on t3.small
+**Cause:** Scraped too fast (TOS requires 3 seconds between requests)
 
----
-
-### Option 2: Deploy as Lambda Functions (Recommended for automation)
-
-**Pros:**
-- Serverless (no EC2 management)
-- Can schedule with EventBridge
-- Pay only for execution time
-
-**Cons:**
-- 15-minute max execution time
-- May need to split large date ranges
-
-**Setup:**
+**Recovery:**
 ```bash
-# Package scraper with dependencies
-mkdir lambda_package
-pip install requests boto3 -t lambda_package/
-cp scripts/etl/scrape_missing_espn_data.py lambda_package/
+# STOP immediately to avoid permanent ban
+kill -9 [PID]
 
-# Create deployment package
-cd lambda_package && zip -r ../scraper.zip .
+# Wait 24 hours before resuming
+# Basketball Reference blocks are usually temporary
 
-# Deploy to Lambda
-aws lambda create-function \
-  --function-name nba-espn-scraper \
-  --runtime python3.11 \
-  --role arn:aws:iam::575734508327:role/lambda-s3-role \
-  --handler scrape_missing_espn_data.lambda_handler \
-  --zip-file fileb://../scraper.zip \
-  --timeout 900 \
-  --memory-size 512
+# Resume after 24 hours with slower rate
+# Edit scrape_basketball_reference.py
+# Increase: time.sleep(3.5)  # Was 3.0
 ```
 
-**Cost:** ~$0.01 per scraping session
+**Prevention:** Never reduce rate limit below 3 seconds
 
 ---
 
-### Option 3: Run Locally (Only if you have stable internet)
+#### Failure 2: HTML Structure Changed
 
-**Pros:**
-- No AWS costs
-- Easy debugging
+**Symptom:**
+```
+IndexError: list index out of range
+No table found with id='schedule'
+```
 
-**Cons:**
-- Unreliable with poor internet
-- Can't run overnight
+**Cause:** Basketball Reference changed HTML structure
 
-**Not recommended based on user's connectivity issues.**
+**Recovery:**
+```bash
+# Inspect current HTML
+curl "https://www.basketball-reference.com/leagues/NBA_2024_games.html" > test.html
 
----
+# Check table IDs
+grep "id=" test.html | grep "table"
 
-## Next Steps
-
-1. ✅ All scrapers created and syntax-validated
-2. ⏸️ Choose deployment method (EC2 or Lambda)
-3. ⏸️ Run ESPN scraper first (highest priority)
-4. ⏸️ Verify data quality
-5. ⏸️ Run other scrapers as needed
-
----
-
-## Scraper Comparison
-
-| Scraper | Purpose | Priority | Deployment | Runtime |
-|---------|---------|----------|------------|---------|
-| **ESPN** | Fill 2022-2025 gap | 🔴 HIGH | EC2 or Lambda | ~1 hour |
-| **NBA.com Stats** | Verification | 🟡 MEDIUM | EC2 | ~2 hours |
-| **Kaggle DB** | Historical data | 🟢 LOW | EC2 (one-time) | ~30 min |
-| **SportsDataverse** | Cross-check | 🟢 LOW | EC2 or Lambda | ~10 min |
-| **Basketball Ref** | Advanced stats | 🟢 LOW | EC2 | ~1 hour |
+# Update scraper with new table ID
+# Edit scrape_basketball_reference.py
+```
 
 ---
 
-## Error Handling
+### Kaggle Database Download
 
-All scrapers include:
-- ✅ Timeout handling
-- ✅ Rate limiting
-- ✅ Error logging
-- ✅ Resume capability (via S3 sync)
-- ✅ Progress tracking
+**Common failures:**
 
-If a scraper fails:
-1. Check error logs
-2. Verify API is accessible
-3. Increase timeout if needed
-4. Re-run (scrapers skip existing files)
+#### Failure 1: Authentication Error
+
+**Symptom:**
+```
+401 Unauthorized: You must be authenticated
+```
+
+**Cause:** Missing or expired Kaggle API token
+
+**Recovery:**
+```bash
+# Re-download token from Kaggle account settings
+# https://www.kaggle.com/[username]/account
+
+# Save to correct location
+mkdir -p ~/.kaggle
+mv ~/Downloads/kaggle.json ~/.kaggle/
+chmod 600 ~/.kaggle/kaggle.json
+
+# Retry download
+python scripts/etl/download_kaggle_database.py
+```
+
+**See:** `docs/KAGGLE_API_SETUP.md` for detailed token setup
 
 ---
 
-*Ready for AWS deployment. Awaiting user instructions on which scraper to run first.*
+#### Failure 2: Disk Space Full
+
+**Symptom:**
+```
+OSError: [Errno 28] No space left on device
+```
+
+**Cause:** Kaggle database is 2-5 GB
+
+**Recovery:**
+```bash
+# Check disk space
+df -h
+
+# Clean up temp files
+rm -rf /tmp/nba_*
+
+# Retry download
+python scripts/etl/download_kaggle_database.py
+```
+
+---
+
+## Monitoring Best Practices
+
+### Pre-Flight Checks
+
+**Before starting overnight scraper:**
+```bash
+# 1. Check disk space (need 10+ GB free)
+df -h /tmp
+
+# 2. Check network
+ping stats.nba.com
+ping www.basketball-reference.com
+
+# 3. Check credentials (if needed)
+cat ~/.kaggle/kaggle.json  # For Kaggle
+aws sts get-caller-identity  # For S3 upload
+
+# 4. Check process not already running
+ps aux | grep scrape_
+
+# 5. Backup existing output (if resuming)
+if [ -d "/tmp/nba_api_comprehensive" ]; then
+    mv /tmp/nba_api_comprehensive /tmp/nba_api_backup_$(date +%s)
+fi
+```
+
+---
+
+### During Execution
+
+**Monitor progress:**
+```bash
+# Watch log file
+tail -f /tmp/[scraper]_log.log
+
+# Check file count (updates every few seconds)
+watch -n 5 'ls /tmp/[output_dir]/ | wc -l'
+
+# Check error rate
+grep -i "error" /tmp/[scraper]_log.log | wc -l
+```
+
+**Kill criteria:**
+- Error rate > 10% → Stop and investigate
+- No new files for 10+ minutes → Stop (likely stuck)
+- Disk space < 1 GB → Stop (will run out of space)
+
+---
+
+### Post-Execution
+
+**Validation checklist:**
+```bash
+# 1. Check process exited cleanly
+echo $?  # Should be 0
+
+# 2. Count output files
+ls /tmp/[output_dir]/ | wc -l
+# Compare to expected count
+
+# 3. Check for errors in log
+grep -i "error\|exception" /tmp/[scraper]_log.log
+
+# 4. Validate sample files (check JSON validity)
+python -m json.tool /tmp/[output_dir]/[file1].json
+python -m json.tool /tmp/[output_dir]/[file2].json
+
+# 5. Upload to S3
+aws s3 sync /tmp/[output_dir]/ s3://nba-sim-raw-data-lake/[source]/
+
+# 6. Verify S3 upload
+aws s3 ls s3://nba-sim-raw-data-lake/[source]/ | wc -l
+
+# 7. Clean up local files
+rm -rf /tmp/[output_dir]/
+```
+
+---
+
+## Emergency Contact
+
+**If all recovery procedures fail:**
+
+1. **Stop scraper immediately** - Prevent further damage
+2. **Preserve logs** - Copy to S3 for debugging
+3. **Document error** - Create GitHub issue with logs
+4. **Check source status** - Website may be down
+
+**Useful commands:**
+```bash
+# Save logs to S3
+aws s3 cp /tmp/[scraper]_log.log s3://nba-sim-raw-data-lake/logs/failure_$(date +%s).log
+
+# Check source website status
+curl -I https://stats.nba.com
+curl -I https://www.basketball-reference.com
+
+# Create GitHub issue
+gh issue create --title "Scraper failure: [name]" --body "$(cat /tmp/[scraper]_log.log | tail -100)"
+```
+
+---
+
+*Last updated: October 7, 2025*
+*For detailed scraper status, see: `docs/SCRAPER_STATUS_REPORT.md`*

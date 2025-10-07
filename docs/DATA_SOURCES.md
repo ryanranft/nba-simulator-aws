@@ -1,7 +1,7 @@
 # NBA Data Sources - Multi-Source Strategy
 
-**Last Updated:** October 4, 2025
-**Status:** Active - 5 sources configured
+**Last Updated:** October 7, 2025
+**Status:** Active - 5 sources configured (with temporal precision tracking)
 
 ---
 
@@ -51,43 +51,69 @@ This project uses a **multi-source data strategy** to ensure data quality, compl
 
 ### 2. NBA.com Stats API (Verification Source #1)
 
-**Status:** 🔄 PENDING IMPLEMENTATION
+**Status:** ✅ ACTIVE (LIMITED - Testing Phase)
 
-**API Type:** Unofficial (reverse-engineered)
+**API Type:** Official NBA Stats API via `nba_api` Python package
 
-**Base URL:** `https://stats.nba.com/stats/`
+**Implementation:** `nba_api` (Python wrapper for stats.nba.com)
 
-**Key Endpoints:**
-- `scoreboardV2` - Daily games and scores
-- `boxscoretraditionalv2` - Box scores
-- `playbyplayv2` - Play-by-play data
-- `leaguegamefinder` - Historical game search
-- `commonteamroster` - Team rosters
-- `commonplayerinfo` - Player information
+**Key Endpoints (Tier 1 - ENABLED):**
+
+**Advanced Box Scores (8 endpoints):**
+- `boxscoreadvancedv2` - Advanced efficiency metrics
+- `boxscoredefensivev2` - Defensive statistics
+- `boxscorefourfactorsv2` - Four factors breakdown
+- `boxscoremiscv2` - Miscellaneous stats
+- `boxscoreplayertrackv2` - Player tracking metrics
+- `boxscorescoringv2` - Scoring breakdown
+- `boxscoretraditionalv2` - Traditional box scores
+- `boxscoreusagev2` - Usage rates
+
+**Player Tracking (4 endpoints):**
+- `playerdashptpass` - Passing stats (passes made, potential assists)
+- `playerdashptreb` - Rebounding stats (contested, chances)
+- `playerdashptshotdefend` - Shot defense (contests, DFG%)
+- `playerdashptshots` - Shot tracking (touch time, dribbles)
+
+**League Dashboards (7 endpoints):**
+- `leaguedashplayerstats` - Player statistics
+- `leaguedashteamstats` - Team statistics
+- `leaguedashlineups` - Lineup combinations
+- `leaguedashptdefend` - Player tracking defense
+- `leaguedashptstats` - Player tracking stats
+- `leaguedashptteamdefend` - Team tracking defense
+- `leagueleaders` - League leaders
+
+**Additional Endpoints:**
+- `leaguehustlestatsplayer` / `leaguehustlestatsteam` - Hustle stats
+- `draftcombinestats` / `drafthistory` - Draft data
+- `shotchartdetail` - Shot chart data
+- `synergyplaytypes` - Synergy play types (10 categories)
 
 **Coverage:**
-- Date range: 1996-present (official NBA data)
-- Data quality: 100% (official source)
-- Update frequency: Real-time during games
+- Date range: 1996-2025 (30 seasons)
+- Data quality: 100% (official NBA source)
+- **Current scrape:** Testing limits (100 games, 50 players per season)
+- **Production capability:** All games (~1,230/season), all players (~500/season)
 
-**Authentication:**
-- No API key required
-- Requires User-Agent header
-- Rate limit: ~10-20 requests/minute (unofficial)
+**Rate Limiting:**
+- 600ms between API calls
+- ~1.67 requests per second
+- Enforced via `_rate_limit()` method
 
-**Use Cases:**
-- Verify game scores against ESPN
-- Cross-check player statistics
-- Official team and player IDs
-- Advanced statistics (TS%, eFG%, etc.)
+**Features Added:**
+- Tier 1 endpoints: 60-80 advanced features
+- Total features: 269-289 (up from 209)
 
-**Implementation Notes:**
-- Use exponential backoff for rate limiting
-- Store responses in S3 for caching
-- Primary use: Validation, not bulk download
+**Current Status:**
+- ✅ Scraper running overnight (started 10:56 PM, Oct 6)
+- ✅ Expected completion: 4-5 AM (5-6 hours for 30 seasons)
+- ✅ Output: `/tmp/nba_api_comprehensive/`
+- ✅ S3 upload: `s3://nba-sim-raw-data-lake/nba_api_comprehensive/`
 
 **Scripts:**
-- `scripts/etl/scrape_nba_stats_api.py` - ⏸️ TO BE CREATED
+- `scripts/etl/scrape_nba_api_comprehensive.py` - ✅ ACTIVE
+- `scripts/etl/overnight_nba_api_comprehensive.sh` - ✅ RUNNING
 
 **Cost:** $0/month (free, rate-limited)
 
@@ -249,6 +275,8 @@ Comprehensive historical basketball statistics site. Most complete source for hi
 
 ## Data Source Comparison Matrix
 
+### Basic Feature Comparison
+
 | Feature | ESPN | NBA.com Stats | Kaggle DB | SportsDataverse | Basketball Reference |
 |---------|------|---------------|-----------|-----------------|----------------------|
 | **Coverage** | 1999-2025 | 1996-present | 1946-2024 | 2002-present | 1946-present |
@@ -261,6 +289,98 @@ Comprehensive historical basketball statistics site. Most complete source for hi
 | **Advanced Stats** | Limited | Yes | Yes | Limited | Yes |
 | **Historical** | 1999+ | 1996+ | 1946+ | 2002+ | 1946+ |
 | **Reliability** | High | Highest | High | Medium | Highest |
+
+---
+
+### Temporal Data Quality Matrix
+
+**This matrix shows temporal precision capabilities for the NBA Temporal Panel Data System.**
+
+| Data Source | Time Period | Temporal Precision | Wall Clock Timestamps | Birth Dates | Data Quality Flag |
+|-------------|-------------|--------------------|-----------------------|-------------|-------------------|
+| **NBA Live API** | 2020-2025 (future) | **Millisecond** | ✅ Full ISO8601 | ✅ Day precision | `precision_level: 'millisecond'` |
+| **NBA.com Stats API** | 2013-2019 | **Second** | ✅ Unix timestamps | ✅ Day precision | `precision_level: 'second'` |
+| **ESPN API** | 1999-2025 | **Minute** | ⚠️ Minute-level only | ✅ Day precision | `precision_level: 'minute'` |
+| **Basketball Ref** | 1946-1992 | **Game-level** | ❌ Game date only | ⚠️ Year precision | `precision_level: 'game'` |
+| **Kaggle DB** | 1946-2024 | **Game-level** | ❌ Game date only | ⚠️ Varies | `precision_level: 'game'` or `'unknown'` |
+| **SportsDataverse** | 2002-present | **Minute** | ⚠️ Minute-level | ✅ Day precision | `precision_level: 'minute'` |
+| **hoopR** | 2002-present | **Minute** | ⚠️ Minute-level | ✅ Day precision | `precision_level: 'minute'` |
+
+**Legend:**
+- ✅ **Full support** - Data available with high precision
+- ⚠️ **Limited support** - Data available but lower precision
+- ❌ **Not available** - Data not provided by source
+
+**Quality Flags (stored in database):**
+- `'millisecond'` - Timestamp accurate to ±0.001 seconds (future NBA Live API)
+- `'second'` - Timestamp accurate to ±1 second (NBA Stats API 2013-2019)
+- `'minute'` - Timestamp accurate to ±60 seconds (ESPN, most historical data)
+- `'game'` - Only game date available, no intra-game timestamps (pre-1993 data)
+- `'unknown'` - Precision unknown or inconsistent
+
+**Temporal Data Availability by Era:**
+
+| Era | Best Source | Precision Level | Wall Clock Available | Use Cases |
+|-----|-------------|-----------------|----------------------|-----------|
+| **2020-2025** | NBA Live API (future) | Millisecond | ✅ Yes | Video sync (30fps), real-time ML, high-frequency analysis |
+| **2013-2019** | NBA.com Stats API | Second | ✅ Yes | Temporal queries, snapshot analysis, ML features |
+| **1999-2012** | ESPN API | Minute | ⚠️ Minute-level | General temporal queries, trend analysis |
+| **1946-1998** | Basketball Reference | Game-level | ❌ Date only | Career aggregates, seasonal trends, historical analysis |
+
+**Birth Date Precision by Source:**
+
+| Source | Birth Date Format | Example | Age Calculation Accuracy | Database Flag |
+|--------|-------------------|---------|--------------------------|---------------|
+| **NBA.com Stats** | YYYY-MM-DD | `1978-08-23` | ±1 day | `birth_date_precision: 'day'` |
+| **Basketball Ref** | YYYY-MM-DD (modern) | `1978-08-23` | ±1 day | `birth_date_precision: 'day'` |
+| **Basketball Ref** | YYYY-MM (historical) | `1960-03` | ±15 days | `birth_date_precision: 'month'` |
+| **Basketball Ref** | YYYY (very old) | `1945` | ±6 months | `birth_date_precision: 'year'` |
+| **ESPN API** | Not provided | N/A | N/A | `birth_date_precision: 'unknown'` |
+
+**Data Quality Recommendations:**
+
+1. **For millisecond-precision queries:**
+   - Filter: `WHERE precision_level = 'millisecond' AND wall_clock_utc >= '2020-01-01'`
+   - Source: NBA Live API (future implementation)
+   - Use case: Video frame synchronization, real-time tracking
+
+2. **For second-precision queries:**
+   - Filter: `WHERE precision_level IN ('millisecond', 'second') AND wall_clock_utc >= '2013-01-01'`
+   - Source: NBA.com Stats API
+   - Use case: Temporal snapshots, ML feature engineering
+
+3. **For minute-precision queries:**
+   - Filter: `WHERE precision_level IN ('millisecond', 'second', 'minute')`
+   - Source: ESPN API + NBA.com Stats
+   - Use case: General temporal analysis, trend detection
+
+4. **For game-level analysis:**
+   - Filter: `WHERE precision_level != 'unknown'`
+   - Source: All sources
+   - Use case: Career statistics, historical comparisons
+
+**Cross-Source Validation Strategy:**
+
+| Validation Type | Primary Source | Verification Source | Discrepancy Resolution |
+|-----------------|----------------|---------------------|------------------------|
+| **Timestamps (2013+)** | NBA.com Stats (second) | ESPN (minute) | Use NBA.com Stats (higher precision) |
+| **Timestamps (1999-2012)** | ESPN (minute) | SportsDataverse (minute) | Cross-validate, flag conflicts |
+| **Birth Dates** | NBA.com Stats | Basketball Reference | Use Basketball Ref if NBA.com missing |
+| **Game Scores** | ESPN | NBA.com Stats | Flag if differ, manual review |
+| **Historical (pre-1999)** | Basketball Reference | Kaggle DB | Cross-validate, prefer Basketball Ref |
+
+**Implementation Notes:**
+
+- Store `precision_level` and `data_source` with every `temporal_events` row
+- Store `birth_date_precision` in `player_biographical` table
+- Create `data_quality_log` table for cross-source discrepancies
+- Use precision flags in queries to filter by confidence level
+- Document precision limitations in query results
+
+**See also:**
+- `docs/adr/009-temporal-panel-data-architecture.md` - Temporal architecture decisions
+- `docs/TEMPORAL_QUERY_GUIDE.md` - Query examples with precision filtering
+- `docs/phases/PHASE_3_DATABASE.md` Sub-Phase 3.5 - Temporal table schemas
 
 ---
 

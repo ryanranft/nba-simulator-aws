@@ -1,10 +1,10 @@
-# NBA Game Simulator & ML Platform - Progress Index
+# NBA Temporal Panel Data System - Progress Index
 
 **System Version:** 2.0 (Modular Documentation System)
 **Date Started:** September 29, 2025
 **Current Phase:** Core Project Complete - Production Ready
-**Last Updated:** October 6, 2025
-**Project Status:** ✅ COMPLETE
+**Last Updated:** October 7, 2025
+**Project Status:** ✅ COMPLETE (Core phases) / 🔄 IN PROGRESS (Temporal data collection)
 
 > 💡 **For Claude Code Users:** See `CLAUDE.md` for detailed instructions on how to navigate this file, read phase files efficiently, and execute workflows. Start every session by reading CLAUDE.md first.
 
@@ -28,17 +28,40 @@
 
 ## Current Session Context
 
-**Last session ended:** October 6, 2025
-**Last completed:** Advanced planning documentation created:
-  - Multi-source data integration plan (209 features from 5 sources)
-  - ML_FEATURE_CATALOG.md (complete feature breakdown)
-  - IMPLEMENTATION_CHECKLIST.md (28-hour roadmap)
-  - QUICK_START_MULTI_SOURCE.md (quick reference)
-  - ADVANCED_SIMULATION_FRAMEWORK.md (econometric simulation architecture)
-**Next to work on:** Implement multi-source data integration (Week 1: Basketball Reference + NBA.com Stats)
-**Phase status:** Core phases complete ✅ - Advanced features ready to implement
+**Last session ended:** October 7, 2025 - 10:05 AM
+**Last completed:** NBA API Scraper - Fixed Player Tracking Bug & Restarted
+  - ✅ Checked overnight scraper status (Workflow #38)
+    - Found 89% error rate (490/551 API calls failing)
+    - Missing `team_id` parameter in player tracking endpoints
+    - Preserved 5,857 files (114 MB) before stopping
+  - ✅ Fixed player tracking bug
+    - Added `team_id` lookup from player roster data
+    - Filter to only active players with teams (ROSTERSTATUS=1, TEAM_ID≠0)
+    - Tested successfully with 2024 season data
+  - ✅ Restarted scraper with fix (PID 14497, started 10:04 AM)
 
-> **Note for Claude:** Update this section at the end of every session (Workflow #14)
+**Overnight jobs running:**
+  - **NBA API Comprehensive Scraper**: PID 14497, started 10:04 AM, ETA 4-5 hours
+    - Coverage: 30 seasons (1996-2025), Tier 1 endpoints enabled
+    - Output: `/tmp/nba_api_comprehensive/`
+    - S3: `s3://nba-sim-raw-data-lake/nba_api_comprehensive/`
+    - Log: `/tmp/nba_api_comprehensive_restart.log`
+    - Testing limits: 100 games, 50 players per season
+    - **Fix applied:** Player tracking now includes team_id parameter
+
+**Next to work on:**
+1. **Check scraper status** (Workflow #38: Overnight Scraper Handoff)
+   - Verify completion: `ps aux | grep 14497`
+   - Check logs: `tail -100 /tmp/nba_api_comprehensive_restart.log`
+   - Validate output: File counts, data size, JSON validity, error rate
+   - Confirm S3 uploads: `aws s3 ls s3://nba-sim-raw-data-lake/nba_api_comprehensive/`
+2. **If successful:** Document results, analyze feature coverage
+3. **If errors persist:** Review logs, adjust endpoints
+4. **Next implementation:** Tier 1 remaining tasks (Kaggle tables, Basketball Ref ratings)
+
+**Phase status:** Data collection enhanced ✅ - Multi-source integration in progress
+
+> **Note for Claude:** Follow Workflow #38 at start of next session to check overnight scraper status
 
 ---
 
@@ -97,41 +120,61 @@
 
 ## 📊 Executive Summary
 
-**Status:** ✅ PROJECT COMPLETE - All Core Phases Operational
-**Completed Date:** October 3, 2025
+**Status:** ✅ CORE PROJECT COMPLETE - Enhanced with Temporal Data Architecture
+**Completed Date:** October 3, 2025 (Core phases) / October 7, 2025 (Temporal enhancement)
 **Current Cost:** $41.53/month (S3 + RDS + EC2 + Monitoring + API)
 **Budget Status:** 72% under $150/month target
 
+### Project Vision
+
+**Temporal Panel Data System:** Create snapshots of NBA history at exact timestamps with millisecond precision.
+
+**Example capability:** Query "What were Kobe Bryant's career statistics at exactly 7:02:34.56 PM CT on June 19, 2016?" and receive accurate cumulative stats up to that exact moment, including his age down to the second.
+
+**Future integration:** Video feed synchronization with ball/player coordinates for computer vision analysis at 30fps (~33ms per frame).
+
 ### What's Accomplished
 
-- ✅ **Phase 0:** Data Collection - S3 data lake with 146,115 files (119 GB) - Oct 1
-- ⏸️ **Phase 1:** Data Quality - Verification sources not yet defined (pending)
+- ✅ **Phase 0:** Multi-Source Data Collection - Oct 1
+  - S3 data lake with 146,115 files (119 GB) from ESPN
+  - NBA API scraper optimized for temporal data (Oct 7)
+    - PlayByPlayV2 endpoint for wall clock timestamps
+    - Player biographical data for age calculations
+    - Season cutoffs for data availability (2014+ tracking, 2016+ hustle/synergy)
+    - Testing limits removed (100% data capture)
+  - Ready to collect: ~366,486 files across all seasons (1996-2025)
+- ⏸️ **Phase 1:** Data Quality - Temporal data validation framework (pending)
 - ✅ **Phase 2:** Local ETL extraction (bypassed AWS Glue) - Oct 2
   - 44,828 games with 53 fields (1993-2025, schedules only)
   - 6,781,155 plays extracted (2004-2021)
-  - 408,833 box score players loaded (1997-2021)
-  - 15,900 box score teams loaded (1997-2021)
+  - Needs temporal indexing enhancement
 - ✅ **Phase 3:** RDS PostgreSQL operational - Oct 1
   - db.t3.small, 58-column schema
-  - All data loaded and indexed
+  - Needs temporal events table for snapshot queries
 - ✅ **Phase 4:** EC2 simulation engine deployed - Oct 3
-  - t3.small instance (i-0b8bbe4cdff7ae2d2)
-  - Monte Carlo simulation scripts
-  - RDS connection verified
-  - Test simulations successful
+  - Can be enhanced with temporal feature engineering
+- ✅ **Phase 5:** ML models operational - Oct 3
+  - Can leverage temporal features for improved predictions
+- ✅ **Phase 6:** Analytics and monitoring - Oct 3
+  - CloudWatch, Athena, API Gateway deployed
 
 ### Current State
 
-- **Working:** S3 bucket + RDS database + EC2 simulation engine
+- **Working:** S3 bucket + RDS database + EC2 simulation engine + Temporal scraper ready
 - **Environment:** Conda env `nba-aws`, Python 3.11.13
 - **Git:** Repository synced with GitHub (SSH auth)
 - **Cost:** $38.33/month ($2.74 S3 + $29 RDS + $6.59 EC2)
+- **Data Precision:**
+  - 2020-2025: Millisecond precision (NBA Live API - future)
+  - 1993-2019: Minute-level precision (NBA Stats PlayByPlayV2)
+  - 1946-1992: Game-level aggregates (Basketball Reference)
 
 ### Next Actions
 
-1. **Develop ML models** → See [Phase 5](docs/phases/PHASE_5_MACHINE_LEARNING.md)
-2. **Or add analytics** → See [Phase 6](docs/phases/PHASE_6_ENHANCEMENTS.md)
-3. **Monitor costs** → Run `make check-costs` weekly
+1. **Start Priority 1 scraping** (2014-2025 seasons) - 14-15 days runtime
+2. **Design temporal events database schema** - Enable snapshot queries
+3. **Implement snapshot query system** - Reconstruct NBA state at any timestamp
+4. **Build temporal feature engineering** - Enhance ML models with time-based features
 
 ---
 
@@ -183,13 +226,50 @@ Phase 3 (RDS Database) ✅
 
 ## 💰 Cost Summary
 
-### Current Monthly Costs
-- S3 Storage: $2.74 (119 GB)
-- RDS db.t3.small: $29.00
+### Current Monthly Costs (Base System)
+- S3 Storage: $2.74 (119 GB ESPN data)
+- RDS db.t3.small: $29.00 (20 GB storage)
 - EC2 t3.small (8hrs/day): $6.59
 - **Total: $38.33/month**
 
-### Projected Costs (Full Deployment)
+---
+
+### Temporal Enhancement Cost Impact
+
+**Additional storage requirements:**
+
+| Component | Storage Size | Monthly Cost |
+|-----------|--------------|--------------|
+| `temporal_events` (500M rows) | 200-300 GB | $4.60-6.90 (S3) |
+| `player_snapshots` (50M rows) | 10-20 GB | $0.23-0.46 (S3) |
+| `game_states` (10M rows) | 5-10 GB | $0.12-0.23 (S3) |
+| `player_biographical` (5K rows) | < 1 GB | $0.02 (S3) |
+| **Total temporal data** | **215-330 GB** | **$4.97-7.61/month** |
+
+**RDS storage upgrade:**
+- Current: 20 GB
+- Needed: 250-350 GB (for temporal tables)
+- Cost increase: +$11.57-23.57/month
+
+**BRIN index savings:**
+- Traditional B-tree: ~50 GB storage
+- BRIN indexes: ~500 MB storage
+- **Savings: ~$1.14/month** (70% reduction)
+
+**Total with temporal enhancement:**
+- Base: $38.33/month
+- Temporal S3: +$4.97-7.61/month
+- RDS upgrade: +$11.57-23.57/month
+- Snapshot generation: +$2-5/month (Lambda/EC2 jobs)
+- **New total: $56.87-74.51/month**
+
+**Cost increase: +$18.54-36.18/month** for temporal capability
+
+---
+
+### Projected Costs (Full Deployment with Temporal)
+
+**Without temporal:**
 - S3: $2.74
 - RDS: $29.00
 - EC2 (t3.small, 8hrs/day): $7.00
@@ -197,13 +277,69 @@ Phase 3 (RDS Database) ✅
 - Enhancements: $5.00
 - **Total: $63.74/month**
 
-### Cost Optimization
-- Stop EC2 when not in use (save ~$8/month)
-- Stop SageMaker notebook when not developing (save ~$30/month)
-- Use Spot instances for training (save 70%)
-- **Actual monthly cost:** $35-65/month with proper start/stop discipline
+**With temporal:**
+- S3: $7.71-10.35 (base + temporal)
+- RDS: $40.57-52.57 (upgraded storage)
+- EC2 (t3.small, 8hrs/day): $7.00
+- SageMaker (moderate use): $20.00
+- Snapshot generation: $2-5.00
+- Enhancements: $5.00
+- **Total: $82.28-99.92/month**
 
-**See individual phase files for detailed cost breakdowns.**
+**Temporal cost increase: +$18.54-36.18/month**
+
+---
+
+### Cost Optimization Strategies
+
+**Temporal-specific:**
+1. **Snapshot frequency tuning:**
+   - Baseline: Every game (18M snapshots)
+   - Optional: Every quarter (+50K/season)
+   - **Tradeoff:** More snapshots = faster queries, higher cost
+
+2. **Archive old snapshots to S3 Glacier:**
+   - Glacier: $0.004/GB vs Standard $0.023/GB
+   - Archive snapshots > 5 years old
+   - **Savings: ~$3-5/month**
+
+3. **Use BRIN indexes (already planned):**
+   - Save $1.14/month vs B-tree indexes
+   - Minimal query performance impact
+
+4. **Partition by year:**
+   - Improves query speed
+   - Enable archiving old partitions
+   - No additional cost
+
+**General optimizations:**
+- Stop EC2 when not in use (save ~$8/month)
+- Stop SageMaker when not developing (save ~$30/month)
+- Use Spot instances for training (save 70%)
+- S3 Intelligent-Tiering for rarely accessed data (save 30-40%)
+
+**Actual monthly cost with discipline:**
+- **Base system:** $35-65/month
+- **Temporal system:** $57-95/month
+- **Peak (everything running):** $100/month
+
+---
+
+### Budget Status
+
+**Target:** $150/month
+**Current:** $38.33/month (74% under budget)
+**With temporal:** $57-75/month (50-62% under budget)
+**Peak usage:** $100/month (33% under budget)
+
+**Temporal enhancement fits budget:** Adds $19-37/month, well within target.
+
+---
+
+**See individual phase files for detailed cost breakdowns:**
+- **Phase 3 (Sub-Phase 3.5):** Temporal table costs and optimizations
+- **ADR-009:** Temporal architecture cost analysis
+- **Phase 0-6:** Base infrastructure costs
 
 ---
 

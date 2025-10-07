@@ -23,18 +23,30 @@
 
 ## Overview
 
-Get raw data from local storage into AWS S3 (one-time setup). This is the **foundation phase** for the entire NBA simulator pipeline - all subsequent phases depend on data being available in S3.
+Get raw data from multiple sources into AWS S3 with temporal precision. This is the **foundation phase** for the NBA temporal panel data system - all subsequent phases depend on temporally-indexed data being available in S3.
+
+**⚠️ IMPORTANT: This is a temporal panel data system, not a traditional game simulator.**
+
+See `docs/PROJECT_VISION.md` for the complete vision.
 
 **This phase includes:**
 - Local development environment setup
 - AWS S3 bucket creation
-- Initial upload of existing ESPN data to S3
-- Upload verification and data integrity checks
+- Multi-source data collection with temporal timestamps
+- ESPN data (146,115 files, 119GB) - primary historical data
+- NBA API data (~366,486 files) - temporal precision data with wall clock timestamps
+- Basketball Reference, hoopR, Kaggle - supplementary sources
 
 **What happens in this phase:**
-- Take 146,115 JSON files (119GB) from local storage
-- Upload to S3 for cloud-based processing
-- Establish S3 as the single source of truth for raw data
+- Collect play-by-play data with wall clock timestamps for temporal alignment
+- Collect player birth dates for precise age calculations
+- Establish S3 as the single source of truth for temporal raw data
+- Enable snapshot queries: "Show me NBA state at exactly 7:02:34 PM on June 19, 2016"
+
+**Temporal precision levels:**
+- 2020-2025: Millisecond precision (NBA Live API - future)
+- 1993-2019: Minute-level precision (NBA Stats PlayByPlayV2)
+- 1946-1992: Game-level aggregates (Basketball Reference)
 
 ---
 

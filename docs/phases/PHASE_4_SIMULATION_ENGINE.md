@@ -21,12 +21,16 @@
 
 Set up AWS EC2 instance to run NBA game simulations using historical data from RDS PostgreSQL. The simulation engine will use Monte Carlo methods and statistical models to predict game outcomes based on team/player performance patterns.
 
+**⚠️ Temporal Enhancement Opportunity:**
+This phase can be enhanced with temporal simulation capabilities once Phase 3.5 (Temporal Database Schema) is complete. Temporal simulation enables event-level resolution with precise timestamps, player aging effects, and fatigue modeling.
+
 **This phase includes:**
 - EC2 instance provisioning
 - Python 3.11 + dependencies installation
-- Simulation code deployment
+- Simulation code deployment (traditional game-level)
 - RDS connection from EC2
 - Test simulation execution
+- **(Future)** Temporal event-level simulation
 
 ---
 
@@ -703,6 +707,325 @@ After completing this phase:
 
 ---
 
+## Sub-Phase 4.5: Temporal Event-Level Simulation (FUTURE ENHANCEMENT)
+
+**Status:** ⏸️ PENDING
+**Prerequisites:** Phase 3.5 complete (Temporal Database Schema), traditional simulation working
+**Time Estimate:** 2-3 weeks
+**Estimated Cost:** No additional cost (uses existing EC2)
+
+### Overview
+
+Enhance the simulation engine to operate at event-level temporal resolution instead of game-level aggregates. This enables realistic play-by-play simulation with timestamps, player fatigue modeling, and momentum effects.
+
+**Traditional simulation:**
+- Input: Team season averages (PPG, FG%, etc.)
+- Output: Final score prediction
+- Resolution: Game-level
+
+**Temporal simulation:**
+- Input: Player/team statistics + temporal events database
+- Output: Complete play-by-play sequence with timestamps
+- Resolution: Event-level (every shot, foul, turnover with precise timestamp)
+
+### Temporal Features for Simulation
+
+**1. Player Fatigue Modeling**
+```python
+def calculate_fatigue_factor(player_id, current_timestamp, game_start):
+    """
+    Calculate player fatigue based on minutes played and rest.
+
+    Fatigue affects shooting percentage, turnovers, defensive efficiency.
+    """
+    minutes_played = get_player_minutes_at_time(player_id, current_timestamp)
+    rest_since_last_sub = get_rest_duration(player_id, current_timestamp)
+
+    # Fatigue increases with minutes, decreases with rest
+    fatigue = 1.0 - (minutes_played / 48.0) * 0.3 + (rest_since_last_sub / 300.0) * 0.1
+    return max(0.5, min(1.0, fatigue))  # Clamp between 50% and 100%
+
+# Example: Player at 35 minutes with 2 minutes rest
+# fatigue = 1.0 - (35/48)*0.3 + (120/300)*0.1 = 0.82 (18% fatigue penalty)
+```
+
+**2. Age-Based Performance Curves**
+```python
+def get_age_adjusted_stats(player_id, event_timestamp):
+    """
+    Adjust player statistics based on precise age at event time.
+
+    Peak performance: ~27-29 years
+    Decline rate: ~2% per year after age 30
+    """
+    age_years = calculate_player_age(player_id, event_timestamp)
+    base_stats = get_player_career_averages(player_id)
+
+    if age_years < 27:
+        # Young player still improving
+        age_factor = 0.85 + (age_years - 19) * 0.0188  # 85% at 19 → 100% at 27
+    elif age_years <= 30:
+        # Peak years
+        age_factor = 1.0
+    else:
+        # Decline phase
+        age_factor = 1.0 - (age_years - 30) * 0.02  # -2% per year
+
+    return {k: v * age_factor for k, v in base_stats.items()}
+
+# Example: Kobe at 37.8 years
+# age_factor = 1.0 - (37.8 - 30) * 0.02 = 0.844 (15.6% decline from peak)
+```
+
+**3. Momentum & Clutch Effects**
+```python
+def calculate_momentum_factor(team_id, current_timestamp, lookback_seconds=300):
+    """
+    Calculate team momentum based on recent scoring runs.
+
+    Momentum affects shooting confidence and turnover rates.
+    """
+    recent_events = get_team_events_in_window(
+        team_id,
+        current_timestamp - timedelta(seconds=lookback_seconds),
+        current_timestamp
+    )
+
+    # Calculate scoring differential in last 5 minutes
+    points_scored = sum(e.points for e in recent_events if e.event_type == 'shot' and e.made)
+    points_allowed = get_opponent_points_in_window(team_id, current_timestamp, lookback_seconds)
+
+    momentum = (points_scored - points_allowed) / 10.0  # Normalize
+    return max(-0.1, min(0.1, momentum))  # +/-10% shooting boost
+
+# Example: Team on 12-2 run in last 5 minutes
+# momentum = (12 - 2) / 10 = +0.10 (+10% shooting boost)
+```
+
+**4. Clutch Time Adjustments**
+```python
+def is_clutch_situation(game_state, current_timestamp):
+    """
+    Detect clutch situations: close game, final 5 minutes.
+
+    Some players perform better/worse in clutch.
+    """
+    if game_state.quarter < 4:
+        return False
+
+    game_clock_seconds = game_state.game_clock_seconds
+    score_diff = abs(game_state.home_score - game_state.away_score)
+
+    # Clutch: 4th quarter, < 5 minutes, score within 5 points
+    return game_clock_seconds < 300 and score_diff <= 5
+
+def get_clutch_factor(player_id):
+    """
+    Player-specific clutch performance multiplier.
+
+    Calculated from historical clutch situations.
+    """
+    historical_clutch_stats = query_player_clutch_performance(player_id)
+    regular_stats = query_player_regular_performance(player_id)
+
+    # Ratio of clutch performance to regular performance
+    return historical_clutch_stats.fg_pct / regular_stats.fg_pct
+
+# Example: Kobe's clutch factor = 0.467 / 0.447 = 1.045 (+4.5% in clutch)
+```
+
+### Simulation Algorithm
+
+**Event-Level Monte Carlo Simulation:**
+
+```python
+def simulate_game_temporal(home_team_id, away_team_id, game_date):
+    """
+    Simulate entire game at event-level with timestamps.
+    """
+    # Initialize game state
+    game_state = GameState(
+        home_team_id=home_team_id,
+        away_team_id=away_team_id,
+        game_date=game_date,
+        current_time=game_date + timedelta(hours=19),  # 7 PM tip-off
+        quarter=1,
+        game_clock_seconds=720,  # 12 minutes
+        home_score=0,
+        away_score=0
+    )
+
+    simulated_events = []
+
+    while game_state.quarter <= 4 or game_state.is_overtime:
+        # Determine possession
+        possession_team = determine_possession(game_state)
+
+        # Simulate possession outcome
+        event = simulate_possession(
+            possession_team,
+            game_state,
+            simulated_events
+        )
+
+        # Update game state
+        game_state.apply_event(event)
+
+        # Advance clock (typical possession: 14-24 seconds)
+        possession_duration = random.triangular(10, 24, 18)
+        game_state.advance_clock(possession_duration)
+        game_state.current_time += timedelta(seconds=possession_duration)
+
+        # Store event with timestamp
+        event.wall_clock_time = game_state.current_time
+        event.game_clock_seconds = game_state.game_clock_seconds
+        simulated_events.append(event)
+
+        # Check for quarter end
+        if game_state.game_clock_seconds <= 0:
+            game_state.end_quarter()
+
+    return simulated_events, game_state
+
+def simulate_possession(team_id, game_state, event_history):
+    """
+    Simulate single possession outcome with temporal factors.
+    """
+    # Select shooter based on lineup and minutes played
+    shooter = select_shooter(team_id, game_state)
+
+    # Get player stats with temporal adjustments
+    base_stats = get_player_snapshot_at_time(shooter.id, game_state.current_time)
+    age_factor = get_age_adjusted_stats(shooter.id, game_state.current_time)
+    fatigue_factor = calculate_fatigue_factor(shooter.id, game_state.current_time, game_state.game_start)
+    momentum_factor = calculate_momentum_factor(team_id, game_state.current_time)
+
+    # Adjust shooting percentage
+    fg_pct = base_stats.fg_pct * age_factor * fatigue_factor * (1 + momentum_factor)
+
+    # Check for clutch situation
+    if is_clutch_situation(game_state, game_state.current_time):
+        clutch_factor = get_clutch_factor(shooter.id)
+        fg_pct *= clutch_factor
+
+    # Simulate shot outcome
+    shot_made = random.random() < fg_pct
+    points = determine_shot_value(game_state)  # 2 or 3 points
+
+    return Event(
+        event_type='shot',
+        player_id=shooter.id,
+        team_id=team_id,
+        made=shot_made,
+        points=points if shot_made else 0,
+        game_state=game_state.snapshot()
+    )
+```
+
+### Benefits of Temporal Simulation
+
+**1. Realistic Play-by-Play Sequences**
+- Every event has a timestamp (wall clock + game clock)
+- Can replay simulated games with exact timing
+- Enables highlight generation: "Show me all 3-pointers made in Q4"
+
+**2. Player Development Over Time**
+- Simulate player aging effects within simulation
+- Account for injuries, rest days, back-to-back games
+- Model career arcs with temporal precision
+
+**3. In-Game Adjustments**
+- Coach substitutions based on fatigue
+- Defensive adjustments in real-time
+- Timeout impacts on momentum
+
+**4. Advanced ML Features**
+- Use simulated temporal data to train models
+- Generate synthetic play-by-play for data augmentation
+- Test "what-if" scenarios: "What if Kobe rested 2 more minutes?"
+
+**5. Video Integration Readiness**
+- Simulated events have timestamps compatible with video
+- Can sync simulated plays with actual game footage
+- Compare simulated vs. actual possession-by-possession
+
+### Implementation Steps
+
+**Week 1: Core Temporal Simulation**
+1. ⏸️ Implement event-level simulation loop
+2. ⏸️ Add timestamp tracking (wall clock + game clock)
+3. ⏸️ Integrate with temporal_events table
+4. ⏸️ Test with single game simulation
+
+**Week 2: Temporal Feature Engineering**
+1. ⏸️ Implement fatigue calculation
+2. ⏸️ Implement age adjustment curves
+3. ⏸️ Implement momentum tracking
+4. ⏸️ Implement clutch detection and factors
+
+**Week 3: Validation & Refinement**
+1. ⏸️ Compare simulated vs. actual game timings
+2. ⏸️ Validate player aging effects
+3. ⏸️ Tune momentum and fatigue parameters
+4. ⏸️ Performance testing (simulate 100 games)
+
+### Example Output
+
+**Simulated Play-by-Play with Timestamps:**
+```
+2016-06-19 19:02:22 | Q1 11:38 | Kobe Bryant 3PT shot MADE (3-0)
+2016-06-19 19:02:38 | Q1 11:22 | Rudy Gobert 2PT shot MADE (3-2)
+2016-06-19 19:02:54 | Q1 11:06 | Kobe Bryant 2PT shot MISSED
+2016-06-19 19:03:10 | Q1 10:50 | Gordon Hayward 3PT shot MADE (3-5)
+...
+2016-06-19 21:45:34 | Q4 00:02 | Kobe Bryant FREE THROW MADE (59-103)
+2016-06-19 21:45:38 | Q4 00:00 | GAME END (60-103)
+```
+
+**Player Statistics with Temporal Factors:**
+```
+Kobe Bryant - Age: 37.8 years
+Minutes Played: 28:14
+Fatigue Factor: 0.76 (24% fatigue at end)
+Age Factor: 0.84 (16% decline from peak)
+Clutch Factor: 1.05 (+5% in final 5 min)
+
+Final Stats:
+- 19/35 FG (54.3%)
+- 4/12 3PT (33.3%)
+- 18/20 FT (90.0%)
+- 60 Points
+```
+
+### Validation Metrics
+
+- [ ] Simulated possession duration matches actual (μ=18s, σ=6s)
+- [ ] Simulated scoring pace matches actual (±5 points per game)
+- [ ] Fatigue effects observable (shooting % decline in 4th quarter)
+- [ ] Age effects match historical aging curves (R² > 0.85)
+- [ ] Clutch performance differential matches historical (±2%)
+- [ ] Momentum effects statistically significant (p < 0.05)
+
+### Cost Impact
+
+**No additional cost:**
+- Uses existing EC2 instance
+- Queries existing temporal_events table
+- No new infrastructure needed
+
+**Performance:**
+- Traditional simulation: ~0.1 seconds per game
+- Temporal simulation: ~2-5 seconds per game (20-50x slower)
+- **Still practical:** Can simulate 100 games in 3-8 minutes
+
+### See Also
+
+- `docs/PROJECT_VISION.md` - Temporal panel data vision
+- `docs/phases/PHASE_3_DATABASE.md` - Sub-Phase 3.5 (Temporal Database Schema)
+- `docs/ADVANCED_SIMULATION_FRAMEWORK.md` - Advanced econometric models (future)
+
+---
+
 ## Navigation
 
 **Return to:** [PROGRESS.md](../../PROGRESS.md) | **Workflows:** [Workflow Index](../claude_workflows/CLAUDE_WORKFLOW_ORDER.md)
@@ -717,6 +1040,6 @@ After completing this phase:
 
 ---
 
-*Last updated: 2025-10-03*
+*Last updated: 2025-10-07* (Added Sub-Phase 4.5: Temporal Event-Level Simulation)
 *Status: ✅ COMPLETE - Implementation successful*
 *Actual implementation time: 3 hours*

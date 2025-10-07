@@ -66,7 +66,7 @@ Before starting this phase:
 3. ✅ Designed foreign key relationships
 4. ✅ Planned for 120K+ games, 5K+ players, 15M+ plays
 
-**Tables created:**
+**Tables created (traditional schema):**
 - `teams` (87 rows) - NBA team metadata
 - `players` (5,000+ rows) - Player information
 - `games` (44,828 rows with 58 columns) - Game metadata and scores
@@ -74,10 +74,17 @@ Before starting this phase:
 - `team_game_stats` (15,900 rows) - Team statistics
 - `plays` / `play_by_play` (6,781,155 rows) - Play-by-play data
 
+**Tables needed (temporal schema - PENDING):**
+- `temporal_events` (500M+ rows projected) - Event-level timestamps with millisecond precision
+- `player_snapshots` (50M+ rows projected) - Cumulative player statistics at temporal checkpoints
+- `game_states` (10M+ rows projected) - Game state reconstruction data
+- `player_biographical` (5K+ rows) - Birth dates and biographical data for age calculations
+
 **Validation:**
-- [x] Schema supports all simulation queries
+- [x] Traditional schema supports simulation queries
 - [x] Indexes cover common query patterns
 - [x] Foreign keys enforce referential integrity
+- [ ] **PENDING:** Temporal schema design and implementation
 
 ---
 
@@ -387,6 +394,325 @@ engine = create_engine(
 
 ---
 
+### Sub-Phase 3.5: Temporal Database Schema (PENDING)
+
+**Status:** ⏸️ PENDING
+**Prerequisites:** Sub-Phase 3.1-3.4 complete, Phase 0 temporal data collection complete
+**Time Estimate:** 6-8 hours
+**Estimated Cost:** +$15-25/month (storage for 500M+ temporal events)
+
+**Follow these workflows:**
+- Workflow #25 ([Database Migration](../claude_workflows/workflow_descriptions/25_database_migration.md))
+  - **When to run:** Before creating temporal schema
+  - **Purpose:** Plan migration strategy, test rollback procedures
+
+- Workflow #28 ([ADR Creation](../claude_workflows/workflow_descriptions/28_adr_creation.md))
+  - **When to run:** When making temporal schema decisions
+  - **Purpose:** Document ADR-009 (Temporal Panel Data Architecture)
+
+**Overview:**
+
+This sub-phase adds temporal panel data capabilities to the database, enabling snapshot queries at exact timestamps with millisecond precision.
+
+**Core capability:** Query "What were Kobe Bryant's career statistics at exactly 7:02:34.56 PM CT on June 19, 2016?"
+
+**Tasks:**
+1. ⏸️ Design and create `temporal_events` table
+2. ⏸️ Design and create `player_snapshots` table
+3. ⏸️ Design and create `game_states` table
+4. ⏸️ Design and create `player_biographical` table
+5. ⏸️ Create temporal indexes (BRIN for time-series optimization)
+6. ⏸️ Implement snapshot query stored procedures
+7. ⏸️ Create age calculation functions
+8. ⏸️ Test temporal queries with validation suite
+
+#### Table 1: temporal_events
+
+**Purpose:** Store every play-by-play event with precise timestamps
+
+**Schema:**
+```sql
+CREATE TABLE temporal_events (
+    event_id BIGSERIAL PRIMARY KEY,
+    game_id VARCHAR(20) NOT NULL,
+
+    -- Temporal precision
+    wall_clock_utc TIMESTAMP(3) NOT NULL,      -- Millisecond precision
+    wall_clock_local TIMESTAMP(3),             -- Local timezone
+    game_clock_seconds INTEGER,                -- Seconds remaining in quarter
+    quarter INTEGER,
+    precision_level VARCHAR(10) NOT NULL,      -- 'millisecond', 'second', 'minute', 'game'
+
+    -- Event details
+    event_type VARCHAR(50),                    -- shot, foul, turnover, etc.
+    event_subtype VARCHAR(50),                 -- 3pt shot, technical foul, etc.
+    player_id INTEGER,
+    team_id INTEGER,
+
+    -- Event data
+    event_data JSONB,                          -- Full play-by-play JSON
+
+    -- Data provenance
+    data_source VARCHAR(20) NOT NULL,          -- 'nba_live', 'nba_stats', 'espn', 'hoopr'
+    ingestion_timestamp TIMESTAMP DEFAULT NOW(),
+
+    -- Foreign keys
+    FOREIGN KEY (game_id) REFERENCES games(game_id),
+    FOREIGN KEY (player_id) REFERENCES players(player_id),
+    FOREIGN KEY (team_id) REFERENCES teams(team_id)
+);
+
+-- BRIN indexes for time-series data (more efficient than B-tree for timestamps)
+CREATE INDEX idx_temporal_events_time_brin ON temporal_events
+    USING BRIN (wall_clock_utc);
+
+CREATE INDEX idx_temporal_events_game ON temporal_events (game_id, wall_clock_utc);
+CREATE INDEX idx_temporal_events_player ON temporal_events (player_id, wall_clock_utc);
+CREATE INDEX idx_temporal_events_precision ON temporal_events (precision_level);
+```
+
+**Projected size:** 500M+ rows, ~200-300 GB
+
+#### Table 2: player_snapshots
+
+**Purpose:** Pre-computed cumulative statistics at temporal checkpoints for fast queries
+
+**Schema:**
+```sql
+CREATE TABLE player_snapshots (
+    snapshot_id BIGSERIAL PRIMARY KEY,
+    player_id INTEGER NOT NULL,
+    snapshot_time TIMESTAMP(3) NOT NULL,
+
+    -- Player age at this moment
+    age_years DECIMAL(10,4),                   -- Precise age (e.g., 37.6412 years)
+    age_days INTEGER,                           -- Age in days
+
+    -- Cumulative career statistics
+    career_points INTEGER,
+    career_assists INTEGER,
+    career_rebounds INTEGER,
+    career_steals INTEGER,
+    career_blocks INTEGER,
+    career_turnovers INTEGER,
+    career_field_goals_made INTEGER,
+    career_field_goals_attempted INTEGER,
+    career_three_pointers_made INTEGER,
+    career_three_pointers_attempted INTEGER,
+    career_free_throws_made INTEGER,
+    career_free_throws_attempted INTEGER,
+    career_games_played INTEGER,
+    career_minutes_played INTEGER,
+
+    -- Metadata
+    precision_level VARCHAR(10) NOT NULL,
+    data_completeness DECIMAL(5,2),            -- % of games with data
+
+    -- Foreign key
+    FOREIGN KEY (player_id) REFERENCES players(player_id)
+);
+
+CREATE INDEX idx_player_snapshots_lookup ON player_snapshots (player_id, snapshot_time);
+CREATE INDEX idx_player_snapshots_time ON player_snapshots USING BRIN (snapshot_time);
+```
+
+**Projected size:** 50M+ rows, ~10-20 GB
+
+#### Table 3: game_states
+
+**Purpose:** Reconstruct complete game state at any timestamp
+
+**Schema:**
+```sql
+CREATE TABLE game_states (
+    state_id BIGSERIAL PRIMARY KEY,
+    game_id VARCHAR(20) NOT NULL,
+    state_time TIMESTAMP(3) NOT NULL,
+
+    -- Score and clock
+    home_score INTEGER,
+    away_score INTEGER,
+    quarter INTEGER,
+    game_clock_seconds INTEGER,
+
+    -- Possession
+    possession_team_id INTEGER,
+
+    -- Lineups (JSON arrays of player IDs)
+    home_lineup JSONB,
+    away_lineup JSONB,
+
+    -- Metadata
+    precision_level VARCHAR(10),
+
+    -- Foreign keys
+    FOREIGN KEY (game_id) REFERENCES games(game_id),
+    FOREIGN KEY (possession_team_id) REFERENCES teams(team_id)
+);
+
+CREATE INDEX idx_game_states_lookup ON game_states (game_id, state_time);
+```
+
+**Projected size:** 10M+ rows, ~2-5 GB
+
+#### Table 4: player_biographical
+
+**Purpose:** Store birth dates and biographical data for precise age calculations
+
+**Schema:**
+```sql
+CREATE TABLE player_biographical (
+    player_id INTEGER PRIMARY KEY,
+
+    -- Birth date with precision flag
+    birth_date DATE,
+    birth_date_precision VARCHAR(10),          -- 'day', 'month', 'year', 'unknown'
+    birth_date_source VARCHAR(50),             -- 'nba_api', 'basketball_ref', 'kaggle'
+
+    -- Name variations
+    full_name VARCHAR(100),
+    display_name VARCHAR(100),
+
+    -- Physical attributes
+    height_inches INTEGER,
+    weight_pounds INTEGER,
+
+    -- Career metadata
+    draft_year INTEGER,
+    draft_round INTEGER,
+    draft_pick INTEGER,
+    rookie_season INTEGER,
+
+    -- Foreign key
+    FOREIGN KEY (player_id) REFERENCES players(player_id)
+);
+
+CREATE INDEX idx_player_bio_birth_date ON player_biographical (birth_date);
+```
+
+**Projected size:** 5,000+ rows, <1 MB
+
+#### Snapshot Query Functions
+
+**Function: get_player_snapshot_at_time**
+
+```sql
+CREATE OR REPLACE FUNCTION get_player_snapshot_at_time(
+    p_player_id INTEGER,
+    p_timestamp TIMESTAMP(3)
+)
+RETURNS TABLE (
+    player_id INTEGER,
+    snapshot_time TIMESTAMP(3),
+    age_years DECIMAL(10,4),
+    career_points INTEGER,
+    career_assists INTEGER,
+    -- ... all cumulative stats
+    precision_level VARCHAR(10)
+) AS $$
+BEGIN
+    -- Look for pre-computed snapshot
+    RETURN QUERY
+    SELECT *
+    FROM player_snapshots ps
+    WHERE ps.player_id = p_player_id
+      AND ps.snapshot_time <= p_timestamp
+    ORDER BY ps.snapshot_time DESC
+    LIMIT 1;
+
+    -- If no snapshot found, compute on-the-fly from temporal_events
+    IF NOT FOUND THEN
+        -- Aggregate all events before timestamp
+        RETURN QUERY
+        SELECT
+            p_player_id,
+            p_timestamp,
+            calculate_player_age(p_player_id, p_timestamp),
+            SUM(CASE WHEN event_type = 'shot' AND (event_data->>'made')::boolean THEN (event_data->>'points')::int ELSE 0 END),
+            SUM(CASE WHEN event_type = 'assist' THEN 1 ELSE 0 END),
+            -- ... compute all stats
+            'computed' as precision_level
+        FROM temporal_events
+        WHERE player_id = p_player_id
+          AND wall_clock_utc <= p_timestamp
+        GROUP BY player_id;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+**Function: calculate_player_age**
+
+```sql
+CREATE OR REPLACE FUNCTION calculate_player_age(
+    p_player_id INTEGER,
+    p_timestamp TIMESTAMP(3)
+)
+RETURNS DECIMAL(10,4) AS $$
+DECLARE
+    v_birth_date DATE;
+    v_age_years DECIMAL(10,4);
+BEGIN
+    SELECT birth_date INTO v_birth_date
+    FROM player_biographical
+    WHERE player_id = p_player_id;
+
+    IF v_birth_date IS NULL THEN
+        RETURN NULL;
+    END IF;
+
+    -- Calculate precise age in years (with decimal precision)
+    v_age_years := EXTRACT(EPOCH FROM (p_timestamp::timestamp - v_birth_date::timestamp)) / (365.25 * 24 * 60 * 60);
+
+    RETURN v_age_years;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+#### Example Queries
+
+**Query 1: Kobe's stats at exact timestamp**
+```sql
+SELECT * FROM get_player_snapshot_at_time(
+    977,  -- Kobe Bryant's player_id
+    '2016-06-19 19:02:34.560-05'::TIMESTAMP
+);
+```
+
+**Query 2: League pace at exact timestamp**
+```sql
+SELECT
+    AVG(possessions_per_48) as league_pace
+FROM game_states gs
+JOIN games g ON gs.game_id = g.game_id
+WHERE gs.state_time <= '2023-03-15 23:23:45.678'::TIMESTAMP
+  AND gs.state_time >= '2023-03-15 23:23:45.678'::TIMESTAMP - INTERVAL '5 minutes'
+  AND g.season = 2023;
+```
+
+**Validation:**
+- [ ] temporal_events table created and indexed
+- [ ] player_snapshots table created
+- [ ] game_states table created
+- [ ] player_biographical table loaded with birth dates
+- [ ] Snapshot query functions working
+- [ ] Age calculation accurate to seconds
+- [ ] Query performance < 5 seconds for single player snapshot
+- [ ] BRIN indexes reducing storage by 70%+
+
+**Cost Impact:**
+- Storage: +$15-25/month (500M rows at $0.10/GB)
+- IOPS: Negligible (BRIN indexes very efficient)
+- Backups: +$5/month (additional storage)
+- **Total: ~$20-30/month additional**
+
+**See also:**
+- `docs/PROJECT_VISION.md` - Temporal panel data architecture
+- `docs/ADR/009-temporal-panel-data-architecture.md` - Architecture decisions (to be created)
+- `docs/TEMPORAL_QUERY_GUIDE.md` - Query examples and performance tips (to be created)
+
+---
+
 ## Navigation
 
 **Return to:** [PROGRESS.md](../../PROGRESS.md) | **Workflows:** [Workflow Index](../claude_workflows/CLAUDE_WORKFLOW_ORDER.md)
@@ -401,6 +727,6 @@ engine = create_engine(
 
 ---
 
-*Last updated: 2025-10-02*
+*Last updated: 2025-10-07* (Added Sub-Phase 3.5: Temporal Database Schema)
 *Completed by: Phase 3 team*
-*Total time: 1 hour 37 minutes*
+*Total time: 1 hour 37 minutes (traditional schema) + pending (temporal schema)*

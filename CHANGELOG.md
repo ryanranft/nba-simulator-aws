@@ -7,6 +7,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - NBA API Comprehensive Scraper (Tier 1)
+
+**Date:** October 6, 2025
+
+**Implementation:**
+- Fixed import errors in `scrape_nba_api_comprehensive.py`:
+  - Changed to module-level import: `from nba_api.stats import endpoints as nba_endpoints`
+  - Fixed all undefined function references by adding `nba_endpoints.` prefix
+- Enabled Tier 1 endpoints (lines 360-362):
+  - Advanced box scores (8 endpoints): 40-50 features
+  - Player tracking (4 endpoints): 20-30 features
+
+**Endpoints Enabled:**
+
+*Advanced Box Scores (8 types):*
+- `BoxScoreAdvancedV2` - Advanced efficiency metrics
+- `BoxScoreDefensiveV2` - Defensive statistics
+- `BoxScoreFourFactorsV2` - Four factors breakdown
+- `BoxScoreMiscV2` - Miscellaneous stats
+- `BoxScorePlayerTrackV2` - Player tracking metrics
+- `BoxScoreScoringV2` - Scoring breakdown
+- `BoxScoreTraditionalV2` - Traditional box scores
+- `BoxScoreUsageV2` - Usage rates
+
+*Player Tracking (4 types):*
+- `PlayerDashPtPass` - Passing stats (passes made, potential assists)
+- `PlayerDashPtReb` - Rebounding stats (contested rebounds, chances)
+- `PlayerDashPtShotDefend` - Shot defense (contests, DFG%)
+- `PlayerDashPtShots` - Shot tracking (touch time, dribbles)
+
+**Scraper Status:**
+- Overnight scraper started: October 6, 2025 - 10:56 PM
+- PID: 50691
+- Expected completion: 4-5 AM (5-6 hours runtime)
+- Coverage: 30 seasons (1996-2025)
+- Output: `/tmp/nba_api_comprehensive/` and `s3://nba-sim-raw-data-lake/nba_api_comprehensive/`
+
+**Testing Configuration:**
+- Advanced box scores: 100 games per season (testing limit)
+- Player tracking: 50 players per season (testing limit)
+- Shot charts: 20 players per season
+- Runtime: ~10 minutes per season
+
+**Feature Impact:**
+- Previous feature count: 209
+- Tier 1 features added: 60-80
+- **New total: 269-289 features** (+29-38%)
+
+**Production Notes:**
+- Current run uses testing limits for validation
+- Production run (all games, all players) would take: 750-900 hours (31-37 days)
+- Recommend EC2 deployment for production run
+
+**Documentation Updates:**
+- `docs/MISSING_ENDPOINTS_ANALYSIS.md` - Marked Tier 1 as implemented
+- `docs/DATA_SOURCES.md` - Updated NBA API status to ACTIVE
+- `docs/SCRAPER_TEST_RESULTS.md` - Added comprehensive test results
+- `scripts/etl/overnight_nba_api_comprehensive.sh` - Updated runtime estimates
+- `scripts/etl/scrape_nba_api_comprehensive.py` - Added implementation notes
+
+### Changed
+- NBA API scraper: PENDING → ACTIVE (LIMITED)
+- Feature count: 209 → 269-289 (+29-38%)
+- Total endpoints: 21 → 33 (+12 Tier 1 endpoints)
+
+---
+
 ## [1.4.0] - 2025-10-03
 
 ### Added - Phase 4: EC2 Simulation Engine
