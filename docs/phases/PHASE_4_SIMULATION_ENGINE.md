@@ -24,6 +24,22 @@ Set up AWS EC2 instance to run NBA game simulations using historical data from R
 **⚠️ Temporal Enhancement Opportunity:**
 This phase can be enhanced with temporal simulation capabilities once Phase 3.5 (Temporal Database Schema) is complete. Temporal simulation enables event-level resolution with precise timestamps, player aging effects, and fatigue modeling.
 
+**💡 Possession Panel Data Source Options:**
+For creating possession-level panel data (required for advanced simulation), we have two approaches:
+
+1. **Custom Implementation** (Current approach)
+   - Full control over possession detection logic
+   - Integration with multiple data sources (Kaggle, NBA API, ESPN)
+   - Scripts: `scripts/etl/create_possession_panel_from_*.py`
+   - Status: 3 implementations built (Kaggle: 127 poss/game, NBA API: 235 poss/game, ESPN: TBD)
+
+2. **pbpstats Library** (Alternative - Recommended for future enhancements)
+   - Production-tested lineup tracking + possession parsing
+   - **Time savings:** 4-6 weeks development vs custom
+   - **Best for:** When lineup tracking is needed (who's on court)
+   - **See:** `docs/analysis/PBPSTATS_EVALUATION.md` for detailed analysis
+   - **Recommendation:** Hybrid approach (pbpstats base + custom enrichment)
+
 **This phase includes:**
 - EC2 instance provisioning
 - Python 3.11 + dependencies installation
