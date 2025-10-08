@@ -65,6 +65,30 @@
     - Much faster than comprehensive scraper (3-4 hours vs 750+ hours)
 
 **Overnight jobs running:**
+  - **hoopR Phase 1 Foundation Data Scraper (R)**: Started 7:34 PM Oct 7
+    - **Status:** Phase 1A ✅ Complete, Phase 1B 🔄 In Progress (Season 2006-07, 5/24 seasons)
+    - **Coverage:** 2002-2025 (24 seasons), ~50 high-value endpoints
+    - **Phase 1A (Bulk Loaders) - ✅ COMPLETE:**
+      - 96 CSV files, 2.5 GB
+      - ✅ Uploaded to S3: `s3://nba-sim-raw-data-lake/hoopr_phase1/`
+      - Play-by-play: 13.9M events
+      - Player box scores: 810K rows
+      - Team box scores: 63K rows
+      - Schedule: 31K games
+    - **Phase 1B (League Dashboards) - 🔄 IN PROGRESS:**
+      - Started: 7:53 PM, ETA: 30-60 minutes
+      - Progress: Season 2006-07 (5/24 seasons complete)
+      - Working endpoints: Player stats, team stats, standings
+      - Failing endpoints: Lineups, player tracking, hustle (not available pre-2013)
+      - Monitor: `tail -f /tmp/hoopr_phase1b_runner.log`
+    - **Scripts created:**
+      - `scripts/etl/scrape_hoopr_phase1_foundation.R` (fixed save_csv for list handling)
+      - `scripts/etl/scrape_hoopr_phase1b_only.R` (Phase 1B standalone)
+      - `scripts/etl/run_hoopr_phase1.sh` (Phase 1 wrapper)
+      - `scripts/etl/run_hoopr_phase1b.sh` (Phase 1B wrapper)
+    - **Fix applied:** Updated save_csv() to extract data frames from hoopR's list responses
+    - **Next step:** Upload Phase 1B data to S3, load all CSV files to PostgreSQL
+
   - **NBA API Play-by-Play Scraper**: PIDs 99697/99764, started 5:39 PM, ETA 8:40-9:40 PM
     - Coverage: 29 seasons (1996-2024), PlayByPlayV2 endpoint only
     - Expected output: ~30,000 games, ~7 million possessions

@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - hoopR Phase 1 Foundation Data Scraper
+
+**Date:** October 7, 2025
+
+**Implementation:**
+- Created comprehensive R-based scraper using hoopR package (151 total endpoints available)
+- Phase 1 focuses on ~50 high-value foundation endpoints (95% of data value)
+- Fixed `save_csv()` function to handle hoopR's list return values instead of just data frames
+- CSV output format (avoids R's 2GB JSON string limit)
+- Per-season saves to prevent memory exhaustion
+
+**Scripts Created:**
+- `scripts/etl/scrape_hoopr_phase1_foundation.R` - Full Phase 1 scraper
+- `scripts/etl/scrape_hoopr_phase1b_only.R` - Phase 1B standalone (league dashboards)
+- `scripts/etl/run_hoopr_phase1.sh` - Phase 1 wrapper script
+- `scripts/etl/run_hoopr_phase1b.sh` - Phase 1B wrapper script
+
+**Phase 1A (Bulk Loaders) - COMPLETE:**
+- 96 CSV files, 2.5 GB
+- Coverage: 2002-2025 (24 seasons × 4 endpoints)
+- Play-by-play: 13.9M events
+- Player box scores: 810K rows
+- Team box scores: 63K rows
+- Schedule: 31K games
+- Uploaded to S3: `s3://nba-sim-raw-data-lake/hoopr_phase1/`
+
+**Phase 1B (League Dashboards) - IN PROGRESS:**
+- League player stats (per-season)
+- League team stats (per-season)
+- Standings (per-season)
+- Expected: ~200 additional CSV files
+- Note: Lineups, player tracking, hustle stats not available pre-2013
+
+**Future Phases:**
+- Phase 2: Per-game endpoints (~30 endpoints requiring game_ids)
+- Phase 3: Per-player/team endpoints (~70 endpoints requiring player/team IDs)
+
+**Fix Applied:**
+- Error: `missing value where TRUE/FALSE needed` in save_csv()
+- Root cause: hoopR returns lists containing data frames, not direct data frames
+- Solution: Extract first valid data frame from list before validation
+
 ### Added - NBA API Comprehensive Scraper (Tier 1)
 
 **Date:** October 6, 2025
