@@ -1,5 +1,15 @@
 #!/bin/bash
 #
+# ⚠️ DEPRECATED - DO NOT USE ⚠️
+#
+# DEPRECATED ON: October 8, 2025
+# REASON: Old multi-source wrapper replaced by individual scraper overnight scripts
+# ALTERNATIVES:
+#   - Basketball Reference: scripts/etl/overnight_basketball_reference_comprehensive.sh
+#   - NBA Stats API: scripts/etl/overnight_nba_api_comprehensive.sh
+#
+# ---
+#
 # Overnight Multi-Source Scraping
 #
 # This script runs multiple scrapers overnight to collect data from:

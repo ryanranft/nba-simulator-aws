@@ -1,5 +1,13 @@
 #!/bin/bash
 #
+# ⚠️ DEPRECATED - DO NOT USE ⚠️
+#
+# DEPRECATED ON: October 8, 2025
+# REASON: Calls deprecated scrape_sportsdataverse.py (redundant with hoopR)
+# ALTERNATIVE: Use scripts/etl/run_hoopr_phase1b.sh for equivalent data
+#
+# ---
+#
 # SportsDataverse Overnight Scraper
 # Scrapes ESPN data via SportsDataverse package: 2007-2025 (18 seasons)
 #

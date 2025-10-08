@@ -1,5 +1,13 @@
 #!/usr/bin/bash
 #
+# ⚠️ DEPRECATED - DO NOT USE ⚠️
+#
+# DEPRECATED ON: October 8, 2025
+# REASON: Duplicate of run_hoopr_comprehensive_overnight.sh
+# ALTERNATIVE: Use scripts/etl/run_hoopr_comprehensive_overnight.sh (identical functionality)
+#
+# ---
+#
 # Overnight hoopR Comprehensive NBA Stats API Scraper
 #
 # Scrapes ALL hoopR data loaders for maximum NBA Stats API coverage (200+ endpoints)

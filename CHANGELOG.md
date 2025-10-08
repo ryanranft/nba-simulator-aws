@@ -11,6 +11,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Date:** October 8, 2025
 
+**Phase 3: Workspace Organization & Monitoring Infrastructure**
+
+**Changes Applied:**
+1. **Session handoff archival:**
+   - Archived 7 old session handoff files (Oct 7, 2025) → `docs/archive/session_handoffs/`
+   - Kept 1 active file: `SESSION_HANDOFF_20251006.md`
+   - Cleaner docs/ directory for current work
+
+2. **Overnight wrapper consolidation:**
+   - Archived `overnight_scrape.sh` → old multi-source wrapper (replaced by individual scrapers)
+   - Archived `overnight_hoopr_comprehensive.sh` → duplicate of `run_hoopr_comprehensive_overnight.sh`
+   - Archived `run_sportsdataverse_overnight.sh` → calls deprecated `scrape_sportsdataverse.py`
+   - Added deprecation notices to all 3 archived wrappers
+
+3. **Monitoring infrastructure documentation:**
+   - Created `scripts/monitoring/README.md` (comprehensive guide)
+   - Documents 4 core monitoring scripts:
+     - `monitor_scrapers.sh` - Manual status checks
+     - `launch_scraper.sh` - Launch wrapper with nohup/logging
+     - `analyze_scraper_completion.sh` - Completion detection
+     - `check_scraper_alerts.sh` - Failure alerts
+   - Integration with Workflows #38 (Overnight Scraper Handoff), #39 (Monitoring), #42 (Management)
+   - Best practices, troubleshooting, testing procedures
+
+**Benefits:**
+- ✅ Cleaner docs/ directory (8 handoffs → 1 active)
+- ✅ Reduced overnight wrapper confusion (11 scripts → 6 active)
+- ✅ Clear monitoring documentation for long-running jobs
+- ✅ Complete audit trail via deprecation notices
+
+**Active Overnight Wrappers After Consolidation:**
+- `overnight_nba_api_comprehensive.sh` - NBA Stats API scraper
+- `overnight_nba_api_playbyplay.sh` - NBA API play-by-play only
+- `overnight_basketball_reference_comprehensive.sh` - Basketball Reference scraper
+- `overnight_hoopr_all_152.sh` - All 152 hoopR endpoints
+- `run_hoopr_comprehensive_overnight.sh` - hoopR comprehensive scraper
+- `run_crawlers_overnight.sh` - AWS Glue crawler automation (keep - different purpose)
+
+---
+
 **Phase 2: Documentation Consolidation**
 
 **Changes Applied:**
