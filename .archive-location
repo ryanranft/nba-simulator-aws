@@ -1,0 +1,23 @@
+# Archive Location
+
+**Gitignored files are automatically archived to:**
+
+`/Users/ryanranft/sports-simulator-archives/nba/`
+
+**Archive system:**
+- Organized by git commit SHA
+- Auto-populated by post-commit hooks
+- Includes: status files, logs, conversations, command history
+
+**To access archives:**
+1. Find commit SHA: `git log --oneline`
+2. Navigate to: `~/sports-simulator-archives/nba/<commit-sha>/`
+3. Browse gitignored files from that commit
+
+**Example:**
+```bash
+cd ~/sports-simulator-archives/nba/c257843afbf0907367b3dbcd255c56176916e8dd/
+ls -la  # See all archived files from this commit
+```
+
+See `~/sports-simulator-archives/nba/README.md` for complete documentation.
