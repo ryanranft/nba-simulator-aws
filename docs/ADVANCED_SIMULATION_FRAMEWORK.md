@@ -1,5 +1,14 @@
 # Advanced Multi-Level Simulation Framework
 
+> **⚠️ LARGE FILE WARNING (903 lines)**
+>
+> **For Claude Code:** Only read this file when:
+> - Implementing advanced simulation features
+> - Working on Monte Carlo simulation system
+> - Developing multi-level simulation architecture
+>
+> **DO NOT read at session start** - this file is a detailed implementation guide, not initialization documentation.
+
 **Created:** October 6, 2025
 **Purpose:** Econometric simulation architecture for NBA game forecasting
 **Status:** Planning document - Post-infrastructure backbone completion

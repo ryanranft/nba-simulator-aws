@@ -1,5 +1,14 @@
 # Code Style Guide
 
+> **⚠️ LARGE FILE WARNING (846 lines)**
+>
+> **For Claude Code:** Only read this file when:
+> - Writing new code and uncertain about style conventions
+> - Resolving code style questions
+> - Adding new style guidelines after establishing pattern (3+ uses)
+>
+> **DO NOT read at session start** - this file is a reference for code style, not initialization documentation.
+
 <!-- AUTO-UPDATE TRIGGER: When code style pattern used 3+ times (establishes precedent) -->
 <!-- LAST UPDATED: 2025-10-01 -->
 <!-- FREQUENCY: As needed (when patterns emerge) -->

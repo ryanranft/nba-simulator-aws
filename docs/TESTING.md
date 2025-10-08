@@ -1,5 +1,16 @@
 # Testing Strategy
 
+> **⚠️ LARGE FILE WARNING (862 lines)**
+>
+> **For Claude Code:** Only read this file when:
+> - Writing new tests for the project
+> - Debugging test failures
+> - Understanding testing philosophy and strategy
+>
+> **DO NOT read at session start** - this file is a reference for writing tests, not initialization documentation.
+>
+> **Best practice:** Reference Workflow #41 for testing procedures instead of reading this entire file.
+
 **Project:** NBA Game Simulator & ML Platform
 **Purpose:** Document testing approach for AWS data pipeline and ML components
 

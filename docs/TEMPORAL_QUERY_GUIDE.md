@@ -1,5 +1,16 @@
 # NBA Temporal Panel Data - Query Guide
 
+> **⚠️ LARGE FILE WARNING (996 lines)**
+>
+> **For Claude Code:** Only read this file when:
+> - Implementing temporal query functionality
+> - Writing database query code for temporal features
+> - Debugging temporal query performance issues
+>
+> **DO NOT read at session start** - this file is an implementation reference, not initialization documentation.
+>
+> **Best practice:** Read specific sections as needed (check Table of Contents), don't read entire file.
+
 **Version:** 1.0
 **Last Updated:** October 7, 2025
 **Audience:** Developers, data analysts, researchers
