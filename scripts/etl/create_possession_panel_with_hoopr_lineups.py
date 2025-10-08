@@ -43,11 +43,13 @@ DB_CONFIG = {
 class LineupTracker:
     """Track current lineups (5 offense + 5 defense) using hoopR starters + Kaggle substitution events"""
 
-    def __init__(self, kaggle_game_id: str, hoopr_game_id: str, home_team_id: str, away_team_id: str):
+    def __init__(self, kaggle_game_id: str, hoopr_game_id: str, home_team_id: str, away_team_id: str, home_espn_team_id: str, away_espn_team_id: str):
         self.kaggle_game_id = kaggle_game_id
         self.hoopr_game_id = hoopr_game_id
-        self.home_team_id = home_team_id
-        self.away_team_id = away_team_id
+        self.home_team_id = home_team_id  # NBA API ID (for Kaggle events)
+        self.away_team_id = away_team_id  # NBA API ID (for Kaggle events)
+        self.home_espn_team_id = home_espn_team_id  # ESPN ID (for hoopR matching)
+        self.away_espn_team_id = away_espn_team_id  # ESPN ID (for hoopR matching)
 
         # Current lineups (ESPN player IDs)
         self.home_lineup = []
@@ -77,11 +79,11 @@ class LineupTracker:
             logger.warning(f"No hoopR starters found for hoopr_game_id {self.hoopr_game_id} (Kaggle game_id: {self.kaggle_game_id})")
             return False
 
-        # Separate by team
+        # Separate by team (hoopR team_id is ESPN format, so compare with ESPN team IDs)
         for player_id, player_name, team_id, is_starter in starters:
-            if str(team_id) == str(self.home_team_id):
+            if str(team_id) == str(self.home_espn_team_id):
                 self.home_lineup.append(str(player_id))
-            elif str(team_id) == str(self.away_team_id):
+            elif str(team_id) == str(self.away_espn_team_id):
                 self.away_lineup.append(str(player_id))
 
         logger.debug(f"Game {self.kaggle_game_id}: Home starters = {len(self.home_lineup)}, Away starters = {len(self.away_lineup)}")
@@ -267,7 +269,7 @@ class PossessionPanelBuilder:
 
         logger.info("Fetching game list (Kaggle events + hoopR starters matched by date)...")
 
-        # Match Kaggle and hoopR games by date + teams (different game_id formats)
+        # Match Kaggle and hoopR games by date + teams using team_id_mapping
         query = """
         WITH kaggle_games AS (
             SELECT DISTINCT
@@ -277,11 +279,7 @@ class PossessionPanelBuilder:
                 g.home_team_id,
                 g.away_team_id
             FROM games g
-            WHERE EXISTS (
-                SELECT 1 FROM temporal_events te
-                WHERE te.game_id = g.game_id
-                AND te.data_source = 'kaggle'
-            )
+            WHERE g.game_date >= '2020-01-01'  -- hoopR has valid starters from 2020+
         ),
         hoopr_games AS (
             SELECT DISTINCT
@@ -299,17 +297,25 @@ class PossessionPanelBuilder:
             kg.season,
             kg.home_team_id,
             kg.away_team_id,
-            hg_home.hoopr_game_id as hoopr_game_id
+            hg_home.hoopr_game_id as hoopr_game_id,
+            tm_home.espn_team_id as home_espn_team_id,
+            tm_away.espn_team_id as away_espn_team_id
         FROM kaggle_games kg
-        -- Match home team by date
+        -- Map Kaggle home team (NBA API) to ESPN team ID
+        JOIN team_id_mapping tm_home
+          ON kg.home_team_id::text = tm_home.nba_api_team_id
+        -- Match hoopR home team by date + ESPN team ID
         JOIN hoopr_games hg_home
           ON kg.game_date = hg_home.game_date
-          AND kg.home_team_id::text = hg_home.team_id::text
+          AND tm_home.espn_team_id = hg_home.team_id::text
           AND hg_home.starter_count = 5
-        -- Match away team by date
+        -- Map Kaggle away team (NBA API) to ESPN team ID
+        JOIN team_id_mapping tm_away
+          ON kg.away_team_id::text = tm_away.nba_api_team_id
+        -- Match hoopR away team by date + ESPN team ID
         JOIN hoopr_games hg_away
           ON kg.game_date = hg_away.game_date
-          AND kg.away_team_id::text = hg_away.team_id::text
+          AND tm_away.espn_team_id = hg_away.team_id::text
           AND hg_away.starter_count = 5
           AND hg_home.hoopr_game_id = hg_away.hoopr_game_id  -- Same game
         ORDER BY kg.game_date, kg.kaggle_game_id
@@ -342,8 +348,10 @@ class PossessionPanelBuilder:
                 'hoopr_game_id': row[5],  # hoopR game_id
                 'game_date': row[1],
                 'season': season_int,
-                'home_team_id': row[3],
-                'away_team_id': row[4]
+                'home_team_id': row[3],  # NBA API ID
+                'away_team_id': row[4],  # NBA API ID
+                'home_espn_team_id': row[6],  # ESPN ID
+                'away_espn_team_id': row[7]   # ESPN ID
             })
 
         return games
@@ -389,7 +397,9 @@ class PossessionPanelBuilder:
             kaggle_game_id=kaggle_game_id,
             hoopr_game_id=hoopr_game_id,
             home_team_id=game['home_team_id'],
-            away_team_id=game['away_team_id']
+            away_team_id=game['away_team_id'],
+            home_espn_team_id=game['home_espn_team_id'],
+            away_espn_team_id=game['away_espn_team_id']
         )
 
         # Load starting lineups from hoopR
