@@ -7,6 +7,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Basketball Reference Complete Historical Scraper
+
+**Date:** October 7, 2025
+
+**Implementation:**
+- Created comprehensive Python scraper using `basketball_reference_web_scraper` library
+- 7 data types implemented for complete historical NBA coverage (1950-2025)
+- 3-second rate limiting with exponential backoff retry logic
+- Checkpoint/resume functionality for interrupted scraper recovery
+- S3 upload integration to `s3://nba-sim-raw-data-lake/basketball_reference/`
+
+**Scripts Created:**
+- `scripts/etl/scrape_basketball_reference_complete.py` - Complete scraper (737 lines)
+- `scripts/etl/overnight_basketball_reference_comprehensive.sh` - Overnight wrapper script
+
+**Data Types Captured:**
+1. **Schedules** - Game schedules per season (79 files expected)
+2. **Player Box Scores** - Daily player statistics (~1.9M records)
+3. **Team Box Scores** - Daily team statistics (~190K records)
+4. **Season Totals** - Player season aggregates (~35,500 records)
+5. **Advanced Totals** - Advanced metrics (~35,500 records)
+6. **Play-by-Play** - Event-level data for modern era 2000-2025 (~30,750 games)
+7. **Standings** - Final season standings (79 files expected)
+
+**Critical Fix Applied:**
+- Error: Missing combined statistics for mid-season traded players
+- Root cause: `include_combined_values=True` parameter not set in advanced totals
+- Solution: Added parameter to `players_advanced_season_totals()` call
+- Impact: +78 records (12% more data) for 2024 season validation test
+
+**Coverage:**
+- **Seasons:** 1950-2025 (75 NBA seasons)
+- **Library Limitation:** BAA years (1947-1949) not supported by library
+- **Note:** Basketball Reference website HAS BAA data but requires custom scraper
+
+**Testing Results:**
+- 2024 season schedule: 1,319 games ✓
+- 2024 season totals: 657 players ✓
+- 2024 advanced totals (with fix): 735 records ✓
+- 1950 season (earliest): 269 players ✓
+- 1947 season (BAA): Not supported by library ✗
+
+**Deployment Status:**
+- Overnight scraper started: October 7, 2025 - 10:50 PM CDT
+- Master PID: 57075
+- Estimated runtime: Several days for complete historical coverage
+- Monitor logs: `/tmp/bbref_*.log`
+
+**Known Issues:**
+- Old team name parsing errors in early NBA years (1950s)
+- Teams like 'TRI-CITIES BLACKHAWKS', 'FORT WAYNE PISTONS', etc. cause parser errors
+- Scraper continues with next season (error handling works)
+- May require library patch or custom parser for complete early-era coverage
+
+**Strategic Value:**
+- Enables SageMaker training on complete 75-year NBA historical dataset
+- Captures data evolution patterns (rule changes, pace changes, etc.)
+- Provides maximum feature richness for panel data transformation
+- User directive: "GET ALL DATA POSSIBLE" - implemented with 7 data types
+
+**Documentation Updates:**
+- `docs/SESSION_HANDOFF_20251007_BASKETBALL_REF.md` - Implementation results
+- `CHANGELOG.md` - This entry
+
 ### Added - hoopR Phase 1 Foundation Data Scraper
 
 **Date:** October 7, 2025
