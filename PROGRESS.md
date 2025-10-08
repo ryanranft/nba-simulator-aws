@@ -166,8 +166,8 @@
 - ⏸️ [Phase 1: Data Quality & Gap Analysis](docs/phases/PHASE_1_DATA_QUALITY.md) - **READY TO IMPLEMENT** (multi-source integration planned)
   - 📖 [Multi-Source Implementation Plan](docs/PHASE_1_MULTI_SOURCE_PLAN.md) - 28 hours, 209 features
   - 📋 [ML Feature Catalog](docs/ML_FEATURE_CATALOG.md) - Complete feature breakdown
-  - ⚡ [Quick Start Guide](docs/QUICK_START_MULTI_SOURCE.md) - Week-by-week implementation
-  - ✅ [Implementation Checklist](docs/IMPLEMENTATION_CHECKLIST.md) - Track progress
+  - ⚡ [Quick Start Guide](docs/archive/planning/QUICK_START_MULTI_SOURCE.md) - Week-by-week implementation
+  - ✅ [Implementation Checklist](docs/archive/planning/IMPLEMENTATION_CHECKLIST.md) - Track progress
 - ✅ [Phase 2: AWS Glue ETL](docs/phases/PHASE_2_AWS_GLUE.md) - **COMPLETE** (Oct 2)
 - ✅ [Phase 3: Database Infrastructure](docs/phases/PHASE_3_DATABASE.md) - **COMPLETE** (Oct 1)
 - ✅ [Phase 4: Simulation Engine](docs/phases/PHASE_4_SIMULATION_ENGINE.md) - **COMPLETE** (Oct 3)
@@ -190,7 +190,7 @@
 ### Enhancement Planning (October 6, 2025)
 
 - **Next Steps Decision Guide:** [docs/NEXT_STEPS_OPTIONS.md](docs/NEXT_STEPS_OPTIONS.md) - Compare multi-source vs simulation paths
-- **Session Summary:** [docs/SESSION_SUMMARY_2025_10_06_CONTINUED.md](docs/SESSION_SUMMARY_2025_10_06_CONTINUED.md) - Planning integration recap
+- **Session Summary:** [docs/archive/session_handoffs/SESSION_SUMMARY_2025_10_06_CONTINUED.md](docs/archive/session_handoffs/SESSION_SUMMARY_2025_10_06_CONTINUED.md) - Planning integration recap
 
 ---
 
@@ -631,11 +631,11 @@ bash scripts/shell/session_manager.sh start
 
 **Week 1 (12 hours):**
 1. Basketball Reference scraper (8 hrs) → 47 advanced features
-   - See `docs/IMPLEMENTATION_CHECKLIST.md` Sub-Phase 1.10
+   - See `docs/archive/planning/IMPLEMENTATION_CHECKLIST.md` Sub-Phase 1.10
    - TOS compliance: 1 request per 3 seconds
    - Features: True Shooting %, PER, BPM, Win Shares, Four Factors
 2. NBA.com Stats expansion (4 hrs) → 92 tracking features
-   - See `docs/IMPLEMENTATION_CHECKLIST.md` Sub-Phase 1.7
+   - See `docs/archive/planning/IMPLEMENTATION_CHECKLIST.md` Sub-Phase 1.7
    - Add 11 API endpoints (tracking, hustle, defense)
    - Features: Movement, touches, shot quality, defensive impact
 

@@ -353,7 +353,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Documentation Updates:**
 - `docs/MISSING_ENDPOINTS_ANALYSIS.md` - Marked Tier 1 as implemented
 - `docs/DATA_SOURCES.md` - Updated NBA API status to ACTIVE
-- `docs/SCRAPER_TEST_RESULTS.md` - Added comprehensive test results
+- `docs/archive/scraper_reports/SCRAPER_TEST_RESULTS.md` - Added comprehensive test results
 - `scripts/etl/overnight_nba_api_comprehensive.sh` - Updated runtime estimates
 - `scripts/etl/scrape_nba_api_comprehensive.py` - Added implementation notes
 

@@ -127,7 +127,7 @@ python scripts/etl/scrape_basketball_reference.py \
 ```
 
 **Documents to read:**
-1. `docs/IMPLEMENTATION_CHECKLIST.md` - Week 1 tasks
+1. `docs/archive/planning/IMPLEMENTATION_CHECKLIST.md` - Week 1 tasks
 2. `docs/ML_FEATURE_CATALOG.md` - Basketball Reference features
 
 ---
@@ -185,7 +185,7 @@ python scripts/simulation/prepare_panel_data.py \
 
 **Implementation guides:**
 - [ML_FEATURE_CATALOG.md](docs/ML_FEATURE_CATALOG.md) - 209 features
-- [IMPLEMENTATION_CHECKLIST.md](docs/IMPLEMENTATION_CHECKLIST.md) - Multi-source tasks
+- [IMPLEMENTATION_CHECKLIST.md](docs/archive/planning/IMPLEMENTATION_CHECKLIST.md) - Multi-source tasks
 - [ADVANCED_SIMULATION_FRAMEWORK.md](docs/ADVANCED_SIMULATION_FRAMEWORK.md) - Simulation architecture
 
 **Project tracking:**

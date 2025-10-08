@@ -269,7 +269,7 @@ Your NBA simulator infrastructure is **production-ready** with all 6 core phases
 
 ```bash
 # Week 1, Day 1: Basketball Reference scraper
-# See docs/IMPLEMENTATION_CHECKLIST.md Sub-Phase 1.10
+# See docs/archive/planning/IMPLEMENTATION_CHECKLIST.md Sub-Phase 1.10
 
 # Option 1: Start with one month test
 python scripts/etl/scrape_basketball_reference.py --start-date 2024-01-01 --end-date 2024-01-31

@@ -196,23 +196,24 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
 - Pre-deployment testing? → `35`
 - Repository cleanup before push? → `36`
 - Credential management? → `37`
-- **🌙 Overnight scraper running?** → `38` (NEW - check at session start)
+- **🌙 Overnight scraper running?** → `38` (check at session start)
 - **Build possession panel data?** → `39` (possession-level ML features)
-- **Run test suites?** → `41` (NEW - validation framework)
-- **Launch data scrapers?** → `42` (NEW - multi-source scraper execution)
+- **Run test suites?** → `41` (validation framework)
+- **Launch data scrapers?** → `42` (multi-source scraper execution)
+- **Consolidate/move documentation files?** → `43` (NEW - prevent broken links)
 
 ---
 
 ## 📊 Workflow Statistics
 
-- **Total workflows**: 42
-- **Total size**: ~750 KB
+- **Total workflows**: 43
+- **Total size**: ~790 KB
 - **Average workflow**: ~18 KB
 - **Largest workflow**: `24_aws_resource_setup.md` (92 KB)
 - **Smallest workflow**: `04_plan_change_protocol.md` (595 bytes)
 
 **Old system**: 1 file, 9,533 lines, 284 KB (unreadable by Claude)
-**New system**: 42 files, average 265 lines per file (fully readable)
+**New system**: 43 files, average 260 lines per file (fully readable)
 
 **Workflow additions:**
 - **Batch 1 (27-31):** Code quality workflows
@@ -243,6 +244,9 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
 
 - **Batch 7 (42):** Scraper management & execution
   - 🕷️ Scraper Management - Multi-source scraper execution and monitoring (5 scrapers: NBA API, hoopR, Basketball Reference, Kaggle, ESPN)
+
+- **Batch 8 (43):** Documentation organization
+  - 📚 Documentation Consolidation - Systematic process for consolidating, moving, and archiving documentation files while preventing broken links
 
 ---
 

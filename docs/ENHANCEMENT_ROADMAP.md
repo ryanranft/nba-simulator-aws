@@ -428,7 +428,7 @@ python scripts/etl/scrape_basketball_reference.py \
 ```
 
 **Documents to read first:**
-1. `docs/IMPLEMENTATION_CHECKLIST.md` - Sub-Phase 1.10
+1. `docs/archive/planning/IMPLEMENTATION_CHECKLIST.md` - Sub-Phase 1.10
 2. `docs/ML_FEATURE_CATALOG.md` - Basketball Reference features
 
 ---

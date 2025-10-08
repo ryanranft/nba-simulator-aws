@@ -549,7 +549,7 @@ For major scraping operations, document:
 
 - **Central Hub:** `docs/SCRAPER_MANAGEMENT.md` - Complete scraper reference
 - **Data Sources:** `docs/DATA_SOURCES.md` - All 5 data source details
-- **Test Results:** `docs/SCRAPER_TEST_RESULTS.md` - Rate limit testing outcomes
+- **Test Results:** `docs/archive/scraper_reports/SCRAPER_TEST_RESULTS.md` - Rate limit testing outcomes
 
 ---
 

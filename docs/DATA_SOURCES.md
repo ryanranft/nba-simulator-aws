@@ -215,7 +215,7 @@ box = nba_player_box.espn_nba_player_box(game_id='401234567')
 - Consider for multi-sport replication
 
 **Scripts:**
-- ~~`scripts/archive/deprecated/scrape_sportsdataverse.py`~~ - ❌ DEPRECATED (redundant with hoopR)
+- ~~`scripts/archive/deprecated/scrape_sportsdataverse.py`~~ - ❌ ARCHIVED (redundant with hoopR)
 - **Alternative:** Use `scripts/etl/scrape_hoopr_phase1b_only.R` (run via `run_hoopr_phase1b.sh`)
 
 **Cost:** $0/month (free, open-source)
@@ -559,7 +559,7 @@ ps aux | grep -E "scrape_nba_api|scrape_hoopr|scrape_bbref" | grep -v grep | awk
 | `scripts/etl/download_kaggle_basketball.py` | Kaggle DB downloader | ✅ ACTIVE |
 | `scripts/etl/scrape_missing_espn_data.py` | ESPN gap filler | ✅ ACTIVE |
 | `scripts/etl/run_espn_scraper.sh` | ESPN scraper wrapper | ✅ ACTIVE |
-| ~~`scripts/etl/scrape_sportsdataverse.py`~~ | ~~SportsDataverse~~ | ❌ DEPRECATED (redundant with hoopR) |
+| ~~`scripts/archive/deprecated/scrape_sportsdataverse.py`~~ | ~~SportsDataverse~~ | ❌ ARCHIVED (redundant with hoopR) |
 
 ---
 

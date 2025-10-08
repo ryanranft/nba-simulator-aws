@@ -81,9 +81,10 @@ bash scripts/etl/overnight_nba_api_comprehensive.sh
 **Status:** ⚠️ High error rate - needs error handling improvements
 
 ### 4. SportsDataverse (Multi-Sport Data)
-**Script:** `scripts/etl/scrape_sportsdataverse.py`
+**Script:** ~~`scripts/archive/deprecated/scrape_sportsdataverse.py`~~ - ❌ ARCHIVED
 **Coverage:** 2002+ seasons
-**Status:** Implemented but not actively used
+**Status:** Archived (redundant with hoopR Phase 1B)
+**Alternative:** Use `scripts/etl/run_hoopr_phase1b.sh` instead
 
 ### 5. Kaggle (Historical Datasets)
 **Script:** `scripts/etl/download_kaggle_basketball.py`

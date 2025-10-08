@@ -19,17 +19,18 @@ Use the following current scripts instead of archived versions:
 
 | Archived Script | Replacement | Location |
 |----------------|-------------|----------|
-| `overnight_hoopr_comprehensive.sh` | `run_hoopr_comprehensive_overnight.sh` | `scripts/etl/` |
-| `overnight_hoopr_all_152.sh` | `run_hoopr_comprehensive_overnight.sh` | `scripts/etl/` |
-| `overnight_nba_api_comprehensive.sh` | Still active (no replacement) | `scripts/etl/` |
+| `overnight_hoopr_comprehensive.sh` | `run_hoopr_phase1b.sh` | `scripts/etl/` |
+| `overnight_scrape.sh` | `scrape_bbref_incremental.sh` | `scripts/etl/` |
+| `run_sportsdataverse_overnight.sh` | `run_hoopr_phase1b.sh` | `scripts/etl/` |
 
 ### Python Scripts
 
 | Archived Script | Replacement | Location |
 |----------------|-------------|----------|
-| `scrape_hoopr_comprehensive.py` | `scrape_hoopr_nba_stats.py` | `scripts/etl/` |
-| `scrape_nba_api_playbyplay_only.py` | `scrape_nba_api_comprehensive.py` | `scripts/etl/` |
-| `scrape_sportsdataverse.py` | Direct Python API usage | Use sportsdataverse library directly |
+| `scrape_sportsdataverse.py` | Use hoopR Phase 1B instead | `scripts/etl/run_hoopr_phase1b.sh` |
+| `download_kaggle_database.py` | `download_kaggle_basketball.py` | `scripts/etl/` |
+| `extract_espn_local_to_temporal.py` | No longer needed | N/A |
+| `extract_espn_local_to_temporal_UPDATED.py` | No longer needed | N/A |
 
 ## Directory Structure
 
@@ -37,13 +38,13 @@ Use the following current scripts instead of archived versions:
 scripts/archive/
 ├── README.md (this file)
 └── deprecated/
+    ├── download_kaggle_database.py
+    ├── extract_espn_local_to_temporal.py
+    ├── extract_espn_local_to_temporal_UPDATED.py
     ├── overnight_hoopr_comprehensive.sh
-    ├── overnight_hoopr_all_152.sh
-    ├── overnight_nba_api_comprehensive.sh (ACTIVE - needs review)
-    ├── scrape_hoopr_comprehensive.py
-    ├── scrape_nba_api_playbyplay_only.py
-    ├── scrape_sportsdataverse.py
-    └── scrape_hoopr_nba_stats.py (ACTIVE - needs review)
+    ├── overnight_scrape.sh
+    ├── run_sportsdataverse_overnight.sh
+    └── scrape_sportsdataverse.py
 ```
 
 ## How to Use This Archive
@@ -74,6 +75,9 @@ cp scripts/archive/deprecated/<script_name> scripts/etl/
 **October 8, 2025 - Initial archival:**
 - Moved 7 files (4 Python, 3 shell scripts)
 - Reason: Consolidation and deduplication
+- Scripts archived:
+  - Python: `download_kaggle_database.py`, `extract_espn_local_to_temporal.py`, `extract_espn_local_to_temporal_UPDATED.py`, `scrape_sportsdataverse.py`
+  - Shell: `overnight_hoopr_comprehensive.sh`, `overnight_scrape.sh`, `run_sportsdataverse_overnight.sh`
 - Commit: ff6bbb5 (`refactor(etl): archive deprecated scripts and consolidate documentation`)
 
 ---

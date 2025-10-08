@@ -64,8 +64,8 @@
 
 **Documentation:**
 - [ML Feature Catalog](docs/ML_FEATURE_CATALOG.md) - All 209 features
-- [Implementation Checklist](docs/IMPLEMENTATION_CHECKLIST.md) - Week-by-week tasks
-- [Quick Start Guide](docs/QUICK_START_MULTI_SOURCE.md) - Getting started
+- [Implementation Checklist](docs/archive/planning/IMPLEMENTATION_CHECKLIST.md) - Week-by-week tasks
+- [Quick Start Guide](docs/archive/planning/QUICK_START_MULTI_SOURCE.md) - Getting started
 
 ---
 
@@ -162,7 +162,7 @@
 
 1. **Review options:** See [NEXT_STEPS_OPTIONS.md](docs/NEXT_STEPS_OPTIONS.md)
 2. **Choose path:** Multi-source (4 weeks) or Advanced simulation (8 weeks)
-3. **Start implementing:** Follow [IMPLEMENTATION_CHECKLIST.md](docs/IMPLEMENTATION_CHECKLIST.md)
+3. **Start implementing:** Follow [IMPLEMENTATION_CHECKLIST.md](docs/archive/planning/IMPLEMENTATION_CHECKLIST.md)
 
 **Need help?**
 - Check [PROGRESS.md](PROGRESS.md) for current status
