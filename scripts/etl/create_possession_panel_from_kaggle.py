@@ -1,7 +1,7 @@
 """
-Create Possession Panel from ESPN Temporal Events
+Create Possession Panel from Kaggle Temporal Events
 
-Aggregates ESPN play-by-play events into possession-level observations
+Aggregates Kaggle play-by-play events into possession-level observations
 for econometric ML training.
 
 Features:
@@ -11,8 +11,8 @@ Features:
 4. Handles missing data gracefully (no lineup tracking initially)
 
 Usage:
-    python scripts/etl/create_possession_panel_from_espn.py --limit 100  # Test on 100 games
-    python scripts/etl/create_possession_panel_from_espn.py              # Process all games
+    python scripts/etl/create_possession_panel_from_kaggle.py --limit 100  # Test on 100 games
+    python scripts/etl/create_possession_panel_from_kaggle.py              # Process all games
 """
 
 import os
@@ -21,7 +21,6 @@ import psycopg2
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-from dotenv import load_dotenv
 import argparse
 import logging
 
@@ -32,16 +31,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Load environment
-load_dotenv()
-
-# Database config
+# Local PostgreSQL database config
 DB_CONFIG = {
-    'host': os.getenv('DB_HOST'),
-    'database': os.getenv('DB_NAME'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'port': os.getenv('DB_PORT', 5432)
+    'host': 'localhost',
+    'dbname': 'nba_simulator',
+    'user': 'ryanranft',  # Update if your username is different
+    'password': '',  # Local PostgreSQL usually doesn't need password
+    'port': 5432
 }
 
 
@@ -56,7 +52,29 @@ class PossessionDetector:
     ]
 
     @staticmethod
-    def is_possession_end(event_text: str, prev_score: tuple, curr_score: tuple) -> bool:
+    def is_end_of_free_throw_sequence(event_text: str) -> bool:
+        """Check if this is the last free throw in a sequence"""
+        if not event_text or 'free throw' not in event_text.lower():
+            return False
+
+        text_lower = event_text.lower()
+
+        # Check for "X of Y" pattern
+        if ' of ' in text_lower:
+            # Extract the "X of Y" part
+            import re
+            match = re.search(r'(\d+)\s+of\s+(\d+)', text_lower)
+            if match:
+                current = int(match.group(1))
+                total = int(match.group(2))
+                return current == total  # True if this is the last FT
+
+        # If no "X of Y" pattern, assume it's a single FT (like technical FT)
+        return True
+
+    @staticmethod
+    def is_possession_end(event_text: str, prev_score: tuple, curr_score: tuple,
+                          next_event_text: str = None) -> bool:
         """
         Determine if this event ends a possession
 
@@ -64,6 +82,7 @@ class PossessionDetector:
             event_text: Event description
             prev_score: (home, away) before event
             curr_score: (home, away) after event
+            next_event_text: Next event description (optional, for and-1 detection)
 
         Returns:
             True if possession ends
@@ -73,11 +92,15 @@ class PossessionDetector:
 
         text_lower = event_text.lower()
 
-        # Score changed = possession ended with points
-        if prev_score != curr_score:
-            return True
+        # Offensive rebound NEVER ends possession (extends it)
+        if 'off:' in text_lower and 'rebound' in text_lower:
+            return False
+        if 'offensive rebound' in text_lower:
+            return False
 
         # Defensive rebound = possession change
+        if 'def:' in text_lower and 'rebound' in text_lower:
+            return True
         if 'defensive rebound' in text_lower:
             return True
 
@@ -87,6 +110,31 @@ class PossessionDetector:
 
         # End of quarter/period
         if 'end of' in text_lower:
+            return True
+
+        # Free throw handling: only end on LAST free throw of sequence
+        if 'free throw' in text_lower:
+            return PossessionDetector.is_end_of_free_throw_sequence(event_text)
+
+        # And-1 detection: Made shot followed by free throw = one possession
+        if next_event_text and prev_score != curr_score:
+            next_text_lower = next_event_text.lower()
+            is_made_shot = (
+                'made' in text_lower or
+                'layup' in text_lower or
+                'dunk' in text_lower or
+                ('jumper' in text_lower and 'miss' not in text_lower)
+            )
+            next_is_ft = 'free throw' in next_text_lower
+
+            if is_made_shot and next_is_ft:
+                # This is likely an and-1 situation
+                # Don't end possession yet - let the FT end it
+                return False
+
+        # Score changed = possession ended with points (checked LAST)
+        # This allows offensive rebounds to extend possession even if score changed
+        if prev_score != curr_score:
             return True
 
         return False
@@ -159,7 +207,7 @@ class PossessionPanelBuilder:
         WHERE EXISTS (
             SELECT 1 FROM temporal_events te
             WHERE te.game_id = g.game_id
-            AND te.data_source = 'espn'
+            AND te.data_source = 'kaggle'
         )
         ORDER BY g.game_date, g.game_id
         """
@@ -211,8 +259,8 @@ class PossessionPanelBuilder:
             event_data
         FROM temporal_events
         WHERE game_id = %s
-        AND data_source = 'espn'
-        ORDER BY quarter, game_clock_seconds DESC, event_id
+        AND data_source = 'kaggle'
+        ORDER BY quarter ASC, game_clock_seconds DESC, event_id ASC
         """
 
         # Use cursor instead of pandas for faster loading
@@ -228,9 +276,10 @@ class PossessionPanelBuilder:
             'wall_clock_utc', 'event_data'
         ])
 
-        # Reverse to process chronologically (oldest event first)
-        # Events are stored DESC by game_clock, so reverse makes them ASC
-        df = df.iloc[::-1].reset_index(drop=True)
+        # Events are now in chronological order:
+        # - Quarter ASC (1, 2, 3, 4)
+        # - Within quarter: game_clock DESC (720 → 0 seconds)
+        # This is the natural game flow from start to end
 
         return df
 
@@ -265,25 +314,82 @@ class PossessionPanelBuilder:
             if not isinstance(event_data, dict):
                 continue
 
-            event_text = event_data.get('text', '')
-            home_score = event_data.get('homeScore', 0) or 0
-            away_score = event_data.get('awayScore', 0) or 0
-            curr_score = (home_score, away_score)
-
-            # Detect possession end
-            is_possession_end = self.detector.is_possession_end(
-                event_text, prev_score, curr_score
+            # Kaggle uses separate description fields instead of 'text'
+            event_text = (
+                event_data.get('home_description', '') or
+                event_data.get('visitor_description', '') or
+                event_data.get('neutral_description', '') or
+                ''
             )
+
+            # Get next event text for and-1 detection
+            next_event_text = None
+            next_idx = idx + 1
+            if next_idx in events_df.index:
+                next_event_data = events_df.loc[next_idx, 'event_data']
+                if isinstance(next_event_data, dict):
+                    next_event_text = (
+                        next_event_data.get('home_description', '') or
+                        next_event_data.get('visitor_description', '') or
+                        next_event_data.get('neutral_description', '') or
+                        ''
+                    )
+
+            # Parse Kaggle score format: "9 - 6" (home - away)
+            score_str = event_data.get('score', '')
+            if score_str and ' - ' in score_str:
+                try:
+                    parts = score_str.split(' - ')
+                    home_score = int(parts[0].strip())
+                    away_score = int(parts[1].strip())
+                    curr_score = (home_score, away_score)
+                except (ValueError, IndexError):
+                    # If parsing fails, use previous score
+                    curr_score = prev_score
+            else:
+                # No score available, use previous score
+                curr_score = prev_score
+
+            # Detect possession end (with and-1 detection)
+            is_possession_end = self.detector.is_possession_end(
+                event_text, prev_score, curr_score, next_event_text
+            )
+
+            # Add event to current possession BEFORE checking for possession end
+            event_dict = {
+                'text': event_text,
+                'team_id': row['team_id'],
+                'quarter': row['quarter'],
+                'game_clock_seconds': row['game_clock_seconds'],
+                'wall_clock_utc': row['wall_clock_utc'],
+                'home_score': home_score if 'home_score' in locals() else 0,
+                'away_score': away_score if 'away_score' in locals() else 0,
+                'event_data': event_data
+            }
+            current_possession['events'].append(event_dict)
+
+            if current_possession['team_id'] is None:
+                current_possession['team_id'] = row['team_id']
+                current_possession['start_event'] = row
 
             if is_possession_end and len(current_possession['events']) > 0:
                 # Finalize possession
-                # curr_score is the score AFTER this possession ended
+                # curr_score is the score AFTER this possession-ending event (correct!)
+
+                # DEBUG: Log first 3 possessions to understand what's happening
+                if possession_number < 3:
+                    logger.debug(f"  Possession #{possession_number}:")
+                    logger.debug(f"    Start score: {current_possession['start_score']}")
+                    logger.debug(f"    End score: {curr_score}")
+                    logger.debug(f"    Events: {len(current_possession['events'])}")
+                    logger.debug(f"    Last event text: {current_possession['events'][-1].get('text', 'N/A')}")
+
                 poss = self.aggregate_possession(
                     possession_events=current_possession['events'],
                     possession_number=possession_number,
                     game=game,
                     start_score=current_possession['start_score'],
-                    end_score=curr_score  # Score after possession ended
+                    end_score=curr_score  # Score AFTER possession-ending event
                 )
 
                 if poss:
@@ -293,27 +399,10 @@ class PossessionPanelBuilder:
                 # Start new possession
                 current_possession = {
                     'events': [],
-                    'team_id': row['team_id'],
-                    'start_event': row,
+                    'team_id': None,
+                    'start_event': None,
                     'start_score': curr_score
                 }
-
-            # Add event to current possession
-            event_dict = {
-                'text': event_text,
-                'team_id': row['team_id'],
-                'quarter': row['quarter'],
-                'game_clock_seconds': row['game_clock_seconds'],
-                'wall_clock_utc': row['wall_clock_utc'],
-                'home_score': home_score,
-                'away_score': away_score,
-                'event_data': event_data
-            }
-            current_possession['events'].append(event_dict)
-
-            if current_possession['team_id'] is None:
-                current_possession['team_id'] = row['team_id']
-                current_possession['start_event'] = row
 
             prev_score = curr_score
 
@@ -361,10 +450,6 @@ class PossessionPanelBuilder:
         # Points scored = end_score - start_score
         score_change = (end_score[0] - start_score[0], end_score[1] - start_score[1])
 
-        # DEBUG: Log first 5 possessions
-        if possession_number < 5:
-            logger.debug(f"Poss #{possession_number}: start={start_score}, end={end_score}, change={score_change}")
-
         # Determine which team scored
         offensive_team_id = first_event['team_id']
 
@@ -381,10 +466,6 @@ class PossessionPanelBuilder:
         else:
             points_scored = score_change[1]
             defensive_team_id = game['home_team_id']
-
-        # DEBUG: Log calculated points
-        if possession_number < 5:
-            logger.debug(f"Poss #{possession_number}: team={offensive_team_id}, is_home={is_home_offense}, points={points_scored}")
 
         # Ensure non-negative
         points_scored = max(0, points_scored)
@@ -532,20 +613,18 @@ class PossessionPanelBuilder:
 
         from io import StringIO
 
-        # Select only columns that exist in the table
-        table_columns = [
-            'game_id', 'possession_number', 'game_date', 'season',
-            'game_seconds_elapsed', 'period', 'seconds_remaining',
-            'offensive_team_id', 'defensive_team_id',
-            'points_scored', 'possession_result', 'possession_duration_seconds',
-            'shot_attempted', 'shot_made', 'shot_type',
-            'turnover', 'foul_drawn', 'offensive_rebound',
-            'score_differential', 'is_clutch', 'is_close_game', 'is_blowout',
-            'is_home_offense', 'data_source'
-        ]
+        # Get actual table columns from database
+        self.cursor.execute("""
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'possession_panel'
+            AND table_schema = 'public'
+            ORDER BY ordinal_position
+        """)
+        actual_table_columns = [row[0] for row in self.cursor.fetchall()]
 
-        # Filter to existing columns
-        df_write = df[[col for col in table_columns if col in df.columns]].copy()
+        # Filter dataframe to only columns that exist in database
+        df_write = df[[col for col in df.columns if col in actual_table_columns]].copy()
 
         # Convert float columns to int (PostgreSQL doesn't accept "0.0" for INTEGER columns)
         int_columns = [
@@ -616,9 +695,9 @@ def main():
     if args.verbose:
         logger.setLevel(logging.DEBUG)
 
-    # Validate credentials
-    if not DB_CONFIG['user'] or not DB_CONFIG['password']:
-        logger.error("ERROR: Database credentials not found in .env file")
+    # Validate credentials (password can be empty for local PostgreSQL)
+    if not DB_CONFIG['user']:
+        logger.error("ERROR: Database user not found")
         sys.exit(1)
 
     # Build panel

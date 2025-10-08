@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
 """
+⚠️ DEPRECATED - DO NOT USE ⚠️
+
+This script has been superseded by download_kaggle_basketball.py
+
+DEPRECATED ON: October 8, 2025
+REASON: Replaced by download_kaggle_basketball.py with better error handling
+ACTIVE VERSION: scripts/etl/download_kaggle_basketball.py
+
+---
+
 Kaggle Basketball Database Downloader
 
 Downloads the comprehensive NBA database from Kaggle:

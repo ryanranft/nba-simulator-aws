@@ -639,6 +639,108 @@ exclude_lines =
 
 ---
 
+## Automated Test Suites
+
+**See Workflow #41 for complete documentation:** `docs/claude_workflows/workflow_descriptions/41_testing_framework.md`
+
+The project includes three comprehensive test suites that validate different aspects of the temporal panel data system:
+
+### 1. Scraper Monitoring System Tests
+
+**Location:** `scripts/monitoring/test_monitoring_system.sh`
+
+**Purpose:** Validate overnight scraper workflow end-to-end (10 test categories)
+
+**Usage:**
+```bash
+bash scripts/monitoring/test_monitoring_system.sh --verbose
+```
+
+**What it tests:**
+- Daemon validation, permissions, command interface
+- Reminder/alert file creation and format
+- Completion analysis (COMPLETE vs INVESTIGATE)
+- Error handling and recommendations
+- Context preservation (JSON validation)
+- Script permissions (all 6 monitoring scripts)
+- Directory structure
+- End-to-end integration workflow
+
+**Runtime:** 30-60 seconds
+**When to run:** Before launching overnight scrapers, after monitoring system changes
+
+### 2. Temporal Panel Data Query Tests
+
+**Location:** `tests/test_temporal_queries.py`
+
+**Purpose:** Validate millisecond-precision temporal queries and snapshot accuracy (25+ tests)
+
+**Usage:**
+```bash
+pytest tests/test_temporal_queries.py -v
+```
+
+**What it tests:**
+- Table availability and data population
+- BRIN indexes for performance
+- Stored procedures (`get_player_snapshot_at_time`, `calculate_player_age`)
+- Snapshot query accuracy and performance (<5s)
+- Precision levels (millisecond/second/minute/game)
+- Age calculations and birth date precision
+- Timestamp consistency (timezone-aware)
+- Game state reconstruction
+- Data quality validation (no duplicates, 5% tolerance)
+- Performance benchmarks (time-range <10s, aggregation <15s)
+
+**Prerequisites:** RDS connection, temporal tables populated
+**Runtime:** 1-3 minutes
+**When to run:** Weekly during temporal development, after schema changes
+
+### 3. Feature Engineering Validation Tests
+
+**Location:** `notebooks/test_feature_engineering.py`
+
+**Purpose:** Pre-flight validation for SageMaker deployment (5 test categories)
+
+**Usage:**
+```bash
+python notebooks/test_feature_engineering.py
+```
+
+**What it tests:**
+- Import availability (pandas, numpy, psycopg2, sqlalchemy, boto3)
+- Database connection (RDS connectivity, games table access)
+- S3 access (read permissions on data lake)
+- Feature logic (rolling stats, rest days, categorical encoding)
+- Parquet I/O (write/read roundtrip validation)
+
+**Exit codes:**
+- 0 = All tests passed, ready for SageMaker
+- 1 = Failures detected, fix before deployment
+
+**Runtime:** 10-30 seconds
+**When to run:** Before each SageMaker session, after environment changes
+
+### Quick Test Suite Execution
+
+**Run all test suites:**
+```bash
+# 1. Feature engineering readiness (fastest)
+python notebooks/test_feature_engineering.py
+
+# 2. Scraper monitoring system (medium)
+bash scripts/monitoring/test_monitoring_system.sh
+
+# 3. Temporal query functionality (slowest)
+pytest tests/test_temporal_queries.py -v
+```
+
+**Total runtime:** 2-5 minutes
+
+**For detailed usage, troubleshooting, and integration:** See Workflow #41
+
+---
+
 ## Testing Anti-Patterns (Avoid These)
 
 ### ❌ Testing Implementation Details
@@ -756,5 +858,5 @@ open htmlcov/index.html
 
 ---
 
-**Last Updated:** 2025-09-30
-**Status:** Testing strategy documented, implementation pending
+**Last Updated:** 2025-10-08
+**Status:** Testing strategy documented, 3 automated test suites integrated (see Workflow #41)

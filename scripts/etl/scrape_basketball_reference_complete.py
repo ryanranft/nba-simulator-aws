@@ -11,7 +11,7 @@ Scrapes ALL available data from Basketball Reference (1946-2025):
 - Play-by-play
 - Standings
 
-Rate Limit: 3 seconds between requests (Basketball Reference courtesy guideline)
+Rate Limit: 5 seconds between requests (Basketball Reference rate limit protection)
 """
 
 import argparse
@@ -50,7 +50,7 @@ logging.basicConfig(
 class BasketballReferenceCompleteHistoricalScraper:
     """Scrape complete historical data from Basketball Reference"""
 
-    def __init__(self, output_dir: str, s3_bucket: Optional[str] = None, rate_limit: float = 3.0):
+    def __init__(self, output_dir: str, s3_bucket: Optional[str] = None, rate_limit: float = 5.0):
         self.output_dir = Path(output_dir)
         self.s3_bucket = s3_bucket
         self.s3_client = boto3.client('s3') if HAS_BOTO3 and s3_bucket else None
@@ -74,9 +74,13 @@ class BasketballReferenceCompleteHistoricalScraper:
             time.sleep(sleep_time)
         self.last_request_time = time.time()
 
-    def _exponential_backoff(self, attempt: int):
+    def _exponential_backoff(self, attempt: int, is_rate_limit: bool = False):
         """Exponential backoff on errors"""
-        wait_time = min(60, (2 ** attempt))  # Max 60 seconds
+        if is_rate_limit:
+            # For 429 errors, wait much longer (30s, 60s, 120s)
+            wait_time = min(120, 30 * (2 ** attempt))  # 30s, 60s, 120s
+        else:
+            wait_time = min(60, (2 ** attempt))  # 1s, 2s, 4s, 8s, max 60s
         logging.warning(f"Backing off for {wait_time}s (attempt {attempt})")
         time.sleep(wait_time)
 
@@ -131,10 +135,12 @@ class BasketballReferenceCompleteHistoricalScraper:
                 return result
             except Exception as e:
                 self.stats['errors'] += 1
+                # Check if it's a 429 rate limit error
+                is_429 = '429' in str(e) or 'Too Many Requests' in str(e)
                 if attempt < max_retries - 1:
                     self.stats['retries'] += 1
                     logging.warning(f"Request failed (attempt {attempt + 1}/{max_retries}): {e}")
-                    self._exponential_backoff(attempt)
+                    self._exponential_backoff(attempt, is_rate_limit=is_429)
                 else:
                     logging.error(f"Request failed after {max_retries} attempts: {e}")
                     raise
@@ -614,8 +620,8 @@ Data types:
                        help='Local output directory (default: /tmp/basketball_reference_complete)')
     parser.add_argument('--checkpoint-file',
                        help='Path to checkpoint file for resume capability')
-    parser.add_argument('--rate-limit', type=float, default=3.0,
-                       help='Seconds between requests (default: 3.0)')
+    parser.add_argument('--rate-limit', type=float, default=5.0,
+                       help='Seconds between requests (default: 5.0)')
     parser.add_argument('--verbose', action='store_true',
                        help='Enable verbose logging')
 

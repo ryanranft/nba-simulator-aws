@@ -1,8 +1,8 @@
 # CLAUDE.md
 
-**Version:** 2.0 (Modular Documentation System)
-**Last Updated:** October 6, 2025 - 11:30 PM
-**System Status:** 8 phases (2 with enhancement plans), 38 workflows, 97+ workflow references
+**Version:** 2.1 (Modular Documentation System + Scraper Operations)
+**Last Updated:** October 8, 2025
+**System Status:** 8 phases (2 with enhancement plans), 40 workflows, 97+ workflow references
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -467,6 +467,106 @@ Session checklist:
 - Monthly review checklist
 - Workflow documentation system
 
+---
+
+## 🌙 Overnight Scraper Monitoring System
+
+**System Type:** Hybrid (Persistent Daemon + Session-Based Checks)
+
+The project includes a comprehensive monitoring system for long-running overnight scrapers. This system ensures scraper completions are never missed and provides intelligent context preservation.
+
+### Architecture
+
+**Persistent Daemon:**
+- `scripts/monitoring/scraper_watcher_daemon.sh` - Runs in background, monitors all scrapers
+- Sends desktop notifications (macOS) when scrapers complete
+- Creates alert files in `/tmp/scraper_alerts/` for completed scrapers
+- Tracks reminder files in `/tmp/scraper_reminders/` for running scrapers
+
+**Session-Based Tools:**
+- `scripts/monitoring/check_scraper_alerts.sh` - Check for completed scrapers at session start
+- `scripts/monitoring/analyze_scraper_completion.sh` - Analyze completion and recommend actions
+- `scripts/monitoring/save_work_context.sh` - Preserve current work before checking scrapers
+
+### Quick Reference Commands
+
+**Check for completed scrapers:**
+```bash
+bash scripts/monitoring/check_scraper_alerts.sh
+```
+
+**Analyze specific completion:**
+```bash
+bash scripts/monitoring/analyze_scraper_completion.sh /tmp/scraper_alerts/<scraper>.alert
+```
+
+**Save current work context:**
+```bash
+bash scripts/monitoring/save_work_context.sh "Task description" "Current step" "Next step"
+```
+
+**Launch daemon (auto-started by launch_scraper.sh):**
+```bash
+nohup bash scripts/monitoring/scraper_watcher_daemon.sh > /tmp/scraper_daemon.log 2>&1 &
+```
+
+### Session Start Workflow Integration
+
+**When starting a new Claude Code session, always:**
+
+1. **Check PROGRESS.md** for "Overnight jobs running" section
+2. **If overnight jobs were running:**
+   - Run: `bash scripts/monitoring/check_scraper_alerts.sh`
+   - Review any completed scrapers
+   - For each completion, run: `bash scripts/monitoring/analyze_scraper_completion.sh <alert_file>`
+   - Follow recommendations (COMPLETE or INVESTIGATE)
+   - Clear alerts when reviewed: `rm /tmp/scraper_alerts/*.alert`
+3. **Document results** in PROGRESS.md or relevant phase file
+4. **Resume regular work** after scraper check
+
+### Completion Analysis Framework
+
+The `analyze_scraper_completion.sh` script provides two recommendations:
+
+**COMPLETE (No action needed):**
+- ✅ No errors detected in log
+- ✅ Completion marker found in log
+- Next steps: Verify S3 uploads, clear alert
+
+**INVESTIGATE (Review required):**
+- ⚠️ Errors found in log OR missing completion marker
+- Actions: Review log, check error details, decide if redeployment needed
+
+### File Locations
+
+**Runtime directories:**
+- `/tmp/scraper_alerts/` - Alert files for completed scrapers
+- `/tmp/scraper_reminders/` - Reminder files for running scrapers
+- `/tmp/claude_work_context.json` - Saved work context
+
+**Log files:**
+- `/tmp/scraper_daemon.log` - Daemon monitoring log
+- `/tmp/<scraper_name>.log` - Individual scraper logs
+
+### Best Practices
+
+**For Claude:**
+1. Always check alerts at session start if PROGRESS.md mentions overnight jobs
+2. Save work context before switching to scraper check (preserve current task)
+3. Analyze completions systematically (don't just clear alerts)
+4. Document outcomes in PROGRESS.md
+
+**For Users:**
+1. Let daemon run continuously (won't interfere with other work)
+2. Clear alerts after reviewing: `rm /tmp/scraper_alerts/*.alert`
+3. Check daemon log if notifications aren't appearing: `tail -f /tmp/scraper_daemon.log`
+
+**Related Workflows:**
+- Workflow #38: Overnight Scraper Handoff Protocol (complete session start workflow)
+- Workflow #40: Scraper Operations Complete (launching and monitoring scrapers)
+
+---
+
 ## Instructions for Claude
 
 **Session Initialization & Daily Workflows:** See `docs/CLAUDE_SESSION_INIT.md`
@@ -535,9 +635,117 @@ See `docs/SECURITY_PROTOCOLS.md` for:
 
 See `QUICKSTART.md` for all common commands (S3, database, AWS resources, daily workflow).
 
+## Testing Quick Reference
+
+**Complete Guide:** See Workflow #41 (`docs/claude_workflows/workflow_descriptions/41_testing_framework.md`)
+
+**Run all test suites:**
+```bash
+# 1. Feature engineering readiness (fastest, 10-30s)
+python notebooks/test_feature_engineering.py
+
+# 2. Scraper monitoring system (medium, 30-60s)
+bash scripts/monitoring/test_monitoring_system.sh --verbose
+
+# 3. Temporal query functionality (slowest, 1-3 min)
+pytest tests/test_temporal_queries.py -v
+```
+
+**Total runtime:** 2-5 minutes
+
+**Related Documentation:**
+- Workflow #41: Testing Framework (detailed procedures)
+- TESTING.md: Testing philosophy and strategy
+
+---
+
+## Scraper Operations Quick Reference
+
+**Complete Guide:** See Workflow #42 (`docs/claude_workflows/workflow_descriptions/42_scraper_management.md`) for comprehensive scraper documentation.
+
+### Launch Scrapers
+
+**Interactive Launcher (Recommended):**
+```bash
+bash scripts/monitoring/launch_scraper.sh
+```
+
+**Direct Commands:**
+```bash
+# Basketball Reference (incremental, resume-capable)
+bash scripts/etl/scrape_bbref_incremental.sh 2020 2025
+
+# hoopR Phase 1B (league dashboards)
+bash scripts/etl/run_hoopr_phase1b.sh
+
+# NBA API (advanced stats - ⚠️ high error rate)
+bash scripts/etl/overnight_nba_api_comprehensive.sh
+```
+
+### Monitor Progress
+
+```bash
+# Quick status (single update)
+bash scripts/monitoring/monitor_scrapers_inline.sh
+
+# Live tracking (10 updates, conversation-friendly)
+bash scripts/monitoring/monitor_scrapers_inline.sh --iterations 10
+
+# Full dashboard (auto-refreshing)
+bash scripts/monitoring/monitor_scrapers.sh --watch
+
+# View logs
+tail -f /tmp/bbref_incremental_2020-2025.log
+tail -f /tmp/hoopr_phase1b.log
+```
+
+### Check Progress
+
+```bash
+# Completion markers
+ls /tmp/basketball_reference_incremental/*.complete | wc -l
+
+# Output files
+find /tmp/hoopr_phase1 -name "*.csv" | wc -l
+
+# S3 verification
+aws s3 ls s3://nba-sim-raw-data-lake/basketball_reference/
+```
+
+### Stop Scrapers
+
+```bash
+# Find running scrapers
+ps aux | grep -E "(scrape_|run_hoopr)" | grep -v grep
+
+# Kill specific scraper
+kill <PID>
+```
+
+**Related Workflows:**
+- **Workflow #38:** [Overnight Scraper Handoff Protocol](docs/claude_workflows/workflow_descriptions/38_overnight_scraper_handoff.md)
+- **Workflow #39:** [Scraper Monitoring Automation](docs/claude_workflows/workflow_descriptions/39_scraper_monitoring_automation.md)
+- **Workflow #40:** [Complete Scraper Operations Guide](docs/claude_workflows/workflow_descriptions/40_scraper_operations_complete.md)
+
 ## Data Structure
 
 See `docs/DATA_STRUCTURE_GUIDE.md` for complete S3 bucket layout, data extraction strategy, and file characteristics.
+
+## Data Source Baselines
+
+See `docs/DATA_SOURCE_BASELINES.md` for verified baseline statistics from each data source.
+
+**Purpose:** Cross-validation and quality checks when integrating multiple sources.
+
+**Current baselines:**
+- **Kaggle:** 3.8M possessions, 127.5 avg/game, 41% undercounting (acceptable for ML)
+- **pbpstats (reference):** ~220 possessions/game (ground truth)
+
+**Use when:**
+- Adding new data sources (verify against existing baselines)
+- Re-scraping data (ensure consistency)
+- Multi-source validation (check for discrepancies)
+- Investigating data quality issues (compare to known-good stats)
 
 ## Important Notes
 

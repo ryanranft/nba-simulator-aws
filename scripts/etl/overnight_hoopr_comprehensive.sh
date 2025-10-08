@@ -26,9 +26,10 @@ mkdir -p "$LOG_DIR"
 echo "================================================" | tee "$FULL_LOG"
 echo "hoopR Comprehensive NBA Stats API Scraper" | tee -a "$FULL_LOG"
 echo "================================================" | tee -a "$FULL_LOG"
-echo "Coverage: 2002-2025 (23 seasons)" | tee -a "$FULL_LOG"
-echo "Endpoints: 200+ via hoopR data loaders" | tee -a "$FULL_LOG"
+echo "Coverage: 2002-2025 (24 seasons) - INCLUDING TODAY" | tee -a "$FULL_LOG"
+echo "Endpoints: Play-by-play, Box scores, Schedules" | tee -a "$FULL_LOG"
 echo "Log directory: $LOG_DIR" | tee -a "$FULL_LOG"
+echo "Output directory: /tmp/hoopr_nba_comprehensive" | tee -a "$FULL_LOG"
 echo "Started: $(date)" | tee -a "$FULL_LOG"
 echo "" | tee -a "$FULL_LOG"
 
@@ -45,6 +46,7 @@ cd "$PROJECT_DIR"
 
 # Define season ranges
 # hoopR data typically available from 2002-present
+# Include current season (2025) to get today's games
 SEASONS=(2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025)
 
 echo "" | tee -a "$FULL_LOG"
@@ -73,7 +75,7 @@ for ((i=0; i<${#SEASONS[@]}; i+=BATCH_SIZE)); do
         --seasons ${BATCH_SEASONS[@]} \
         --all-endpoints \
         --upload-to-s3 \
-        --output-dir "/tmp/hoopr_nba_stats" \
+        --output-dir "/tmp/hoopr_nba_comprehensive" \
         2>&1 | tee -a "$LOG_DIR/batch_${BATCH_NUM}.log" | tee -a "$FULL_LOG"
 
     if [ ${PIPESTATUS[0]} -eq 0 ]; then

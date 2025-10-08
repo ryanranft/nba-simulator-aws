@@ -12,7 +12,7 @@
 # - Play-by-play (modern era only - 2000+)
 # - Standings
 #
-# Rate limit: 3 seconds between requests (Basketball Reference courtesy)
+# Rate limit: 5 seconds between requests (Basketball Reference rate limit protection)
 #
 
 set -e
@@ -40,7 +40,7 @@ mkdir -p "$OUTPUT_DIR"
 
 # 1. Schedules (fast - gets game list for all seasons)
 echo "[1/7] Scraping schedules..."
-echo "Estimated time: ~5 minutes (79 seasons × 3s rate limit)"
+echo "Estimated time: ~7 minutes (79 seasons × 5s rate limit)"
 python "$SCRIPT_DIR/scrape_basketball_reference_complete.py" \
   --data-type schedules \
   --start-season $SEASON_START \
@@ -57,7 +57,7 @@ echo
 
 # 2. Player box scores (LARGEST - run in background overnight)
 echo "[2/7] Scraping player box scores (BACKGROUND)..."
-echo "Estimated time: ~79 hours (95,000 games × 3s rate limit)"
+echo "Estimated time: ~132 hours (95,000 games × 5s rate limit)"
 echo "This will run in the background while we continue with other data types"
 nohup python "$SCRIPT_DIR/scrape_basketball_reference_complete.py" \
   --data-type player-box-scores \
@@ -74,7 +74,7 @@ echo
 
 # 3. Team box scores
 echo "[3/7] Scraping team box scores..."
-echo "Estimated time: ~79 hours (95,000 games × 3s rate limit)"
+echo "Estimated time: ~132 hours (95,000 games × 5s rate limit)"
 python "$SCRIPT_DIR/scrape_basketball_reference_complete.py" \
   --data-type team-box-scores \
   --start-season $SEASON_START \
@@ -91,7 +91,7 @@ echo
 
 # 4. Season totals
 echo "[4/7] Scraping player season totals..."
-echo "Estimated time: ~5 minutes (79 seasons × 3s rate limit)"
+echo "Estimated time: ~7 minutes (79 seasons × 5s rate limit)"
 python "$SCRIPT_DIR/scrape_basketball_reference_complete.py" \
   --data-type season-totals \
   --start-season $SEASON_START \
@@ -108,7 +108,7 @@ echo
 
 # 5. Advanced totals
 echo "[5/7] Scraping player advanced totals..."
-echo "Estimated time: ~5 minutes (79 seasons × 3s rate limit)"
+echo "Estimated time: ~7 minutes (79 seasons × 5s rate limit)"
 python "$SCRIPT_DIR/scrape_basketball_reference_complete.py" \
   --data-type advanced-totals \
   --start-season $SEASON_START \
@@ -125,7 +125,7 @@ echo
 
 # 6. Play-by-play (modern era only - start from 2000)
 echo "[6/7] Scraping play-by-play data (modern era: 2000-2025)..."
-echo "Estimated time: ~26 hours (31,250 games × 3s rate limit)"
+echo "Estimated time: ~43 hours (31,250 games × 5s rate limit)"
 python "$SCRIPT_DIR/scrape_basketball_reference_complete.py" \
   --data-type play-by-play \
   --start-season 2000 \
@@ -142,7 +142,7 @@ echo
 
 # 7. Standings
 echo "[7/7] Scraping standings..."
-echo "Estimated time: ~5 minutes (79 seasons × 3s rate limit)"
+echo "Estimated time: ~7 minutes (79 seasons × 5s rate limit)"
 python "$SCRIPT_DIR/scrape_basketball_reference_complete.py" \
   --data-type standings \
   --start-season $SEASON_START \

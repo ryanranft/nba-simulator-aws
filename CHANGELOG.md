@@ -7,6 +7,96 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed - ETL Script Cleanup & Organization
+
+**Date:** October 8, 2025
+
+**Phase 2: Documentation Consolidation**
+
+**Changes Applied:**
+1. **Deprecated script archival:**
+   - Archived `extract_espn_local_to_temporal.py` (v1) → `scripts/archive/deprecated/`
+   - Archived `extract_espn_local_to_temporal_UPDATED.py` → `scripts/archive/deprecated/`
+   - Archived `download_kaggle_database.py` → `scripts/archive/deprecated/`
+   - Archived `scrape_sportsdataverse.py` → `scripts/archive/deprecated/`
+
+2. **Added deprecation notices:**
+   - All 4 archived files now have clear deprecation warnings at top of docstring
+   - Includes deprecation date, reason, and pointer to active replacement
+
+3. **Created ETL directory README:**
+   - New `scripts/etl/README.md` (5.7KB) provides comprehensive guide
+   - Lists all active scrapers (5 core scrapers)
+   - Documents deprecated scripts with explanations
+   - Includes quick start commands and monitoring procedures
+   - References Workflow #42 for complete documentation
+
+4. **Updated documentation references:**
+   - `docs/DATA_SOURCES.md`: Updated Kaggle and SportsDataverse script references
+   - Marked deprecated files with strikethrough and ❌ status
+   - Added pointers to active replacements
+
+**Benefits:**
+- ✅ Clear separation of active vs deprecated scripts
+- ✅ Single source of truth for ETL script usage
+- ✅ Eliminated confusion about which scripts to use
+- ✅ Improved discoverability with comprehensive README
+- ✅ Preserved deprecated code for reference
+
+**Active Scripts After Cleanup:**
+- `download_kaggle_basketball.py` (replaces download_kaggle_database.py)
+- `extract_espn_local_to_temporal_v2.py` (replaces v1 and UPDATED)
+- `extract_kaggle_to_temporal.py`
+- `scrape_hoopr_phase1b_only.R` (replaces scrape_sportsdataverse.py)
+
+---
+
+### Fixed - Basketball Reference Rate Limit Issues
+
+**Date:** October 8, 2025
+
+**Problem:** Basketball Reference scraper was getting 429 "Too Many Requests" errors on every request with 3-second rate limit.
+
+**Root Cause:**
+- 3-second rate limit was too aggressive for Basketball Reference servers
+- Exponential backoff started at only 1s (10^0) for 429 errors, insufficient to recover from rate limiting
+- Argparse default was not updated when __init__ default was changed
+
+**Solution Applied:**
+1. **Increased base rate limit:** 3.0s → 5.0s (67% increase)
+   - Updated `__init__` default parameter (line 53)
+   - Updated argparse default (line 623)
+   - Updated overnight script documentation and estimates
+
+2. **Enhanced 429-specific backoff:** 1s/10s/120s → 30s/60s/120s
+   - First retry: 30 seconds (was 1s)
+   - Second retry: 60 seconds (was 10s)
+   - Third retry: 120 seconds (unchanged)
+   - Formula: `min(120, 30 * (2 ** attempt))` for rate limits
+
+3. **429 Detection working correctly:**
+   - Detection: `'429' in str(e) or 'Too Many Requests' in str(e)`
+   - Passes `is_rate_limit=True` to use longer backoff times
+
+**Testing Results:**
+- **Before fix:** 6 requests, 0 successes, 6 errors (100% failure rate)
+- **After fix:** 2 requests, 2 successes, 0 errors, 0 retries (100% success rate)
+- Test seasons: 2024 (1,319 games), 2025 (1,321 games)
+- No 429 errors observed
+
+**Files Modified:**
+- `scripts/etl/scrape_basketball_reference_complete.py` (3 changes)
+- `scripts/etl/overnight_basketball_reference_comprehensive.sh` (7 time estimates updated)
+
+**Impact on Overnight Scraper:**
+- Estimated runtime increase: +67% (due to 5s vs 3s rate limit)
+- Player box scores: 79 hours → 132 hours
+- Team box scores: 79 hours → 132 hours
+- Play-by-play: 26 hours → 43 hours
+- Schedules/totals/standings: 5 min → 7 min each
+
+**Strategic Value:** Enables reliable overnight scraping of complete 75-year NBA historical dataset without rate limit failures.
+
 ### Added - Basketball Reference Complete Historical Scraper
 
 **Date:** October 7, 2025

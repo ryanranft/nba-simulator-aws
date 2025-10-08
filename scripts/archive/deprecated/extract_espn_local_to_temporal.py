@@ -1,4 +1,14 @@
 """
+⚠️ DEPRECATED - DO NOT USE ⚠️
+
+This script has been superseded by extract_espn_local_to_temporal_v2.py
+
+DEPRECATED ON: October 8, 2025
+REASON: Replaced by v2 with improved error handling and better temporal extraction
+ACTIVE VERSION: scripts/etl/extract_espn_local_to_temporal_v2.py
+
+---
+
 Extract Local ESPN Data to Temporal Format
 
 Processes existing ESPN JSON files from /Users/ryanranft/0espn/data/nba/

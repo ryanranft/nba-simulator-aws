@@ -454,10 +454,52 @@ python scripts/ml/train_possession_model.py \
 | **Maintenance** | Library updates | We maintain | ★★★☆☆ |
 
 **Weighted score:**
-- **pbpstats:** 4.2/5
-- **Custom:** 3.4/5
+- **pbpstats:** 4.2/5 (theoretical)
+- **Custom:** 3.4/5 (practical)
 
-**Recommendation:** Use pbpstats for base panel, build custom enrichment on top.
+**Original Recommendation:** Use pbpstats for base panel, build custom enrichment on top.
+
+---
+
+## ⚠️ IMPLEMENTATION UPDATE (Oct 7, 2025)
+
+**Status:** pbpstats implementation **BLOCKED - Recommend custom approach instead**
+
+### Issues Encountered:
+
+1. **Configuration problems** with pbpstats v1.3.11
+   - `stats_nba` web source produces invalid host (`stats.none.com`)
+   - DNS resolution errors prevent data fetching
+
+2. **Game ID format mismatches**
+   - Database has 8-digit IDs (Kaggle format)
+   - pbpstats expects 10-digit IDs (NBA API format)
+   - Normalization added but still blocked by DNS errors
+
+3. **Time vs. Value trade-off**
+   - Debugging library configuration issues takes time
+   - Already have working custom implementations
+   - Custom solutions provide more control over features
+
+### Final Recommendation: **Use Custom Implementation**
+
+**Reasons:**
+- ✅ **Working now:** Kaggle panel provides 127 poss/game
+- ✅ **Better accuracy:** NBA API data shows 235 poss/game (85% more possessions detected)
+- ✅ **Full control:** Can integrate all data sources (Kaggle, NBA API, ESPN)
+- ✅ **No dependencies:** Not blocked by third-party library issues
+- ✅ **Learning value:** Understanding possession logic helps model design
+
+**Deferred:** Can revisit pbpstats later if advanced lineup tracking becomes critical for ML features.
+
+---
+
+## Next Steps
+
+1. Continue with custom NBA API possession panel implementation
+2. Validate possession detection logic across data sources
+3. Add lineup tracking to custom implementation if needed for advanced simulation features
+4. Document possession panel schema and usage
 
 ---
 
@@ -466,7 +508,8 @@ python scripts/ml/train_possession_model.py \
 - **pbpstats GitHub:** https://github.com/dblackrun/pbpstats
 - **pbpstats Docs:** https://github.com/dblackrun/pbpstats/tree/master/docs
 - **NBA API Endpoint Reference:** https://github.com/swar/nba_api/tree/master/docs/nba_api/stats/endpoints
+- **Implementation notes:** `docs/analysis/PBPSTATS_IMPLEMENTATION_NOTES.md`
 
 ---
 
-*Last updated: October 7, 2025*
+*Last updated: October 7, 2025 - 6:10 PM*

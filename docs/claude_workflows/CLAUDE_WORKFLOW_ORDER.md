@@ -10,6 +10,7 @@ All detailed workflow descriptions are located in: `/docs/claude_workflows/workf
 
 1. **Session Start** → `01_session_start.md`
 2. **🌙 Overnight Scraper Check** → `38_overnight_scraper_handoff.md` (if overnight jobs running - check PROGRESS.md)
+   - **Use:** `bash scripts/monitoring/monitor_scrapers.sh` → See `39_scraper_monitoring_automation.md`
 3. **Command Logging** → `02_command_logging.md` (automatic throughout session)
 
 ### When User Requests Task (Decision Point)
@@ -196,19 +197,22 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
 - Repository cleanup before push? → `36`
 - Credential management? → `37`
 - **🌙 Overnight scraper running?** → `38` (NEW - check at session start)
+- **Build possession panel data?** → `39` (possession-level ML features)
+- **Run test suites?** → `41` (NEW - validation framework)
+- **Launch data scrapers?** → `42` (NEW - multi-source scraper execution)
 
 ---
 
 ## 📊 Workflow Statistics
 
-- **Total workflows**: 38
-- **Total size**: ~500 KB
-- **Average workflow**: ~14 KB
+- **Total workflows**: 42
+- **Total size**: ~750 KB
+- **Average workflow**: ~18 KB
 - **Largest workflow**: `24_aws_resource_setup.md` (92 KB)
 - **Smallest workflow**: `04_plan_change_protocol.md` (595 bytes)
 
 **Old system**: 1 file, 9,533 lines, 284 KB (unreadable by Claude)
-**New system**: 36 files, average 265 lines per file (fully readable)
+**New system**: 42 files, average 265 lines per file (fully readable)
 
 **Workflow additions:**
 - **Batch 1 (27-31):** Code quality workflows
@@ -231,6 +235,15 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
   - 🔐 Credential Management - Add/update AWS credentials to .env
   - 🌙 Overnight Scraper Handoff - Track and validate overnight jobs
 
+- **Batch 5 (39):** Data pipeline documentation
+  - 📊 Possession Panel Data Pipelines - Complete possession-level panel creation system
+
+- **Batch 6 (41):** Testing framework integration
+  - 🧪 Testing Framework - Comprehensive test suite validation (3 test suites: monitoring, temporal queries, feature engineering)
+
+- **Batch 7 (42):** Scraper management & execution
+  - 🕷️ Scraper Management - Multi-source scraper execution and monitoring (5 scrapers: NBA API, hoopR, Basketball Reference, Kaggle, ESPN)
+
 ---
 
-*Last updated: 2025-10-06*
+*Last updated: 2025-10-08*

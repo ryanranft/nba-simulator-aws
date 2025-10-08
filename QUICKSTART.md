@@ -181,6 +181,64 @@ ssh -T git@github.com
 
 ---
 
+## Scraper Operations
+
+**Complete guide:** See Workflow #42 (`docs/claude_workflows/workflow_descriptions/42_scraper_management.md`)
+
+### Launch Scrapers
+
+**NBA API Comprehensive** (5-6 hours, 30 seasons):
+```bash
+nohup bash scripts/etl/overnight_nba_api_comprehensive.sh > /tmp/nba_api.log 2>&1 &
+tail -f /tmp/nba_api.log
+```
+
+**hoopR Phase 1B** (30-60 minutes, 24 seasons):
+```bash
+nohup bash scripts/etl/run_hoopr_phase1b.sh > /tmp/hoopr.log 2>&1 &
+tail -f /tmp/hoopr_phase1b_runner.log
+```
+
+**Basketball Reference** (3-4 hours, 2020-2025):
+```bash
+nohup bash scripts/etl/scrape_bbref_incremental.sh 2020 2025 > /tmp/bbref.log 2>&1 &
+tail -f /tmp/bbref.log
+```
+
+**Kaggle Database** (10-15 minutes, one-time):
+```bash
+python scripts/etl/download_kaggle_basketball.py
+```
+
+**ESPN Gap Filler** (2-3 hours):
+```bash
+nohup bash scripts/etl/run_espn_scraper.sh > /tmp/espn_gap.log 2>&1 &
+```
+
+### Monitor Scrapers
+
+**Check all running scrapers:**
+```bash
+ps aux | grep -E "scrape_nba_api|scrape_hoopr|scrape_bbref" | grep -v grep
+```
+
+**Monitor all logs:**
+```bash
+tail -f /tmp/nba_api.log /tmp/hoopr.log /tmp/bbref.log
+```
+
+**Emergency stop (kill all):**
+```bash
+ps aux | grep -E "scrape" | grep -v grep | awk '{print $2}' | xargs kill -9
+```
+
+### Related Workflows
+- **Workflow #38:** Check scraper completion at session start
+- **Workflow #41:** Validate scraper output with test suites
+- **Workflow #42:** Complete scraper execution guide (900+ lines)
+
+---
+
 ## Troubleshooting Quick Fixes
 
 **Problem: Conda environment not found**

@@ -120,9 +120,9 @@ class ComprehensiveNBAStatsScraper:
             'api_calls': 0,
         }
 
-        # Rate limiting (increased for production stability)
+        # Rate limiting (increased for production stability and to avoid NBA.com blocking)
         self.last_request_time = 0
-        self.min_request_interval = 1.5  # 1.5s between requests (safer for long runs)
+        self.min_request_interval = 2.5  # 2.5s between requests (very conservative to avoid rate limiting)
 
     def _rate_limit(self):
         """Enforce rate limiting between API calls"""

@@ -159,8 +159,9 @@ Comprehensive SQLite database with NBA data from 1946-present. Includes games, p
 - Update periodically (monthly)
 
 **Scripts:**
-- `scripts/etl/download_kaggle_database.py` - ⏸️ TO BE CREATED
-- `scripts/etl/extract_kaggle_data.py` - ⏸️ TO BE CREATED
+- `scripts/etl/download_kaggle_basketball.py` - ✅ Active downloader
+- `scripts/etl/extract_kaggle_to_temporal.py` - ✅ Active extractor
+- ~~`scripts/archive/deprecated/download_kaggle_database.py`~~ - ❌ DEPRECATED (use download_kaggle_basketball.py instead)
 
 **Cost:** $0/month (free download)
 
@@ -214,7 +215,8 @@ box = nba_player_box.espn_nba_player_box(game_id='401234567')
 - Consider for multi-sport replication
 
 **Scripts:**
-- `scripts/etl/scrape_sportsdataverse.py` - ⏸️ TO BE CREATED
+- ~~`scripts/archive/deprecated/scrape_sportsdataverse.py`~~ - ❌ DEPRECATED (redundant with hoopR)
+- **Alternative:** Use `scripts/etl/scrape_hoopr_phase1b_only.R` (run via `run_hoopr_phase1b.sh`)
 
 **Cost:** $0/month (free, open-source)
 
@@ -469,18 +471,95 @@ Comprehensive historical basketball statistics site. Most complete source for hi
 
 ---
 
+## Scraper Scripts Reference
+
+**Complete guide:** See Workflow #42 (`docs/claude_workflows/workflow_descriptions/42_scraper_management.md`)
+
+### Quick Launch Commands
+
+**1. NBA API Comprehensive Scraper** (5-6 hours, 30 seasons):
+```bash
+nohup bash scripts/etl/overnight_nba_api_comprehensive.sh > /tmp/nba_api.log 2>&1 &
+# Monitor: tail -f /tmp/nba_api.log
+```
+
+**2. hoopR Scraper** (30-60 minutes, 24 seasons):
+```bash
+# Phase 1A (bulk loaders, 30 seconds):
+bash scripts/etl/run_hoopr_phase1.sh
+
+# Phase 1B (league dashboards, 30-60 minutes):
+nohup bash scripts/etl/run_hoopr_phase1b.sh > /tmp/hoopr.log 2>&1 &
+# Monitor: tail -f /tmp/hoopr_phase1b_runner.log
+```
+
+**3. Basketball Reference Scraper** (3-4 hours incremental, 30 hours full):
+```bash
+# Incremental (2020-2025):
+nohup bash scripts/etl/scrape_bbref_incremental.sh 2020 2025 > /tmp/bbref.log 2>&1 &
+
+# Full historical (1946-present):
+nohup bash scripts/etl/overnight_basketball_reference_comprehensive.sh > /tmp/bbref_full.log 2>&1 &
+
+# Monitor: tail -f /tmp/bbref*.log
+```
+
+**4. Kaggle Database Download** (10-15 minutes, one-time):
+```bash
+python scripts/etl/download_kaggle_basketball.py
+# Prerequisites: Install Kaggle CLI, configure API token
+# See: docs/KAGGLE_API_SETUP.md
+```
+
+**5. ESPN Gap Filler** (2-3 hours):
+```bash
+bash scripts/etl/run_espn_scraper.sh
+# Or overnight:
+nohup bash scripts/etl/run_espn_scraper.sh > /tmp/espn_gap.log 2>&1 &
+```
+
+### Monitor All Scrapers
+
+**Check status:**
+```bash
+ps aux | grep -E "scrape_nba_api|scrape_hoopr|scrape_bbref" | grep -v grep
+```
+
+**Monitor logs (all scrapers):**
+```bash
+tail -f /tmp/nba_api.log /tmp/hoopr.log /tmp/bbref.log
+```
+
+**Emergency stop (kill all):**
+```bash
+ps aux | grep -E "scrape_nba_api|scrape_hoopr|scrape_bbref" | grep -v grep | awk '{print $2}' | xargs kill -9
+```
+
+### Integration with Workflows
+
+- **Workflow #38:** Check scraper completion status at session start
+- **Workflow #41:** Validate scraper output with test suites
+- **Workflow #42:** Complete scraper execution procedures (900+ lines)
+
+---
+
 ## Scripts Summary
 
 | Script | Purpose | Status |
 |--------|---------|--------|
-| `scripts/etl/scrape_missing_espn_data.py` | ESPN scraper (2022-2025) | ✅ CREATED |
-| `scripts/etl/run_espn_scraper.sh` | ESPN scraper wrapper | ✅ CREATED |
-| `scripts/etl/scrape_nba_stats_api.py` | NBA.com Stats scraper | ⏸️ PENDING |
-| `scripts/etl/download_kaggle_database.py` | Kaggle DB downloader | ⏸️ PENDING |
-| `scripts/etl/extract_kaggle_data.py` | Kaggle DB extractor | ⏸️ PENDING |
-| `scripts/etl/scrape_sportsdataverse.py` | SportsDataverse scraper | ⏸️ PENDING |
-| `scripts/etl/scrape_basketball_reference.py` | Basketball Reference scraper | ⏸️ PENDING |
-| `scripts/etl/verify_data_quality.py` | Cross-source validation | ⏸️ PENDING |
+| `scripts/etl/scrape_nba_api_comprehensive.py` | NBA API scraper (30 seasons, 24 endpoints) | ✅ ACTIVE |
+| `scripts/etl/overnight_nba_api_comprehensive.sh` | NBA API overnight wrapper | ✅ ACTIVE |
+| `scripts/etl/scrape_hoopr_phase1_foundation.R` | hoopR Phase 1A bulk loaders | ✅ ACTIVE |
+| `scripts/etl/scrape_hoopr_phase1b_only.R` | hoopR Phase 1B league dashboards | ✅ ACTIVE |
+| `scripts/etl/run_hoopr_phase1.sh` | hoopR Phase 1 wrapper | ✅ ACTIVE |
+| `scripts/etl/run_hoopr_phase1b.sh` | hoopR Phase 1B wrapper | ✅ ACTIVE |
+| `scripts/etl/scrape_basketball_reference_complete.py` | Basketball Ref scraper | ✅ ACTIVE |
+| `scripts/etl/scrape_bbref_incremental.sh` | Basketball Ref incremental wrapper | ✅ ACTIVE |
+| `scripts/etl/overnight_basketball_reference_comprehensive.sh` | Basketball Ref full wrapper | ✅ ACTIVE |
+| `scripts/etl/download_kaggle_basketball.py` | Kaggle DB downloader | ✅ ACTIVE |
+| `scripts/etl/scrape_missing_espn_data.py` | ESPN gap filler | ✅ ACTIVE |
+| `scripts/etl/run_espn_scraper.sh` | ESPN scraper wrapper | ✅ ACTIVE |
+| ~~`scripts/etl/scrape_sportsdataverse.py`~~ | ~~SportsDataverse~~ | ❌ DEPRECATED (redundant with hoopR) |
 
 ---
 

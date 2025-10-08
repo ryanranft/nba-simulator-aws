@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
 """
+⚠️ DEPRECATED - DO NOT USE ⚠️
+
+This script is deprecated and should not be used.
+
+DEPRECATED ON: October 8, 2025
+REASON: Redundant with hoopR implementation (R-based scraper provides same data)
+ALTERNATIVE: Use scripts/etl/scrape_hoopr_phase1b_only.R (run via run_hoopr_phase1b.sh)
+
+---
+
 SportsDataverse NBA Data Scraper
 
 Scrapes NBA data using the SportsDataverse Python package.
