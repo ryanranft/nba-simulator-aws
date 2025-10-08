@@ -59,38 +59,30 @@ python scripts/etl/scrape_hoopr_nba_stats.py --season 2024 --all-endpoints
 
 ### Overnight Script
 ```bash
-bash scripts/etl/overnight_hoopr_comprehensive.sh
+# DEPRECATED - Use hoopR Phase 1B instead:
+# bash scripts/archive/deprecated/overnight_hoopr_comprehensive.sh (archived)
+# ALTERNATIVE:
+bash scripts/etl/run_hoopr_phase1b.sh
 ```
 
 ---
 
-## 3. SportsDataverse Scraper ✅ READY
+## 3. SportsDataverse Scraper ❌ ARCHIVED
 
-**File:** `scripts/etl/scrape_sportsdataverse.py`
-**Status:** Tested and functional
-**Package:** `sportsdataverse`
+**File:** ~~`scripts/archive/deprecated/scrape_sportsdataverse.py`~~ - ARCHIVED
+**Status:** Replaced by hoopR Phase 1B
+**Package:** `sportsdataverse` (still installed)
 
-### Test Results
-```
-✅ Package imports successfully
-✅ ESPN schedule loader working (500 games)
-✅ Returns Polars DataFrame
-✅ No errors detected
-```
+### Deprecation Notice
+This scraper has been archived because:
+- Redundant with hoopR functionality
+- hoopR provides better coverage (152 endpoints vs limited ESPN wrapper)
+- Use `scripts/etl/run_hoopr_phase1b.sh` instead
 
-### Features
-- Unified access to ESPN, NBA.com Stats
-- Alternative to hoopR
-- Polars-based (faster than pandas)
-
-### Usage
+### Alternative
 ```bash
-python scripts/etl/scrape_sportsdataverse.py --season 2024
-```
-
-### Overnight Script
-```bash
-bash scripts/etl/run_sportsdataverse_overnight.sh
+# Use hoopR Phase 1B league dashboards instead:
+bash scripts/etl/run_hoopr_phase1b.sh
 ```
 
 ---
@@ -176,11 +168,11 @@ python scripts/etl/download_kaggle_database.py
 |---------|--------|---------|----------|---------|--------|
 | NBA API | 🟢 Running | nba_api | 60-80 | 4-5 hrs | Fixed ✅ |
 | hoopR | 🟢 Ready | sportsdataverse | 50+ | 3-4 hrs | None |
-| SportsDataverse | 🟢 Ready | sportsdataverse | 40+ | 2-3 hrs | None |
+| ~~SportsDataverse~~ | ❌ Archived | ~~sportsdataverse~~ | ~~40+~~ | ~~2-3 hrs~~ | Archived (redundant with hoopR) |
 | Basketball Ref | 🟢 Ready | beautifulsoup4 | 47 | 30 hrs | Slow (by design) |
 | Kaggle | 🟢 Ready | kaggle | 12 | 5 min | None |
 
-**Total Features:** 209+ advanced features for ML models
+**Total Features:** 169+ advanced features for ML models (excluding archived SportsDataverse)
 
 ---
 
@@ -188,8 +180,8 @@ python scripts/etl/download_kaggle_database.py
 
 ### Today (if NBA API scraper succeeds)
 1. ✅ NBA API Comprehensive (currently running) - 4-5 hrs
-2. hoopR overnight - 3-4 hrs
-3. SportsDataverse overnight - 2-3 hrs
+2. hoopR Phase 1B overnight - 30-60 min
+3. ~~SportsDataverse overnight~~ - ARCHIVED (use hoopR instead)
 
 ### Tomorrow/Weekend (slow scrapers)
 4. Basketball Reference - 30 hrs (rate limited)
@@ -202,8 +194,8 @@ python scripts/etl/download_kaggle_database.py
 1. **Wait for NBA API scraper** to complete (~2-3 PM today)
 2. **Review logs** and validate data quality
 3. **If successful:**
-   - Start hoopR scraper overnight
-   - Start SportsDataverse scraper overnight
+   - Start hoopR Phase 1B scraper overnight
+   - ~~Start SportsDataverse scraper overnight~~ - ARCHIVED
    - Plan Basketball Ref weekend run
 4. **If errors found:**
    - Debug based on error logs
@@ -220,22 +212,19 @@ ps aux | grep scrape
 
 # Check logs
 tail -100 /tmp/nba_api_comprehensive_restart.log
-tail -100 /tmp/hoopr_comprehensive.log
-tail -100 /tmp/sportsdataverse.log
+tail -100 /tmp/hoopr_phase1b_runner.log
 
 # Count output files
 find /tmp/nba_api_comprehensive -type f -name "*.json" | wc -l
-find /tmp/hoopr_nba_stats -type f -name "*.json" | wc -l
-find /tmp/sportsdataverse -type f -name "*.json" | wc -l
+find /tmp/hoopr_phase1 -type f -name "*.csv" | wc -l
 
 # Check data size
 du -sh /tmp/nba_api_comprehensive
-du -sh /tmp/hoopr_nba_stats
-du -sh /tmp/sportsdataverse
+du -sh /tmp/hoopr_phase1
 
 # Test individual scraper
 python scripts/etl/scrape_hoopr_nba_stats.py --season 2024 --all-endpoints
-python scripts/etl/scrape_sportsdataverse.py --season 2024
+bash scripts/etl/run_hoopr_phase1b.sh  # Replaces SportsDataverse
 python scripts/etl/scrape_basketball_reference.py --season 2024 --all
 python scripts/etl/download_kaggle_database.py
 ```

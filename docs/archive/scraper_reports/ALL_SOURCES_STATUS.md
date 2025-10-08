@@ -110,19 +110,14 @@ Your project now has scrapers for **ALL 5 data sources** identified in the multi
 - ESPN wrapper + multi-sport capabilities
 - Schedule, play-by-play, box scores
 
-**Script created:** `scripts/etl/scrape_sportsdataverse.py`
+**Script created:** ~~`scripts/archive/deprecated/scrape_sportsdataverse.py`~~ - ❌ ARCHIVED (redundant with hoopR)
 
-**Status:** ✅ Package installed, ready to run
+**Status:** ⚠️ ARCHIVED - Use hoopR Phase 1B instead
 
-**To run manually:**
+**Alternative:**
 ```bash
-# Single season
-python scripts/etl/scrape_sportsdataverse.py --season 2024 --upload-to-s3
-
-# All seasons 2007-2025
-for year in {2007..2025}; do
-    python scripts/etl/scrape_sportsdataverse.py --season $year --upload-to-s3
-done
+# Use hoopR Phase 1B league dashboards instead:
+bash scripts/etl/run_hoopr_phase1b.sh
 ```
 
 **Runtime:** ~2-3 hours for all 18 seasons
@@ -172,9 +167,9 @@ done
 
 ### Ready to Run:
 
-**4. SportsDataverse**
+**4. hoopR Phase 1B (replaces SportsDataverse)**
 - Package: ✅ Installed
-- Script: `scripts/etl/scrape_sportsdataverse.py`
+- Script: `scripts/etl/run_hoopr_phase1b.sh`
 - Can start: Yes (anytime)
 
 **5. Kaggle**
@@ -258,9 +253,9 @@ done
    - Save to ~/.kaggle/kaggle.json
    - Run: `bash scripts/etl/kaggle_download.sh`
 
-4. **Run SportsDataverse (optional):**
+4. **Run hoopR Phase 1B (replaces SportsDataverse):**
    ```bash
-   nohup bash -c 'for year in {2007..2025}; do python scripts/etl/scrape_sportsdataverse.py --season $year --upload-to-s3; done' > /tmp/sportsdataverse.log 2>&1 &
+   bash scripts/etl/run_hoopr_phase1b.sh
    ```
 
 ### Future:
@@ -297,7 +292,7 @@ done
 **All scraping scripts:**
 1. `scripts/etl/scrape_basketball_reference.py` - Basketball Reference scraper
 2. `scripts/etl/scrape_nba_stats_api.py` - NBA.com Stats API scraper
-3. `scripts/etl/scrape_sportsdataverse.py` - SportsDataverse scraper
+3. ~~`scripts/archive/deprecated/scrape_sportsdataverse.py`~~ - ❌ ARCHIVED (use hoopR instead)
 4. `scripts/etl/kaggle_download.sh` - Kaggle database downloader
 
 **Batch scripts:**
