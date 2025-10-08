@@ -1,54 +1,62 @@
 # CLAUDE.md
 
-**Version:** 2.1 (Modular Documentation System + Scraper Operations)
+**Version:** 3.0 (Context-Optimized Modular System)
 **Last Updated:** October 8, 2025
 **System Status:** 8 phases (2 with enhancement plans), 40 workflows, 97+ workflow references
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides core guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Workflow Order - Follow This Sequence
+---
+
+## Quick Start - Every Session
+
+**Always read these 3 files at session start:**
+1. **CLAUDE.md** (this file, ~300 lines) - Core instructions
+2. **PROGRESS.md** (~685 lines) - Current project state
+3. **docs/README.md** (~100 lines) - Documentation index
+
+**Total: ~1,085 lines (5% context)** - Leaves 95% for actual work
+
+---
+
+## Workflow Order
 
 **See `docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md` for workflow index and execution order.**
 
-**All detailed workflows are in: `docs/claude_workflows/workflow_descriptions/`**
+**All detailed workflows:** `docs/claude_workflows/workflow_descriptions/`
 
-**System now contains 38 modular workflows:**
-- 🚀 Session Start & End workflows (#1, #14)
-- 📋 Decision & Plan Change workflows
-- 💻 Task Execution & File Creation workflows
-- 🔒 Git Commit & Push workflows (security protocols)
-- 🧪 Testing workflows (TDD, unit, integration, pre-deployment)
-- 🔧 Environment Setup & Verification workflows
-- 💰 Cost Management workflows (before creating, tracking, optimization)
-- 💾 Backup & Recovery workflows
-- 🔄 Maintenance Schedule workflows (weekly, monthly)
-- 📊 Data Validation workflows (pre-ETL, pre-simulation, pre-ML)
-- 🔍 Systematic Troubleshooting Protocol
-- 🔐 Credential Rotation workflows
-- ☁️ AWS Resource Setup workflows (Glue, RDS, EC2, SageMaker)
-- 🗄️ Database Migration workflows
-- 🔧 Makefile Quick Reference
-- 🌙 **Overnight Scraper Handoff Protocol (#38)** - NEW
+**System contains 38+ modular workflows:**
+- 🚀 Session Start & End (#1, #14)
+- 📋 Decision & Plan Change
+- 💻 Task Execution & File Creation
+- 🔒 Git Commit & Push (security protocols)
+- 🧪 Testing (TDD, unit, integration)
+- 💰 Cost Management
+- 💾 Backup & Recovery
+- 📊 Data Validation
+- 🔍 Troubleshooting Protocol
+- ☁️ AWS Resource Setup
+- 🌙 Overnight Scraper Handoff (#38)
 
 **Navigation pattern:**
 ```
 1. Read PROGRESS.md (identify current task/phase)
-2. Read docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md (find relevant workflow number)
-3. Read docs/claude_workflows/workflow_descriptions/XX_workflow_name.md (get detailed steps)
-4. Execute workflow steps
+2. Read docs/README.md (find documentation location)
+3. Read specific phase file (e.g., docs/phases/PHASE_3_DATABASE.md)
+4. Read workflows referenced in current sub-phase
+5. Execute workflow steps
 ```
 
-**Quick reference - Every session follows this order:**
+**Quick reference - Every session:**
 1. Initialize session (`session_manager.sh start`) - show output to user
 2. Orient to current state (read PROGRESS.md)
-3. **🌙 Check overnight jobs** (if "Overnight jobs running" section exists in PROGRESS.md):
+3. **🌙 Check overnight jobs** (if "Overnight jobs running" in PROGRESS.md):
+   - See docs/SCRAPER_MONITORING_SYSTEM.md
    - Follow Workflow #38: Overnight Scraper Handoff Protocol
-   - Check process status, logs, output files
-   - Document results or failure
 4. Ask about completed work
 5. Wait for user's task request
-6. Follow decision workflow (check plan, prerequisites, costs, risks)
-7. Execute task → Document outcome → Wait for confirmation
+6. Follow decision workflow
+7. Execute task → Document outcome
 8. Update PROGRESS.md → Suggest next action
 9. Follow security protocol for commits/pushes
 10. Monitor context (auto-save at 75%, warn at 90%)
@@ -57,53 +65,54 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Skipping ahead?** → Check prerequisites, warn if missing
 - **Changing the plan?** → Update PROGRESS.md first, get approval
 - **Will it cost money?** → Warn with estimate, get confirmation
-- **Could it break something?** → Explain risk, suggest backup/test approach
-- **Command fails?** → Check TROUBLESHOOTING.md, stop, ask for guidance
+- **Could it break something?** → Explain risk, suggest backup/test
+- **Command fails?** → Check TROUBLESHOOTING.md (grep first!), stop, ask
 
-**How workflows integrate with PROGRESS.md:**
+---
 
-**✅ NEW MODULAR STRUCTURE (Implemented Oct 2, 2025):**
-- PROGRESS.md is now a lightweight index (~350 lines, was 1,244 lines)
-- Individual phase files in `docs/phases/` contain detailed implementation steps
-- Phase files explicitly reference workflow numbers (e.g., "Follow workflow #24")
-- Clear hierarchy: PROGRESS.md → Phase file → Workflow file
+## Modular Documentation System
+
+**✅ Implemented October 2025:**
+- PROGRESS.md is lightweight index (~685 lines, was 1,244)
+- Phase files in `docs/phases/` contain detailed steps
+- Workflow files contain specific procedures
+- **Clear hierarchy:** PROGRESS.md → Phase file → Workflow file
 
 **Phase files:**
 - PHASE_0_DATA_COLLECTION.md (complete)
-- PHASE_1_DATA_QUALITY.md (ready to implement - multi-source integration planned)
+- PHASE_1_DATA_QUALITY.md (ready - multi-source integration planned)
 - PHASE_2_AWS_GLUE.md (complete)
 - PHASE_3_DATABASE.md (complete)
-- PHASE_4_SIMULATION_ENGINE.md (complete - advanced simulation framework planned)
+- PHASE_4_SIMULATION_ENGINE.md (complete - advanced simulation planned)
 - PHASE_5_MACHINE_LEARNING.md (complete)
 - PHASE_6_ENHANCEMENTS.md (complete)
-- PHASE_7_BETTING_ODDS.md (pending - optional future enhancement)
+- PHASE_7_BETTING_ODDS.md (pending - optional)
 
 **Benefits:**
 - ✅ Read only what you need (72% reduction in PROGRESS.md size)
-- ✅ Faster file operations (350 lines vs 1,244)
+- ✅ Faster file operations
 - ✅ Reduced context usage (90%+ savings)
-- ✅ Easier maintenance (update one phase without affecting others)
-- ✅ Scalable (easy to add new phases)
-- ✅ Clear separation of concerns
+- ✅ Easier maintenance
+- ✅ Scalable
 
 ---
 
 ## Navigation Between PROGRESS.md and Phase Files
 
-**PROGRESS.md serves as the master index** - it shows high-level status and directs to detailed phase files.
+**PROGRESS.md serves as the master index** - high-level status, directs to detailed phase files.
 
 **Navigation pattern:**
 1. Read PROGRESS.md (identify current task/phase)
-2. Follow link to specific phase file (e.g., `docs/phases/PHASE_3_DATABASE.md`)
-3. Read phase file for detailed implementation steps and workflow references
-4. Follow workflow links to `docs/claude_workflows/workflow_descriptions/XX_workflow_name.md`
+2. Follow link to specific phase file
+3. Read phase file for detailed implementation steps
+4. Follow workflow links
 5. Execute workflow steps
 
 **Always start with PROGRESS.md** to understand:
 - Current phase status (⏸️ PENDING, 🔄 IN PROGRESS, ✅ COMPLETE)
 - What was completed in previous session
 - What user wants to work on next
-- Cost implications of next steps
+- Cost implications
 
 ---
 
@@ -112,10 +121,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Before starting any phase work:**
 1. Read PROGRESS.md to identify current phase
 2. Read the full phase file (e.g., `docs/phases/PHASE_3_DATABASE.md`)
-3. Check for the "⚠️ IMPORTANT - Before Starting This Phase" note
+3. Check for "⚠️ IMPORTANT - Before Starting This Phase" note
 4. If present, ask user: "Should I add any workflows to this phase before beginning?"
-5. Review existing workflow references in the phase file
-6. Follow workflow execution order as specified in phase file
+5. Review existing workflow references
+6. Follow workflow execution order
 
 **During phase work:**
 - Reference phase file for step-by-step instructions
@@ -152,209 +161,103 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## Context Management with Modular Docs
+## Context Management
 
-**Why this matters:**
-- Old PROGRESS.md: 9,533 lines (massive context usage)
-- New system: Average 400 lines per file (90%+ context savings)
+**See docs/CONTEXT_MANAGEMENT_GUIDE.md for complete strategies.**
 
-**Context-efficient reading strategy:**
-1. **Always read PROGRESS.md first** (350 lines) - establishes orientation
-2. **Read only the relevant phase file** (400-600 lines) - get detailed steps
-3. **Read only the workflows referenced in current sub-phase** (200-400 lines each)
-4. **Don't read all phase files at once** - wait for user to specify which phase
+**Quick tips:**
+- Session start: Read CLAUDE.md + PROGRESS.md + docs/README.md only (~1,085 lines)
+- Don't read all phase files at once - read only what's needed
+- Don't read all workflows upfront - read when referenced
+- Use grep for large files (TROUBLESHOOTING.md, etc.), don't read fully
+- Commit at 75% context, not 90%
 
-**Example efficient session:**
-- Read PROGRESS.md: 350 lines
-- Read PHASE_3_DATABASE.md: 450 lines
-- Read Workflow #32 (RDS Connection): 300 lines
-- **Total: 1,100 lines vs 9,533 lines (88% savings)**
-
-**When to read multiple files:**
-- User explicitly asks to review all phases
-- Working on cross-phase documentation updates
-- Creating new workflows that span multiple phases
-- Otherwise: Read only what's needed for current task
+**Context budget examples:**
+- Minimal session: 1,085 lines (orientation only)
+- Light work: 1,985 lines (+ 1 phase + 1 workflow)
+- Moderate work: 2,585 lines (+ 1 phase + 3 workflows)
+- Heavy work: 3,485 lines (+ 2 phases + 3 workflows)
+- **Maximum recommended:** 4,000 lines (stay under 200K tokens)
 
 ---
 
 ## PROGRESS.md Update Protocol
 
 **When to update PROGRESS.md:**
-- ✅ When completing a sub-phase (update status from ⏸️ to ✅)
-- ✅ When starting a new phase (update status from ⏸️ to 🔄)
-- ✅ At session end (update "Current Session Context")
-- ❌ Don't update for minor tasks or intermediate steps
+- ✅ When completing a sub-phase (⏸️ → ✅)
+- ✅ When starting a new phase (⏸️ → 🔄)
+- ✅ At session end ("Current Session Context")
+- ❌ Don't update for minor tasks
 
-**What to update in PROGRESS.md:**
-1. Phase/sub-phase status emoji (⏸️ → 🔄 → ✅)
-2. "Started" and "Completed" dates in phase summary
+**What to update:**
+1. Phase/sub-phase status emoji
+2. "Started" and "Completed" dates
 3. "Current Session Context" section
 4. Link to newly created phase file (if applicable)
 
-**What NOT to update in PROGRESS.md:**
-- Detailed implementation steps (those belong in phase files)
-- Workflow procedures (those belong in workflow files)
-- Command outputs (those belong in COMMAND_LOG.md)
+**What NOT to update:**
+- Detailed implementation steps (belong in phase files)
+- Workflow procedures (belong in workflow files)
+- Command outputs (belong in COMMAND_LOG.md)
 
 ---
 
 ## Consistency Check Before Session End
 
-**Before running Workflow #14 (Session End), verify:**
+**Before Workflow #14 (Session End), verify:**
 - [ ] PROGRESS.md status matches actual completion state
 - [ ] Phase file status matches PROGRESS.md
-- [ ] "Current Session Context" in PROGRESS.md is updated
-- [ ] New workflow references added to phase files if needed
+- [ ] "Current Session Context" updated
+- [ ] New workflow references added if needed
 - [ ] COMMAND_LOG.md updated with session commands
-- [ ] All files saved and no unsaved changes
+- [ ] All files saved, no unsaved changes
 
 **If inconsistencies found:**
 1. Update PROGRESS.md first (master index)
 2. Then update phase files to match
-3. Then commit changes with clear message
-
----
-
-## Creating New Phase Files
-
-**If you need to create a new phase file (rare):**
-
-Use this template structure:
-```markdown
-# Phase X: [Name]
-
-**Status:** ⏸️ PENDING
-**Prerequisites:** [List]
-**Estimated Time:** [Hours]
-**Estimated Cost:** [$/month]
-
----
-
-> **⚠️ IMPORTANT - Before Starting This Phase:**
->
-> **Ask Claude:** "Should I add any workflows to this phase before beginning?"
-
----
-
-## Overview
-[Description]
-
-## Prerequisites
-[Checklist]
-
-## Implementation Steps
-
-### Sub-Phase X.1: [Name]
-**Status:** ⏸️ PENDING
-**Time Estimate:** [Hours]
-
-**Follow these workflows:**
-- Workflow #XX ([Name](../claude_workflows/workflow_descriptions/XX_name.md))
-  - **When to run:** [When]
-  - **Purpose:** [Why]
-
-[Implementation details]
-
-**Validation:**
-- [ ] [Checklist items]
-
----
-
-## Success Criteria
-[When complete checklist]
-
----
-
-## Next Steps
-[What comes after]
-
----
-
-*Last updated: [Date]*
-```
-
-**Then:**
-1. Link from PROGRESS.md
-2. Add to phase list in CLAUDE.md
-3. Create workflows as needed
-
----
-
-## File Reading Efficiency Metrics
-
-**Track your context usage:**
-
-**Inefficient approach (old way):**
-- Read all of PROGRESS.md: 9,533 lines
-- Read all workflows at once: 13,212 lines (36 workflows)
-- **Total: 22,745 lines** ❌
-
-**Efficient approach (new way):**
-- Read CLAUDE.md: 291 lines
-- Read PROGRESS.md: 380 lines
-- Read relevant phase file: 450 lines
-- Read 2-3 relevant workflows: 600-900 lines
-- **Total: 1,721-2,021 lines** ✅
-
-**Context savings: 91-92%**
-
-**Remember:**
-- Don't read files "just in case"
-- Don't read all phases when working on one
-- Don't read all workflows upfront
-- Do read incrementally as needed
+3. Then commit with clear message
 
 ---
 
 ## Session Startup Checklist
 
-**Every new session, follow this exact sequence:**
+**Every new session:**
 
-1. ✅ Read CLAUDE.md (this file) - orient to the system
-2. ✅ Read PROGRESS.md - identify current phase and last session's work
-3. ✅ Check "Current Session Context" in PROGRESS.md
-4. ✅ Ask user: "What did you complete since our last session?"
-5. ✅ Update PROGRESS.md "Current Session Context" based on user response
-6. ✅ Ask user: "What would you like to work on today?"
-7. ✅ Read relevant phase file for the task
-8. ✅ Check for "⚠️ IMPORTANT" note at top of phase file
-9. ✅ If present, ask about adding workflows before proceeding
-10. ✅ Begin work following phase file + workflow references
+1. ✅ Read CLAUDE.md (this file) - orient to system
+2. ✅ Read PROGRESS.md - identify current phase
+3. ✅ Read docs/README.md - documentation map
+4. ✅ Check "Current Session Context" in PROGRESS.md
+5. ✅ Ask user: "What did you complete since our last session?"
+6. ✅ Update PROGRESS.md "Current Session Context"
+7. ✅ Ask user: "What would you like to work on today?"
+8. ✅ Read relevant phase file for the task
+9. ✅ Check for "⚠️ IMPORTANT" note
+10. ✅ Begin work following phase file + workflows
 
 **Do NOT:**
 - ❌ Read all phase files at once
 - ❌ Read all workflows upfront
 - ❌ Start work before asking user what they completed
-- ❌ Skip the "Current Session Context" update
+- ❌ Skip "Current Session Context" update
 
 ---
 
 ## Common Pitfalls to Avoid
 
 **Context management mistakes:**
-1. ❌ Reading all 6 phase files when user wants to work on Phase 4
-   - ✅ Only read PHASE_4 file
-2. ❌ Reading workflows 1-36 at session start "just in case"
-   - ✅ Read workflows only when referenced in current sub-phase
-3. ❌ Re-reading files you already read in this session
-   - ✅ Keep track of what you've read, don't re-read unnecessarily
+1. ❌ Reading all 8 phase files when user wants Phase 4 → ✅ Only read PHASE_4
+2. ❌ Reading workflows 1-38 at session start → ✅ Read only when referenced
+3. ❌ Re-reading files in same session → ✅ Track what you've read
 
 **Documentation update mistakes:**
-1. ❌ Updating phase files with detailed implementation notes
-   - ✅ Phase files contain planning, COMMAND_LOG.md contains execution
-2. ❌ Forgetting to update "Current Session Context" at session end
-   - ✅ Always update before running Workflow #14 (Session End)
-3. ❌ Marking sub-phase complete when errors occurred
-   - ✅ Only mark complete when fully successful
+1. ❌ Updating phase files with detailed implementation notes → ✅ Use COMMAND_LOG.md
+2. ❌ Forgetting "Current Session Context" → ✅ Always update at session end
+3. ❌ Marking sub-phase complete when errors occurred → ✅ Only mark when successful
 
 **Navigation mistakes:**
-1. ❌ Starting work without checking prerequisites in phase file
-   - ✅ Always verify prerequisites before starting phase
-2. ❌ Skipping the "Should I add workflows?" question for pending phases
-   - ✅ Always ask when you see the ⚠️ IMPORTANT note
-3. ❌ Not following workflow execution order specified in phase file
-   - ✅ Follow workflows in the order listed
+1. ❌ Starting work without checking prerequisites → ✅ Always verify first
+2. ❌ Skipping "Should I add workflows?" question → ✅ Always ask for pending phases
+3. ❌ Not following workflow execution order → ✅ Follow order in phase file
 
 ---
 
@@ -362,231 +265,89 @@ Use this template structure:
 
 **Know before you read:**
 
-| File | Lines | Read Time | When to Read |
-|------|-------|-----------|--------------|
-| CLAUDE.md | ~550 | Always | Every session start |
-| PROGRESS.md | ~410 | Always | Every session start |
-| PHASE_1 | ~300 | As needed | Working on Phase 1 |
-| PHASE_2 | ~345 | As needed | Working on Phase 2 |
-| PHASE_3 | ~407 | As needed | Working on Phase 3 |
-| PHASE_4 | ~485 | As needed | Working on Phase 4 |
-| PHASE_5 | ~489 | As needed | Working on Phase 5 |
-| PHASE_6 | ~427 | As needed | Working on Phase 6 |
-| Workflow (avg) | ~300 | As needed | Referenced in phase |
+| File | Lines | Context Impact | When to Read |
+|------|-------|----------------|--------------|
+| CLAUDE.md | ~300 | Low (1%) | Every session start |
+| PROGRESS.md | ~685 | Low (2-3%) | Every session start |
+| docs/README.md | ~100 | Minimal (<1%) | Every session start |
+| Phase files | ~400-500 | Low (2%) | Working on that phase |
+| Workflow files | ~200-400 | Low (1-2%) | Referenced in phase |
+| **⚠️ TROUBLESHOOTING.md** | 1,025 | High (5%) | **Grep only, read sections** |
+| **⚠️ LESSONS_LEARNED.md** | 1,002 | High (5%) | **Only when requested** |
+| **⚠️ TEMPORAL_QUERY_GUIDE.md** | 996 | High (4-5%) | **Only when implementing** |
+| **⚠️ TESTING.md** | 862 | Medium (3-4%) | **Only when writing tests** |
+| **⚠️ STYLE_GUIDE.md** | 846 | Medium (3-4%) | **Only for style questions** |
 
-**Typical session context usage:**
-- Minimal session: 960 lines (CLAUDE.md + PROGRESS.md)
-- Light work: 1,750 lines (+ 1 phase file)
-- Moderate work: 2,350 lines (+ 1 phase + 2 workflows)
-- Heavy work: 3,200 lines (+ 2 phases + 3 workflows)
-
-**Maximum recommended:** 4,000 lines per session (stay well under 200K token limit)
-
----
-
-## Quick Reference Card
-
-**Copy this to start of every response when you're uncertain:**
-
-```
-Session checklist:
-[ ] Read CLAUDE.md ✓
-[ ] Read PROGRESS.md ✓
-[ ] Asked user what they completed
-[ ] Updated "Current Session Context"
-[ ] Asked user what they want to work on
-[ ] Read relevant phase file
-[ ] Checked for workflow recommendations
-[ ] Ready to begin work
-```
-
-**Decision points:**
-- User wants to work on [task] → Which phase? → Read that phase file
-- Phase file says "Follow workflow #X" → Read workflow #X
-- Workflow says "Log to COMMAND_LOG.md" → Use Workflow #2
-- Task complete → Update PROGRESS.md → Run Workflow #14
-- Session ending → Consistency check → Update context → Commit if needed
+**Large files (⚠️) have lazy-loading warnings** - use grep, don't read fully
 
 ---
 
 ## Emergency Recovery
 
-**If something goes wrong mid-session:**
+**See docs/EMERGENCY_RECOVERY.md for complete procedures.**
 
-### Lost context / confused about state:
+**If lost context mid-session:**
 1. Stop immediately
-2. Re-read PROGRESS.md "Current Session Context"
+2. Re-read PROGRESS.md "Current Session Context" (just this section)
 3. Re-read current phase file
 4. Ask user: "Where were we? What's the current state?"
-5. Resume from a known-good checkpoint
+5. Resume from known-good checkpoint
 
-### Made changes to wrong file:
-1. Check git status: `git status`
-2. Review changes: `git diff`
-3. If wrong, revert: `git checkout -- <file>`
-4. Apologize to user, explain what happened
-5. Start over with correct file
-
-### Updated PROGRESS.md incorrectly:
-1. Check git diff for PROGRESS.md
-2. Compare against phase file status
-3. If mismatch, revert and update correctly
-4. Always update PROGRESS.md last (after phase work)
-
-### Forgot to log commands:
-1. Recreate command history from bash history
-2. Add to COMMAND_LOG.md retroactively
-3. Note that it was added retroactively
-4. Set reminder to log commands in real-time next time
+**If context approaching 90%:**
+1. Stop reading files immediately
+2. Commit current work
+3. Update PROGRESS.md with current state
+4. End session (Workflow #14)
+5. Start fresh session with 0% context
 
 ---
 
-## Critical Workflows (See Detailed Docs)
+## Critical Workflows
 
-**Security & Git:** See `docs/SECURITY_PROTOCOLS.md`
-- Pre-commit security scans
-- Pre-push inspection workflow (automated via `scripts/shell/pre_push_inspector.sh`)
-- Credential rotation schedules
-- GitHub secret scanning setup
+**Session Operations:** See docs/CLAUDE_OPERATIONAL_GUIDE.md
+- Session initialization, progress tracking, command logging, doc triggers
 
-**Archiving & Conversation History:** See `docs/ARCHIVE_PROTOCOLS.md`
-- File deletion protocol (archive first)
-- Conversation archiving (auto at 75%/90% context)
-- Finding past conversations
-- Auto-generated commit logs
+**Context Management:** See docs/CONTEXT_MANAGEMENT_GUIDE.md
+- Strategies for extending session length, reading protocols, context budgets
 
-**Session Startup:** See `docs/SESSION_INITIALIZATION.md`
-- Run `session_manager.sh start` automatically
-- Progress tracking protocol
-- When to update documentation
-- Command logging procedures
+**Emergency Recovery:** See docs/EMERGENCY_RECOVERY.md
+- Lost context, wrong file edits, session crashes, recovery procedures
 
-**Documentation System:** See `docs/DOCUMENTATION_SYSTEM.md`
-- Documentation trigger system
-- Update schedules (manual vs automated)
-- Monthly review checklist
-- Workflow documentation system
+**Scraper Monitoring:** See docs/SCRAPER_MONITORING_SYSTEM.md
+- Overnight jobs, monitoring tools, completion analysis
 
----
+**Security & Git:** See docs/SECURITY_PROTOCOLS.md
+- Pre-commit security scans, pre-push inspection, credential rotation
 
-## 🌙 Overnight Scraper Monitoring System
+**Archiving:** See docs/ARCHIVE_PROTOCOLS.md
+- File deletion protocol, conversation archiving, finding past conversations
 
-**System Type:** Hybrid (Persistent Daemon + Session-Based Checks)
-
-The project includes a comprehensive monitoring system for long-running overnight scrapers. This system ensures scraper completions are never missed and provides intelligent context preservation.
-
-### Architecture
-
-**Persistent Daemon:**
-- `scripts/monitoring/scraper_watcher_daemon.sh` - Runs in background, monitors all scrapers
-- Sends desktop notifications (macOS) when scrapers complete
-- Creates alert files in `/tmp/scraper_alerts/` for completed scrapers
-- Tracks reminder files in `/tmp/scraper_reminders/` for running scrapers
-
-**Session-Based Tools:**
-- `scripts/monitoring/check_scraper_alerts.sh` - Check for completed scrapers at session start
-- `scripts/monitoring/analyze_scraper_completion.sh` - Analyze completion and recommend actions
-- `scripts/monitoring/save_work_context.sh` - Preserve current work before checking scrapers
-
-### Quick Reference Commands
-
-**Check for completed scrapers:**
-```bash
-bash scripts/monitoring/check_scraper_alerts.sh
-```
-
-**Analyze specific completion:**
-```bash
-bash scripts/monitoring/analyze_scraper_completion.sh /tmp/scraper_alerts/<scraper>.alert
-```
-
-**Save current work context:**
-```bash
-bash scripts/monitoring/save_work_context.sh "Task description" "Current step" "Next step"
-```
-
-**Launch daemon (auto-started by launch_scraper.sh):**
-```bash
-nohup bash scripts/monitoring/scraper_watcher_daemon.sh > /tmp/scraper_daemon.log 2>&1 &
-```
-
-### Session Start Workflow Integration
-
-**When starting a new Claude Code session, always:**
-
-1. **Check PROGRESS.md** for "Overnight jobs running" section
-2. **If overnight jobs were running:**
-   - Run: `bash scripts/monitoring/check_scraper_alerts.sh`
-   - Review any completed scrapers
-   - For each completion, run: `bash scripts/monitoring/analyze_scraper_completion.sh <alert_file>`
-   - Follow recommendations (COMPLETE or INVESTIGATE)
-   - Clear alerts when reviewed: `rm /tmp/scraper_alerts/*.alert`
-3. **Document results** in PROGRESS.md or relevant phase file
-4. **Resume regular work** after scraper check
-
-### Completion Analysis Framework
-
-The `analyze_scraper_completion.sh` script provides two recommendations:
-
-**COMPLETE (No action needed):**
-- ✅ No errors detected in log
-- ✅ Completion marker found in log
-- Next steps: Verify S3 uploads, clear alert
-
-**INVESTIGATE (Review required):**
-- ⚠️ Errors found in log OR missing completion marker
-- Actions: Review log, check error details, decide if redeployment needed
-
-### File Locations
-
-**Runtime directories:**
-- `/tmp/scraper_alerts/` - Alert files for completed scrapers
-- `/tmp/scraper_reminders/` - Reminder files for running scrapers
-- `/tmp/claude_work_context.json` - Saved work context
-
-**Log files:**
-- `/tmp/scraper_daemon.log` - Daemon monitoring log
-- `/tmp/<scraper_name>.log` - Individual scraper logs
-
-### Best Practices
-
-**For Claude:**
-1. Always check alerts at session start if PROGRESS.md mentions overnight jobs
-2. Save work context before switching to scraper check (preserve current task)
-3. Analyze completions systematically (don't just clear alerts)
-4. Document outcomes in PROGRESS.md
-
-**For Users:**
-1. Let daemon run continuously (won't interfere with other work)
-2. Clear alerts after reviewing: `rm /tmp/scraper_alerts/*.alert`
-3. Check daemon log if notifications aren't appearing: `tail -f /tmp/scraper_daemon.log`
-
-**Related Workflows:**
-- Workflow #38: Overnight Scraper Handoff Protocol (complete session start workflow)
-- Workflow #40: Scraper Operations Complete (launching and monitoring scrapers)
+**Documentation System:** See docs/DOCUMENTATION_SYSTEM.md
+- Documentation triggers, update schedules, monthly review
 
 ---
 
 ## Instructions for Claude
 
-**Session Initialization & Daily Workflows:** See `docs/CLAUDE_SESSION_INIT.md`
+**Complete operational guides:**
+- **docs/CLAUDE_OPERATIONAL_GUIDE.md** - Session init, progress tracking, command logging
+- **docs/CONTEXT_MANAGEMENT_GUIDE.md** - Context optimization strategies
+- **docs/EMERGENCY_RECOVERY.md** - Recovery procedures
 
-**Progress Tracking:** See `docs/CLAUDE_PROGRESS_TRACKING.md`
-
-**Command Logging:** See `docs/CLAUDE_COMMAND_LOGGING.md`
-
-**Documentation Quick Reference:** See `docs/CLAUDE_DOCUMENTATION_QUICK_REF.md`
+---
 
 ## Project Overview
 
 **This is a temporal panel data system, not a traditional sports analytics project.**
 
-See `docs/PROJECT_VISION.md` for the authoritative project vision and goals.
+See `docs/PROJECT_VISION.md` for authoritative project vision and goals.
 See `README.md` for quick start, architecture, and current status.
 
 **Core capability:** Query cumulative NBA statistics at any exact moment in time with millisecond precision.
 
 **Example:** "What were Kobe Bryant's career statistics at exactly 7:02:34.56 PM CT on June 19, 2016?"
+
+---
 
 ## Essential Setup
 
@@ -598,6 +359,8 @@ conda activate nba-aws
 cd /Users/ryanranft/nba-simulator-aws
 ```
 
+---
+
 ## Critical Paths
 
 See `docs/SETUP.md` for complete project paths and directory structure.
@@ -607,9 +370,13 @@ See `docs/SETUP.md` for complete project paths and directory structure.
 - **S3 Bucket:** `s3://nba-sim-raw-data-lake` (146,115 files)
 - **Archives:** `~/sports-simulator-archives/nba/`
 
+---
+
 ## Architecture
 
 See `README.md` for complete 5-phase pipeline architecture and key architectural decisions.
+
+---
 
 ## Git & GitHub Configuration
 
@@ -617,23 +384,19 @@ See `QUICKSTART.md` for Git commands and `docs/SECURITY_PROTOCOLS.md` for comple
 
 **CRITICAL - Before ANY Git Operation:**
 
-- **Before commit:** Run security scan (see `docs/SECURITY_PROTOCOLS.md` for scan commands and protocols)
+- **Before commit:** Run security scan (see `docs/SECURITY_PROTOCOLS.md`)
 - **Before push:** Run `scripts/shell/pre_push_inspector.sh full` (7-step automated workflow)
 - **NEVER commit without security scan** - check for AWS keys, secrets, IPs, passwords
 - **NEVER push without user approval** - always ask "Ready to push to GitHub?"
 - **If hook blocks commit/push:** Show user flagged lines, explain findings, get explicit bypass approval
 
-See `docs/SECURITY_PROTOCOLS.md` for:
-- Complete security scan bash commands
-- Whitelist patterns (safe vs unsafe)
-- Security check protocol (step-by-step)
-- Pre-push inspection workflow (repository cleanup)
-- Credential rotation schedules
-- GitHub secret scanning setup
+---
 
 ## Common Commands
 
 See `QUICKSTART.md` for all common commands (S3, database, AWS resources, daily workflow).
+
+---
 
 ## Testing Quick Reference
 
@@ -653,83 +416,34 @@ pytest tests/test_temporal_queries.py -v
 
 **Total runtime:** 2-5 minutes
 
-**Related Documentation:**
-- Workflow #41: Testing Framework (detailed procedures)
-- TESTING.md: Testing philosophy and strategy
-
 ---
 
 ## Scraper Operations Quick Reference
 
-**Complete Guide:** See Workflow #42 (`docs/claude_workflows/workflow_descriptions/42_scraper_management.md`) for comprehensive scraper documentation.
+**Complete Guide:** See docs/SCRAPER_MANAGEMENT.md
 
-### Launch Scrapers
-
-**Interactive Launcher (Recommended):**
+**Launch Scrapers:**
 ```bash
-bash scripts/monitoring/launch_scraper.sh
+bash scripts/monitoring/launch_scraper.sh  # Interactive
 ```
 
-**Direct Commands:**
+**Monitor Progress:**
 ```bash
-# Basketball Reference (incremental, resume-capable)
-bash scripts/etl/scrape_bbref_incremental.sh 2020 2025
-
-# hoopR Phase 1B (league dashboards)
-bash scripts/etl/run_hoopr_phase1b.sh
-
-# NBA API (advanced stats - ⚠️ high error rate)
-bash scripts/etl/overnight_nba_api_comprehensive.sh
-```
-
-### Monitor Progress
-
-```bash
-# Quick status (single update)
-bash scripts/monitoring/monitor_scrapers_inline.sh
-
-# Live tracking (10 updates, conversation-friendly)
-bash scripts/monitoring/monitor_scrapers_inline.sh --iterations 10
-
-# Full dashboard (auto-refreshing)
-bash scripts/monitoring/monitor_scrapers.sh --watch
-
-# View logs
-tail -f /tmp/bbref_incremental_2020-2025.log
-tail -f /tmp/hoopr_phase1b.log
-```
-
-### Check Progress
-
-```bash
-# Completion markers
-ls /tmp/basketball_reference_incremental/*.complete | wc -l
-
-# Output files
-find /tmp/hoopr_phase1 -name "*.csv" | wc -l
-
-# S3 verification
-aws s3 ls s3://nba-sim-raw-data-lake/basketball_reference/
-```
-
-### Stop Scrapers
-
-```bash
-# Find running scrapers
-ps aux | grep -E "(scrape_|run_hoopr)" | grep -v grep
-
-# Kill specific scraper
-kill <PID>
+bash scripts/monitoring/monitor_scrapers_inline.sh --iterations 10  # Live tracking
 ```
 
 **Related Workflows:**
-- **Workflow #38:** [Overnight Scraper Handoff Protocol](docs/claude_workflows/workflow_descriptions/38_overnight_scraper_handoff.md)
-- **Workflow #39:** [Scraper Monitoring Automation](docs/claude_workflows/workflow_descriptions/39_scraper_monitoring_automation.md)
-- **Workflow #40:** [Complete Scraper Operations Guide](docs/claude_workflows/workflow_descriptions/40_scraper_operations_complete.md)
+- **Workflow #38:** Overnight Scraper Handoff Protocol
+- **Workflow #39:** Scraper Monitoring Automation
+- **Workflow #40:** Complete Scraper Operations Guide
+
+---
 
 ## Data Structure
 
 See `docs/DATA_STRUCTURE_GUIDE.md` for complete S3 bucket layout, data extraction strategy, and file characteristics.
+
+---
 
 ## Data Source Baselines
 
@@ -737,15 +451,7 @@ See `docs/DATA_SOURCE_BASELINES.md` for verified baseline statistics from each d
 
 **Purpose:** Cross-validation and quality checks when integrating multiple sources.
 
-**Current baselines:**
-- **Kaggle:** 3.8M possessions, 127.5 avg/game, 41% undercounting (acceptable for ML)
-- **pbpstats (reference):** ~220 possessions/game (ground truth)
-
-**Use when:**
-- Adding new data sources (verify against existing baselines)
-- Re-scraping data (ensure consistency)
-- Multi-source validation (check for discrepancies)
-- Investigating data quality issues (compare to known-good stats)
+---
 
 ## Important Notes
 
@@ -771,9 +477,13 @@ See `PROGRESS.md` for complete cost breakdowns.
 
 See `docs/SECURITY_PROTOCOLS.md` for complete security procedures.
 
+---
+
 ## Next Steps
 
 See `PROGRESS.md` for detailed phase-by-phase implementation plan with time estimates, cost breakdowns, and step-by-step instructions.
+
+---
 
 ## Development Workflow
 
