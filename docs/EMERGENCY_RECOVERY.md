@@ -226,7 +226,7 @@ Session orientation checklist:
    - Don't try to guess fix
 
 4. **After resolving:**
-   - Consider adding to TROUBLESHOOTING.md (see CLAUDE_SESSION_INIT.md)
+   - Consider adding to TROUBLESHOOTING.md (see CLAUDE_OPERATIONAL_GUIDE.md)
    - Resume workflow from step that failed
 
 ---
