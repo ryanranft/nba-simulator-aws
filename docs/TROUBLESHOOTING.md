@@ -1,5 +1,16 @@
 # Troubleshooting Guide
 
+> **⚠️ LARGE FILE WARNING (1,025 lines)**
+>
+> **For Claude Code:** Only read this file when:
+> - User explicitly requests troubleshooting information
+> - Debugging specific error mentioned in this guide
+> - Searching for known solution to current error
+>
+> **DO NOT read at session start** - this file is a reference, not initialization documentation.
+>
+> **Best practice:** Use `grep -i "error keyword" docs/TROUBLESHOOTING.md` to find relevant section, then read only that section.
+
 <!-- AUTO-UPDATE TRIGGER: After solving new error that took >10 minutes OR has non-obvious solution -->
 <!-- LAST UPDATED: 2025-10-01 -->
 <!-- FREQUENCY: As needed (when encountering new errors) -->

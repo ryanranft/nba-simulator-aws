@@ -1,5 +1,14 @@
 # Lessons Learned - NBA Simulator AWS Project
 
+> **⚠️ LARGE FILE WARNING (1,002 lines)**
+>
+> **For Claude Code:** Only read this file when:
+> - User explicitly requests historical context or lessons learned
+> - Need to understand why certain decisions were made
+> - Researching how errors were solved in the past
+>
+> **DO NOT read at session start** - this file is historical reference only.
+
 <!-- AUTO-UPDATE TRIGGER: After encountering and solving any significant error or design decision -->
 <!-- LAST UPDATED: 2025-10-01 -->
 
