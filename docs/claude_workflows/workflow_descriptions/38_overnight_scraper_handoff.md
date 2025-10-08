@@ -95,22 +95,31 @@ EOF
 
 ## Start of Next Session (Morning After)
 
-### 1. Check Scraper Status
+### 1. Generate Data Collection Inventory
 
-**Is it still running?**
+**Run automated inventory tool:**
 ```bash
-ps aux | grep [PID]
+bash scripts/monitoring/data_collection_status.sh markdown
 ```
 
-**Check log for progress:**
+**This generates `docs/DATA_COLLECTION_INVENTORY.md` with:**
+- S3 file counts and sizes for all data sources
+- Active scraper PIDs
+- Last activity timestamps
+- Failed scraper error counts
+- Recommended next steps
+
+**Quick manual check (if needed):**
 ```bash
+# Check specific scraper PID
+ps aux | grep [PID]
+
+# Check log for progress
 tail -100 [LOG_FILE]
 # Or for specific patterns:
 tail -500 [LOG_FILE] | grep -E "(Progress|Error|Complete|Season)"
-```
 
-**Check output files:**
-```bash
+# Check output files
 ls -lh [OUTPUT_DIR] | tail -20
 # Count files created:
 find [OUTPUT_DIR] -type f -name "*.json" | wc -l

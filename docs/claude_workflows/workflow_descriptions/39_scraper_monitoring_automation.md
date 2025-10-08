@@ -21,6 +21,20 @@
 
 ## Quick Start
 
+### Data Collection Inventory (Recommended)
+```bash
+# Generate comprehensive data source inventory
+bash scripts/monitoring/data_collection_status.sh markdown
+# Creates: docs/DATA_COLLECTION_INVENTORY.md
+
+# Output includes:
+# - S3 file counts and sizes for all sources (ESP N, hoopR, Basketball Reference, etc.)
+# - Active scraper PIDs
+# - Last activity timestamps
+# - Failed scraper error counts
+# - Recommended next steps
+```
+
 ### Single Status Check
 ```bash
 cd /Users/ryanranft/nba-simulator-aws

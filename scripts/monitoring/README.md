@@ -16,7 +16,34 @@ This directory contains monitoring and automation scripts for tracking long-runn
 
 ### Core Monitoring Scripts
 
-#### 1. `monitor_scrapers.sh`
+#### 1. `data_collection_status.sh` ⭐ NEW
+**Purpose:** Automated data collection inventory across all sources
+**Usage:**
+```bash
+bash scripts/monitoring/data_collection_status.sh markdown
+```
+
+**Output:**
+- Auto-generates `docs/DATA_COLLECTION_INVENTORY.md`
+- S3 file counts and sizes for all data sources (ESPN, hoopR, Basketball Reference, NBA API, Kaggle, SportsDataverse)
+- Active scraper PIDs
+- Last activity timestamps
+- Failed scraper error counts
+- Recommended next steps
+
+**Features:**
+- Real-time S3 integration via AWS CLI
+- Automated markdown report generation
+- Integrated with Workflow #38 (Overnight Scraper Handoff)
+- Detects failed scrapers by error count
+
+**When to use:**
+- At session start (check overnight job results)
+- After completing scraper runs
+- Before launching new scrapers (check existing data)
+- When generating status reports
+
+#### 2. `monitor_scrapers.sh`
 **Purpose:** Check status of all running scraper processes
 **Usage:**
 ```bash
@@ -25,14 +52,14 @@ bash scripts/monitoring/monitor_scrapers.sh
 
 **Output:** Process status, log locations, progress indicators
 
-#### 2. `launch_scraper.sh`
+#### 3. `launch_scraper.sh`
 **Purpose:** Launch scrapers with proper nohup and logging
 **Usage:**
 ```bash
 bash scripts/monitoring/launch_scraper.sh <script_name> [args]
 ```
 
-#### 3. `analyze_scraper_completion.sh`
+#### 4. `analyze_scraper_completion.sh`
 **Purpose:** Analyze scraper output and detect completion/errors
 **Usage:**
 ```bash
@@ -44,7 +71,7 @@ bash scripts/monitoring/analyze_scraper_completion.sh
 - Error patterns in logs
 - Completion markers
 
-#### 4. `check_scraper_alerts.sh`
+#### 5. `check_scraper_alerts.sh`
 **Purpose:** Check for scraper failures and generate alerts
 **Usage:**
 ```bash
@@ -166,6 +193,7 @@ bash scripts/monitoring/test_monitoring_system.sh
 ```
 scripts/monitoring/
 ├── README.md (this file)
+├── data_collection_status.sh        # ⭐ NEW: Automated inventory system
 ├── monitor_scrapers.sh              # Status check (manual)
 ├── monitor_scrapers_inline.sh       # Status check (automated)
 ├── launch_scraper.sh                # Launch wrapper

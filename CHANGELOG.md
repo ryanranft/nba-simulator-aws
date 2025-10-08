@@ -7,9 +7,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Data Collection Inventory System
+
+**Date:** October 8, 2025 (4:00 PM)
+
+**Feature:** Automated data collection monitoring and inventory system
+
+**New Files:**
+1. **`scripts/monitoring/data_collection_status.sh`** (10.2 KB, executable)
+   - Automated inventory generator for all data sources
+   - Real-time S3 statistics (file counts, sizes)
+   - Active scraper PID detection
+   - Failed scraper diagnostics (error count)
+   - Auto-generates `docs/DATA_COLLECTION_INVENTORY.md`
+
+2. **`scripts/archive/README.md`** (2.7 KB)
+   - Documents 7 deprecated scripts (4 Python, 3 shell)
+   - Maps archived files to active alternatives
+   - Deprecation policy and restoration procedures
+
+3. **`docs/DATA_COLLECTION_INVENTORY.md`** (auto-generated)
+   - Live data source status dashboard
+   - S3 metrics for all 6 data sources
+   - Recommended next steps
+
+**Modified Files:**
+1. **`docs/claude_workflows/workflow_descriptions/38_overnight_scraper_handoff.md`**
+   - Integrated data collection inventory tool
+   - Streamlined session handoff protocol
+
+2. **`scripts/monitoring/README.md`**
+   - Added `data_collection_status.sh` documentation
+   - Updated file inventory list
+
+3. **`docs/SESSION_HANDOFF_20251008.md`**
+   - Documented overnight scraper results
+   - hoopR Phase 1B complete (218 files, 5.24 GB in S3)
+   - Basketball Reference complete (42 files)
+   - NBA API failing (5,111 errors, rate limiting)
+
+4. **`PROGRESS.md`**
+   - Updated Current Session Context with Oct 8 work
+
+**Integration:**
+- Workflow #38 (Overnight Scraper Handoff) now uses automated inventory
+- Monitoring infrastructure complete with data collection tracking
+
+**Benefits:**
+- ✅ Real-time data source visibility
+- ✅ Automated overnight job status reporting
+- ✅ Failed scraper diagnostics
+- ✅ Complete archive documentation
+
+---
+
 ### Changed - ETL Script Cleanup & Organization
 
-**Date:** October 8, 2025
+**Date:** October 8, 2025 (Morning)
 
 **Phase 3: Workspace Organization & Monitoring Infrastructure**
 
