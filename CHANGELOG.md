@@ -7,9 +7,82 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Data Catalog Auto-Update Utilities
+
+**Date:** October 9, 2025 (~2:00 PM - Session 2/3 Complete)
+
+**Feature:** Production-ready utilities for automatic DATA_CATALOG.md updates and ESPN database comparisons
+
+**Session Progress:** 6 of 11 tasks complete (55%) in Data Catalog Consolidation project
+
+**Files Created:**
+1. **`scripts/utils/update_data_catalog.py`** (483 lines)
+   - Auto-updates DATA_CATALOG.md from ESPN local SQLite database
+   - Updates ESPN statistics (games, events, coverage by era)
+   - Updates hoopR progress tracking (seasons complete percentage)
+   - Verification mode checks catalog consistency across sections
+   - Dry-run mode for testing changes before applying
+   - Ready for scraper integration (call at end of scraper runs)
+
+2. **`scripts/utils/compare_espn_databases.py`** (518 lines)
+   - Fast summary comparison using aggregate statistics only
+   - Detailed game-by-game comparison (--detailed flag)
+   - Export missing games to CSV (--export-missing flag)
+   - Optimized for 14.1M event database (query timeouts handled)
+
+3. **`/tmp/espn_database_comparison_report.md`** (Analysis report)
+   - Comprehensive ESPN data quality analysis
+   - Coverage by era breakdown
+   - RDS optimization recommendations
+   - Production readiness assessment
+
+**Key Findings from ESPN Database Analysis:**
+- **Total Coverage:** 44,826 games (1993-2025), 31,241 with PBP (69.7%)
+- **Total Events:** 14,114,618 play-by-play events
+- **Early Digital Era (1993-2001):** 11,210 games, 5.3% PBP coverage, ~22 events/game (LOW quality - metadata only)
+- **Transition Era (2002-2010):** 14,464 games, 86.9% PBP coverage, ~382 events/game (MEDIUM quality)
+- **Modern Era (2011-2025):** 19,152 games, 94.4% PBP coverage, ~435 events/game (HIGH quality - **production ready**)
+
+**RDS Performance Issue Identified:**
+- `COUNT(DISTINCT game_id)` query on temporal_events table times out (>3 minutes)
+- Root cause: Missing index on game_id column (14.1M rows)
+- **Solution:** `CREATE INDEX idx_temporal_events_game_id ON temporal_events(game_id);`
+- **Expected improvement:** 10-100x faster for game-based aggregations
+
+**Integration Plan:**
+- Scrapers call `update_data_catalog.py --source <name>` on completion
+- Session startup displays data freshness ("ESPN: current, hoopR: 21% complete")
+- Daily automation runs catalog updates
+- Workflow #1 enhanced with data catalog checks
+
+**Git Status:**
+- 2 commits created and pushed to GitHub
+- Commit 846f935: feat(data): add catalog auto-updater and database comparison utilities
+- Commit 8ccd47c: docs(progress): update session context
+
+**Remaining Tasks (4 of 11):**
+1. ⏸️ Analyze data gaps and source mapping
+2. ⏸️ Create daily ESPN update automation
+3. ⏸️ Integrate auto-updates into scraper workflows
+4. ⏸️ Update session startup workflow for data checks
+
+**Benefits:**
+- ✅ Single command updates DATA_CATALOG.md automatically
+- ✅ Consistent statistics across all documentation
+- ✅ Fast database comparison without fetching 31K+ game IDs
+- ✅ Production-ready data quality assessment
+- ✅ Clear RDS optimization path (index creation)
+
+**Next Session:**
+- Continue with remaining 4 automation/integration tasks
+- Or add RDS index and re-run detailed comparison
+- Estimated 2-3 hours to complete all 11 tasks
+
+---
+
 ### Added - ESPN Data Catalog Consolidation & Single Source of Truth System
 
-**Date:** October 9, 2025 (1:00 PM - Session End)
+**Date:** October 9, 2025 (1:00 PM - Session 1/3 Complete)
 
 **Feature:** Comprehensive data catalog system with auto-updating documentation and ESPN local database analysis
 
