@@ -216,13 +216,22 @@ Offset: 27ms (within acceptable tolerance)
 **Collection Date:** October 2025
 **Records:** 46,595 games, 6.78M play-by-play rows, 408K player stats
 
-### Source 2: hoopR (ESPN Bulk Loading) 🔄 IN PROGRESS
+### Source 2: hoopR (ESPN Bulk Loading) ✅ COMPLETE (DISCOVERED)
 **Coverage:** 2002-2025 (24 seasons)
-**Data:** ESPN data via sportsdataverse package (bulk loading approach)
-**Precision:** Second-level
-**Status:** 🔄 Phase 1B in progress (21% complete, ~48 hours remaining)
-**Expected Output:** 10K-15K files, 5-8 GB, 2-3M records
-**Phase 1A Complete:** 96 files, 2.5 GB (play-by-play, box scores, schedule)
+**Data:** Play-by-play, player box scores, team box scores, schedules
+**Precision:** Second-level (game clock)
+**Status:** ✅ 57.8 GB ALREADY COLLECTED LOCALLY (discovered October 2025)
+**Location:**
+- Primary: `/Users/ryanranft/Projects/hoopR-nba-raw` (43 GB - 29,688 JSON files)
+- Structured: `/Users/ryanranft/Projects/hoopR-nba-data` (8.6 GB - 235 files)
+- Analysis-ready: `/Users/ryanranft/Desktop/sports_data_backup/hoopR` (6.2 GB - 120 parquet files)
+**Records Discovered:**
+- Play-by-play: ~12-15 million events (24 seasons, 63 columns)
+- Player box scores: ~750,000-800,000 (24 seasons, 56 columns)
+- Team box scores: ~60,000-65,000 (24 seasons, 56 columns)
+- Schedules: ~30,000-31,000 games (24 seasons, 77 columns)
+**Schema Richness:** 63-77 columns per data type (more comprehensive than ESPN)
+**Next Steps:** Upload to S3 (6.2 GB parquet), load to RDS, cross-validate with ESPN (2002-2025 overlap)
 
 ### Source 3: NBA.com Stats API 📋 PLANNED
 **Coverage:** 1996-2025 (30 seasons)
