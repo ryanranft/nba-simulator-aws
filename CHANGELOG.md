@@ -7,6 +7,125 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Comprehensive Data Acquisition Planning & Integration
+
+**Date:** October 9, 2025 (~9:00 PM - 11:45 PM)
+
+**Feature:** Complete 10-week data acquisition strategy covering all 6 NBA data sources for 79 seasons (1946-2025)
+
+**New Files:**
+1. **`docs/DATA_COLLECTION_PLAN_UPDATED.md`** (~1,000 lines)
+   - Foundation requirements aligned with Progressive Fidelity Simulator architecture
+   - 3 simulation eras: Early (1946-1960), Digital (1960-1990), Modern (1990-2025)
+   - Phase 1 blocking requirements: possessions, team_season_stats, venues tables
+   - 40+ engineered features required for ML model training
+   - Model performance targets: RMSE < 0.55, R² > 0.25, PPP error < 0.03
+
+2. **`docs/COMPLETE_DATA_ACQUISITION_PLAN.md`** (~2,600 lines)
+   - Production-ready 10-week execution plan for all 6 data sources
+   - Massive scope: 500+ GB raw data, 700K-900K files, 48-62M records, 500-800 hours scraping
+   - **6 data sources detailed:**
+     - SOURCE 1: ESPN API ✅ COMPLETE (146,115 files, 119 GB)
+     - SOURCE 2: hoopR 🔄 IN PROGRESS (21% complete, ~48 hrs remaining)
+     - SOURCE 3: NBA.com Stats API (430-505 hours planned, 269-289 features)
+     - SOURCE 4: Basketball Reference (67-114 hours, 1946-1999 historical)
+     - SOURCE 5: Kaggle Database (0.5 hours, 17 tables, one-time download)
+     - SOURCE 6: SportsDataverse (SKIPPED - redundant with hoopR)
+   - **Strategic sections added:**
+     - 💰 Cost management ($55-122/month, within $150 budget)
+     - ⚠️ Risk mitigation (10 risks identified, 5 detailed strategies with code)
+     - 🧪 Testing strategy (50+ tests: unit, integration, E2E, CI/CD)
+   - **Includes:** 10-week schedule, cross-source ID mapping, deduplication rules, quality scoring, parallel scrapers, monitoring dashboards
+
+3. **`docs/claude_workflows/workflow_descriptions/48_integrated_data_pipeline.md`** (~1,085 lines)
+   - **Workflow #48:** Integrated Data Pipeline
+   - Single unified workflow combining 5 phases:
+     - Phase 1: Data inventory (Workflows #45, #47)
+     - Phase 2: Gap analysis (Workflow #46)
+     - Phase 3: Collection plan generation
+     - Phase 4: Scraper execution (Workflows #40, #42)
+     - Phase 5: Data validation (Workflow #41)
+   - **5 modes:** `status`, `plan`, `collect`, `validate`, `full`
+   - **Use cases:** Weekly updates, gap filling, QA checks, overnight scraper setup
+
+4. **`scripts/monitoring/data_pipeline_manager.sh`** (874 lines, executable)
+   - Master orchestration script for integrated data pipeline
+   - Implements all 5 modes from Workflow #48
+   - Graceful error handling (continues on missing scripts)
+   - Integration with existing inventory and scraper workflows
+
+5. **`docs/archive/session_handoffs/2025-10-09_comprehensive_data_acquisition_planning.md`**
+   - Complete session handoff document with next session checklist
+   - Critical table verification commands (possessions, team_season_stats, venues)
+   - hoopR completion workflow (validate → upload → load)
+   - Week 1 data collection launch instructions (NBA API Modern + Basketball Reference)
+
+**Modified Files:**
+1. **`PROGRESS.md`**
+   - Updated "Current Session Context" with comprehensive summary
+   - Documented both planning documents created
+   - Listed key architectural learnings from Progressive Fidelity guide
+   - Identified next immediate actions and blocking requirements
+
+2. **`docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md`**
+   - Added Workflow #48 to quick workflow finder
+   - Updated workflow statistics: 47 → 48 workflows
+   - Added Batch 12 description with 5-phase integration details
+
+3. **`.env.example`** (security improvement)
+   - Removed old RDS credential placeholders
+   - Added documentation for external credentials file
+   - Includes usage examples for bash and Python scripts
+
+4. **Database/ETL Scripts** (8 files - security improvement)
+   - Updated all scripts to load credentials from external file:
+     - `scripts/db/create_stored_procedures.py`
+     - `scripts/db/create_temporal_indexes.py`
+     - `scripts/db/create_temporal_tables.py`
+     - `scripts/db/load_espn_events.py`
+     - `scripts/db/load_kaggle_to_rds.py`
+     - `scripts/etl/create_possession_panel_from_espn.py`
+     - `scripts/ml/generate_features.py`
+   - All now use: `load_dotenv('/Users/ryanranft/nba-sim-credentials.env')`
+   - Added `sslmode='require'` to RDS connections for security
+
+**Data Inventory Compiled:**
+- **S3 Bucket:** 165,614 files, 118.4 GiB across 14 prefixes
+- **RDS Database:** 16 tables, 7.2 GB total, temporal_events largest (5.6 GB, 14.1M rows)
+- **hoopR Scraper:** 21% complete (5/24 seasons), ~48 hours remaining
+
+**Key Architectural Learnings:**
+- **Hierarchical Temporal Modeling:** Multiple data granularities at different temporal resolutions
+- **Era-Adaptive Transfer Learning:** ML models learn from one era, transfer knowledge to others
+- **Multi-Source Data Integration:** Combine 6 sources with source priority deduplication
+- **Cross-Source ID Mapping:** Essential for linking game_id, player_id, team_id across sources
+- **Data Quality Scoring:** 0-100 score calculation with precision levels (millisecond → game)
+
+**Critical Blocking Requirements Identified:**
+- ⚠️ **possessions table** - Must exist before ML training can begin
+- ⚠️ **team_season_stats table** - Required for advanced feature engineering
+- ⚠️ **venues table** - Needed for elevation and location-based features
+
+**Integration:**
+- Workflow #48 combines 6 existing workflows into single unified pipeline
+- Reduces 7-step manual process to single command: `data_pipeline_manager.sh full`
+- User experience improvement: inventory → gaps → plan → collect → validate (automated)
+
+**Benefits:**
+- ✅ Complete production-ready acquisition strategy (79 seasons, 6 sources)
+- ✅ Cost-managed approach ($55-122/month within $150 budget)
+- ✅ Risk mitigation with checkpoint recovery and rate limiting
+- ✅ Comprehensive testing strategy (50+ tests planned)
+- ✅ Integrated data pipeline workflow for streamlined execution
+- ✅ Security improvements (external credentials, SSL connections)
+- ✅ Clear next session checklist with actionable commands
+
+**Session Type:** Pure strategic planning - no code execution, no scrapers launched, no database changes
+
+**Next Session Priority:** Verify critical RDS tables exist, complete hoopR validation when scraper finishes, launch Week 1 data collection (NBA API Modern + Basketball Reference scrapers)
+
+---
+
 ### Added - Data Collection Inventory System
 
 **Date:** October 8, 2025 (4:00 PM)
