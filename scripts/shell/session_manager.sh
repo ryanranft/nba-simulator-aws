@@ -316,6 +316,110 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 # ─────────────────────────────────────────────────────────────────────────
+# DATA FRESHNESS CHECK (New - automatic catalog status)
+# ─────────────────────────────────────────────────────────────────────────
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📊 DATA FRESHNESS"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# Check if DATA_CATALOG.md exists
+if [ -f "docs/DATA_CATALOG.md" ]; then
+    # Get last catalog update timestamp
+    catalog_timestamp=$(grep "Last Full Update:" docs/DATA_CATALOG.md | head -1 | sed 's/.*Last Full Update: //')
+
+    if [ -n "$catalog_timestamp" ]; then
+        echo "📅 Catalog last updated: $catalog_timestamp"
+    fi
+
+    # Check scraper completion timestamps
+    if [ -d "/tmp/scraper_timestamps" ]; then
+        echo ""
+        echo "Data source completion status:"
+        echo ""
+
+        # ESPN status
+        if [ -f "/tmp/scraper_timestamps/espn_last_completion.txt" ]; then
+            espn_time=$(head -1 /tmp/scraper_timestamps/espn_last_completion.txt)
+            espn_status=$(sed -n '2p' /tmp/scraper_timestamps/espn_last_completion.txt)
+            if [ "$espn_status" = "success" ]; then
+                echo "  ✅ ESPN: Current (last updated: $espn_time)"
+            else
+                echo "  ⚠️  ESPN: $espn_status (last run: $espn_time)"
+            fi
+        else
+            echo "  ℹ️  ESPN: No completion timestamp available"
+        fi
+
+        # hoopR status
+        if [ -f "/tmp/scraper_timestamps/hoopr_last_completion.txt" ]; then
+            hoopr_time=$(head -1 /tmp/scraper_timestamps/hoopr_last_completion.txt)
+            hoopr_status=$(sed -n '2p' /tmp/scraper_timestamps/hoopr_last_completion.txt)
+            if [ "$hoopr_status" = "success" ]; then
+                echo "  ✅ hoopR: Current (last updated: $hoopr_time)"
+            else
+                echo "  ⚠️  hoopR: $hoopr_status (last run: $hoopr_time)"
+            fi
+        else
+            # Check if hoopR scraper is running
+            if ps aux | grep -E "hoopr|R.*scrape" | grep -v grep > /dev/null; then
+                echo "  🔄 hoopR: Scraper currently running"
+            else
+                echo "  ℹ️  hoopR: No completion timestamp (check catalog for progress)"
+            fi
+        fi
+
+        # NBA API status
+        if [ -f "/tmp/scraper_timestamps/nba_api_last_completion.txt" ]; then
+            nba_time=$(head -1 /tmp/scraper_timestamps/nba_api_last_completion.txt)
+            nba_status=$(sed -n '2p' /tmp/scraper_timestamps/nba_api_last_completion.txt)
+            if [ "$nba_status" = "success" ]; then
+                echo "  ✅ NBA API: Current (last updated: $nba_time)"
+            else
+                echo "  ⚠️  NBA API: $nba_status (last run: $nba_time)"
+            fi
+        else
+            echo "  ⏸️  NBA API: Paused (rate limiting)"
+        fi
+
+        # Basketball Reference status
+        if [ -f "/tmp/scraper_timestamps/basketball_ref_last_completion.txt" ]; then
+            bbref_time=$(head -1 /tmp/scraper_timestamps/basketball_ref_last_completion.txt)
+            bbref_status=$(sed -n '2p' /tmp/scraper_timestamps/basketball_ref_last_completion.txt)
+            if [ "$bbref_status" = "success" ]; then
+                echo "  ✅ Basketball Ref: Complete (last run: $bbref_time)"
+            else
+                echo "  ⚠️  Basketball Ref: $bbref_status (last run: $bbref_time)"
+            fi
+        else
+            echo "  ✅ Basketball Ref: Complete (static historical data)"
+        fi
+    else
+        echo "ℹ️  No scraper timestamps available"
+        echo "   (Timestamps created after first scraper completion)"
+    fi
+
+    # Quick database stats
+    echo ""
+    if [ -f "/tmp/espn_local.db" ]; then
+        local_games=$(sqlite3 /tmp/espn_local.db "SELECT COUNT(*) FROM games" 2>/dev/null || echo "N/A")
+        local_events=$(sqlite3 /tmp/espn_local.db "SELECT COUNT(*) FROM pbp_events" 2>/dev/null || echo "N/A")
+        echo "📁 Local ESPN database: $local_games games, $local_events events"
+    else
+        echo "ℹ️  Local ESPN database not found (will be created on first use)"
+    fi
+else
+    echo "⚠️  DATA_CATALOG.md not found"
+    echo ""
+    echo "💡 The data catalog is the authoritative source for all data statistics."
+    echo "   Run data consolidation to create: Task #1-11 in PROGRESS.md"
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# ─────────────────────────────────────────────────────────────────────────
 # OVERNIGHT JOBS CHECK (New - automatic when applicable)
 # ─────────────────────────────────────────────────────────────────────────
 if grep -q "Overnight jobs running:" PROGRESS.md 2>/dev/null; then

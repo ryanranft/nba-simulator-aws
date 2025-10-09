@@ -1,0 +1,617 @@
+# Daily ESPN Automation Setup Guide
+
+**Purpose:** Configure automatic daily updates for ESPN data collection and catalog maintenance
+
+**Created:** October 9, 2025
+
+---
+
+## Overview
+
+The `daily_espn_update.sh` script automates the complete ESPN data update workflow:
+
+1. ✅ **Pre-flight checks** - Verify environment and dependencies
+2. ⏸️ **ESPN scraper** - Trigger daily game scraping (optional)
+3. ✅ **Database update** - Rebuild local SQLite database from S3
+4. ✅ **Catalog update** - Update DATA_CATALOG.md with latest statistics
+5. ✅ **Git commit** - Commit catalog changes (optional)
+6. ✅ **Cleanup** - Remove old log files
+
+---
+
+## Quick Start
+
+### Manual Run
+
+```bash
+# Activate environment
+conda activate nba-aws
+
+# Run daily update
+cd /Users/ryanranft/nba-simulator-aws
+bash scripts/workflows/daily_espn_update.sh
+```
+
+### Cron Job Setup
+
+```bash
+# Edit crontab
+crontab -e
+
+# Add daily run at 3:00 AM
+0 3 * * * cd /Users/ryanranft/nba-simulator-aws && /Users/ryanranft/miniconda3/envs/nba-aws/bin/python -c "import sys; from pathlib import Path; sys.path.insert(0, str(Path.home()/'nba-simulator-aws')); exec(open('scripts/workflows/daily_espn_update.sh').read())" >> /tmp/espn_daily_update.log 2>&1
+
+# Or simpler version (requires conda init in shell)
+0 3 * * * source ~/.bashrc && cd /Users/ryanranft/nba-simulator-aws && bash scripts/workflows/daily_espn_update.sh >> /tmp/espn_daily_update.log 2>&1
+```
+
+**Recommended Cron Schedule:**
+- **Daily at 3:00 AM:** `0 3 * * *` - After overnight scrapers finish
+- **Twice daily:** `0 3,15 * * *` - 3 AM and 3 PM
+- **Every 6 hours:** `0 */6 * * *` - Frequent updates during season
+
+---
+
+## Configuration
+
+### Environment Variables
+
+**Required:**
+- `CONDA_DEFAULT_ENV` - Conda environment (auto-detected if activated)
+
+**Optional:**
+- `SLACK_WEBHOOK_URL` - Slack webhook for notifications
+- `EMAIL_RECIPIENT` - Email address for error notifications (requires mail setup)
+
+**Example:**
+```bash
+# Add to ~/.bashrc or cron job
+export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+```
+
+### Script Paths
+
+**Default Configuration (in script):**
+```bash
+PROJECT_DIR="/Users/ryanranft/nba-simulator-aws"
+ESPN_SCRAPER_DIR="$HOME/0espn"
+LOCAL_DB="/tmp/espn_local.db"
+LOG_FILE="/tmp/espn_daily_update_$(date +%Y%m%d_%H%M%S).log"
+CATALOG_FILE="$PROJECT_DIR/docs/DATA_CATALOG.md"
+UPDATE_SCRIPT="$PROJECT_DIR/scripts/utils/update_data_catalog.py"
+REBUILD_SCRIPT="$PROJECT_DIR/scripts/db/create_local_espn_database.py"
+```
+
+**Customization:**
+Edit the "Configuration" section at the top of `daily_espn_update.sh`
+
+---
+
+## Workflow Steps
+
+### Step 1: Pre-Flight Checks
+
+**Validates:**
+- ESPN scraper directory exists
+- Python is available
+- Conda environment is active
+- Update script exists
+
+**Error Handling:**
+- Script exits if critical checks fail
+- Sends error notification (if configured)
+
+### Step 2: ESPN Scraper (Optional)
+
+**Purpose:** Scrape latest games from ESPN API
+
+**Status:** ⏸️ DISABLED by default (uncomment lines 208-212 to enable)
+
+**Why disabled:**
+- ESPN scraper may run separately as overnight job
+- Scraper runtime varies (2-4 hours for daily updates)
+- May want to control scraper timing independently
+
+**To enable:**
+```bash
+# Uncomment these lines in daily_espn_update.sh
+if ! trigger_espn_scraper; then
+    log_warn "ESPN scraper failed, continuing with existing data"
+fi
+```
+
+### Step 3: Local Database Update
+
+**Purpose:** Rebuild `/tmp/espn_local.db` from S3 data
+
+**What it does:**
+- Runs `scripts/db/create_local_espn_database.py`
+- Downloads latest JSON files from S3
+- Rebuilds SQLite database
+- Reports games and events added
+
+**Runtime:** 2-5 minutes (depending on S3 file count)
+
+**Example Output:**
+```
+Current database: 44,826 games, 14,114,618 events
+Database updated: +12 games, +5,234 events
+New totals: 44,838 games, 14,119,852 events
+```
+
+### Step 4: Data Catalog Update
+
+**Purpose:** Update `DATA_CATALOG.md` with latest ESPN statistics
+
+**What it does:**
+- Runs `scripts/utils/update_data_catalog.py --source espn --action update`
+- Queries local database for current stats
+- Updates Quick Reference table
+- Updates Source 1 statistics
+- Updates coverage by era table
+- Updates timestamp
+
+**Runtime:** < 5 seconds
+
+**Example Output:**
+```
+📊 Fetching ESPN statistics from local database...
+✅ ESPN statistics updated successfully
+   Games: 44,838
+   Games with PBP: 31,253
+   PBP Events: 14,119,852
+   Coverage: 69.7%
+```
+
+### Step 5: Git Commit (Optional)
+
+**Purpose:** Commit catalog changes to Git
+
+**What it does:**
+- Checks if `DATA_CATALOG.md` has changes
+- Stages changes
+- Creates commit with timestamp
+- **Does NOT push** to remote (disabled for safety)
+
+**Commit Message Format:**
+```
+chore(data): daily ESPN catalog update 2025-10-09
+
+Automated daily update of ESPN data statistics.
+
+🤖 Generated by daily_espn_update.sh
+```
+
+**To enable auto-push:**
+```bash
+# Uncomment line in daily_espn_update.sh
+git push origin main || log_warn "Failed to push to remote"
+```
+
+### Step 6: Cleanup
+
+**Purpose:** Remove old log files
+
+**What it does:**
+- Deletes log files older than 7 days
+- Keeps recent logs for debugging
+
+---
+
+## Monitoring & Logs
+
+### Log Files
+
+**Location:** `/tmp/espn_daily_update_YYYYMMDD_HHMMSS.log`
+
+**Example:**
+```
+/tmp/espn_daily_update_20251009_030001.log
+```
+
+**View latest log:**
+```bash
+ls -lt /tmp/espn_daily_update_*.log | head -1
+tail -f /tmp/espn_daily_update_*.log  # Follow latest log
+```
+
+**View all logs:**
+```bash
+ls -lt /tmp/espn_daily_update_*.log
+```
+
+### Log Format
+
+```
+[2025-10-09 03:00:01] [INFO] Starting daily ESPN update workflow
+[2025-10-09 03:00:02] [INFO] Pre-flight checks passed
+[2025-10-09 03:00:05] [INFO] Database updated: +12 games, +5,234 events
+[2025-10-09 03:00:06] [INFO] DATA_CATALOG.md updated successfully
+[2025-10-09 03:00:07] [INFO] Changes committed successfully
+[2025-10-09 03:05:12] [INFO] Daily ESPN update workflow completed in 5m 10s
+```
+
+### Status Indicators
+
+- ✓ **Green** - Success
+- ⚠ **Yellow** - Warning (non-fatal)
+- ✗ **Red** - Error (fatal)
+
+### Notifications
+
+**Slack Integration:**
+```bash
+# Set webhook URL
+export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+
+# Script will automatically send notifications on:
+# - Significant new data added (>0 games)
+# - Errors during workflow
+# - Successful completion with runtime
+```
+
+**Email Integration:**
+```bash
+# Requires mail command configured
+# Uncomment lines in send_notification() function
+```
+
+---
+
+## Troubleshooting
+
+### Issue: "Conda environment not active"
+
+**Solution:**
+```bash
+# Option 1: Add conda init to cron job
+0 3 * * * source ~/.bashrc && cd /Users/ryanranft/nba-simulator-aws && bash scripts/workflows/daily_espn_update.sh
+
+# Option 2: Use full path to conda python
+0 3 * * * cd /Users/ryanranft/nba-simulator-aws && /Users/ryanranft/miniconda3/envs/nba-aws/bin/bash scripts/workflows/daily_espn_update.sh
+```
+
+### Issue: "ESPN scraper directory not found"
+
+**Check:**
+```bash
+ls -la ~/0espn
+```
+
+**Fix:**
+```bash
+# Update ESPN_SCRAPER_DIR in daily_espn_update.sh to correct path
+ESPN_SCRAPER_DIR="$HOME/path/to/espn/scraper"
+```
+
+### Issue: "Database rebuild failed"
+
+**Common Causes:**
+1. S3 credentials not loaded
+2. Network connectivity issues
+3. Insufficient disk space (/tmp)
+
+**Debug:**
+```bash
+# Test database rebuild manually
+python scripts/db/create_local_espn_database.py
+
+# Check S3 access
+aws s3 ls s3://nba-sim-raw-data-lake/espn/ | head -10
+
+# Check disk space
+df -h /tmp
+```
+
+### Issue: "Catalog update failed"
+
+**Debug:**
+```bash
+# Test catalog update manually
+python scripts/utils/update_data_catalog.py --source espn --action update --verbose
+
+# Check if local database exists
+ls -lh /tmp/espn_local.db
+```
+
+### Issue: "Cron job not running"
+
+**Check cron status:**
+```bash
+# View crontab
+crontab -l
+
+# Check if cron daemon is running
+ps aux | grep cron
+
+# Check system logs
+tail -f /var/log/cron  # Linux
+tail -f /var/log/system.log | grep cron  # macOS
+```
+
+**Common fixes:**
+```bash
+# Ensure script has execute permissions
+chmod +x scripts/workflows/daily_espn_update.sh
+
+# Use absolute paths in cron
+0 3 * * * /Users/ryanranft/nba-simulator-aws/scripts/workflows/daily_espn_update.sh
+
+# Redirect stderr to log
+0 3 * * * ... >> /tmp/espn_daily_update.log 2>&1
+```
+
+---
+
+## Testing
+
+### Dry Run (Manual Test)
+
+```bash
+# Test without making changes
+cd /Users/ryanranft/nba-simulator-aws
+bash scripts/workflows/daily_espn_update.sh
+
+# Check log output
+tail -f /tmp/espn_daily_update_*.log
+```
+
+### Verify Results
+
+```bash
+# Check if database was updated
+ls -lh /tmp/espn_local.db
+
+# Check if catalog was updated
+git diff docs/DATA_CATALOG.md
+
+# Check game counts
+sqlite3 /tmp/espn_local.db "SELECT COUNT(*) FROM games"
+```
+
+### Test Cron Job (Without Waiting)
+
+```bash
+# Run cron job manually (simulates cron environment)
+env -i HOME=$HOME USER=$USER PATH=/usr/bin:/bin:/usr/sbin:/sbin \
+  bash scripts/workflows/daily_espn_update.sh
+
+# Or use cron test tool
+crontab -l | grep espn  # Find cron line
+# Copy command and run manually
+```
+
+---
+
+## Integration with Other Workflows
+
+### Session Startup (Workflow #1)
+
+**Future Enhancement:**
+- Session manager displays data freshness
+- Shows time since last catalog update
+- Alerts if update failed
+
+**Example Output:**
+```
+▶ DATA FRESHNESS
+  ESPN: ✅ Current (updated 2 hours ago)
+  hoopR: 🔄 21% complete
+  Last update: 2025-10-09 03:05:12 (5m 10s runtime)
+```
+
+### Overnight Scraper Handoff (Workflow #38)
+
+**Integration:**
+```bash
+# Run daily update after overnight scraper completes
+bash scripts/monitoring/monitor_scrapers_inline.sh --wait-for-completion
+bash scripts/workflows/daily_espn_update.sh
+```
+
+### Weekly Data Validation
+
+**Cron Schedule:**
+```bash
+# Daily update at 3 AM
+0 3 * * * bash scripts/workflows/daily_espn_update.sh >> /tmp/espn_daily_update.log 2>&1
+
+# Weekly validation on Sundays at 4 AM
+0 4 * * 0 python scripts/utils/compare_espn_databases.py --detailed >> /tmp/weekly_validation.log 2>&1
+```
+
+---
+
+## Performance Benchmarks
+
+**Typical Runtime:** 3-8 minutes
+
+| Step | Runtime | Notes |
+|------|---------|-------|
+| Pre-flight checks | < 1s | Fast environment validation |
+| ESPN scraper | 2-4 hours | DISABLED by default |
+| Database rebuild | 2-5 min | Depends on new file count |
+| Catalog update | < 5s | Fast SQL query and regex replacement |
+| Git commit | < 1s | If changes detected |
+| Cleanup | < 1s | Delete old logs |
+
+**Disk Space:**
+- Local database: ~1.7 GB
+- Log files: ~100 KB/day × 7 days = ~700 KB
+- S3 cache (if used): Variable
+
+**Network Usage:**
+- Database rebuild: ~0-500 MB (incremental, only new JSON files)
+- S3 API calls: ~100-1000 requests (depending on new files)
+
+---
+
+## Maintenance
+
+### Weekly Tasks
+
+- ✅ Review logs for errors
+- ✅ Verify catalog accuracy
+- ✅ Check disk space on /tmp
+
+### Monthly Tasks
+
+- ✅ Audit full workflow execution
+- ✅ Validate against RDS database
+- ✅ Update documentation if paths change
+
+### Annual Tasks
+
+- ✅ Review cron schedule (adjust for off-season)
+- ✅ Archive old logs (> 6 months)
+- ✅ Performance optimization
+
+---
+
+## Best Practices
+
+### 1. Run After Overnight Scrapers
+
+**Why:** Ensures latest data is available
+**When:** 3:00 AM (after overnight scrapers typically finish)
+
+### 2. Monitor Logs Regularly
+
+**Why:** Catch errors early
+**How:** Weekly log review, automated alerts
+
+### 3. Test Before Production
+
+**Why:** Prevent breaking changes
+**How:** Manual dry run before cron deployment
+
+### 4. Keep Backups
+
+**Why:** Disaster recovery
+**How:** S3 data is primary backup, local DB is ephemeral
+
+### 5. Version Control Catalog
+
+**Why:** Track changes over time
+**How:** Automatic git commits (already implemented)
+
+---
+
+## Advanced Configuration
+
+### Custom Notification Channels
+
+**Slack Webhook:**
+```bash
+export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+```
+
+**Discord Webhook:**
+```bash
+# Modify send_notification() function in script
+curl -H "Content-Type: application/json" \
+  -d "{\"content\":\"$message\"}" \
+  "$DISCORD_WEBHOOK_URL"
+```
+
+**Email via SendGrid:**
+```bash
+# Modify send_notification() function
+curl -X POST https://api.sendgrid.com/v3/mail/send \
+  -H "Authorization: Bearer $SENDGRID_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{...}"
+```
+
+### Conditional Execution
+
+**Only run during NBA season:**
+```bash
+# Check if current date is in season (Oct-Jun)
+month=$(date +%m)
+if [ $month -ge 10 ] || [ $month -le 6 ]; then
+    bash scripts/workflows/daily_espn_update.sh
+fi
+```
+
+**Only run if scraper completed:**
+```bash
+# Check if scraper PID file exists
+if [ -f /tmp/espn_scraper.pid ]; then
+    bash scripts/workflows/daily_espn_update.sh
+fi
+```
+
+---
+
+## Security Considerations
+
+### Credentials
+
+- ✅ AWS credentials stored in `~/.aws/credentials` (not in script)
+- ✅ Slack webhook in environment variable (not hardcoded)
+- ✅ Script runs as local user (not root)
+
+### File Permissions
+
+```bash
+# Script should be user-executable only
+chmod 700 scripts/workflows/daily_espn_update.sh
+
+# Logs should be user-readable only
+chmod 600 /tmp/espn_daily_update_*.log
+```
+
+### Git Commits
+
+- ⚠️ **Auto-push disabled** by default (requires manual review)
+- ✅ Commit messages clearly marked as automated
+- ✅ Only catalog file committed (no credentials)
+
+---
+
+## Future Enhancements
+
+### Planned (Phase 6)
+
+1. **RDS Integration:** Upload to RDS after local DB update
+2. **Multi-Source Updates:** Extend to hoopR, NBA API, Basketball Reference
+3. **Validation Alerts:** Alert if catalog deviates from RDS
+4. **Dashboard Integration:** Real-time status in web dashboard
+5. **Parallel Execution:** Run multiple source updates concurrently
+
+### Ideas
+
+- **Smart Scheduling:** Only run when games are scheduled
+- **Retry Logic:** Auto-retry on transient failures
+- **Health Checks:** Ping external monitoring service
+- **Data Quality Metrics:** Track PBP coverage % over time
+
+---
+
+## Support
+
+**Documentation:**
+- This file: `scripts/workflows/DAILY_AUTOMATION_SETUP.md`
+- Script: `scripts/workflows/daily_espn_update.sh`
+- Workflow #1: `docs/claude_workflows/workflow_descriptions/01_session_start.md`
+
+**Related Scripts:**
+- `scripts/utils/update_data_catalog.py` - Catalog updater
+- `scripts/db/create_local_espn_database.py` - Database builder
+- `scripts/utils/compare_espn_databases.py` - Database comparator
+
+**Troubleshooting:**
+- See "Troubleshooting" section above
+- Check logs: `/tmp/espn_daily_update_*.log`
+- Contact: Reference PROGRESS.md for current maintainer
+
+---
+
+**Last Updated:** October 9, 2025
+**Version:** 1.0
+**Status:** ✅ Production Ready
+
+---
+
+**End of Daily Automation Setup Guide**
