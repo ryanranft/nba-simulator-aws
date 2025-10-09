@@ -32,17 +32,18 @@
 
 | Source | Date Range | Status | Games | PBP Events | Files | Size | Location |
 |--------|-----------|--------|-------|-----------|-------|------|----------|
-| ESPN API | 1993-2025 | ✅ COMPLETE | 44,826 | 14,114,618 | 146,115 | 119 GB | S3 + Local |
-| hoopR | 2002-2025 | ✅ COMPLETE | ~30-31K | 12-15M | 410 | 8.2 GB | S3 + Local |
+| ESPN API | 1993-2025 | ✅ COMPLETE | 44,826 | 14,114,618 | 146,115 | 119 GB | S3 + Local + RDS |
+| hoopR | 2002-2025 | ✅ COMPLETE | 30,758 | 13,074,829 | 410 | 8.2 GB | S3 + Local + RDS |
 | NBA.com API | 1996-2025 | ⏸️ PAUSED | 0 | 0 | 0 | 0 GB | Not started |
 | Basketball Ref | 1950-2025 | ✅ COMPLETE | N/A | N/A | 42 | 156 MB | S3 |
 | Kaggle | 2004-2020 | ✅ COMPLETE | 26,496 | 0 | 17 tables | 280 MB | Local DB |
 | SportsDataverse | 2002-2023 | ❌ DEPRECATED | 0 | 0 | 0 | 0 GB | Not used |
 
 **RDS Database (nba_simulator):**
-- **Total Size:** 7.2 GB
-- **Largest Table:** `temporal_events` (5.6 GB, 14,114,618 rows from ESPN)
-- **Other Tables:** 15 additional tables (games, players, possessions, etc.)
+- **Total Size:** 13.9 GB (7.2 GB ESPN + 6.7 GB hoopR)
+- **ESPN Tables:** `temporal_events` (5.6 GB, 14.1M rows) + 15 tables
+- **hoopR Tables:** `hoopr_play_by_play` (6.2 GB, 13.1M rows) + 3 tables
+- **Unified Views:** 3 views combining ESPN + hoopR (40,652 games, 1993-2025)
 
 **Total Collection:**
 - **Combined Files:** 165,614+ files
@@ -167,23 +168,24 @@ s3://nba-sim-raw-data-lake/espn/
 ## Source 2: hoopR
 
 **Official Name:** hoopR R Package (nbahoopR functions)
-**Status:** ✅ COMPLETE (DISCOVERED - Already collected locally)
+**Status:** ✅ COMPLETE (Local + S3 + RDS)
 **Coverage:** 2002-2025 (24 complete seasons)
-**Last Updated:** October 9, 2025 (~3:30 PM)
+**Last Updated:** October 9, 2025 (~6:00 PM)
 
 ### Statistics
 
 | Metric | Value | Notes |
 |--------|-------|-------|
 | **Total Seasons** | 24 seasons | 2002-2025 (complete) |
-| **Total Games** | ~30,000-31,000 | From schedule data |
-| **Estimated PBP Events** | 12-15 million | 24 seasons, 63 columns |
-| **Player Box Scores** | 750,000-800,000 | 24 seasons, 56 columns |
-| **Team Box Scores** | 60,000-65,000 | 24 seasons, 56 columns |
-| **Schedules** | ~30,000-31,000 | 24 seasons, 77 columns |
+| **Total Games** | 30,758 | Verified from RDS schedule table |
+| **PBP Events** | 13,074,829 | Loaded to RDS `hoopr_play_by_play` |
+| **Player Box Scores** | 785,505 | Loaded to RDS `hoopr_player_box` |
+| **Team Box Scores** | 59,670 | Loaded to RDS `hoopr_team_box` |
+| **Schedules** | 30,758 | Loaded to RDS `hoopr_schedule` |
 | **S3 Parquet Files** | 96 files | 531 MB in `hoopr_parquet/` |
 | **S3 CSV Files** | 314 files | 7.7 GB in `hoopr_phase1/` |
 | **Total S3 Size** | 8.2 GB | Combined parquet + CSV |
+| **RDS Size** | 6.7 GB | 4 tables + indexes |
 
 ### Scraper Phases
 
@@ -238,8 +240,46 @@ s3://nba-sim-raw-data-lake/espn/
 
 - **Location:** `scripts/etl/scrape_hoopr_phase1_foundation.R`
 - **Language:** R (hoopR package v2.0+)
-- **Status:** ✅ COMPLETE - Data already collected
-- **Next Step:** Load to RDS PostgreSQL for cross-validation with ESPN
+- **Status:** ✅ COMPLETE - Data collected and loaded to RDS
+
+### RDS Integration
+
+- **Load Date:** October 9, 2025 (~4:30 PM)
+- **Load Script:** `scripts/db/load_hoopr_to_rds.py`
+- **Load Time:** 10 minutes (13.1M rows at 33,416 rows/sec)
+- **Tables Created:**
+  - `hoopr_play_by_play` (6.2 GB, 13,074,829 rows, 63 columns)
+  - `hoopr_player_box` (433 MB, 785,505 rows, 56 columns)
+  - `hoopr_team_box` (29 MB, 59,670 rows, 56 columns)
+  - `hoopr_schedule` (27 MB, 30,758 rows, 77 columns)
+- **Indexes:** 6 indexes on game_id and game_date columns
+- **Status:** ✅ Complete and indexed
+
+### Unified ESPN + hoopR Views
+
+Created October 9, 2025 to provide seamless 33-year coverage (1993-2025):
+
+**View: `unified_play_by_play`**
+- ESPN data: Pre-2002 (1993-2001)
+- hoopR data: 2002+ (modern era with 100% coverage)
+- Combined: Seamless play-by-play events across all eras
+
+**View: `unified_schedule`**
+- Total games: 40,652 (1993-2025)
+- ESPN games: 11,210 (1993-2001, 27.2%)
+- hoopR games: 29,442 (2002-2025, 72.8%)
+
+**View: `data_source_coverage`**
+- Documentation view showing year-by-year source coverage
+- Enables analysis of data quality by era
+
+**Creation Script:** `scripts/db/create_unified_espn_hoopr_view.py`
+
+**Schema Mappings:**
+- ESPN `clock_display` → hoopR `clock_display_value`
+- ESPN `play_text` → hoopR `text`
+- ESPN `game_id` (VARCHAR) → hoopR `game_id` (INTEGER, cast to TEXT)
+- ESPN `home_team_id` → hoopR `home_id`
 
 ### Validation Strategy
 
