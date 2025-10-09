@@ -200,20 +200,21 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
 - **Build possession panel data?** → `39` (possession-level ML features)
 - **Run test suites?** → `41` (validation framework)
 - **Launch data scrapers?** → `42` (multi-source scraper execution)
-- **Consolidate/move documentation files?** → `43` (NEW - prevent broken links)
+- **Consolidate/move documentation files?** → `43` (prevent broken links)
+- **Validate file references after moves?** → `44` (NEW - automatic reference path validation)
 
 ---
 
 ## 📊 Workflow Statistics
 
-- **Total workflows**: 43
-- **Total size**: ~790 KB
-- **Average workflow**: ~18 KB
+- **Total workflows**: 44
+- **Total size**: ~830 KB
+- **Average workflow**: ~19 KB
 - **Largest workflow**: `24_aws_resource_setup.md` (92 KB)
 - **Smallest workflow**: `04_plan_change_protocol.md` (595 bytes)
 
 **Old system**: 1 file, 9,533 lines, 284 KB (unreadable by Claude)
-**New system**: 43 files, average 260 lines per file (fully readable)
+**New system**: 44 files, average 265 lines per file (fully readable)
 
 **Workflow additions:**
 - **Batch 1 (27-31):** Code quality workflows
@@ -247,6 +248,9 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
 
 - **Batch 8 (43):** Documentation organization
   - 📚 Documentation Consolidation - Systematic process for consolidating, moving, and archiving documentation files while preventing broken links
+
+- **Batch 9 (44):** Automatic reference validation
+  - 🔍 Reference Path Validator - Automatically detects moved/renamed/deleted files and finds all references in codebase; validates file paths before GitHub push
 
 ---
 

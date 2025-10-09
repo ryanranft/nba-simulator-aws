@@ -82,14 +82,15 @@ show_usage() {
 USAGE: bash scripts/shell/pre_push_inspector.sh <mode>
 
 MODES:
-  security-scan     Run comprehensive 15-point security audit
-  inspect-repo      Scan for local-only files (categorized by risk)
-  recommend         Show recommendations with priority levels
-  archive-cleanup   Archive flagged files before deletion
-  cleanup-repo      Remove files from tracking (git rm --cached)
-  full              Complete workflow (all steps, interactive)
-  status            Preview what would be flagged (dry-run)
-  help              Show this help message
+  security-scan        Run comprehensive 15-point security audit
+  inspect-repo         Scan for local-only files (categorized by risk)
+  recommend            Show recommendations with priority levels
+  archive-cleanup      Archive flagged files before deletion
+  cleanup-repo         Remove files from tracking (git rm --cached)
+  validate-references  Check for broken references to moved/archived files
+  full                 Complete workflow (all steps, interactive)
+  status               Preview what would be flagged (dry-run)
+  help                 Show this help message
 
 EXAMPLES:
   # Full pre-push workflow (recommended before git push)
@@ -107,7 +108,8 @@ WORKFLOW STEPS (full mode):
   Step 4: User Confirmation
   Step 5: Archive Before Deletion
   Step 6: Remove from Repository
-  Step 7: Final Push Approval
+  Step 7: Reference Path Validation
+  Step 8: Final Push Approval
 
 See docs/SECURITY_PROTOCOLS.md for complete documentation.
 EOF
@@ -730,6 +732,46 @@ EOF
 }
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# MODE: validate-references
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+mode_validate_references() {
+    echo "╔════════════════════════════════════════════════════════════╗"
+    echo "║      Reference Path Validation - Check Broken Links       ║"
+    echo "╚════════════════════════════════════════════════════════════╝"
+    echo ""
+
+    # Check if validate_references.sh exists
+    if [ ! -f "$PROJECT_DIR/scripts/shell/validate_references.sh" ]; then
+        echo "❌ validate_references.sh not found"
+        echo "Expected location: $PROJECT_DIR/scripts/shell/validate_references.sh"
+        return 1
+    fi
+
+    # Run reference validator in check-only mode
+    bash "$PROJECT_DIR/scripts/shell/validate_references.sh" --check-only
+
+    local result=$?
+
+    echo ""
+
+    if [ $result -eq 0 ]; then
+        echo -e "${GREEN}✅ PASSED: All file references valid${NC}"
+        return 0
+    else
+        echo -e "${RED}❌ FAILED: Broken documentation references detected${NC}"
+        echo ""
+        echo "To see details, run:"
+        echo "  bash scripts/shell/validate_references.sh"
+        echo ""
+        echo "To auto-fix, run:"
+        echo "  bash scripts/shell/validate_references.sh --fix"
+        echo ""
+        return 1
+    fi
+}
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # MODE: status
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -930,7 +972,31 @@ mode_full() {
 
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "STEP 7: Final Push Approval"
+    echo "STEP 7: Reference Path Validation"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+
+    mode_validate_references
+    local validation_result=$?
+
+    if [ "$validation_result" -ne 0 ]; then
+        echo ""
+        echo "⚠️  Warning: Broken documentation references detected"
+        echo ""
+        read -p "Fix references now? [y/N] " -n 1 -r
+        echo ""
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            bash "$PROJECT_DIR/scripts/shell/validate_references.sh" --fix
+            echo ""
+            echo "✅ References fixed"
+        else
+            echo "⚠️  Proceeding with broken references (may cause 404s)"
+        fi
+    fi
+
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "STEP 8: Final Push Approval"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo "✅ Cleanup complete!"
@@ -984,6 +1050,9 @@ case "$MODE" in
     cleanup-repo)
         shift  # Remove mode argument
         mode_cleanup_repo "$@"
+        ;;
+    validate-references)
+        mode_validate_references
         ;;
     full)
         mode_full
