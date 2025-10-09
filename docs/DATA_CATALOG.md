@@ -28,12 +28,12 @@
 
 ## Quick Reference
 
-**Last Full Update:** October 09, 2025 02:01 PM CT
+**Last Full Update:** October 09, 2025 03:45 PM CT
 
 | Source | Date Range | Status | Games | PBP Events | Files | Size | Location |
 |--------|-----------|--------|-------|-----------|-------|------|----------|
 | ESPN API | 1993-2025 | ✅ COMPLETE | 44,826 | 14,114,618 | 146,115 | 119 GB | S3 + Local |
-| hoopR | 2002-2025 | 🔄 21% COMPLETE | 31,236 | 13,900,000 | 314 | 7.7 GB | S3 |
+| hoopR | 2002-2025 | ✅ COMPLETE | ~30-31K | 12-15M | 410 | 8.2 GB | S3 + Local |
 | NBA.com API | 1996-2025 | ⏸️ PAUSED | 0 | 0 | 0 | 0 GB | Not started |
 | Basketball Ref | 1950-2025 | ✅ COMPLETE | N/A | N/A | 42 | 156 MB | S3 |
 | Kaggle | 2004-2020 | ✅ COMPLETE | 26,496 | 0 | 17 tables | 280 MB | Local DB |
@@ -167,21 +167,23 @@ s3://nba-sim-raw-data-lake/espn/
 ## Source 2: hoopR
 
 **Official Name:** hoopR R Package (nbahoopR functions)
-**Status:** 🔄 IN PROGRESS (21% complete)
-**Coverage:** 2002-present
-**Last Updated:** October 9, 2025 (~10:00 AM)
+**Status:** ✅ COMPLETE (DISCOVERED - Already collected locally)
+**Coverage:** 2002-2025 (24 complete seasons)
+**Last Updated:** October 9, 2025 (~3:30 PM)
 
 ### Statistics
 
 | Metric | Value | Notes |
 |--------|-------|-------|
-| **Total Seasons** | 24 seasons | 2002-2025 |
-| **Seasons Complete** | 5 seasons | 21% complete |
-| **Estimated Games** | 31,236 | 1,301 games/season × 24 |
-| **Estimated PBP Events** | 13,900,000 | Based on 445 events/game |
-| **S3 Files** | 314 CSV files | Phase 1A + 1B complete |
-| **S3 Size** | 7.7 GB | `s3://nba-sim-raw-data-lake/hoopr_phase1/` |
-| **Estimated Remaining** | ~48 hours | At current scraper pace |
+| **Total Seasons** | 24 seasons | 2002-2025 (complete) |
+| **Total Games** | ~30,000-31,000 | From schedule data |
+| **Estimated PBP Events** | 12-15 million | 24 seasons, 63 columns |
+| **Player Box Scores** | 750,000-800,000 | 24 seasons, 56 columns |
+| **Team Box Scores** | 60,000-65,000 | 24 seasons, 56 columns |
+| **Schedules** | ~30,000-31,000 | 24 seasons, 77 columns |
+| **S3 Parquet Files** | 96 files | 531 MB in `hoopr_parquet/` |
+| **S3 CSV Files** | 314 files | 7.7 GB in `hoopr_phase1/` |
+| **Total S3 Size** | 8.2 GB | Combined parquet + CSV |
 
 ### Scraper Phases
 
@@ -215,15 +217,29 @@ s3://nba-sim-raw-data-lake/espn/
 - ✅ **Team IDs:** NBA official IDs
 - ⚠️ **Coverage Gap:** Pre-2002 not available
 
+### Local Data Locations
+
+**Discovery:** October 9, 2025 - Found 57.8 GB of hoopR data already collected locally
+
+1. **Primary:** `/Users/ryanranft/Projects/hoopR-nba-raw` (43 GB - 29,688 JSON files)
+2. **Structured:** `/Users/ryanranft/Projects/hoopR-nba-data` (8.6 GB - 235 files)
+3. **Analysis-Ready:** `/Users/ryanranft/Desktop/sports_data_backup/hoopR` (6.2 GB - 120 parquet files)
+
+### S3 Locations
+
+- **Parquet (uploaded Oct 9):** `s3://nba-sim-raw-data-lake/hoopr_parquet/`
+  - `play_by_play/` - 24 files (393 MB) - 2002-2025 seasons
+  - `player_box/` - 24 files (15 MB) - 2002-2025 seasons
+  - `schedule/` - 24 files (3.4 MB) - 2002-2025 seasons
+  - `team_box/` - 24 files (3.1 MB) - 2002-2025 seasons
+- **CSV (uploaded Oct 8):** `s3://nba-sim-raw-data-lake/hoopr_phase1/` (7.7 GB, 314 files)
+
 ### Scraper Information
 
 - **Location:** `scripts/etl/scrape_hoopr_phase1_foundation.R`
 - **Language:** R (hoopR package v2.0+)
-- **Current Scraper PID:** Check with `ps aux | grep R`
-- **Runtime:** ~48 hours remaining for Phase 1
-- **Log Location:** `/tmp/hoopr_phase1_*.log`
-
-**Active Wrapper:** `scripts/etl/run_hoopr_comprehensive_overnight.sh`
+- **Status:** ✅ COMPLETE - Data already collected
+- **Next Step:** Load to RDS PostgreSQL for cross-validation with ESPN
 
 ### Validation Strategy
 
@@ -561,7 +577,7 @@ Penalties:
 | 1993-2001 | Sparse PBP | ❌ | ❌ | ✅ | ❌ | **ESPN + BBRef** |
 | 2002-2003 | ✅ Full PBP | ✅ | ❌ | ✅ | ❌ | **ESPN** |
 | 2004-2020 | ✅ Full PBP | ✅ | ⏸️ | ✅ | ✅ | **ESPN + Kaggle** |
-| 2021-2025 | ✅ Full PBP | 🔄 | ⏸️ | ✅ | ❌ | **ESPN** |
+| 2021-2025 | ✅ Full PBP | ✅ | ⏸️ | ✅ | ❌ | **ESPN** |
 
 ### By Data Type
 
@@ -588,7 +604,7 @@ Penalties:
 
 #### Quality Gaps
 1. **Early Era PBP:** Only 594 games with PBP in 1993-2001
-2. **hoopR Completion:** Only 21% complete, need 48 more hours
+2. **hoopR RDS Load:** Parquet files ready, need to load to RDS for cross-validation
 3. **NBA API:** Paused due to rate limiting
 
 ---
