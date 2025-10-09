@@ -121,7 +121,7 @@ Implement a comprehensive documentation trigger system with four components:
 **Completed Steps:**
 
 1. ✅ Added trigger comments to 9 key documentation files:
-   - COMMAND_LOG.md, FILE_INVENTORY.md, MACHINE_SPECS.md, PROGRESS.md
+   - COMMAND_LOG.md, FILE_INVENTORY.md, ~~MACHINE_SPECS.md~~ (archived), PROGRESS.md
    - .session-history.md, QUICKSTART.md, TROUBLESHOOTING.md, STYLE_GUIDE.md
    - .documentation-triggers.md (meta-trigger)
 
@@ -193,10 +193,10 @@ Implement a comprehensive documentation trigger system with four components:
 <!-- REMINDER: [What action to take] -->
 ```
 
-**Files with Triggers (9 total):**
+**Files with Triggers (8 active, 1 archived):**
 1. COMMAND_LOG.md - Update after every code change
 2. FILE_INVENTORY.md - Run `make inventory` before `git add .`
-3. MACHINE_SPECS.md - Verify at session start
+3. ~~MACHINE_SPECS.md - Verify at session start~~ (archived 2025-10-08)
 4. PROGRESS.md - Update after completing tasks
 5. .session-history.md - Append after every commit (automated via hook)
 6. QUICKSTART.md - Update when workflow changes

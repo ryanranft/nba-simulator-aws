@@ -76,6 +76,7 @@ Implement automated session initialization with:
 - **Pros:** Single file with current versions
 - **Cons:** Loses historical version information, can't correlate with commits
 - **Why rejected:** Need version history for each commit
+- **Note:** MACHINE_SPECS.md was later archived (2025-10-08) for context optimization
 
 ### Alternative 4: Commit Session History to Git
 - **Pros:** Shared across team, backed up

@@ -44,12 +44,6 @@
 **Last Modified:** 2025-10-01
 **Purpose:** **Auto-generated:** 2025-10-01 22:12:56
 
-### MACHINE_SPECS.md
-
-**Type:** Markdown documentation (4474 lines)
-**Last Modified:** 2025-10-01
-**Purpose:** <!-- AUTO-UPDATE TRIGGER: Run session_startup.sh at start of EVERY session -->
-
 ### OVERNIGHT_AUTOMATION_STATUS.md
 
 **Type:** Markdown documentation (283 lines)
