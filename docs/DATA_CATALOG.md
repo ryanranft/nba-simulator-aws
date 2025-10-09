@@ -28,7 +28,7 @@
 
 ## Quick Reference
 
-**Last Full Update:** October 9, 2025 1:00 PM CT
+**Last Full Update:** October 09, 2025 02:01 PM CT
 
 | Source | Date Range | Status | Games | PBP Events | Files | Size | Location |
 |--------|-----------|--------|-------|-----------|-------|------|----------|
