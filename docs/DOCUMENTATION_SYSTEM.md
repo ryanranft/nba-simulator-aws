@@ -16,7 +16,6 @@ This project uses an automated documentation update trigger system. Each key doc
 - `FILE_INVENTORY.md` - Run `make inventory` before every `git add .`
 - `PROGRESS.md` - Update after completing ANY task
 - `.session-history.md` - Append after every commit
-- `MACHINE_SPECS.md` - Verify at session start
 
 **The triggers tell you:**
 - ✅ When each file should be updated (triggering event)
@@ -39,7 +38,6 @@ The following documentation requires MANUAL updates (cannot be automated):
 
 | Document | Update When | How to Update |
 |----------|-------------|---------------|
-| **MACHINE_SPECS.md** | Daily (start of each session) | Run session startup checklist, update version table with current software versions |
 | **PROGRESS.md** | After completing phase/task | Change ⏸️ PENDING → ✅ COMPLETE, update "Last Updated" |
 | **PROGRESS.md** | After creating AWS resources | Run `make check-costs`, update cost estimates with actuals |
 | **TROUBLESHOOTING.md** | After solving new error | Add new section with problem/solution, run `make inventory` |

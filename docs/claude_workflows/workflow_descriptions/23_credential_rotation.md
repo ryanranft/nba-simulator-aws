@@ -51,7 +51,8 @@
 
 8. **Document rotation:**
    ```bash
-   echo "AWS credentials rotated on $(date)" >> MACHINE_SPECS.md
+   echo "AWS credentials rotated on $(date)" >> COMMAND_LOG.md
+   # Or create calendar reminder for next rotation (90 days)
    ```
 
 ### Emergency Rotation (If Compromised)

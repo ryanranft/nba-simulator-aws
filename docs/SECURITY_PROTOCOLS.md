@@ -311,7 +311,7 @@ Follow these security best practices for credential rotation:
 - Set calendar reminders for 85 days after each rotation
 - Use AWS IAM Access Analyzer to identify unused credentials
 - Check: `aws iam get-credential-report` to see key ages
-- Document last rotation date in MACHINE_SPECS.md
+- Document last rotation date in COMMAND_LOG.md or create calendar event
 
 **Emergency Rotation (if compromised):**
 1. Immediately deactivate compromised credential
