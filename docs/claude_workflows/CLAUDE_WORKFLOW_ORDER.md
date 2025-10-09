@@ -201,13 +201,16 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
 - **Run test suites?** → `41` (validation framework)
 - **Launch data scrapers?** → `42` (multi-source scraper execution)
 - **Consolidate/move documentation files?** → `43` (prevent broken links)
-- **Validate file references after moves?** → `44` (NEW - automatic reference path validation)
+- **Validate file references after moves?** → `44` (automatic reference path validation)
+- **Inventory local data?** → `45` (comprehensive data inventory system - local disk, project data, archives)
+- **Analyze data gaps?** → `46` (identify and remediate missing data - local/S3/DB comparison)
+- **Inventory AWS data?** → `47` (AWS services inventory - S3, RDS, Glue, Athena, costs)
 
 ---
 
 ## 📊 Workflow Statistics
 
-- **Total workflows**: 44
+- **Total workflows**: 47
 - **Total size**: ~830 KB
 - **Average workflow**: ~19 KB
 - **Largest workflow**: `24_aws_resource_setup.md` (92 KB)
@@ -251,6 +254,25 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
 
 - **Batch 9 (44):** Automatic reference validation
   - 🔍 Reference Path Validator - Automatically detects moved/renamed/deleted files and finds all references in codebase; validates file paths before GitHub push
+
+- **Batch 10 (45-46):** Data inventory & gap analysis (UPDATED 2025-10-08)
+  - 📁 Local Data Inventory - Comprehensive system to inventory all local data:
+    - **Project data:** `/Users/ryanranft/nba-simulator-aws/data/` (115 GB, 146K+ files)
+    - **External ESPN:** `/Users/ryanranft/0espn/data/nba/` (used by ETL scripts)
+    - **Git archives:** `~/sports-simulator-archives/nba/` (67+ conversation logs)
+    - **Temp data:** `/tmp/*` (all scraper patterns: hoopr, nba_api, basketball_reference, kaggle, espn, sportsdataverse)
+  - 📊 Data Gap Analysis - Identify missing data and cross-location gaps:
+    - **Local vs S3:** Compare project data to S3 bucket (identify upload gaps)
+    - **S3 vs Database:** Compare S3 to RDS tables (identify load gaps)
+    - **Database completeness:** Check table existence, row counts, data sources loaded
+    - **Remediation plans:** Generate actionable plans with specific scraper commands
+
+- **Batch 11 (47):** AWS data inventory (UPDATED 2025-10-08)
+  - ☁️ AWS Data Inventory - S3, RDS, Glue, Athena, cost analysis:
+    - **S3 bucket structure:** 14 actual prefixes (athena-results, basketball_reference, box_scores, hoopr_phase1, ml-features, ml-models, ml-predictions, nba_api_comprehensive, nba_api_playbyplay, pbp, schedule, scripts, sportsdataverse, team_stats)
+    - **RDS database:** Instance details, size analysis, table row counts, connection metrics
+    - **Cost estimation:** S3 storage costs, RDS compute/storage costs, total monthly estimate
+    - **Resource utilization:** Storage and compute usage summaries
 
 ---
 
