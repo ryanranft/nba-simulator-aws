@@ -291,6 +291,96 @@ if [ -f "scripts/shell/log_command.sh" ]; then
     echo ""
 fi
 
+# ─────────────────────────────────────────────────────────────────────────
+# CREDENTIALS CHECK (New - automatic)
+# ─────────────────────────────────────────────────────────────────────────
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🔐 CREDENTIALS"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# Check for NBA simulator credentials
+if [ -f "/Users/ryanranft/nba-sim-credentials.env" ]; then
+    source /Users/ryanranft/nba-sim-credentials.env 2>/dev/null
+    if [ -n "$AWS_ACCESS_KEY_ID" ]; then
+        echo "✅ NBA Simulator credentials loaded"
+    else
+        echo "⚠️  Credentials file exists but not loaded properly"
+    fi
+else
+    echo "⚠️  NBA Simulator credentials not found at /Users/ryanranft/nba-sim-credentials.env"
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# ─────────────────────────────────────────────────────────────────────────
+# OVERNIGHT JOBS CHECK (New - automatic when applicable)
+# ─────────────────────────────────────────────────────────────────────────
+if grep -q "Overnight jobs running:" PROGRESS.md 2>/dev/null; then
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "🌙 OVERNIGHT JOBS STATUS"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+
+    # Check for running scraper processes
+    running_scrapers=$(ps aux | grep -E "(hoopr|nba_api|scrape_)" | grep -v grep | wc -l)
+
+    if [ $running_scrapers -gt 0 ]; then
+        echo "✅ $running_scrapers scraper process(es) still running"
+        echo ""
+        ps aux | grep -E "(hoopr|nba_api|scrape_)" | grep -v grep | awk '{print "   PID " $2 ": " $11 " " $12 " " $13}'
+        echo ""
+        echo "💡 To monitor: Follow Workflow #38 (Overnight Scraper Handoff Protocol)"
+    else
+        echo "⏹️  No scraper processes currently running (jobs may have completed)"
+        echo ""
+        echo "💡 Check logs and validate output per Workflow #38"
+    fi
+
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+fi
+
+# ─────────────────────────────────────────────────────────────────────────
+# SESSION CONTEXT SUMMARY (New - consolidated view)
+# ─────────────────────────────────────────────────────────────────────────
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📋 SESSION CONTEXT"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# Extract last session info from PROGRESS.md
+if [ -f "PROGRESS.md" ]; then
+    last_session=$(grep "Last session ended:" PROGRESS.md | head -1 | sed 's/.*Last session ended: //')
+    last_completed=$(grep "Last completed:" PROGRESS.md | head -1 | sed 's/.*Last completed: //')
+    next_task=$(grep "Next to work on:" PROGRESS.md -A 1 | tail -1 | sed 's/^[0-9]*\. //' | sed 's/^\*\*//' | sed 's/\*\*//' | head -c 100)
+
+    if [ -n "$last_session" ]; then
+        echo "📅 Last session: $last_session"
+    fi
+    if [ -n "$last_completed" ]; then
+        echo "✅ Last completed: $last_completed"
+    fi
+
+    # Check for pending commits
+    commits_ahead=$(git rev-list --count @{u}..HEAD 2>/dev/null || echo "0")
+    if [ "$commits_ahead" -gt 0 ]; then
+        echo "📤 Pending commits: $commits_ahead (ready to push)"
+    fi
+
+    # Show next planned task
+    if [ -n "$next_task" ]; then
+        echo "🎯 Next planned: $next_task"
+    fi
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
 fi  # End of SESSION START
 
 # ═══════════════════════════════════════════════════════════════════════════

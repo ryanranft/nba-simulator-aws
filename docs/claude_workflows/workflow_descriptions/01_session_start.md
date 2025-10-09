@@ -2,16 +2,29 @@
 
 ### 1. Initialize Session (AUTOMATIC - Don't Ask)
 ```bash
-source scripts/shell/session_manager.sh start
+bash scripts/shell/session_manager.sh start
 ```
 
 **What this does:**
-- Checks system diagnostics (hardware, software, environment)
-- Reviews git status and recent commits
-- Identifies documentation status (stale docs, pending tasks)
-- Sources command logging functions
+- ✅ Checks system diagnostics (hardware, software, environment)
+- ✅ Reviews git status and recent commits
+- ✅ Identifies documentation status (stale docs, pending tasks)
+- ✅ Sources command logging functions
+- ✅ **NEW:** Verifies NBA simulator credentials loaded
+- ✅ **NEW:** Auto-checks overnight scraper jobs (if applicable)
+- ✅ **NEW:** Displays session context summary (last session, next task, pending commits)
 
-**Show output to user for review**
+**Note:** Path is `scripts/shell/session_manager.sh` (not `scripts/session_manager.sh`)
+
+**Output includes:**
+- Hardware/system info
+- Git status and recent commits
+- Documentation age checks
+- **Credentials status:** ✅ or ⚠️
+- **Overnight jobs status:** Running/completed/N/A (auto-detected from PROGRESS.md)
+- **Session context:** Last session date, last completed work, next planned task, pending commits
+
+**Show output to user - no need to separately read PROGRESS.md for orientation**
 
 ### 1.5. Standalone Health Check (OPTIONAL - Deep System Verification)
 
@@ -365,12 +378,30 @@ bash scripts/maintenance/archive_manager.sh full
 5. ✅ Include in onboarding checklist for new team members
 
 ### 2. Orient to Current State (AUTOMATIC - Don't Ask)
-- Read `PROGRESS.md` to identify current phase and next pending task
-- Review documentation status warnings from session_manager output
-- Check for stale CHAT_LOG.md (>30 min old)
 
-### 3. Ask User One Question
-"Any work completed since last session that should be marked ✅ COMPLETE in PROGRESS.md?"
+**Session manager now provides all context automatically!**
+
+Previously required reading PROGRESS.md separately - now all context displayed in session output:
+- ✅ Last session date/time
+- ✅ Last completed work
+- ✅ Overnight jobs status (if applicable)
+- ✅ Pending commits count
+- ✅ Next planned task
+
+**Only read PROGRESS.md if user asks specific questions not answered by session summary.**
+
+### 3. Ask User One Focused Question (AUTOMATIC - Always Ask)
+
+"What did you complete since last session? (or 'none' to continue where we left off)"
+
+**Why this matters:**
+- User may have worked between sessions
+- Claude needs to know what's already done to avoid duplicate work
+- Updates context for accurate task selection
+
+**After user responds:**
+- If work was completed → Update PROGRESS.md status
+- If "none" → Proceed with "Next planned task" from session summary
 
 ### 4. Offer Time-Based Maintenance (Conditional - Ask Only If Applicable)
 

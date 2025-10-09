@@ -48,18 +48,24 @@ This file provides core guidance to Claude Code (claude.ai/code) when working wi
 ```
 
 **Quick reference - Every session:**
-1. Initialize session (`session_manager.sh start`) - show output to user
-2. Orient to current state (read PROGRESS.md)
-3. **🌙 Check overnight jobs** (if "Overnight jobs running" in PROGRESS.md):
-   - See docs/SCRAPER_MONITORING_SYSTEM.md
-   - Follow Workflow #38: Overnight Scraper Handoff Protocol
-4. Ask about completed work
-5. Wait for user's task request
-6. Follow decision workflow
-7. Execute task → Document outcome
-8. Update PROGRESS.md → Suggest next action
-9. Follow security protocol for commits/pushes
-10. Monitor context (auto-save at 75%, warn at 90%)
+1. **Initialize session** (`bash scripts/shell/session_manager.sh start`) - show output to user
+   - **NEW:** Auto-checks credentials, overnight jobs, displays session context
+   - No need to separately read PROGRESS.md - all context in output
+2. **Ask user:** "What did you complete since last session?" (or 'none' to continue)
+3. If work completed → Update PROGRESS.md status
+4. If 'none' → Proceed with "Next planned task" from session summary
+5. Execute task → Document outcome
+6. Update PROGRESS.md → Suggest next action
+7. Follow security protocol for commits/pushes
+8. Monitor context (auto-save at 75%, warn at 90%)
+
+**Session manager now provides automatically:**
+- ✅ Credentials status
+- ✅ Overnight jobs check (auto-detected, no manual workflow needed)
+- ✅ Last session date/time
+- ✅ Last completed work
+- ✅ Pending commits count
+- ✅ Next planned task
 
 **Critical decision points:**
 - **Skipping ahead?** → Check prerequisites, warn if missing
