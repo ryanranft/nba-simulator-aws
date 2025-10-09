@@ -460,9 +460,9 @@ log_cmd git status
 ### Documentation
 
 - **Quick Reference:** `QUICKSTART.md` (one-page command reference)
-- **Machine Specs:** `MACHINE_SPECS.md` (hardware, software versions)
 - **File Inventory:** `FILE_INVENTORY.md` (auto-generated summaries)
 - **Progress Tracking:** `PROGRESS.md` (phase-by-phase implementation plan)
+- **Machine Specs:** Archived (hardware/software versions - see `~/sports-simulator-archives/nba/`)
 - **Detailed Docs:** `docs/` (23 documentation files)
 
 ---

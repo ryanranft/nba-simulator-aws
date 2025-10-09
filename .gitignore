@@ -92,8 +92,12 @@ scripts/maintenance/archive_chat_by_next_sha.sh
 CHAT_LOG_INSTRUCTIONS.md
 COMMAND_LOG.example.md
 
-# Pre-push cleanup - files archived 2025-10-08
+# Pre-push cleanup - files archived 2025-10-08 (session 1)
 CONTEXT_OPTIMIZATION_STATUS.md
 PROJECT_STATUS.md
 WORKFLOW_3_COMPARISON.md
 WORKFLOW_2_COMPARISON.md
+
+# Pre-push cleanup - files archived 2025-10-08 (session 2)
+MACHINE_SPECS.md
+WORKFLOW_CONSOLIDATION_LOG.md
