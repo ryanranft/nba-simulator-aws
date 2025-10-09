@@ -1,6 +1,21 @@
-# NBA Data Sources - Multi-Source Strategy
+# ⚠️ DEPRECATED - Use DATA_CATALOG.md Instead
 
-**Last Updated:** October 7, 2025
+**This file contains outdated data statistics.**
+
+**Authoritative Source:** See [`docs/DATA_CATALOG.md`](DATA_CATALOG.md) for current, accurate data collection information.
+
+**Last Updated:** October 7, 2025 (Statistics may be outdated)
+**Deprecated:** October 9, 2025
+**Reason:** Consolidated into single source of truth to prevent conflicting references
+
+---
+
+**⚠️ WARNING:** ESPN date ranges and statistics below may be incorrect. Always reference DATA_CATALOG.md for current values.
+
+---
+
+# NBA Data Sources - Multi-Source Strategy (HISTORICAL)
+
 **Status:** Active - 5 sources configured (with temporal precision tracking)
 
 ---

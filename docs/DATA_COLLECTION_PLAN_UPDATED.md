@@ -25,10 +25,10 @@ This is a **Progressive Fidelity Historical Simulation System** that adapts to d
 
 | Data Source | Files | Coverage | Status |
 |-------------|-------|----------|--------|
-| ESPN Play-by-Play | 44,826 | 1999-2025 | ✅ Complete |
-| ESPN Box Scores | 44,828 | 1999-2025 | ✅ Complete |
-| ESPN Team Stats | 46,093 | 1999-2025 | ✅ Complete |
-| ESPN Schedule | 11,633 | 1999-2025 | ✅ Complete |
+| ESPN Play-by-Play | 44,826 | 1993-2025 | ✅ Complete |
+| ESPN Box Scores | 44,828 | 1993-2025 | ✅ Complete |
+| ESPN Team Stats | 46,093 | 1993-2025 | ✅ Complete |
+| ESPN Schedule | 11,633 | 1993-2025 | ✅ Complete |
 | NBA API Comprehensive | 15,736 | 2020-2025 | ✅ Current |
 | NBA API Play-by-Play | 2,163 | Recent | 🔄 Expanding |
 | hoopR Phase 1 | 218 | 2017-2021 | 🔄 Expanding to 1997 |
@@ -38,7 +38,7 @@ This is a **Progressive Fidelity Historical Simulation System** that adapts to d
 
 | Table | Size | Rows | Coverage | Quality |
 |-------|------|------|----------|---------|
-| temporal_events | 5.6 GB | 14.1M | 1999-2025 | ✅ High |
+| temporal_events | 5.6 GB | 14.1M | 1993-2025 | ✅ High |
 | play_by_play | 1.5 GB | 6.8M | 2004-2021 | ✅ High |
 | box_score_players | 91 MB | 408K | 1997-2021 | ⚠️ Gap 2021-2025 |
 | games | 22 MB | 54,710 | 1993-2025 | ✅ Complete |
