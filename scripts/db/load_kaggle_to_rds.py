@@ -26,8 +26,8 @@ from dotenv import load_dotenv
 from datetime import datetime
 import csv
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from external credentials file
+load_dotenv('/Users/ryanranft/nba-sim-credentials.env')
 
 # Database configuration
 DB_CONFIG = {
@@ -35,7 +35,8 @@ DB_CONFIG = {
     'database': os.getenv('DB_NAME', 'nba_simulator'),
     'user': os.getenv('DB_USER'),
     'password': os.getenv('DB_PASSWORD'),
-    'port': os.getenv('DB_PORT', 5432)
+    'port': os.getenv('DB_PORT', 5432),
+    'sslmode': 'require'
 }
 
 # Data files

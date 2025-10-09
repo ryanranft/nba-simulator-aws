@@ -54,7 +54,7 @@ def main():
 
     # 1. Connect to database
     print("[1/7] Connecting to RDS database...")
-    engine = create_engine(f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
+    engine = create_engine(f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=require')
 
     # Validate connection
     try:

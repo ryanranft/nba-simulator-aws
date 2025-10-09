@@ -26,7 +26,7 @@ from dotenv import load_dotenv
 import argparse
 
 # Load environment variables
-load_dotenv()
+load_dotenv('/Users/ryanranft/nba-sim-credentials.env')
 
 # Database configuration
 DB_CONFIG = {
@@ -34,7 +34,8 @@ DB_CONFIG = {
     'database': os.getenv('DB_NAME', 'nba_simulator'),
     'user': os.getenv('DB_USER'),
     'password': os.getenv('DB_PASSWORD'),
-    'port': os.getenv('DB_PORT', 5432)
+    'port': os.getenv('DB_PORT', 5432),
+    'sslmode': 'require'
 }
 
 # Input file

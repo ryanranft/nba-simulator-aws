@@ -205,12 +205,13 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
 - **Inventory local data?** → `45` (comprehensive data inventory system - local disk, project data, archives)
 - **Analyze data gaps?** → `46` (identify and remediate missing data - local/S3/DB comparison)
 - **Inventory AWS data?** → `47` (AWS services inventory - S3, RDS, Glue, Athena, costs)
+- **🚀 Integrated data pipeline?** → `48` (unified workflow: inventory → gaps → plan → collect → validate)
 
 ---
 
 ## 📊 Workflow Statistics
 
-- **Total workflows**: 47
+- **Total workflows**: 48
 - **Total size**: ~830 KB
 - **Average workflow**: ~19 KB
 - **Largest workflow**: `24_aws_resource_setup.md` (92 KB)
@@ -274,6 +275,17 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
     - **Cost estimation:** S3 storage costs, RDS compute/storage costs, total monthly estimate
     - **Resource utilization:** Storage and compute usage summaries
 
+- **Batch 12 (48):** Integrated data collection pipeline (NEW 2025-10-09) 🚀
+  - 🔗 Integrated Data Pipeline - Single unified workflow combining:
+    - **Phase 1:** Data inventory (Workflows #45, #47)
+    - **Phase 2:** Gap analysis (Workflow #46)
+    - **Phase 3:** Collection plan generation
+    - **Phase 4:** Scraper execution (Workflows #40, #42)
+    - **Phase 5:** Data validation (Workflow #41)
+  - **Modes:** `status`, `plan`, `collect`, `validate`, `full`
+  - **Use cases:** Weekly updates, comprehensive gap filling, QA checks, overnight scraper setup
+  - **Script:** `scripts/monitoring/data_pipeline_manager.sh`
+
 ---
 
-*Last updated: 2025-10-08*
+*Last updated: 2025-10-09*
