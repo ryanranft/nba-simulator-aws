@@ -27,6 +27,7 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 import argparse
+import pandas as pd
 
 # Import sportsdataverse (hoopR Python wrapper)
 try:
@@ -247,6 +248,10 @@ class HoopRIncrementalScraper:
                 print("❌ No schedule data returned from hoopR")
                 return
 
+            # Convert to pandas if it's a Polars DataFrame
+            if hasattr(schedule_df, 'to_pandas'):
+                schedule_df = schedule_df.to_pandas()
+
             print(f"✓ Loaded {len(schedule_df):,} games from hoopR schedule")
 
             # Filter to recent games only
@@ -300,6 +305,10 @@ class HoopRIncrementalScraper:
                     pbp_df = load_nba_pbp(seasons=[current_season])
 
                     if pbp_df is not None and len(pbp_df) > 0:
+                        # Convert to pandas if it's a Polars DataFrame
+                        if hasattr(pbp_df, 'to_pandas'):
+                            pbp_df = pbp_df.to_pandas()
+
                         # Filter to this game
                         game_pbp = pbp_df[pbp_df['game_id'] == int(game_id)]
 
