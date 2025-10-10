@@ -11,7 +11,8 @@ Scrapes ALL available data from Basketball Reference (1946-2025):
 - Play-by-play
 - Standings
 
-Rate Limit: 5 seconds between requests (Basketball Reference rate limit protection)
+Rate Limit: 12 seconds between requests (Basketball Reference rate limit protection)
+Updated: Increased from 5s to 12s to prevent HTTP 429 rate limiting errors
 """
 
 import argparse
@@ -50,7 +51,7 @@ logging.basicConfig(
 class BasketballReferenceCompleteHistoricalScraper:
     """Scrape complete historical data from Basketball Reference"""
 
-    def __init__(self, output_dir: str, s3_bucket: Optional[str] = None, rate_limit: float = 5.0):
+    def __init__(self, output_dir: str, s3_bucket: Optional[str] = None, rate_limit: float = 12.0):
         self.output_dir = Path(output_dir)
         self.s3_bucket = s3_bucket
         self.s3_client = boto3.client('s3') if HAS_BOTO3 and s3_bucket else None
@@ -620,8 +621,8 @@ Data types:
                        help='Local output directory (default: /tmp/basketball_reference_complete)')
     parser.add_argument('--checkpoint-file',
                        help='Path to checkpoint file for resume capability')
-    parser.add_argument('--rate-limit', type=float, default=5.0,
-                       help='Seconds between requests (default: 5.0)')
+    parser.add_argument('--rate-limit', type=float, default=12.0,
+                       help='Seconds between requests (default: 12.0, increased to prevent 429 errors)')
     parser.add_argument('--verbose', action='store_true',
                        help='Enable verbose logging')
 
