@@ -1,20 +1,30 @@
 #!/bin/bash
+################################################################################
+# ⚠️  WARNING: FULL HISTORICAL SCRAPER - MANUAL USE ONLY ⚠️
+################################################################################
 #
-# Enhanced Overnight Multi-Source Scraping
+# This script scrapes ALL 27 seasons (1999-2025) - 12+ HOUR RUNTIME!
 #
-# This script maximizes data collection across all available years:
-# 1. Basketball Reference (1999-2025) - Match ESPN coverage
-# 2. NBA.com Stats API (1999-2025) - All endpoints with 92 tracking features
+# ⛔ DO NOT USE FOR NIGHTLY AUTOMATION ⛔
 #
-# Estimated runtime:
-# - Basketball Reference: 27 seasons × 3 requests × 3.5 sec = ~5 minutes
-# - NBA Stats API: 27 seasons × 8 endpoints × 3 sec = ~10-12 hours
-# - Total: ~12 hours
+# Purpose: Historical backfills only (manual use)
+# For nightly updates: use scripts/workflows/overnight_multi_source_unified.sh
 #
-# Features gained:
-# - Basketball Reference: 47 advanced metrics (TS%, PER, BPM, Win Shares)
-# - NBA.com Stats: 92 tracking features (hustle, defense, speed, clutch)
-# - Total: 209 features across all sources
+# This script is preserved for manual historical data collection when needed.
+# It scrapes:
+# 1. Basketball Reference (1999-2025) - 27 seasons, ~5 minutes
+# 2. NBA.com Stats API (1999-2025) - 27 seasons, ~10-12 hours
+#
+# Total runtime: ~12 hours
+# Features gained: 209 advanced metrics
+#
+# Use cases:
+# - Initial database setup
+# - Filling large historical gaps
+# - Adding new data source (one-time backfill)
+#
+# DO NOT schedule this in cron/launchd!
+################################################################################
 
 set -e  # Exit on error
 

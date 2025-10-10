@@ -100,19 +100,19 @@ setup() {
 ################################################################################
 
 scrape_espn() {
-    log_section "STEP 1: SCRAPE ESPN DATA"
+    log_section "STEP 1: SCRAPE ESPN DATA (INCREMENTAL)"
 
-    # Check if ESPN scraper exists
-    if [ -f "$PROJECT_DIR/scripts/etl/enhanced_overnight_scrape.sh" ]; then
-        log "Running ESPN overnight scraper..."
+    # Use incremental scraper (only recent games, NOT all 27 seasons)
+    if [ -f "$PROJECT_DIR/scripts/etl/espn_incremental_scraper.py" ]; then
+        log "Running ESPN incremental scraper (last 14 days)..."
 
-        if bash scripts/etl/enhanced_overnight_scrape.sh >> "$LOG_FILE" 2>&1; then
-            log "✓ ESPN scraping complete"
+        if python scripts/etl/espn_incremental_scraper.py >> "$LOG_FILE" 2>&1; then
+            log "✓ ESPN incremental scraping complete"
         else
             log_error "ESPN scraping failed (non-fatal, continuing)"
         fi
     else
-        log "⚠️  ESPN scraper not found, skipping"
+        log "⚠️  ESPN incremental scraper not found, skipping"
     fi
 }
 
@@ -121,19 +121,19 @@ scrape_espn() {
 ################################################################################
 
 scrape_hoopr() {
-    log_section "STEP 2: SCRAPE HOOPR DATA"
+    log_section "STEP 2: SCRAPE HOOPR DATA (INCREMENTAL)"
 
-    # Check if hoopR scraper exists
-    if [ -f "$PROJECT_DIR/scripts/etl/run_hoopr_comprehensive_overnight.sh" ]; then
-        log "Running hoopR overnight scraper..."
+    # Use incremental scraper (only recent games, NOT all seasons)
+    if [ -f "$PROJECT_DIR/scripts/etl/hoopr_incremental_scraper.py" ]; then
+        log "Running hoopR incremental scraper (last 7 days)..."
 
-        if bash scripts/etl/run_hoopr_comprehensive_overnight.sh >> "$LOG_FILE" 2>&1; then
-            log "✓ hoopR scraping complete"
+        if python scripts/etl/hoopr_incremental_scraper.py >> "$LOG_FILE" 2>&1; then
+            log "✓ hoopR incremental scraping complete"
         else
             log_error "hoopR scraping failed (non-fatal, continuing)"
         fi
     else
-        log "⚠️  hoopR scraper not found, skipping"
+        log "⚠️  hoopR incremental scraper not found, skipping"
     fi
 }
 
