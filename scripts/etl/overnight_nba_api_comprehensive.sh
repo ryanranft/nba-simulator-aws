@@ -72,7 +72,23 @@ for season in "${SEASONS[@]}"; do
     echo "🏀 Season $season" | tee -a "$FULL_LOG"
     echo "================================================" | tee -a "$FULL_LOG"
 
+    # Check if season already completed (checkpoint exists)
+    checkpoint_file="/tmp/nba_api_comprehensive/.checkpoints/season_${season}.complete"
+    if [ -f "$checkpoint_file" ]; then
+        echo "⏭️  Season $season already complete (checkpoint found), skipping..." | tee -a "$FULL_LOG"
+        echo "" | tee -a "$FULL_LOG"
+        continue
+    fi
+
+    # PRE-SCRAPE VALIDATION: Clean up any partial files from previous failed runs
+    echo "🔍 Pre-scrape validation: Checking for partial files..." | tee -a "$FULL_LOG"
+    python scripts/utils/validate_nba_api_files.py \
+        --output-dir "/tmp/nba_api_comprehensive" \
+        --delete-invalid \
+        --quiet 2>&1 | tee -a "$FULL_LOG"
+
     # Run comprehensive scraper for this season
+    echo "🚀 Starting scrape for season $season..." | tee -a "$FULL_LOG"
     python scripts/etl/scrape_nba_api_comprehensive.py \
         --season "$season" \
         --all-endpoints \
@@ -83,9 +99,23 @@ for season in "${SEASONS[@]}"; do
     exit_code=${PIPESTATUS[0]}
 
     if [ $exit_code -eq 0 ]; then
-        echo "✅ Season $season complete" | tee -a "$FULL_LOG"
+        # POST-SCRAPE VALIDATION: Ensure all files are valid
+        echo "🔍 Post-scrape validation: Verifying data quality..." | tee -a "$FULL_LOG"
+        python scripts/utils/validate_nba_api_files.py \
+            --output-dir "/tmp/nba_api_comprehensive" \
+            --quiet 2>&1 | tee -a "$FULL_LOG"
+
+        validation_code=$?
+
+        if [ $validation_code -eq 0 ]; then
+            echo "✅ Season $season complete and validated" | tee -a "$FULL_LOG"
+        else
+            echo "⚠️  Season $season completed but has validation warnings" | tee -a "$FULL_LOG"
+            echo "   Run validation manually: python scripts/utils/validate_nba_api_files.py --season $season" | tee -a "$FULL_LOG"
+        fi
     else
         echo "❌ Season $season failed (exit code: $exit_code)" | tee -a "$FULL_LOG"
+        echo "   Checkpoint not created - season will be re-attempted on next run" | tee -a "$FULL_LOG"
     fi
 
     echo "" | tee -a "$FULL_LOG"

@@ -113,6 +113,10 @@ class ComprehensiveNBAStatsScraper:
         for category in self.categories:
             (self.output_dir / category).mkdir(parents=True, exist_ok=True)
 
+        # Create checkpoint directory
+        self.checkpoint_dir = self.output_dir / '.checkpoints'
+        self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
+
         self.stats = {
             'endpoints_scraped': 0,
             'files_created': 0,
@@ -123,6 +127,41 @@ class ComprehensiveNBAStatsScraper:
         # Rate limiting (increased for production stability and to avoid NBA.com blocking)
         self.last_request_time = 0
         self.min_request_interval = 2.5  # 2.5s between requests (very conservative to avoid rate limiting)
+
+    def check_season_complete(self, season: int) -> bool:
+        """
+        Check if season has already been completed
+
+        Args:
+            season: Season year (e.g., 2024)
+
+        Returns:
+            True if season checkpoint exists, False otherwise
+        """
+        checkpoint_file = self.checkpoint_dir / f"season_{season}.complete"
+        return checkpoint_file.exists()
+
+    def create_season_checkpoint(self, season: int):
+        """
+        Create checkpoint marker after successful season completion
+
+        Args:
+            season: Season year (e.g., 2024)
+        """
+        checkpoint_file = self.checkpoint_dir / f"season_{season}.complete"
+        checkpoint_data = {
+            "season": season,
+            "completed_at": datetime.now().isoformat(),
+            "files_created": self.stats['files_created'],
+            "api_calls": self.stats['api_calls'],
+            "errors": self.stats['errors'],
+            "endpoints_scraped": self.stats['endpoints_scraped']
+        }
+
+        with open(checkpoint_file, 'w') as f:
+            json.dump(checkpoint_data, f, indent=2)
+
+        print(f"\n✅ Season {season} checkpoint created")
 
     def _rate_limit(self):
         """Enforce rate limiting between API calls"""
@@ -497,6 +536,9 @@ class ComprehensiveNBAStatsScraper:
         print(f"API calls made:       {self.stats['api_calls']}")
         print(f"Errors:               {self.stats['errors']}")
         print("="*60)
+
+        # Create checkpoint marker for successful completion
+        self.create_season_checkpoint(season)
 
 
 def main():
