@@ -450,6 +450,22 @@ main() {
     # Cleanup
     cleanup || log "⚠️  Cleanup failed (non-fatal)"
 
+    # Step 10: Check and recover long-running scrapers
+    log_section "STEP 10: CHECK LONG-RUNNING SCRAPERS"
+
+    if [ -f "$PROJECT_DIR/scripts/monitoring/check_and_recover_scrapers.sh" ]; then
+        log "Checking health of Basketball Reference and NBA API scrapers..."
+
+        if bash "$PROJECT_DIR/scripts/monitoring/check_and_recover_scrapers.sh" >> "$LOG_FILE" 2>&1; then
+            log "✓ All long-running scrapers healthy or recovered"
+        else
+            log "⚠️  Some scraper recovery attempts failed (non-fatal)"
+            log "  Check recovery log for details"
+        fi
+    else
+        log "⚠️  Scraper health check script not found, skipping"
+    fi
+
     # Success
     log_section "WORKFLOW COMPLETE"
     log "✓ All steps completed successfully!"

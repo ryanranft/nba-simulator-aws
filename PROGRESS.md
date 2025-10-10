@@ -28,11 +28,67 @@ up in# NBA Temporal Panel Data System - Progress Index
 
 ## Current Session Context
 
-**Last session ended:** October 9, 2025 - ~8:35 PM
-**Last completed:** Gap Filler Verification + Overnight Automation Scheduling
-**Next session:** Monitor overnight automation OR resume multi-source data quality work
+**Last session ended:** October 9, 2025 - ~11:00 PM
+**Last completed:** Long-Running Scraper Deployment + Auto-Recovery System
+**Next session:** Monitor scrapers + overnight automation tomorrow 3 AM
 
-**Current session:** October 9, 2025 - ~7:55 PM - 8:35 PM - Gap Filler Verification + Automation Scheduling (✅ COMPLETE)
+**Current session:** October 9, 2025 - ~9:00 PM - 11:00 PM - Long-Running Scraper Deployment + Auto-Recovery (✅ COMPLETE)
+  - ✅ **Deployed Basketball Reference comprehensive scraper**
+    - Coverage: Full historical 1947-2025 (79 seasons, 553 operations)
+    - Running as 2 parallel scrapers (no conflicts):
+      - 2020-2025: PID 15843, ~2-3 hours, `/tmp/bbref_2020-2025.log`
+      - 1947-2019: PID 19278, ~20-25 hours, `/tmp/bbref_1947-2019.log`
+    - Data types: Schedules, season totals, advanced totals, standings, box scores, play-by-play (2000+)
+    - Checkpoint system: `.complete` markers per season+data-type (automatic resume)
+    - Output: `/tmp/basketball_reference_incremental/` (shared directory)
+    - S3: `s3://nba-sim-raw-data-lake/basketball_reference/`
+  - ✅ **Deployed NBA API test scraper**
+    - Coverage: 2024-2025 seasons only (200+ endpoints per season)
+    - PID: 17289, ~50-60 hours runtime, `/tmp/nba_api_test.log`
+    - Created: `scripts/etl/overnight_nba_api_test.sh`
+    - Endpoints: Play-by-play with timestamps, player bio, dashboards, hustle stats, draft data, shot charts, synergy play types, advanced box scores, player tracking
+    - Checkpoint: Each game/player/endpoint saved immediately to disk + S3
+    - Output: `/tmp/nba_api_comprehensive/`
+    - S3: `s3://nba-sim-raw-data-lake/nba_api_comprehensive/`
+    - Known: 50-70% error rate on some endpoints (expected, documented)
+  - ✅ **Created auto-recovery system**
+    - File: `scripts/monitoring/check_and_recover_scrapers.sh` (306 lines)
+    - Monitors: All 3 long-running scrapers (Basketball Reference 2020-2025, 1947-2019, NBA API test)
+    - Health checks: Process running → log completion → recovery if failed
+    - Recovery: Automatic redeploy from checkpoint with `nohup`
+    - Testing: All scrapers healthy (verified Oct 9, 10:52 PM)
+    - Output: Color-coded status + recovery log
+  - ✅ **Integrated auto-recovery into overnight workflow**
+    - Modified: `scripts/workflows/overnight_multi_source_unified.sh`
+    - Added: Step 10 - Check long-running scrapers (after Steps 1-9)
+    - Execution: Daily at 3 AM as part of overnight automation
+    - Behavior: Non-fatal (workflow continues even if recovery fails)
+    - Logs: Separate recovery logs + overnight workflow log
+  - ✅ **Documented comprehensive deployment**
+    - File: `docs/SCRAPER_DEPLOYMENT_STATUS.md` (380 lines)
+    - Sections: Currently running scrapers, auto-recovery system, checkpoint/resume behavior, monitoring commands, troubleshooting, expected behavior, next steps
+    - Documentation: Recovery scenarios (4 types), integration flow, health check logic, manual execution commands
+  - ✅ **Updated monitoring tools**
+    - File: `SCRAPER_MONITOR.sh` (updated to track all 3 scrapers)
+    - Quick status: Shows all running scrapers + progress
+    - Log locations: tail commands for each scraper
+  - 📊 **Key achievements:**
+    - Full historical Basketball Reference scraping (1947-2025, first time)
+    - NBA API test deployment (2024-2025 as proof of concept)
+    - Automatic recovery system prevents overnight failures
+    - Game-by-game checkpointing prevents data loss
+    - Tomorrow's 3 AM workflow will auto-check and recover scrapers
+  - 🎯 **Current scraper progress (as of 11:00 PM):**
+    - Basketball Reference (2020-2025): Processing season 2023, ~85% complete
+    - Basketball Reference (1947-2019): Processing season 1949, ~3% complete
+    - NBA API test: Started season 2024 play-by-play data
+  - 🎯 **Next session options:**
+    - Option A: Monitor scraper progress and first 3 AM auto-recovery run
+    - Option B: After NBA API test completes (2-3 days), deploy full scraper (all 30 seasons)
+    - Option C: After Basketball Reference completes (~25 hours), validate data quality
+    - Option D: Resume multi-source data quality framework
+
+**Previous session:** October 9, 2025 - ~7:55 PM - 8:35 PM - Gap Filler Verification + Automation Scheduling (✅ COMPLETE)
   - ✅ **Verified historical gap filler results**
     - Analyzed 2,464 missing games from ESPN-hoopR gap analysis
     - Result: All games permanently unavailable from hoopR API
