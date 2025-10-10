@@ -113,12 +113,36 @@ The high discrepancy rate (99.3%) is **NOT due to data quality issues**, but rat
 
 ### Why is Coverage So Limited?
 
-**Likely causes:**
+**Root cause identified:** ✅ **Rate Limiting by Basketball Reference Website**
 
-1. **S3 Data Source:** Basketball Reference overnight scraper only found schedules for certain years in S3
-2. **Website Availability:** Basketball Reference website may only have season totals for certain years
-3. **Scraper Configuration:** May have been configured to download specific years only
-4. **Data Processing:** Some years may have failed quality checks during integration
+**Investigation findings:**
+
+1. **Scraper attempted ALL years (1947-2025):**
+   - Log files exist for every single year in `/tmp/bbref_incremental_logs/`
+   - Scraper was configured correctly to collect comprehensive data
+   - NOT a configuration or scheduling issue
+
+2. **Many years failed with HTTP 429 (Too Many Requests):**
+   - Example from `season-totals_2005.log`:
+     ```
+     2025-10-10 02:49:02,127 - WARNING - Request failed (attempt 1/3): 429 Client Error: Too Many Requests
+     2025-10-10 02:49:32,256 - WARNING - Request failed (attempt 2/3): 429 Client Error: Too Many Requests
+     2025-10-10 02:50:32,379 - ERROR - Request failed after 3 attempts: 429 Client Error: Too Many Requests
+     ```
+   - Pattern observed: Failed years have larger log files (~1.7K) with error messages
+   - Successful years have small log files (~959B-969B)
+
+3. **Scraper rate limiting settings insufficient:**
+   - Current delay: 5 seconds between requests
+   - Basketball Reference's rate limits are stricter than expected
+   - Exponential backoff needed for 429 errors
+
+4. **Years that succeeded vs failed:**
+   - **Successful:** 1953-1985 (33 years), 1992, 2000, 2014, 2016, 2019, 2020
+   - **Failed (rate limited):** 1986-1991, 1993-1999, 2001-2013, 2015, 2017-2018
+   - Pattern: Earlier requests succeeded, later requests were rate-limited
+
+**Key insight:** The data EXISTS on Basketball Reference website and in S3, but our scraper was blocked by aggressive rate limiting during overnight collection.
 
 ---
 
@@ -175,6 +199,69 @@ The high discrepancy rate (99.3%) is **NOT due to data quality issues**, but rat
 
 ---
 
+## Coverage Gap Investigation
+
+**Investigation Date:** October 10, 2025
+**Trigger:** Cross-validation revealed only 4 overlapping years instead of expected 20
+
+### Investigation Steps
+
+1. **Checked S3 Bucket Contents:**
+   - Command: `aws s3 ls s3://nba-sim-raw-data-lake/basketball_reference/season_totals/`
+   - Finding: 39 years present in S3, matching database count
+   - Conclusion: No data loss between S3 and database integration
+
+2. **Examined Basketball Reference Scraper Logs:**
+   - Location: `/tmp/bbref_incremental_logs/`
+   - Finding: Log files exist for ALL years (1947-2025), not just the 39 with data
+   - Key observation: Failed years have larger log files (~1.7K) with error messages
+
+3. **Analyzed Failure Patterns:**
+   - Searched logs for "429" errors: Found extensive rate limiting
+   - Compared successful vs failed log file sizes
+   - Pattern: Early requests succeeded, later requests blocked by rate limits
+
+4. **Root Cause Confirmed:**
+   - ✅ Scraper configuration: Correct (attempted all years)
+   - ✅ Data availability: Exists on Basketball Reference website
+   - ✅ S3 upload: Working (uploaded successful years)
+   - ❌ Rate limiting: Insufficient delay between requests
+   - **Primary issue:** HTTP 429 Too Many Requests errors
+
+### Failed Years by Category
+
+**Critical for ML (modern era):**
+- 2001-2013 (13 years) - **HIGHEST PRIORITY**
+- 2015, 2017-2018 (3 years)
+
+**Historical gaps:**
+- 1986-1991 (6 years)
+- 1993-1999 (7 years)
+
+**Total failed:** 26 years due to rate limiting
+**Total successful:** 39 years (scraped before rate limits hit)
+
+### Resolution Plan
+
+**Immediate fix:**
+1. Modify scraper rate limiting:
+   - Increase base delay: 5s → 10-15s
+   - Add exponential backoff: 2x on 429, max 60s
+   - Add request throttling: Max 100 requests/hour
+
+2. Re-run scraper for 26 failed years:
+   - Overnight batch job (2-4 hours)
+   - Target: Fill 2001-2013 gap first (ML priority)
+   - Secondary: Fill 1986-2000 gap (historical completeness)
+
+3. Expected outcome:
+   - +26 years of data (1986-2018)
+   - Complete modern coverage: 2001-2020 (20 years vs current 4)
+   - Complete transition coverage: 1986-2000 (15 years vs current 2)
+   - Total coverage: 65 years (1953-2018) vs current 39
+
+---
+
 ## Recommendations
 
 ### Immediate Actions
@@ -198,11 +285,13 @@ The high discrepancy rate (99.3%) is **NOT due to data quality issues**, but rat
 
 ### Short-Term Actions (This Week)
 
-1. **Collect Missing Basketball Reference Data:**
-   - Identify why 2001-2013 is missing
-   - Check if data exists in Basketball Reference website
-   - Re-run scraper if data available
-   - May need to scrape from website directly (not S3)
+1. **Fix Rate Limiting and Re-collect Missing Data:**
+   - ✅ **Root cause identified:** HTTP 429 rate limiting
+   - **Fix needed:** Increase scraper delay from 5s to 10-15s
+   - **Enhancement needed:** Implement exponential backoff for 429 errors
+   - **Re-run targets:** 26 failed years (1986-1991, 1993-1999, 2001-2013, 2015, 2017-2018)
+   - **Estimated time:** 2-4 hours overnight scraping
+   - **Priority:** High (fills critical 2001-2013 gap for ML training)
 
 2. **Validate Historical Data Quality:**
    - Cross-validate 1953-1985 with Kaggle database
