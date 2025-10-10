@@ -7,7 +7,10 @@
 #
 # Strategy:
 # 1. Scrape from each source independently (maintains data purity)
-# 2. Update source databases (ESPN, hoopR remain pure)
+#    - ESPN: Last 14 days of games (play-by-play)
+#    - hoopR: Last 7 days of games (play-by-play)
+#    - Basketball Reference: Current season aggregate stats (season totals + advanced)
+# 2. Update source databases (ESPN, hoopR, Basketball Reference remain pure)
 # 3. Extract/update game ID mappings
 # 4. Rebuild unified database with quality scores
 # 5. Run discrepancy detection
@@ -18,8 +21,9 @@
 # Schedule: Daily at 3:00 AM (games are final, web traffic is low)
 # Cron: 0 3 * * * cd /Users/ryanranft/nba-simulator-aws && bash scripts/workflows/overnight_multi_source_unified.sh
 #
-# Version: 1.0
+# Version: 1.1
 # Created: October 9, 2025
+# Updated: October 10, 2025 - Added Basketball Reference incremental scraping
 ################################################################################
 
 set -e  # Exit on error
@@ -134,6 +138,35 @@ scrape_hoopr() {
         fi
     else
         log "⚠️  hoopR incremental scraper not found, skipping"
+    fi
+}
+
+################################################################################
+# Step 2.5: Scrape Basketball Reference Aggregate Data
+################################################################################
+
+scrape_basketball_reference() {
+    log_section "STEP 2.5: SCRAPE BASKETBALL REFERENCE AGGREGATE DATA"
+
+    # Scrape current season aggregate stats (season totals + advanced stats)
+    if [ -f "$PROJECT_DIR/scripts/etl/basketball_reference_incremental_scraper.py" ]; then
+        log "Running Basketball Reference incremental scraper (current season)..."
+
+        if python scripts/etl/basketball_reference_incremental_scraper.py --upload-to-s3 >> "$LOG_FILE" 2>&1; then
+            log "✓ Basketball Reference scraping complete"
+
+            # Re-integrate into local database
+            log "Re-integrating Basketball Reference aggregate data..."
+            if python scripts/etl/integrate_basketball_reference_aggregate.py >> "$LOG_FILE" 2>&1; then
+                log "✓ Basketball Reference database updated"
+            else
+                log_error "Basketball Reference integration failed (non-fatal, continuing)"
+            fi
+        else
+            log_error "Basketball Reference scraping failed (non-fatal, continuing)"
+        fi
+    else
+        log "⚠️  Basketball Reference incremental scraper not found, skipping"
     fi
 }
 
@@ -425,6 +458,9 @@ main() {
 
     # Step 2: Scrape hoopR
     scrape_hoopr || log "⚠️  hoopR scraping skipped or failed (non-fatal)"
+
+    # Step 2.5: Scrape Basketball Reference
+    scrape_basketball_reference || log "⚠️  Basketball Reference scraping skipped or failed (non-fatal)"
 
     # Step 3: Update mappings
     update_mappings || error_handler "Update Mappings"
