@@ -343,6 +343,18 @@ class HistoricalGapFiller:
 
             print(f"[{i}/{len(gaps_in_season)}] {matchup} ({game_date})")
 
+            # Skip games without hoopR mapping
+            if not hoopr_game_id or hoopr_game_id.strip() == '':
+                print(f"  ⚠️  No hoopR game ID (no mapping exists)")
+                self.unavailable_games.append({
+                    'game_id': gap['espn_game_id'],
+                    'game_date': game_date,
+                    'matchup': matchup,
+                    'reason': 'No ESPN-hoopR game ID mapping exists'
+                })
+                self.stats['gaps_unavailable'] += 1
+                continue
+
             self.stats['gaps_attempted'] += 1
 
             # Check if game exists in hoopR data
