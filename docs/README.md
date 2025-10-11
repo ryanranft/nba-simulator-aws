@@ -9,10 +9,10 @@ This index helps Claude Code and developers find the right documentation efficie
 ## Quick Navigation
 
 ### Starting a New Session
-1. Read **CLAUDE.md** (~300 lines) - Core instructions and navigation
-2. Read **PROGRESS.md** (~685 lines) - Current project state
+1. Read **CLAUDE.md** (~395 lines) - Core instructions and navigation
+2. Read **PROGRESS.md** (~390 lines) - Current project state
 3. Read **this file** (~100 lines) - Documentation map
-4. **Total: ~1,085 lines** (5% of 200K context budget)
+4. **Total: ~885 lines** (4.5% of 200K context budget)
 
 ### Working on a Specific Task
 - **Phase work:** `docs/phases/PHASE_X.md` (400-500 lines)
@@ -29,14 +29,14 @@ This index helps Claude Code and developers find the right documentation efficie
 - **PROGRESS.md** - Current phase status, session context, cost tracking
 
 ### Phase Implementation
-- **docs/phases/PHASE_0_DATA_COLLECTION.md** - Data collection (✅ Complete)
-- **docs/phases/PHASE_1_DATA_QUALITY.md** - Multi-source integration (⏸️ Pending)
-- **docs/phases/PHASE_2_AWS_GLUE.md** - ETL pipeline (✅ Complete)
-- **docs/phases/PHASE_3_DATABASE.md** - RDS setup (✅ Complete)
-- **docs/phases/PHASE_4_SIMULATION_ENGINE.md** - Simulation (✅ Complete)
-- **docs/phases/PHASE_5_MACHINE_LEARNING.md** - ML models (✅ Complete)
-- **docs/phases/PHASE_6_ENHANCEMENTS.md** - Advanced features (✅ Complete)
-- **docs/phases/PHASE_7_BETTING_ODDS.md** - Betting odds (⏸️ Optional)
+- **docs/phases/PHASE_0_INDEX.md** - Data collection (✅ Complete initial, 🔄 Expansion ready)
+- **docs/phases/PHASE_1_INDEX.md** - Multi-source integration (⏸️ Pending)
+- **docs/phases/PHASE_2_INDEX.md** - ETL pipeline (✅ Complete)
+- **docs/phases/PHASE_3_INDEX.md** - RDS setup (✅ Complete)
+- **docs/phases/PHASE_4_INDEX.md** - Simulation (✅ Complete)
+- **docs/phases/PHASE_5_INDEX.md** - ML models (✅ Complete)
+- **docs/phases/PHASE_6_INDEX.md** - Advanced features (✅ Complete)
+- **docs/phases/PHASE_7_INDEX.md** - Betting odds (⏸️ Optional)
 
 ### Workflows
 - **docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md** - Workflow index (38 workflows)
@@ -89,7 +89,6 @@ This index helps Claude Code and developers find the right documentation efficie
 ## By File Size (Context Planning)
 
 ### Small (<200 lines) - Safe to Read Freely
-- **CLAUDE.md** (300 lines after optimization)
 - **docs/README.md** (this file, 100 lines)
 - **docs/CLAUDE_OPERATIONAL_GUIDE.md** (200 lines)
 - **docs/CLAUDE_QUICK_COMMANDS.md** (150 lines)
@@ -101,8 +100,10 @@ This index helps Claude Code and developers find the right documentation efficie
 ### Medium (200-500 lines) - Read When Needed
 - **README.md** (342 lines)
 - **QUICKSTART.md** (250 lines after split)
-- **PROGRESS.md** (685 lines)
-- **Phase files** (300-500 lines each)
+- **CLAUDE.md** (395 lines)
+- **PROGRESS.md** (390 lines)
+- **Phase index files** (PHASE_N_INDEX.md, ~150 lines each)
+- **Phase sub-phase files** (phase_N/N.M_name.md, 300-800 lines)
 - **docs/SETUP.md** (697 lines)
 - **docs/DATA_SOURCES.md** (595 lines)
 
@@ -132,16 +133,17 @@ This index helps Claude Code and developers find the right documentation efficie
 ## Reading Protocols for Claude Code
 
 ### Tier 1 - Always Read (Session Start)
-- CLAUDE.md (~300 lines)
-- PROGRESS.md (~685 lines)
+- CLAUDE.md (~395 lines)
+- PROGRESS.md (~390 lines)
 - docs/README.md (~100 lines)
-- **Total: ~1,085 lines (5% context)**
+- **Total: ~885 lines (4.5% context)**
 
 ### Tier 2 - Read When Needed (Task-Specific)
-- Specific phase file for current work (~400-500 lines)
+- PHASE_N_INDEX.md for current phase (~150 lines)
+- Specific sub-phase file phase_N/N.M_name.md (~300-800 lines)
 - Referenced workflows for current sub-phase (~300 lines each)
 - CLAUDE_OPERATIONAL_GUIDE.md (~200 lines) - only if doing session management
-- **Total: +900-1,000 lines per task**
+- **Total: +650-1,450 lines per task**
 
 ### Tier 3 - Search First, Read Selectively (Reference Only)
 - **TROUBLESHOOTING.md** - Use grep to find error, read that section only
@@ -221,22 +223,31 @@ This index helps Claude Code and developers find the right documentation efficie
 ## Optimization Strategies
 
 **For Claude Code:**
-1. **Start lean:** 1,085 lines (Tier 1) = 5% context
-2. **Add incrementally:** Read phase + workflows as needed
+1. **Start lean:** 885 lines (Tier 1) = 4.5% context
+2. **Add incrementally:** Read phase indexes + sub-phases + workflows as needed
 3. **Search, don't read:** Use grep for large files
 4. **Track what you've read:** Don't re-read files in same session
 5. **Target: Stay under 4,000 lines** per session (comfortable limit)
 
 **Context Budget Examples:**
-- **Minimal session:** 1,085 lines (orientation only)
-- **Light work:** 1,985 lines (+ 1 phase + 1 workflow)
-- **Moderate work:** 2,585 lines (+ 1 phase + 3 workflows)
-- **Heavy work:** 3,485 lines (+ 2 phases + 3 workflows)
+- **Minimal session:** 885 lines (orientation only)
+- **Light work:** 1,335 lines (+ 1 phase index + 1 sub-phase)
+- **Moderate work:** 1,935 lines (+ 1 phase index + 1 sub-phase + 2 workflows)
+- **Heavy work:** 2,835 lines (+ 2 phase indexes + 2 sub-phases + 2 workflows)
 - **Maximum recommended:** 4,000 lines (stay under 200K tokens)
 
 ---
 
 ## Recent Changes
+
+**October 11, 2025 - Phase Index Reorganization:**
+- Created phase index system (PHASE_N_INDEX.md) with 4-level hierarchy
+- Reorganized phase files into subdirectories (phase_0/ through phase_7/)
+- Sub-phase naming: N.M_name.md (e.g., 0.0_initial_data_collection.md)
+- PROGRESS.md reduction: 1,094 → 391 lines (64% reduction)
+- CLAUDE.md reduction: 546 → 395 lines (28% reduction)
+- **Session start context reduced: 1,085 → 885 lines (18% additional reduction)**
+- **Phase navigation context: -78% (17% → 3.75%)**
 
 **October 8, 2025 - Context Optimization:**
 - Created this index file for efficient navigation

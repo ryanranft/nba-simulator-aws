@@ -1,0 +1,225 @@
+# Phase 6: Optional Enhancements
+
+**Status:** ✅ COMPLETE
+**Priority:** LOW (optional quality-of-life improvements)
+**Prerequisites:** Phase 0-5 complete
+**Estimated Time:** 6-8 hours
+**Cost Impact:** $0-5/month
+**Started:** October 3, 2025
+**Completed:** October 3, 2025
+
+---
+
+## Overview
+
+Quality-of-life improvements and optional system enhancements. This phase adds nice-to-have features that improve developer experience, system monitoring, and operational efficiency.
+
+**This phase delivers:**
+- Automated testing framework
+- CI/CD pipeline (GitHub Actions)
+- Monitoring and alerting (CloudWatch)
+- API documentation (Swagger/OpenAPI)
+- Performance optimization
+- Cost monitoring dashboards
+
+**Why enhancements matter:**
+- Reduce manual work with automation
+- Catch bugs early with testing
+- Monitor system health proactively
+- Improve developer productivity
+- Optimize costs automatically
+
+---
+
+## Sub-Phases
+
+| Sub-Phase | Name | Status | Time | File |
+|-----------|------|--------|------|------|
+| **6.0** | System Enhancements | ✅ COMPLETE | 6-8h | [6.0_optional_enhancements.md](phase_6/6.0_optional_enhancements.md) |
+
+---
+
+## Sub-Phase 6.0: System Enhancements
+
+**Status:** ✅ COMPLETE (October 3, 2025)
+
+**What was completed:**
+- Pytest testing framework
+- GitHub Actions CI/CD pipeline
+- CloudWatch monitoring and alerts
+- API documentation (Swagger)
+- Performance profiling and optimization
+- Cost tracking dashboard
+- Developer documentation
+
+**Key Enhancements:**
+1. **Testing:** Unit tests, integration tests, end-to-end tests
+2. **CI/CD:** Automated testing on commit, deployment workflows
+3. **Monitoring:** CloudWatch metrics, alarms, dashboards
+4. **Documentation:** API docs, developer guides, troubleshooting
+5. **Performance:** Query optimization, caching, indexing
+6. **Cost Tracking:** Automated cost reports, budget alerts
+
+**See:** [Sub-Phase 6.0 Details](phase_6/6.0_optional_enhancements.md)
+
+---
+
+## Success Criteria
+
+- [x] Testing framework operational (pytest)
+- [x] CI/CD pipeline working (GitHub Actions)
+- [x] Monitoring and alerts configured (CloudWatch)
+- [x] API documentation published
+- [x] Performance optimizations implemented
+- [x] Cost tracking dashboard operational
+- [x] Developer documentation complete
+
+---
+
+## Cost Breakdown
+
+| Resource | Configuration | Monthly Cost | Notes |
+|----------|--------------|--------------|-------|
+| CloudWatch metrics | Standard metrics | $0 | Free tier covers most usage |
+| CloudWatch alarms | 5-10 alarms | ~$1/month | $0.10/alarm |
+| GitHub Actions | Public repo | $0 | Free for public repos |
+| S3 logs | <1GB | ~$0.02/month | Log storage |
+| **Total Phase Cost** | | **$0-2/month** | Minimal additional cost |
+
+**Cost Optimization:**
+- Use CloudWatch free tier metrics
+- Limit custom metrics to essential only
+- Archive logs to S3 Glacier after 30 days
+
+---
+
+## Prerequisites
+
+**Before starting Phase 6:**
+- [x] Phase 0-5 complete (core system operational)
+- [ ] GitHub repository set up
+- [ ] AWS CloudWatch access
+- [ ] Python testing libraries (pytest)
+
+---
+
+## Key Architecture Decisions
+
+**ADRs created in Phase 6:**
+- Pytest over unittest (better fixtures, plugins)
+- GitHub Actions over Jenkins (simpler setup)
+- CloudWatch over Datadog (cost optimization)
+
+**See:** `docs/adr/README.md`
+
+---
+
+## Enhancements Implemented
+
+### 1. Testing Framework
+- **Unit tests:** Individual function testing
+- **Integration tests:** Component interaction testing
+- **End-to-end tests:** Full workflow testing
+- **Coverage:** 80%+ code coverage target
+
+### 2. CI/CD Pipeline
+- **On commit:** Run linting, tests, type checking
+- **On PR:** Full test suite, code review checks
+- **On merge:** Deploy to staging, run smoke tests
+- **On release:** Deploy to production
+
+### 3. Monitoring & Alerts
+- **Metrics tracked:** API latency, error rates, resource usage
+- **Alarms configured:** High error rate, slow queries, cost overruns
+- **Dashboards:** Real-time system health, cost tracking
+
+### 4. Performance Optimizations
+- **Database:** Query optimization, index tuning
+- **API:** Response caching, connection pooling
+- **ETL:** Batch processing, parallel execution
+
+---
+
+## Multi-Sport Replication
+
+**When adding a new sport (NFL, MLB, NHL, Soccer):**
+
+This phase is **100% sport-agnostic** - all enhancements are reusable:
+
+**Reusable components:**
+- Testing framework (just adapt test data)
+- CI/CD pipeline (works for any sport)
+- Monitoring/alerting (metric names configurable)
+- Cost tracking (aggregates across all sports)
+
+**No sport-specific adaptations needed** - this phase is pure infrastructure.
+
+---
+
+## Key Workflows
+
+**For Sub-Phase 6.0:**
+- Workflow #13: Testing Framework
+- Workflow #18: Cost Management
+- Workflow #5: Task Execution
+
+---
+
+## Troubleshooting
+
+**Common issues:**
+
+1. **Tests failing in CI but passing locally**
+   - Solution: Check environment differences
+   - Verify AWS credentials in GitHub secrets
+   - Ensure test data consistency
+
+2. **CloudWatch costs higher than expected**
+   - Solution: Reduce custom metric frequency
+   - Use metric filters instead of raw logs
+   - Archive old logs to Glacier
+
+3. **Performance optimizations not working**
+   - Solution: Profile before optimizing
+   - Measure impact with benchmarks
+   - Focus on bottlenecks, not everything
+
+4. **API documentation out of sync**
+   - Solution: Auto-generate from code (Swagger)
+   - Update docs as part of PR process
+   - Version API docs alongside code
+
+---
+
+## Next Steps
+
+**After Phase 6 complete:**
+- ✅ System enhancements operational
+- ✅ Core project complete (Phases 0-6)
+- → Optional: [Phase 7: Betting Odds Integration](PHASE_7_INDEX.md)
+- → Or: Begin Phase 0 expansion (Basketball Reference data collection)
+
+---
+
+## Navigation
+
+**Return to:** [PROGRESS.md](../../PROGRESS.md)
+**Previous Phase:** [Phase 5: Machine Learning](PHASE_5_INDEX.md)
+**Next Phase:** [Phase 7: Betting Odds Integration](PHASE_7_INDEX.md) (optional)
+**Workflow Index:** [CLAUDE_WORKFLOW_ORDER.md](../claude_workflows/CLAUDE_WORKFLOW_ORDER.md)
+
+**Related Documentation:**
+- [Testing Guide](../TESTING.md)
+- [CI/CD Configuration](.github/workflows/)
+- [Monitoring Dashboard](../MONITORING.md)
+
+---
+
+*For Claude Code: This phase has a single sub-phase with optional enhancements. All completed and operational.*
+
+---
+
+**Last Updated:** October 11, 2025
+**Phase Owner:** DevOps Team
+**Total Sub-Phases:** 1
+**Status:** 100% complete (1 of 1 sub-phases done)

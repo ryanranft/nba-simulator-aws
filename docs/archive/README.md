@@ -1,6 +1,6 @@
 # Documentation Archive
 
-**Last Updated:** October 8, 2025
+**Last Updated:** October 11, 2025
 
 This directory contains archived documentation files that are historical snapshots or superseded planning documents.
 
@@ -21,9 +21,10 @@ These documents provide valuable historical context:
 ```
 docs/archive/
 ├── README.md (this file)
-├── session_handoffs/       # Session handoff documents (date-specific snapshots)
-├── scraper_reports/        # Scraper test results and status reports (point-in-time)
-└── planning/               # Pre-implementation planning documents (superseded)
+├── session_handoffs/           # Session handoff documents (date-specific snapshots)
+├── scraper_reports/            # Scraper test results and status reports (point-in-time)
+├── planning/                   # Pre-implementation planning documents (superseded)
+└── superseded_documentation/   # Large docs replaced by modular structure (Oct 2025)
 ```
 
 ---
@@ -82,6 +83,54 @@ docs/archive/
 
 ---
 
+## Superseded Documentation (`superseded_documentation/`)
+
+**Purpose:** Preserve large monolithic documentation files replaced by modular structure
+
+**Contents:**
+- `PHASE_0_BASKETBALL_REFERENCE_EXPANSION.md` - Original Basketball Reference planning (4,800 lines, Oct 10, 2025)
+- `PHASE_0_BASKETBALL_REFERENCE_COMPLETE_EXPANSION.md` - Complete expansion plan (4,800 lines, Oct 11, 2025)
+- `PHASE_0_TIER_10_WNBA.md` - WNBA detailed implementation (1,400 lines, Oct 11, 2025)
+- `PHASE_0_TIERS_11_12_13_MULTI_LEAGUE.md` - Multi-League planning (1,800 lines, Oct 11, 2025)
+
+**Active replacements:**
+- Phase index system: `docs/phases/PHASE_N_INDEX.md` (150 lines each)
+- 13-tier modular structure: `docs/phases/phase_0/0.1_basketball_reference/` directory
+- Tier Index: `docs/phases/phase_0/0.1_basketball_reference/README.md` (~300 lines)
+- Individual tier files: `TIER_1_NBA_HIGH_VALUE.md` through `TIER_13_COLLEGE.md` (300-800 lines each)
+- Quick Reference: `docs/phases/phase_0/0.1_basketball_reference/QUICK_REFERENCE_CARDS.md` (~600 lines)
+- Organization protocol: Workflow #45 (`docs/claude_workflows/workflow_descriptions/45_documentation_organization_protocol.md`)
+
+**Why replaced:**
+- Original files consumed 20-24% of context budget (4,800+ lines)
+- Made it inefficient to work on specific tasks
+- New modular structure reduces context usage to 1.5-6% per session
+- Enables progressive detail levels and faster file operations
+- Scalable for future additions
+
+**When archived:** October 11, 2025 (phase index reorganization)
+
+**Status:** Historical documentation - replaced by phase index system
+
+**Phase Index Reorganization (October 11, 2025):**
+
+Complete documentation structure reorganization to reduce context usage:
+
+1. **Phase Index System:** Created PHASE_N_INDEX.md files (0-7) as navigation hubs
+2. **Subdirectory Organization:** Moved all phase content to phase_N/ subdirectories
+3. **Sub-phase Naming:** Standardized N.M_name.md format (e.g., 0.0_initial_data_collection.md)
+4. **Basketball Reference:** Moved to phase_0/0.1_basketball_reference/ with 13-tier structure
+
+**Context impact reduction:**
+- Before: Reading Phase 0 content = ~3,362 lines (17% context)
+- After: Reading PHASE_0_INDEX.md + 1 sub-phase = ~750 lines (3.75% context)
+- **Phase navigation savings:** -78% context reduction
+- **Overall session start:** 1,085 → 885 lines (-18% additional reduction)
+- **PROGRESS.md:** 1,094 → 391 lines (-64% reduction)
+- **CLAUDE.md:** 546 → 395 lines (-28% reduction)
+
+---
+
 ## Finding Archived Documents
 
 ### Method 1: Browse by Category
@@ -95,6 +144,9 @@ ls -lt docs/archive/scraper_reports/
 
 # List planning docs
 ls -lt docs/archive/planning/
+
+# List superseded documentation
+ls -lt docs/archive/superseded_documentation/
 ```
 
 ### Method 2: Search by Keyword
@@ -129,6 +181,7 @@ git log --all --full-history -- "*/<filename>"
 - Pre-implementation planning documents (after implementation)
 - Test results from specific dates
 - Superseded quick-start guides
+- Large monolithic documentation files replaced by modular structure
 
 ### What Stays Active
 
@@ -136,7 +189,7 @@ git log --all --full-history -- "*/<filename>"
 - Operational guides (SCRAPER_MANAGEMENT.md, DATA_SOURCES.md)
 - Active workflows (all files in `claude_workflows/`)
 - Architecture decisions (ADR files)
-- Phase documentation (PHASE_*.md in `phases/`)
+- Phase documentation (PHASE_N_INDEX.md and phase_N/ subdirectories in `phases/`)
 - Current setup guides (SETUP.md, SECURITY_PROTOCOLS.md)
 
 ### Archiving Workflow

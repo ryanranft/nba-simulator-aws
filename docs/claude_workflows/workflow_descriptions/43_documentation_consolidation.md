@@ -484,19 +484,20 @@ Total: 200 lines (51% reduction)
 
 **When:** One file > 800 lines covering multiple topics
 
-**Example: PROGRESS.md → Phase files**
+**Example: PROGRESS.md → Phase index system**
 ```
 Before:
 - PROGRESS.md (9,533 lines) - everything in one file
 
-After:
-- PROGRESS.md (350 lines) - index only
-- docs/phases/PHASE_0_DATA_COLLECTION.md (300 lines)
-- docs/phases/PHASE_1_DATA_QUALITY.md (450 lines)
-- docs/phases/PHASE_2_AWS_GLUE.md (345 lines)
+After (October 2025):
+- PROGRESS.md (391 lines) - master index only
+- docs/phases/PHASE_0_INDEX.md (150 lines) - phase overview + sub-phase table
+- docs/phases/phase_0/0.0_initial_data_collection.md (300 lines)
+- docs/phases/phase_0/0.1_basketball_reference/ (13-tier structure)
+- docs/phases/PHASE_1_INDEX.md through PHASE_7_INDEX.md
 - [etc.]
 
-Result: 90% context savings (read only what's needed)
+Result: 96% context savings (read only what's needed, 4-level hierarchy)
 ```
 
 ---
