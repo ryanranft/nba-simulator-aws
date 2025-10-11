@@ -10,7 +10,7 @@ make update-docs
 bash scripts/maintenance/update_docs.sh
 ```
 
-**What this does (7 automated steps):**
+**What this does (8 automated steps):**
 
 #### Step 1: Update QUICKSTART.md Costs
 ```bash
@@ -98,6 +98,50 @@ find docs -name "*.md" -mtime +30
 # "✅ All internal links valid" (if no issues)
 ```
 
+#### Step 8: Run Data Audit
+```bash
+# Verifies sync status between local, S3, and RDS
+bash scripts/audit/run_data_audit.sh
+
+# Or manually:
+cd /Users/ryanranft/nba-simulator-aws
+source /Users/ryanranft/nba-sim-credentials.env
+bash scripts/audit/run_data_audit.sh
+```
+
+**What this checks:**
+- Local file counts (play-by-play, box scores, team stats, schedule)
+- S3 bucket counts (all data sources)
+- RDS PostgreSQL status
+- Sync status (local vs S3)
+- Database integrity (Kaggle, unified DBs)
+
+**Output:**
+```
+ℹ Phase 1: Counting local data files...
+✅ Local data inventory complete
+  - Play-by-Play: 44826 files
+  - Box Scores: 44828 files
+  - Team Stats: 46093 files
+  - Schedule: 11633 files
+
+ℹ Phase 2: Counting S3 data files...
+✅ S3 data inventory complete
+  - TOTAL: 147380 files
+
+✅ All data sources synchronized! ✅
+```
+
+**If sync issues detected:**
+```
+⚠️  Team Stats out of sync: S3 has 1265 more files
+
+To sync, run:
+  aws s3 sync s3://nba-sim-raw-data-lake/team_stats/ data/nba_team_stats/
+```
+
+**See also:** [Workflow #49: Automated Data Audit](49_automated_data_audit.md)
+
 **Script output summary:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -154,7 +198,7 @@ Next steps:
 
 ### Monthly Maintenance (First Monday of Month)
 
-**5-step review checklist:**
+**6-step review checklist:**
 
 1. **Review PROGRESS.md**
    - Mark completed tasks ✅ COMPLETE
@@ -180,13 +224,30 @@ Next steps:
    - Review resource costs (Cost Explorer)
    - Stop unused resources
 
-4. **Review security**
+4. **Review data audit logs**
+   ```bash
+   # Review monthly audit logs
+   tail -100 logs/audit/monthly_audit.log
+
+   # Check for recurring sync issues
+   grep "out of sync" logs/audit/*.log
+
+   # Review data growth trends
+   bash scripts/audit/audit_history.sh --summary
+   ```
+   - Verify no persistent sync issues
+   - Review data growth (files added/removed)
+   - Check MASTER_DATA_INVENTORY.md accuracy
+   - Confirm critical gaps are being addressed
+   - See [Workflow #49: Automated Data Audit](49_automated_data_audit.md)
+
+5. **Review security**
    - Check credential ages (90-day rotation)
    - Review .gitignore effectiveness
    - Verify git hooks still installed
    - Check for exposed secrets (GitHub secret scanning)
 
-5. **Create archive checkpoint**
+6. **Create archive checkpoint**
    ```bash
    make backup  # Monthly backup
    ```
@@ -414,6 +475,7 @@ vim PROGRESS.md
 make sync-progress           # Check actual AWS state
 make check-costs            # Check monthly spending
 make inventory              # Update FILE_INVENTORY.md
+bash scripts/audit/run_data_audit.sh  # Verify data sync status
 
 # Review output and update PROGRESS.md if needed
 ```
