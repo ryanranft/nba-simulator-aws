@@ -47,6 +47,11 @@ elif [ "$1" == "--compare" ]; then
     MODE="compare"
 elif [ "$1" == "--alert" ]; then
     MODE="alert"
+elif [ "$1" == "--diff" ]; then
+    # Diff mode - delegate to audit_diff.sh
+    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    bash "$SCRIPT_DIR/audit_diff.sh" "$2"
+    exit $?
 fi
 
 ##############################################################################

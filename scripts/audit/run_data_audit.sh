@@ -38,12 +38,14 @@ AUDIT_LOG="$AUDIT_LOG_DIR/audit_${TIMESTAMP}.log"
 UPDATE_DOCS=false
 QUIET=false
 SKIP_S3=false
+DEEP_RDS=false
 
 for arg in "$@"; do
     case $arg in
         --update-docs) UPDATE_DOCS=true ;;
         --quiet) QUIET=true ;;
         --skip-s3) SKIP_S3=true ;;
+        --deep-rds) DEEP_RDS=true ;;
     esac
 done
 
@@ -155,6 +157,12 @@ if [ "$SKIP_S3" = false ]; then
 
     if [ "$RDS_STATUS" = "available" ]; then
         log SUCCESS "RDS PostgreSQL: $RDS_STATUS"
+
+        # Phase 3.5: RDS Deep Inspection (if requested)
+        if [ "$DEEP_RDS" = true ]; then
+            log INFO "Phase 3.5: Running RDS deep inspection..."
+            bash "$PROJECT_ROOT/scripts/audit/inspect_rds.sh" || log WARNING "RDS deep inspection detected issues"
+        fi
     else
         log WARNING "RDS PostgreSQL: $RDS_STATUS"
     fi
