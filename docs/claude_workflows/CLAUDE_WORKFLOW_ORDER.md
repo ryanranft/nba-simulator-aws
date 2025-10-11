@@ -206,12 +206,13 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
 - **Analyze data gaps?** → `46` (identify and remediate missing data - local/S3/DB comparison)
 - **Inventory AWS data?** → `47` (AWS services inventory - S3, RDS, Glue, Athena, costs)
 - **🚀 Integrated data pipeline?** → `48` (unified workflow: inventory → gaps → plan → collect → validate)
+- **📊 Run data audit?** → `49` (automated inventory update & sync verification - runs after scraping)
 
 ---
 
 ## 📊 Workflow Statistics
 
-- **Total workflows**: 48
+- **Total workflows**: 49
 - **Total size**: ~830 KB
 - **Average workflow**: ~19 KB
 - **Largest workflow**: `24_aws_resource_setup.md` (92 KB)
@@ -286,6 +287,17 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
   - **Use cases:** Weekly updates, comprehensive gap filling, QA checks, overnight scraper setup
   - **Script:** `scripts/monitoring/data_pipeline_manager.sh`
 
+- **Batch 13 (49):** Automated data audit system (NEW 2025-10-11) 📊
+  - 📊 Automated Data Audit - Post-scraping inventory updates:
+    - **Automatic triggers:** Runs after every scraping operation
+    - **Manual execution:** On-demand audit with `bash scripts/audit/run_data_audit.sh`
+    - **Sync verification:** Compares local vs S3 vs RDS automatically
+    - **Documentation updates:** Auto-updates MASTER_DATA_INVENTORY.md timestamp
+    - **Gap detection:** Identifies missing files and sync issues
+  - **Modes:** `standard`, `--update-docs`, `--quiet`, `--skip-s3`
+  - **Integration:** Post-scrape hook automatically calls audit
+  - **Related phase:** [Phase 8: Data Audit & Inventory](../phases/PHASE_8_INDEX.md)
+
 ---
 
-*Last updated: 2025-10-09*
+*Last updated: 2025-10-11*

@@ -31,8 +31,8 @@
 ## Current Session Context
 
 **Last session ended:** October 11, 2025
-**Last completed:** Phase Index Reorganization - ALL 11 TASKS COMPLETE ✅
-**Next session:** Choose next work item (Basketball Reference Tier 1-2, Multi-Source Integration, or Advanced Simulation)
+**Last completed:** Phase 8 Data Audit System - COMPLETE ✅
+**Next planned task:** Fill critical data gaps (Box score players 2006-2025, Lineup data 2007-2025)
 
 **Session completed:** October 11, 2025 - Phase Index Reorganization (✅ COMPLETE)
   - ✅ **Created 8 PHASE_N_INDEX.md files** (150 lines each)
@@ -105,9 +105,16 @@
 - ⏸️ [Phase 7: Betting Odds](docs/phases/PHASE_7_INDEX.md) - **PENDING** (Optional)
   - ⏸️ [7.0 Betting Odds Integration](docs/phases/phase_7/7.0_betting_odds_integration.md)
 
+### Operational Phases (Maintenance & Auditing)
+
+- ✅ [Phase 8: Data Audit & Inventory](docs/phases/PHASE_8_INDEX.md) - **COMPLETE** (Runs automatically after scraping)
+  - ✅ [8.0 Recursive Data Discovery](docs/phases/phase_8/8.0_recursive_data_discovery.md) - All storage locations
+  - ✅ [8.1 Deep Content Analysis](docs/phases/phase_8/8.1_deep_content_analysis.md) - Quality sampling & gap detection
+  - **Automation:** `scripts/audit/run_data_audit.sh` - See [Workflow #49](docs/claude_workflows/workflow_descriptions/49_automated_data_audit.md)
+
 ### Reference Documentation
 
-- **Workflows:** [docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md](docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md) (45 workflows)
+- **Workflows:** [docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md](docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md) (49 workflows)
 - **Architecture decisions:** [docs/adr/README.md](docs/adr/README.md) (7 ADRs)
 - **Setup instructions:** [docs/SETUP.md](docs/SETUP.md)
 - **Quick commands:** [QUICKSTART.md](QUICKSTART.md)
