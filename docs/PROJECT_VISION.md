@@ -209,7 +209,7 @@ Offset: 27ms (within acceptable tolerance)
 **Complete Acquisition Plan:** See `docs/COMPLETE_DATA_ACQUISITION_PLAN.md` for detailed 10-week execution strategy.
 
 ### Source 1: ESPN API (Primary Historical) ✅ COMPLETE
-**Coverage:** 1999-2025 (27 seasons)
+**Coverage:** 1993-2025 (27 seasons)
 **Data:** Box scores, play-by-play, schedules, team stats, player stats
 **Precision:** Second-level (game clock), estimated wall clock times
 **Status:** ✅ Collected (146,115 files, 119 GB in S3)
@@ -403,7 +403,7 @@ The system operates at **multiple temporal resolutions simultaneously**:
 - Tracking data integration
 - Computer vision analysis
 
-**Resolution 2: Second-Level (ESPN, hoopR, 1999-2025)**
+**Resolution 2: Second-Level (ESPN, hoopR, 1993-2025)**
 - Play-by-play event sequences
 - Possession-level simulation
 - ML feature engineering

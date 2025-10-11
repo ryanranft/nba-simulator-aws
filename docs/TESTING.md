@@ -551,7 +551,7 @@ docker rm nba-test-db
 **Data Quality:**
 - ✅ No null values in required fields
 - ✅ Foreign key relationships valid
-- ✅ Dates within expected range (1999-2025)
+- ✅ Dates within expected range (1993-2025)
 - ✅ Statistics within realistic bounds
 
 ---

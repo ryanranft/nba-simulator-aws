@@ -241,7 +241,7 @@ include_player_tracking = False  # Not available
 - Use for pre-1996 data
 - Validate 1996-2000 shot location data
 
-**2. ESPN API (1999-2025)**
+**2. ESPN API (1993-2025)**
 - Your project's primary source
 - Already in S3 bucket
 - Use for traditional box score validation

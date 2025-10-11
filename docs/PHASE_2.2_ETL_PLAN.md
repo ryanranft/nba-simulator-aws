@@ -461,7 +461,7 @@ if __name__ == "__main__":
 |-------|----------------|--------|
 | teams | ~30 | Schedule files (unique teams) |
 | players | ~5,000 | PBP files (unique athletes) |
-| games | ~120,000 | Schedule files (all games 1999-2025) |
+| games | ~120,000 | Schedule files (all games 1993-2025) |
 | plays | ~15,000,000 | PBP files (~468 plays × 31,378 games) |
 | team_game_stats | ~240,000 | Box score files (2 teams × 120,000 games) |
 | player_game_stats | 0 | **Not available in current dataset** |
@@ -522,7 +522,7 @@ SELECT
 FROM games;
 
 -- 4. Completeness check
--- Expected: ~120,000 games from 1999-2025
+-- Expected: ~120,000 games from 1993-2025
 SELECT
     EXTRACT(YEAR FROM game_date) AS year,
     COUNT(*) AS games_per_year
@@ -584,7 +584,7 @@ ORDER BY year;
 - ✅ Row counts match expected values (±5%)
 - ✅ No NULL values in required fields
 - ✅ Foreign key relationships valid
-- ✅ Data spans expected date range (1999-2025)
+- ✅ Data spans expected date range (1993-2025)
 - ✅ Sample queries return correct results
 - ✅ Database size ~12 GB
 

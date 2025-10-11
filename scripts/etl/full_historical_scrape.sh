@@ -3,7 +3,7 @@
 # ⚠️  WARNING: FULL HISTORICAL SCRAPER - MANUAL USE ONLY ⚠️
 ################################################################################
 #
-# This script scrapes ALL 27 seasons (1999-2025) - 12+ HOUR RUNTIME!
+# This script scrapes ALL 27 seasons (1993-2025) - 12+ HOUR RUNTIME!
 #
 # ⛔ DO NOT USE FOR NIGHTLY AUTOMATION ⛔
 #
@@ -12,8 +12,8 @@
 #
 # This script is preserved for manual historical data collection when needed.
 # It scrapes:
-# 1. Basketball Reference (1999-2025) - 27 seasons, ~5 minutes
-# 2. NBA.com Stats API (1999-2025) - 27 seasons, ~10-12 hours
+# 1. Basketball Reference (1993-2025) - 27 seasons, ~5 minutes
+# 2. NBA.com Stats API (1993-2025) - 27 seasons, ~10-12 hours
 #
 # Total runtime: ~12 hours
 # Features gained: 209 advanced metrics
@@ -36,7 +36,7 @@ echo "🌙 Starting Enhanced Multi-Source Scrape"
 echo "📁 Logs: $LOG_DIR"
 echo "⏰ Started: $(date)"
 echo ""
-echo "📊 Coverage: 1999-2025 (27 seasons - matching ESPN data)"
+echo "📊 Coverage: 1993-2025 (27 seasons - matching ESPN data)"
 echo "🎯 Target: 209 features from 2 sources"
 echo ""
 
@@ -46,7 +46,7 @@ conda activate nba-aws
 
 cd "$PROJECT_DIR"
 
-# Seasons to scrape (1999-2025 to match ESPN coverage)
+# Seasons to scrape (1993-2025 to match ESPN coverage)
 SEASONS=(1999 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025)
 
 #############################################
@@ -56,7 +56,7 @@ echo "================================================"
 echo "Phase 1: Basketball Reference Scraper (EXTENDED)"
 echo "================================================"
 echo "⏱️  Rate limit: 3.5 seconds between requests"
-echo "📊 Scraping ${#SEASONS[@]} seasons: 1999-2025"
+echo "📊 Scraping ${#SEASONS[@]} seasons: 1993-2025"
 echo "📈 Features: 47 advanced metrics per game"
 echo ""
 
@@ -92,7 +92,7 @@ echo "================================================"
 echo "Phase 2: NBA.com Stats API Scraper (ALL ENDPOINTS)"
 echo "================================================"
 echo "⏱️  Rate limit: 3.0 seconds between requests"
-echo "📊 Scraping ${#SEASONS[@]} seasons: 1999-2025"
+echo "📊 Scraping ${#SEASONS[@]} seasons: 1993-2025"
 echo "📈 Features: 92 tracking/hustle/defensive metrics"
 echo ""
 
@@ -165,7 +165,7 @@ echo "================================================"
 echo "⏰ Finished: $(date)"
 echo ""
 echo "📊 Coverage Summary:"
-echo "  - Seasons scraped: 27 (1999-2025)"
+echo "  - Seasons scraped: 27 (1993-2025)"
 echo "  - Basketball Reference: 47 features × 27 seasons"
 echo "  - NBA.com Stats: 92 features × 27 seasons"
 echo "  - Total unique features: 209"

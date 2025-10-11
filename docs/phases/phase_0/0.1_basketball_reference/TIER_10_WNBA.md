@@ -123,7 +123,7 @@
 
 ### Sub-Phase 0.10.4: WNBA All-Star Games ⏸️
 
-**Coverage:** 1999-2025 (27 All-Star Games, none in 2004, 2010, 2016, 2020)
+**Coverage:** 1993-2025 (27 All-Star Games, none in 2004, 2010, 2016, 2020)
 **Records:** ~600 (27 games × ~20-25 players per game)
 **Time:** 1 hour
 

@@ -26,7 +26,7 @@
 **Content:**
 ```markdown
 NBA Game Simulator & ML Platform - A Python-based AWS data pipeline that:
-- Ingests 146K+ historical NBA game JSON files (1999-2025, 119 GB) from ESPN
+- Ingests 146K+ historical NBA game JSON files (1993-2025, 119 GB) from ESPN
 - Extracts 10% of relevant fields via AWS Glue ETL
 - Stores processed data in RDS PostgreSQL (~12 GB after extraction)
 - Simulates NBA games using statistical models on EC2

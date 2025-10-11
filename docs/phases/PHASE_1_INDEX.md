@@ -24,7 +24,7 @@ Integrate multiple data sources to maximize ML granularity. Originally planned a
 **Why multi-source integration matters:**
 - ML accuracy boost: 63% → 75-80% (estimated +15-20%)
 - Enables defensive impact metrics (not in ESPN)
-- Historical coverage: 1946-2025 (vs 1999-2025)
+- Historical coverage: 1946-2025 (vs 1993-2025)
 - Confidence scoring for data quality
 
 ---

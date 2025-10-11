@@ -256,18 +256,16 @@ Phase 3 (RDS Database) ✅
 
 ## 📚 Data Summary
 
-### S3 Data Lake
-- **Time period:** NBA games 1999-2025
-- **Total files:** 146,115 JSON files
+### S3 Data Lake (ESPN Data)
+- **Time period:** NBA games 1993-2025 (33 seasons)
+- **Total files:** 147,380 JSON files (actual count as of Oct 11, 2025)
+  - Play-by-play: 44,826 files
+  - Box scores: 44,828 files
+  - Team stats: 46,093 files
+  - Schedule: 11,633 files
 - **Total size:** 119 GB raw
-- **Valid files:** ~121,608 (83%)
-- **Empty files:** ~24,507 (17%)
-
-**Breakdown:**
-- Schedule: 11,633 files
-- Play-by-play: 44,826 files
-- Box scores: 44,828 files
-- Team stats: 44,828 files
+- **Valid files:** ~122,600 (83%)
+- **Empty files:** ~24,780 (17%)
 
 ### RDS Database
 - **games:** 44,828 rows (1993-2025)

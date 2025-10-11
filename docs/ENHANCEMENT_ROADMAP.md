@@ -194,7 +194,7 @@ Final State: 209 features + sophisticated simulation
 ```
 Data:
 ├─ ESPN only: 58 features
-├─ Coverage: 1999-2025
+├─ Coverage: 1993-2025
 └─ Quality: 89.9% complete
 
 ML:

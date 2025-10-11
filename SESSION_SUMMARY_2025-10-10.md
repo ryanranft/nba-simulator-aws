@@ -158,7 +158,7 @@ bash scripts/monitoring/nba_api_quick_status.sh
 - Season 1996: ❌ Failed (exit code 143 - killed by duplicate cleanup)
 - Season 1997: ~65% complete (~9.5h remaining)
 - Season 1998: ~50% complete (~13.5h remaining)
-- Seasons 1999-2025: 27 pending (~742h)
+- Seasons 1993-2025: 33 pending (~742h)
 
 **Estimated Completion:** ~32 days (767 hours remaining)
 

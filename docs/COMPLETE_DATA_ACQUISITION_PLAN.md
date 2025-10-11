@@ -25,7 +25,7 @@ Based on the Progressive Fidelity Simulator requirements, this plan acquires **E
 
 | Source | Coverage | Priority | Runtime | Features | Status |
 |--------|----------|----------|---------|----------|--------|
-| ESPN API | 1999-2025 | 🔴 CRITICAL | 0 hrs | 53 | ✅ Complete (in S3) |
+| ESPN API | 1993-2025 | 🔴 CRITICAL | 0 hrs | 53 | ✅ Complete (in S3) |
 | hoopR Phase 1B | 1997-2021 | 🔴 CRITICAL | 48 hrs | 200+ | 🔄 IN PROGRESS (21% done) |
 | NBA API (2015-2025) | 2015-2025 | 🟡 HIGH | 100-150 hrs | 269-289 | ⏸️ PENDING |
 
@@ -56,7 +56,7 @@ Based on the Progressive Fidelity Simulator requirements, this plan acquires **E
 
 **Status:** Already in S3 bucket (146,115 files, 119 GB)
 
-**Coverage:** 1999-2025 (26 seasons, 31,980+ games)
+**Coverage:** 1993-2025 (26 seasons, 31,980+ games)
 
 **Data Collected:**
 - ✅ Play-by-play events (44,826 files)
@@ -639,7 +639,7 @@ print(f'Loaded {len(schedule)} games')
 
 | Source | Files | Size | Records | Coverage | Unique Fields |
 |--------|-------|------|---------|----------|---------------|
-| ESPN | 146,115 | 119 GB | 14.1M events | 1999-2025 | 53 |
+| ESPN | 146,115 | 119 GB | 14.1M events | 1993-2025 | 53 |
 | hoopR | 10,000-15,000 | 5-8 GB | 2-3M | 1997-2021 | 200+ |
 | NBA API Modern | 150K-200K | 20-30 GB | 3-5M | 2015-2025 | 289 |
 | NBA API Digital | 220K-250K | 25-35 GB | 5-7M | 2000-2014 | 200 |

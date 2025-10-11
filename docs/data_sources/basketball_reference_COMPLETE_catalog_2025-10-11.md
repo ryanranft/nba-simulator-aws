@@ -646,7 +646,7 @@
 
 126. **WNBA All-Star Games**
     - URL: `/wnba/allstar/`
-    - Coverage: 1999-2025
+    - Coverage: 1993-2025
     - Data: Rosters, scores, MVP
 
 127. **WNBA Draft**

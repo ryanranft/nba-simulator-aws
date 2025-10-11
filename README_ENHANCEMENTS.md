@@ -31,7 +31,7 @@ We've created two fully-planned enhancement paths ready to implement immediately
 **Outcome:**
 - ML accuracy: 63% → **75-80%** (+15-20%)
 - Features: 58 → **209** (260% increase)
-- Coverage: 1999-2025 → **1946-2025** (historical)
+- Coverage: 1993-2025 → **1946-2025** (historical)
 
 **Critical new features:**
 - True Shooting %, Player Efficiency Rating, Box Plus/Minus

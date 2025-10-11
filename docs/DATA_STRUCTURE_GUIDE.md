@@ -345,7 +345,7 @@ df_valid = df.filter(
 
 **Stats:**
 - **Average:** 9 games per date
-- **Date range:** 1999-2025 (11,633 dates with NBA games)
+- **Date range:** 1993-2025 (11,633 dates with NBA games)
 - **Filename format:** `YYYYMMDD.json` (e.g., `20210512.json`)
 
 ### Filter Criteria (ETL)

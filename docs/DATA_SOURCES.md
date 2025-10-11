@@ -25,7 +25,7 @@
 This project uses a **multi-source data strategy** to ensure data quality, completeness, and redundancy. Each source serves a specific purpose and fills gaps in the others.
 
 **Philosophy:**
-- **Primary source:** ESPN (already uploaded to S3, 1999-2025)
+- **Primary source:** ESPN (already uploaded to S3, 1993-2025)
 - **Verification sources:** 4 additional sources for cross-validation and gap-filling
 - **Goal:** Achieve 95%+ data completeness and accuracy
 
@@ -43,7 +43,7 @@ This project uses a **multi-source data strategy** to ensure data quality, compl
 - Play-by-play: `https://site.api.espn.com/apis/site/v2/sports/basketball/nba/playbyplay?event={game_id}`
 
 **Coverage:**
-- Date range: 1999-2025
+- Date range: 1993-2025
 - Data quality: 83% valid files
 - Missing: 17% empty files (future/cancelled games)
 
@@ -296,7 +296,7 @@ Comprehensive historical basketball statistics site. Most complete source for hi
 
 | Feature | ESPN | NBA.com Stats | Kaggle DB | SportsDataverse | Basketball Reference |
 |---------|------|---------------|-----------|-----------------|----------------------|
-| **Coverage** | 1999-2025 | 1996-present | 1946-2024 | 2002-present | 1946-present |
+| **Coverage** | 1993-2025 | 1996-present | 1946-2024 | 2002-present | 1946-present |
 | **Format** | JSON | JSON | SQLite | Python API | HTML |
 | **Cost** | Free | Free | Free | Free | Free |
 | **Rate Limit** | None (files) | ~20/min | N/A | Varies | 1/3sec |
@@ -317,7 +317,7 @@ Comprehensive historical basketball statistics site. Most complete source for hi
 |-------------|-------------|--------------------|-----------------------|-------------|-------------------|
 | **NBA Live API** | 2020-2025 (future) | **Millisecond** | ✅ Full ISO8601 | ✅ Day precision | `precision_level: 'millisecond'` |
 | **NBA.com Stats API** | 2013-2019 | **Second** | ✅ Unix timestamps | ✅ Day precision | `precision_level: 'second'` |
-| **ESPN API** | 1999-2025 | **Minute** | ⚠️ Minute-level only | ✅ Day precision | `precision_level: 'minute'` |
+| **ESPN API** | 1993-2025 | **Minute** | ⚠️ Minute-level only | ✅ Day precision | `precision_level: 'minute'` |
 | **Basketball Ref** | 1946-1992 | **Game-level** | ❌ Game date only | ⚠️ Year precision | `precision_level: 'game'` |
 | **Kaggle DB** | 1946-2024 | **Game-level** | ❌ Game date only | ⚠️ Varies | `precision_level: 'game'` or `'unknown'` |
 | **SportsDataverse** | 2002-present | **Minute** | ⚠️ Minute-level | ✅ Day precision | `precision_level: 'minute'` |
