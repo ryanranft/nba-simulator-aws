@@ -166,15 +166,21 @@ class ESPNIncrementalScraper:
             # Insert or update game
             cursor.execute("""
                 INSERT OR REPLACE INTO games (
-                    game_id, game_date, home_team, away_team,
-                    home_score, away_score, has_pbp, pbp_event_count,
-                    created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+                    game_id, game_date, season, game_type, status,
+                    home_team, away_team, home_score, away_score,
+                    quarters_played, has_pbp, pbp_event_count,
+                    json_file_path, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
             """, (
-                game_id, game_date, home_team, away_team,
-                home_score, away_score,
+                game_id, game_date,
+                int(game_date[:4]) if int(game_date[5:7]) >= 10 else int(game_date[:4]) + 1,  # season
+                competitions.get('type', {}).get('abbreviation', 'REG') if competitions else 'REG',  # game_type
+                game_data.get('status', {}).get('type', {}).get('name', 'Final'),  # status
+                home_team, away_team, home_score, away_score,
+                competitions.get('status', {}).get('period', 4) if competitions else 4,  # quarters_played
                 1 if pbp_event_count > 0 else 0,
-                pbp_event_count
+                pbp_event_count,
+                None  # json_file_path
             ))
 
             # Load play-by-play if available

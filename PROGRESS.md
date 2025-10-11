@@ -28,11 +28,43 @@ up in# NBA Temporal Panel Data System - Progress Index
 
 ## Current Session Context
 
-**Last session ended:** October 10, 2025 - ~2:52 PM
-**Last completed:** Basketball Reference Data Integration into Unified Database
-**Next session:** Continue multi-source data quality work or monitor overnight scrapers
+**Last session ended:** October 10, 2025 - ~7:14 PM
+**Last completed:** Basketball Reference Data Expansion Planning
+**Next session:** Execute Phase 0 Basketball Reference Expansion (Tier 1 recommended) or continue multi-source data quality work
 
-**Current session:** October 10, 2025 - ~2:00 PM - 2:52 PM - Basketball Reference Data Integration (✅ COMPLETE)
+**Current session:** October 10, 2025 - ~3:00 PM - 7:14 PM - Basketball Reference Data Expansion Planning (✅ COMPLETE)
+  - ✅ **Comprehensive Basketball Reference website analysis**
+    - Investigated 19+ different stat page types on Basketball Reference
+    - Identified 20 additional data sources beyond the 12 already collected
+    - Created comprehensive analysis document (847 lines): `docs/data_sources/basketball_reference_additional_sources_2025-10-10.md`
+  - ✅ **Organized data sources into 4 tiers by priority and value**
+    - **Tier 1** (5 data types, ~150K records, 15-20 hours): Adjusted Shooting, Per 100 Poss, Schedule, Rookies, All-Rookie Teams
+    - **Tier 2** (4 data types, ~200K records, 20-25 hours): Team Lineups, Team Game Logs, Per Minute Stats, Season Leaders
+    - **Tier 3** (4 data types, ~5K records, 5-7 hours): Hall of Fame, Executives, Referee Stats, Jersey Numbers
+    - **Tier 4** (2 data types, 5-10M records, 50-100 hours): Player Game Logs, Player Splits (selective collection recommended)
+  - ✅ **Created comprehensive implementation plan**
+    - File: `docs/phases/PHASE_0_BASKETBALL_REFERENCE_EXPANSION.md` (1,100+ lines)
+    - 15 detailed sub-phases (0.1-0.15) with step-by-step instructions
+    - Code examples for extending comprehensive scraper
+    - URL patterns and table IDs verified
+    - Testing procedures and validation criteria included
+    - Week-by-week execution schedule (4-5 weeks for Tiers 1-3)
+  - ✅ **Analyzed storage and cost impact**
+    - Tier 1-3 additional data: ~260 MB = $0.006/month (negligible)
+    - Tier 4 (optional): 5-10 GB = $0.12-0.23/month
+    - Total impact: Well within budget
+  - 📊 **Key achievements:**
+    - Complete catalog of all Basketball Reference data sources
+    - Actionable implementation plan ready to follow
+    - Clear prioritization (Tier 1 = highest value for ML/analytics)
+    - Integration strategy with existing comprehensive scraper
+  - 🎯 **Next session options:**
+    - **Option A (Recommended):** Start Tier 1 collection (Adjusted Shooting, Per 100 Poss, Schedule, Rookies, All-Rookie Teams)
+    - Option B: Continue multi-source data quality framework
+    - Option C: Monitor overnight scrapers (ESPN, hoopR)
+    - Option D: Wait for Basketball Reference comprehensive scraper completion (2001-2025 run)
+
+**Previous session:** October 10, 2025 - ~2:00 PM - 2:52 PM - Basketball Reference Data Integration (✅ COMPLETE)
   - ✅ **Integrated Basketball Reference as third data source**
     - Created integration script: `scripts/etl/integrate_basketball_reference.py` (479 lines)
     - Downloaded 5 schedules from S3 (1985, 1992, 2000, 2019, 2020)
@@ -533,6 +565,7 @@ up in# NBA Temporal Panel Data System - Progress Index
 ### Phase Details
 
 - ✅ [Phase 0: Data Collection & Initial Upload](docs/phases/PHASE_0_DATA_COLLECTION.md) - **COMPLETE** (Oct 1)
+  - 🔄 [Phase 0 Expansion: Basketball Reference Additional Data](docs/phases/PHASE_0_BASKETBALL_REFERENCE_EXPANSION.md) - **READY TO IMPLEMENT** (20 new data sources, 15 sub-phases)
 - ⏸️ [Phase 1: Data Quality & Gap Analysis](docs/phases/PHASE_1_DATA_QUALITY.md) - **READY TO IMPLEMENT** (multi-source integration planned)
   - 📖 [Multi-Source Implementation Plan](docs/PHASE_1_MULTI_SOURCE_PLAN.md) - 28 hours, 209 features
   - 📋 [ML Feature Catalog](docs/ML_FEATURE_CATALOG.md) - Complete feature breakdown
