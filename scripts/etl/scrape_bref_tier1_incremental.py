@@ -48,7 +48,7 @@ import re
 
 try:
     import requests
-    from bs4 import BeautifulSoup
+    from bs4 import BeautifulSoup, Comment
 except ImportError:
     print("❌ Install: pip install requests beautifulsoup4 lxml")
     sys.exit(1)
@@ -256,40 +256,98 @@ class Tier1IncrementalScraper:
         return None
 
     def _uncomment_html(self, html: str) -> str:
-        """Uncomment HTML tables (Basketball Reference hides them)."""
-        return re.sub(
-            r'<!--(.*?)-->',
-            lambda m: m.group(1) if '<table' in m.group(1) or '<div' in m.group(1) else m.group(0),
-            html,
-            flags=re.DOTALL
-        )
+        """
+        Uncomment HTML tables (Basketball Reference hides them in comments).
+        Uses BeautifulSoup Comment parsing for robust extraction.
+        """
+        soup = BeautifulSoup(html, 'lxml')
+
+        # Find all HTML comments
+        comments = soup.find_all(string=lambda text: isinstance(text, Comment))
+
+        # Replace comments containing tables/divs with their content
+        for comment in comments:
+            comment_str = str(comment)
+            # Only uncomment if it contains table or div elements
+            if '<table' in comment_str or '<div' in comment_str:
+                # Parse the comment content and replace the comment
+                try:
+                    comment_soup = BeautifulSoup(comment_str, 'lxml')
+                    comment.replace_with(comment_soup)
+                except:
+                    # Fallback: simple string replacement
+                    comment.replace_with(BeautifulSoup(comment_str, 'lxml'))
+
+        return str(soup)
 
     def _parse_table(self, soup, table_id: str) -> List[Dict]:
-        """Parse table into list of dicts."""
+        """
+        Parse table into list of dicts with multiple fallback strategies.
+
+        Tries multiple approaches:
+        1. Direct table by ID
+        2. Table within div_[table_id]
+        3. Table within all_[table_id]
+        4. Any table with matching ID pattern
+        5. First table in content (last resort)
+        """
+        table = None
+
+        # Strategy 1: Direct table lookup
         table = soup.find('table', {'id': table_id})
+
+        # Strategy 2: Table within div wrappers
         if not table:
-            # Try finding in div
-            div = soup.find('div', {'id': f'div_{table_id}'}) or soup.find('div', {'id': f'all_{table_id}'})
-            if div:
-                table = div.find('table')
+            for div_id in [f'div_{table_id}', f'all_{table_id}', table_id]:
+                div = soup.find('div', {'id': div_id})
+                if div:
+                    table = div.find('table')
+                    if table:
+                        logger.debug(f"Found table via div: {div_id}")
+                        break
+
+        # Strategy 3: Search all tables for matching ID
+        if not table:
+            all_tables = soup.find_all('table')
+            for t in all_tables:
+                if t.get('id') and table_id in t.get('id'):
+                    table = t
+                    logger.debug(f"Found table via partial match: {t.get('id')}")
+                    break
+
+        # Strategy 4: Last resort - first table with data-stat attributes
+        if not table:
+            all_tables = soup.find_all('table')
+            for t in all_tables:
+                if t.find('td', attrs={'data-stat': True}):
+                    table = t
+                    logger.warning(f"Using first table with data-stat as fallback")
+                    break
 
         if not table:
+            logger.warning(f"No table found for ID: {table_id}")
             return []
 
         records = []
         tbody = table.find('tbody')
         if not tbody:
+            logger.warning(f"No tbody found in table: {table_id}")
             return []
 
         for row in tbody.find_all('tr', class_=lambda x: x != 'thead'):
             record = {}
+            has_data = False
+
             for cell in row.find_all(['th', 'td']):
                 stat = cell.get('data-stat', 'unknown')
                 value = cell.get_text(strip=True)
-                record[stat] = value if value else None
 
-                # Extract player slug from link
-                if stat in ('player', 'name_display'):
+                if value:  # Only store non-empty values
+                    record[stat] = value
+                    has_data = True
+
+                # Extract player slug from link (multiple stat names possible)
+                if stat in ('player', 'name_display', 'player_name', 'name'):
                     link = cell.find('a')
                     if link and link.get('href'):
                         href = link['href']
@@ -297,10 +355,12 @@ class Tier1IncrementalScraper:
                         if '/players/' in href:
                             slug = href.split('/')[-1].replace('.html', '')
                             record['player_slug'] = slug
+                            has_data = True
 
-            if record:
+            if has_data and record:
                 records.append(record)
 
+        logger.debug(f"Parsed {len(records)} records from table: {table_id}")
         return records
 
     def _save_to_s3(self, data: Dict, s3_key: str) -> bool:
@@ -363,9 +423,9 @@ class Tier1IncrementalScraper:
                     self.checkpoint.mark_failed(item_id, "Failed to fetch page")
                     continue
 
-                # Parse
-                html = self._uncomment_html(html)
-                soup = BeautifulSoup(html, 'lxml')
+                # Parse with comment extraction
+                uncommented_html = self._uncomment_html(html)
+                soup = BeautifulSoup(uncommented_html, 'lxml')
                 games = self._parse_table(soup, 'pgl_basic')
 
                 if not games:
@@ -408,8 +468,8 @@ class Tier1IncrementalScraper:
             logger.error("Failed to fetch player list")
             return []
 
-        html = self._uncomment_html(html)
-        soup = BeautifulSoup(html, 'lxml')
+        uncommented_html = self._uncomment_html(html)
+        soup = BeautifulSoup(uncommented_html, 'lxml')
         players = self._parse_table(soup, 'per_game_stats')
 
         # Extract player slugs
