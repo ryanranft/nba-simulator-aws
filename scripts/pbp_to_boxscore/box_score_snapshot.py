@@ -20,7 +20,7 @@ class PlayerStats:
     player_id: str
     player_name: str
     team_id: str
-    
+
     # Basic stats
     points: int = 0
     fgm: int = 0  # Field goals made
@@ -29,24 +29,24 @@ class PlayerStats:
     fg3a: int = 0  # Three-pointers attempted
     ftm: int = 0  # Free throws made
     fta: int = 0  # Free throws attempted
-    
+
     # Rebounds
     oreb: int = 0  # Offensive rebounds
     dreb: int = 0  # Defensive rebounds
     reb: int = 0   # Total rebounds
-    
+
     # Other stats
     ast: int = 0   # Assists
     stl: int = 0   # Steals
     blk: int = 0   # Blocks
     tov: int = 0   # Turnovers
     pf: int = 0    # Personal fouls
-    
+
     # Advanced
     plus_minus: int = 0
     minutes: float = 0.0
     on_court: bool = False
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for storage"""
         return {
@@ -72,40 +72,40 @@ class PlayerStats:
             'minutes': self.minutes,
             'on_court': self.on_court
         }
-    
+
     def validate(self) -> List[str]:
         """
         Validate player stats for consistency.
         Returns list of validation errors (empty if valid).
         """
         errors = []
-        
+
         # No negative stats
         if self.points < 0: errors.append(f"Negative points: {self.points}")
         if self.fgm < 0: errors.append(f"Negative FGM: {self.fgm}")
         if self.fga < 0: errors.append(f"Negative FGA: {self.fga}")
         if self.minutes < 0: errors.append(f"Negative minutes: {self.minutes}")
-        
+
         # FGM <= FGA
         if self.fgm > self.fga:
             errors.append(f"FGM ({self.fgm}) > FGA ({self.fga})")
-        
+
         # FG3M <= FG3A
         if self.fg3m > self.fg3a:
             errors.append(f"FG3M ({self.fg3m}) > FG3A ({self.fg3a})")
-        
+
         # FTM <= FTA
         if self.ftm > self.fta:
             errors.append(f"FTM ({self.ftm}) > FTA ({self.fta})")
-        
+
         # Total rebounds = offensive + defensive
         if self.reb != self.oreb + self.dreb:
             errors.append(f"REB ({self.reb}) != OREB ({self.oreb}) + DREB ({self.dreb})")
-        
+
         # Minutes reasonable (<=48 for regulation, <=65 for OT games)
         if self.minutes > 65:
             errors.append(f"Excessive minutes: {self.minutes}")
-        
+
         return errors
 
 
@@ -114,10 +114,10 @@ class TeamStats:
     """Immutable team statistics at a snapshot"""
     team_id: str
     team_name: str
-    
+
     # Scores
     points: int = 0
-    
+
     # Shooting
     fgm: int = 0
     fga: int = 0
@@ -125,19 +125,19 @@ class TeamStats:
     fg3a: int = 0
     ftm: int = 0
     fta: int = 0
-    
+
     # Rebounds
     oreb: int = 0
     dreb: int = 0
     reb: int = 0
-    
+
     # Other
     ast: int = 0
     stl: int = 0
     blk: int = 0
     tov: int = 0
     pf: int = 0
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
@@ -165,36 +165,36 @@ class TeamStats:
 class BoxScoreSnapshot:
     """
     Immutable snapshot of complete game state at a specific play-by-play event.
-    
+
     Represents the cumulative box score at a specific moment in time.
     Can be stored to database and used for temporal queries.
     """
-    
+
     # Identifiers
     game_id: str
     event_num: int
     data_source: str  # 'espn', 'hoopr', 'nba_api', 'kaggle'
-    
+
     # Game State
     quarter: int
     time_remaining: str  # e.g., "7:32"
     game_clock_seconds: int  # Total seconds elapsed
     home_score: int
     away_score: int
-    
+
     # Player Stats (keyed by player_id)
     players: Dict[str, PlayerStats] = field(default_factory=dict)
-    
+
     # Team Stats (keyed by team_id)
     teams: Dict[str, TeamStats] = field(default_factory=dict)
-    
+
     # Quarter Box Scores (cumulative per quarter)
     # Format: {1: {player_id: PlayerStats}, 2: {...}, ...}
     quarter_box_scores: Dict[int, Dict[str, PlayerStats]] = field(default_factory=dict)
-    
+
     # Metadata
     created_at: datetime = field(default_factory=datetime.now)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for storage/serialization"""
         return {
@@ -214,7 +214,7 @@ class BoxScoreSnapshot:
             },
             'created_at': self.created_at.isoformat()
         }
-    
+
     def validate(self) -> Dict[str, List[str]]:
         """
         Validate snapshot for consistency.
@@ -226,54 +226,54 @@ class BoxScoreSnapshot:
             'team_stats': [],
             'consistency': []
         }
-        
+
         # Game state validations
         if self.quarter < 1:
             errors['game_state'].append(f"Invalid quarter: {self.quarter}")
-        
+
         if self.game_clock_seconds < 0:
             errors['game_state'].append(f"Negative game clock: {self.game_clock_seconds}")
-        
+
         if self.home_score < 0 or self.away_score < 0:
             errors['game_state'].append(f"Negative score: H={self.home_score}, A={self.away_score}")
-        
+
         # Player stat validations
         for player_id, player_stats in self.players.items():
             player_errors = player_stats.validate()
             if player_errors:
                 errors['player_stats'].extend([f"{player_id}: {e}" for e in player_errors])
-        
+
         # Team stats consistency (sum of player stats should equal team totals)
         for team_id, team_stats in self.teams.items():
             team_players = [p for p in self.players.values() if p.team_id == team_id]
-            
+
             player_total_points = sum(p.points for p in team_players)
             if player_total_points != team_stats.points:
                 errors['consistency'].append(
                     f"Team {team_id}: Player points ({player_total_points}) != Team points ({team_stats.points})"
                 )
-            
+
             player_total_reb = sum(p.reb for p in team_players)
             if player_total_reb != team_stats.reb:
                 errors['consistency'].append(
                     f"Team {team_id}: Player rebounds ({player_total_reb}) != Team rebounds ({team_stats.reb})"
                 )
-        
+
         return errors
-    
+
     def is_valid(self) -> bool:
         """Check if snapshot passes all validations"""
         errors = self.validate()
         return all(len(errs) == 0 for errs in errors.values())
-    
+
     def get_score_differential(self) -> int:
         """Get current score differential (home - away)"""
         return self.home_score - self.away_score
-    
+
     def get_on_court_players(self) -> List[PlayerStats]:
         """Get list of players currently on court"""
         return [p for p in self.players.values() if p.on_court]
-    
+
     def get_team_players(self, team_id: str) -> List[PlayerStats]:
         """Get all players for a specific team"""
         return [p for p in self.players.values() if p.team_id == team_id]
@@ -287,33 +287,33 @@ class VerificationResult:
     """
     game_id: str
     data_source: str
-    
+
     # Final Score Comparison
     final_score_match: bool
     home_score_generated: int
     away_score_generated: int
     home_score_actual: int
     away_score_actual: int
-    
+
     # Discrepancy Metrics
     total_discrepancies: int
     discrepancy_details: Dict[str, Dict[str, Any]]  # player_id -> {stat: {gen, act, diff}}
-    
+
     # Mean Absolute Errors
     mae_points: float
     mae_rebounds: float
     mae_assists: float
-    
+
     # Quality Grade
     quality_grade: str  # 'A', 'B', 'C', 'D', or 'F'
-    
+
     # Optional fields with defaults
     mae_steals: float = 0.0
     mae_blocks: float = 0.0
     mae_turnovers: float = 0.0
     notes: str = ""
     verified_at: datetime = field(default_factory=datetime.now)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for storage"""
         return {
@@ -336,7 +336,7 @@ class VerificationResult:
             'notes': self.notes,
             'verified_at': self.verified_at.isoformat()
         }
-    
+
     def is_passing(self) -> bool:
         """Check if verification passed (grade A, B, or C)"""
         return self.quality_grade in ['A', 'B', 'C']
@@ -347,7 +347,7 @@ class VerificationResult:
 def calculate_quality_grade(total_discrepancies: int, final_score_match: bool) -> str:
     """
     Calculate quality grade based on discrepancies.
-    
+
     Grade A: Perfect (0 discrepancies)
     Grade B: Excellent (1-5 discrepancies)
     Grade C: Good (6-15 discrepancies)
@@ -356,7 +356,7 @@ def calculate_quality_grade(total_discrepancies: int, final_score_match: bool) -
     """
     if not final_score_match:
         return 'F'
-    
+
     if total_discrepancies == 0:
         return 'A'
     elif total_discrepancies <= 5:
