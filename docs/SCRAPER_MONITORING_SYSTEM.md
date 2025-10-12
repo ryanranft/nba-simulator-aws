@@ -192,4 +192,86 @@ tail -100 /tmp/<scraper_name>.log
 
 ---
 
+## Basketball Reference Comprehensive Scraper
+
+**Monitor command:**
+```bash
+tail -f /tmp/bbref_comprehensive_overnight.log
+```
+
+**Check progress:**
+```bash
+# Current season being processed
+tail -20 /tmp/bbref_comprehensive_overnight.log | grep "Season"
+
+# Count uploaded files by data type
+for type in draft awards per_game shooting play_by_play team_ratings playoffs coaches standings; do
+  count=$(aws s3 ls s3://nba-sim-raw-data-lake/basketball_reference/$type/ --recursive | wc -l)
+  echo "$type: $count files"
+done
+
+# Check error rate
+total=$(grep -c "Season" /tmp/bbref_comprehensive_overnight.log)
+errors=$(grep -c "ERROR\|Failed" /tmp/bbref_comprehensive_overnight.log)
+echo "Error rate: $errors errors in $total requests ($(echo "scale=2; $errors*100/$total" | bc)%)"
+```
+
+**Expected coverage:**
+- 578 total files across 9 data types
+- ~1.9 hours runtime (12s rate limit)
+- Error rate should be < 5%
+
+**Alert conditions:**
+- ❌ Error rate > 10%
+- ❌ No progress for > 5 minutes
+- ❌ HTTP 403 errors (blocking)
+- ✅ All 578 files uploaded to S3
+
+---
+
+## Phase 9 Batch Processing (ESPN)
+
+**Monitor command:**
+```bash
+tail -f /tmp/phase9_espn_full.log
+```
+
+**Check progress:**
+```bash
+# Games processed
+processed=$(grep -c "Processed game" /tmp/phase9_espn_full.log)
+echo "Games processed: $processed / 44,826"
+
+# Snapshot counts
+snapshots=$(find /tmp/phase9_snapshots/ -name "*.json" | wc -l)
+echo "Snapshots generated: $snapshots (~22M expected)"
+
+# Validation rate
+grep "Validation" /tmp/phase9_espn_full.log | \
+  awk '{sum+=$NF; count++} END {print "Average validation rate: " sum/count "%"}'
+
+# ETA calculation
+elapsed=$(ps -p $(cat /tmp/phase9_processor.pid) -o etime= | tr -d ' ')
+rate=$(echo "scale=2; $processed / $(echo $elapsed | awk -F: '{print ($1*3600)+($2*60)+$3}')" | bc)
+remaining=$((44826 - processed))
+eta=$(echo "scale=0; $remaining / $rate / 3600" | bc)
+echo "ETA: ~$eta hours"
+```
+
+**Expected output:**
+- 44,826 games total
+- ~22 million snapshots
+- 15-20 hours runtime
+- > 95% validation rate
+
+**Alert conditions:**
+- ❌ Error rate > 10%
+- ❌ Validation rate < 90%
+- ❌ No progress for > 10 minutes
+- ❌ Disk space < 5GB
+- ✅ All games processed successfully
+
+---
+
 *For complete scraper management procedures, see docs/SCRAPER_MANAGEMENT.md*
+*Updated: October 12, 2025*

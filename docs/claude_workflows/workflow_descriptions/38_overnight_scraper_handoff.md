@@ -308,4 +308,83 @@ done
 
 ---
 
-*Last updated: October 6, 2025*
+## Basketball Reference Comprehensive Scraper
+
+**Check command:**
+```bash
+ps aux | grep scrape_basketball_reference_comprehensive
+```
+
+**Key locations:**
+- Output: Uploads directly to S3
+- S3: `s3://nba-sim-raw-data-lake/basketball_reference/[data_type]/[season]/`
+- Logs: `/tmp/bbref_comprehensive_overnight.log`
+- PID file: `/tmp/bbref_scraper.pid`
+
+**Validation:**
+```bash
+# Check progress in log
+tail -100 /tmp/bbref_comprehensive_overnight.log | grep "Season"
+
+# Count uploaded files by data type
+for type in draft awards per_game shooting play_by_play team_ratings playoffs coaches standings; do
+  echo "$type: $(aws s3 ls s3://nba-sim-raw-data-lake/basketball_reference/$type/ --recursive | wc -l) files"
+done
+
+# Check for errors
+grep -i "error\|failed" /tmp/bbref_comprehensive_overnight.log | tail -20
+```
+
+**Expected coverage (after complete run):**
+- Draft: 79 seasons (1947-2025)
+- Awards: 80 seasons (1946-2025)
+- Per-Game: 79 seasons (1947-2025)
+- Shooting: 26 seasons (2000-2025)
+- Play-by-Play Stats: 25 seasons (2001-2025)
+- Team Ratings: 52 seasons (1974-2025)
+- Playoffs: 79 seasons (1947-2025)
+- Coaches: 79 seasons (1947-2025)
+- Standings: 79 seasons (1947-2025)
+
+**Total:** 578 files, ~1.9 hours runtime (with 12s rate limit)
+
+---
+
+## Phase 9 Batch Processing (ESPN Play-by-Play to Box Score)
+
+**Check command:**
+```bash
+ps aux | grep espn_processor
+```
+
+**Key locations:**
+- Input: `s3://nba-sim-raw-data-lake/pbp/*.json` (44,826 games)
+- Output: Box score snapshots (JSON + RDS)
+- Logs: `/tmp/phase9_espn_processor.log`
+
+**Validation:**
+```bash
+# Check batch processing progress
+tail -100 /tmp/phase9_espn_processor.log | grep "Processed"
+
+# Check snapshot counts
+find /tmp/phase9_snapshots/ -name "*.json" | wc -l
+
+# Verify sample snapshots
+ls -lh /tmp/phase9_snapshots/ | tail -10
+```
+
+**Expected output:**
+- ~22 million snapshots (459 avg × 44,826 games)
+- ~2GB storage in RDS
+- ~500MB in S3 Parquet (compressed)
+
+**Validation checks:**
+- Final scores match ESPN data
+- All quarters present (4 for regulation, 5+ for OT)
+- Score progression is monotonic (never decreases)
+- Snapshot validation rate > 95%
+
+---
+
+*Last updated: October 12, 2025*

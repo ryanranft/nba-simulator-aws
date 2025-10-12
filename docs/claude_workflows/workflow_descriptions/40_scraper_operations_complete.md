@@ -373,29 +373,47 @@ For major scraping operations, document:
 
 ### Basketball Reference
 
-**Data Types (7 per season):**
-1. Schedules
-2. Season totals (player stats)
-3. Advanced totals
-4. Standings
-5. Player box scores
-6. Team box scores
-7. Play-by-play (2000+ only)
+**Active Scrapers:**
+1. **Incremental Scraper** (`scrape_bbref_incremental.sh`) - 5s rate limit, 7 data types
+2. **Comprehensive Scraper** (`scrape_basketball_reference_comprehensive.py`) - 12s rate limit, 9 data types ✅ RECOMMENDED
 
-**Rate Limit:** 5 seconds (tested stable, 0 errors)
+**Comprehensive Scraper Data Types (9 total):**
+1. Draft (1947-2025) - 79 seasons
+2. Awards (1946-2025) - 80 seasons
+3. Per-Game Stats (1947-2025) - 79 seasons
+4. Shooting Stats (2000-2025) - 26 seasons
+5. Play-by-Play Stats (2001-2025) - 25 seasons
+6. Team Ratings (1974-2025) - 52 seasons
+7. Playoffs (1947-2025) - 79 seasons
+8. Coaches (1947-2025) - 79 seasons
+9. Standings (1947-2025) - 79 seasons
 
-**Resume Capability:** Yes (completion markers: `.complete` files)
+**Rate Limit:** 12 seconds (tested stable, 0 errors, 0 HTTP 403)
+
+**Usage:**
+```bash
+python3 scripts/etl/scrape_basketball_reference_comprehensive.py \
+  --start-season 1946 --end-season 2025 \
+  --draft --awards --per-game --shooting \
+  --play-by-play --team-ratings --playoffs --coaches --standings
+```
+
+**Resume Capability:** No (will re-scrape existing files)
 
 **Expected Runtimes:**
-- Recent seasons (2020-2025): ~2-3 hours
-- 10-year range: ~5-7 hours
-- Full historical (1950-2025): ~15-20 hours
+- All 9 data types (1946-2025): ~1.9 hours (578 files)
+- Recent seasons only (2020-2025): ~15 minutes (48 files)
+- Missing data only: ~1.2 hours (373 files)
 
-**Incremental Strategy:**
-- Run recent first (2020-2025)
-- Validate data quality
-- Expand to earlier years
-- Use completion markers for resume
+**Anti-Blocking Strategies:**
+See [MCP Scraping Recommendations](#mcp-scraping-best-practices) below for comprehensive anti-blocking guidance.
+
+**Key Improvements (Oct 2025):**
+- User-Agent rotation
+- Session management
+- Enhanced request headers
+- Exponential backoff on errors
+- Data validation during scraping
 
 ### hoopR
 
@@ -545,13 +563,60 @@ For major scraping operations, document:
 
 ---
 
+## MCP Scraping Best Practices
+
+**Source:** `docs/MCP_SCRAPING_RECOMMENDATIONS.md` (Complete guide created October 12, 2025)
+
+### Critical Recommendations Summary
+
+**1. Rate Limiting (⭐⭐⭐)**
+- Use 12s minimum for Basketball Reference
+- Add random jitter (±2s) for human-like behavior
+- Implement exponential backoff on errors
+- Monitor response times and adjust
+
+**2. Anti-Blocking (⭐⭐⭐)**
+Priority order for HTTP 403 issues:
+1. **User-Agent rotation** (Easy, High Impact) - Rotate through 3-5 browser UAs
+2. **Session management** (Medium, High Impact) - Reuse requests.Session
+3. **Request headers** (Easy, Medium Impact) - Add Referer, Accept-Language, etc.
+4. **IP rotation** (Hard, High Impact) - Only if above fails, requires proxy service
+
+**3. Error Recovery (⭐⭐⭐)**
+- Atomic writes (temp file → rename)
+- Progress markers (.complete files)
+- Save immediately after each item
+- Resume logic checks for existing data
+- Error budget: Stop if > 10% error rate
+
+**4. Data Validation (⭐⭐)**
+- Validate HTTP status, content-length, content-type
+- Check expected tables/structures exist
+- Sanity check record counts
+- Fail fast: Stop after 5 consecutive errors
+
+**5. Monitoring (⭐⭐)**
+- Structured JSON logging
+- Progress indicators every season
+- ETA calculations
+- Heartbeat messages every 10 minutes
+- Summary stats every 10 seasons
+
+**Implementation:**
+All recommendations have been implemented in `scrape_basketball_reference_comprehensive.py` as of October 2025.
+
+**For complete details:** See `docs/MCP_SCRAPING_RECOMMENDATIONS.md`
+
+---
+
 ## Related Documentation
 
 - **Central Hub:** `docs/SCRAPER_MANAGEMENT.md` - Complete scraper reference
+- **MCP Recommendations:** `docs/MCP_SCRAPING_RECOMMENDATIONS.md` - Comprehensive scraping best practices
 - **Data Sources:** `docs/DATA_SOURCES.md` - All 5 data source details
 - **Test Results:** `docs/archive/scraper_reports/SCRAPER_TEST_RESULTS.md` - Rate limit testing outcomes
 
 ---
 
-*Last updated: October 8, 2025*
+*Last updated: October 12, 2025*
 *Created: October 8, 2025*
