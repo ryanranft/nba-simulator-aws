@@ -68,37 +68,42 @@ logs/
 .session-history.md
 *.pid
 
+# MLflow artifacts (local runs only)
+mlartifacts/
+mlruns/
+models/
+
+# Synthesis outputs (generated analysis files)
+synthesis_outputs/
+
 # Temporary documentation with credentials
-COMMIT_VERIFICATION.md
-EXTRACTION_PROGRESS_SNAPSHOT.md
-EXTRACTION_STATUS.md
-OVERNIGHT_AUTOMATION_STATUS_old.md
-OVERNIGHT_AUTOMATION_STATUS.md
-OVERNIGHT_STATUS.md
-OVERNIGHT_SUCCESS_SUMMARY.md
-OVERNIGHT_EXTRACTION_STATUS.md
-OVERNIGHT*.md
-PYCHARM_DATABASE_SETUP.md
 CHAT_LOG.md
 COMMAND_LOG.md
 
-# Sanitized archives (optional - only commit to private repos)
-# archived-docs/
+# Archived files (now in docs/archive/)
+# Note: These patterns prevent re-creation of archived files
+OVERNIGHT*.md
+EXTRACTION*.md
+WORKFLOW*.md
+SESSION_SUMMARY*.md
+*_STATUS.md
+*_COMPLETE.md
+COMMIT_VERIFICATION.md
+PYCHARM_DATABASE_SETUP.md
+CHAT_LOG_INSTRUCTIONS.md
+COMMAND_LOG.example.md
+MACHINE_SPECS.md
+FILE_INVENTORY.md
+CLAUDE_MD_EXTRACTION_PLAN.md
+.test_archive_system.txt
+.documentation-triggers.md
+
 # Sensitive archiving scripts (local only)
 scripts/maintenance/archive_chat_by_next_sha.sh
 
-# Pre-push cleanup - files archived 2025-10-02
-.test_archive_system.txt
-CHAT_LOG_INSTRUCTIONS.md
-COMMAND_LOG.example.md
+# Temporary scraper files
+tier1_progress.json
+*_progress.json
 
-# Pre-push cleanup - files archived 2025-10-08 (session 1)
-CONTEXT_OPTIMIZATION_STATUS.md
-PROJECT_STATUS.md
-WORKFLOW_3_COMPARISON.md
-WORKFLOW_2_COMPARISON.md
-
-# Pre-push cleanup - files archived 2025-10-08 (session 2)
-MACHINE_SPECS.md
-WORKFLOW_CONSOLIDATION_LOG.md
+# Backups (local only)
 backups/

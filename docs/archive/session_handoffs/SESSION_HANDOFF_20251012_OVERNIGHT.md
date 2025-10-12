@@ -166,10 +166,10 @@ bash scripts/monitoring/monitor_scrapers_inline.sh
    ```bash
    # Verify scraper completed
    ps -p 88290
-   
+
    # Check final log output
    tail -100 /tmp/bbref_comprehensive_overnight.log
-   
+
    # Count uploaded files
    for type in draft awards per_game shooting play_by_play team_ratings playoffs coaches standings; do
      count=$(aws s3 ls s3://nba-sim-raw-data-lake/basketball_reference/$type/ --recursive | wc -l)
@@ -181,10 +181,10 @@ bash scripts/monitoring/monitor_scrapers_inline.sh
    ```bash
    # Check error rate
    grep -c "ERROR" /tmp/bbref_comprehensive_overnight.log
-   
+
    # Verify no HTTP 403 blocks
    grep "403" /tmp/bbref_comprehensive_overnight.log
-   
+
    # Spot check 5 random files
    aws s3 ls s3://nba-sim-raw-data-lake/basketball_reference/draft/ --recursive | sort -R | head -5
    ```
@@ -203,7 +203,7 @@ bash scripts/monitoring/monitor_scrapers_inline.sh
      --season 2024 \
      --limit 10 \
      --verbose
-   
+
    # If successful, deploy full batch
    nohup python3 scripts/pbp_to_boxscore/batch_process_espn.py \
      --start-season 1993 \

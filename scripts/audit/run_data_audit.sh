@@ -161,10 +161,16 @@ if [ "$SKIP_S3" = false ]; then
         # Phase 3.5: RDS Deep Inspection (if requested)
         if [ "$DEEP_RDS" = true ]; then
             log INFO "Phase 3.5: Running RDS deep inspection..."
-            bash "$PROJECT_ROOT/scripts/audit/inspect_rds.sh" || log WARNING "RDS deep inspection detected issues"
+            if ! bash "$PROJECT_ROOT/scripts/audit/inspect_rds.sh"; then
+                log WARNING "RDS deep inspection detected issues"
+                # Send alert for RDS health issues
+                bash "$PROJECT_ROOT/scripts/audit/send_alert.sh" WARNING "RDS Health Issues" "Database deep inspection detected table health issues. Check audit log for details." 2>/dev/null || true
+            fi
         fi
     else
         log WARNING "RDS PostgreSQL: $RDS_STATUS"
+        # Send alert for RDS unavailable
+        bash "$PROJECT_ROOT/scripts/audit/send_alert.sh" ERROR "RDS Database Unavailable" "PostgreSQL RDS instance status: $RDS_STATUS. Database may be down." 2>/dev/null || true
     fi
 fi
 
@@ -213,6 +219,9 @@ if [ "$SKIP_S3" = false ]; then
         echo "  aws s3 sync s3://nba-sim-raw-data-lake/box_scores/ data/nba_box_score/" | tee -a "$AUDIT_LOG"
         echo "  aws s3 sync s3://nba-sim-raw-data-lake/team_stats/ data/nba_team_stats/" | tee -a "$AUDIT_LOG"
         echo "  aws s3 sync s3://nba-sim-raw-data-lake/schedule/ data/nba_schedule_json/" | tee -a "$AUDIT_LOG"
+
+        # Send alert for sync issues
+        bash "$PROJECT_ROOT/scripts/audit/send_alert.sh" WARNING "Data Sync Issues" "$SYNC_ISSUES data source(s) out of sync between local and S3" 2>/dev/null || true
     fi
 fi
 

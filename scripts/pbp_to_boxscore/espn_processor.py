@@ -196,7 +196,7 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
     def parse_event(self, event: Any, event_num: int) -> Dict[str, Any]:
         """
         Parse ESPN play into standardized event format.
-        
+
         ESPN events have simplified structure:
         - id: Play ID
         - period: {number, displayValue}
@@ -204,14 +204,14 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
         - homeAway: "home" or "away"
         - homeScore, awayScore: Current scores
         - clock: {displayValue} (e.g., "7:32")
-        
+
         Note: ESPN doesn't provide structured participant data in these files.
         We track scores but not individual player stats (would need text parsing).
-        
+
         Args:
             event: ESPN play dict
             event_num: Sequential event number
-            
+
         Returns:
             Standardized event dict
         """
@@ -219,7 +219,7 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
             # Extract basic info
             period_num = event.get('period', {}).get('number', 1)
             clock_display = event.get('clock', {}).get('displayValue', '12:00')
-            
+
             # Parse clock to seconds (format: "MM:SS")
             try:
                 clock_parts = clock_display.split(':')
@@ -231,7 +231,7 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
                     seconds_remaining = 720.0  # Default to 12:00
             except:
                 seconds_remaining = 720.0
-            
+
             parsed = {
                 'event_num': event_num,
                 'play_id': event.get('id'),
@@ -251,13 +251,13 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
                 'player_id': None,
                 'team_id': None
             }
-            
+
             # Note: ESPN doesn't provide structured player data in this format
             # Would need to parse text descriptions to extract player actions
             # For now, we're just tracking game state (scores, time, quarter)
-            
+
             return parsed
-            
+
         except Exception as e:
             self.logger.warning(f"Error parsing event {event_num}: {e}", exc_info=True)
             # Return minimal event to avoid breaking processing

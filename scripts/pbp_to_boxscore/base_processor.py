@@ -362,7 +362,7 @@ class BasePlayByPlayProcessor(ABC):
                     box_score['home_score'] += stat_updates['points']
                 else:
                     box_score['away_score'] += stat_updates['points']
-        
+
         return box_score
 
     def _create_snapshot(self, game_id: str, event_num: int, box_score: Dict[str, Any]) -> BoxScoreSnapshot:

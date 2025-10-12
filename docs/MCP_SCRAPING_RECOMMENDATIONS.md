@@ -1,7 +1,7 @@
 # MCP Web Scraping Recommendations for Overnight Jobs
 
-**Created:** October 12, 2025  
-**Context:** Basketball Reference overnight scraping (9 data types, 1947-2025)  
+**Created:** October 12, 2025
+**Context:** Basketball Reference overnight scraping (9 data types, 1947-2025)
 **Note:** MCP book library currently empty - recommendations based on established best practices
 
 ---
@@ -50,14 +50,14 @@ def save_with_checkpoint(data, season, data_type):
     temp_file = f"/tmp/bbref_{data_type}_{season}.json.tmp"
     final_file = f"/tmp/bbref_{data_type}_{season}.json"
     complete_marker = f"/tmp/bbref_{data_type}_{season}.complete"
-    
+
     # Write to temp
     with open(temp_file, 'w') as f:
         json.dump(data, f)
-    
+
     # Atomic rename
     os.rename(temp_file, final_file)
-    
+
     # Create completion marker
     Path(complete_marker).touch()
 ```
@@ -125,22 +125,22 @@ def validate_response(response, season):
     if response.status_code != 200:
         log.error(f"HTTP {response.status_code} for {season}")
         return False
-    
+
     if len(response.content) < 1000:
         log.error(f"Suspiciously small response for {season}")
         return False
-    
+
     soup = BeautifulSoup(response.content, 'html.parser')
     table = soup.find('table', id='draft_stats')
     if not table:
         log.error(f"No draft table found for {season}")
         return False
-    
+
     rows = table.find_all('tr')
     if len(rows) < 10:
         log.error(f"Too few draft picks for {season}: {len(rows)}")
         return False
-    
+
     return True
 ```
 
@@ -161,16 +161,16 @@ class ScraperStats:
         self.total_attempts = 0
         self.total_errors = 0
         self.consecutive_errors = 0
-    
+
     def record_success(self):
         self.total_attempts += 1
         self.consecutive_errors = 0
-    
+
     def record_error(self):
         self.total_attempts += 1
         self.total_errors += 1
         self.consecutive_errors += 1
-    
+
     def should_continue(self):
         error_rate = self.total_errors / max(self.total_attempts, 1)
         if error_rate > 0.10:  # 10% error budget
@@ -203,7 +203,7 @@ def log_progress(season, total_seasons, start_time):
     remaining = total_seasons - season
     eta_seconds = remaining / rate
     eta = datetime.now() + timedelta(seconds=eta_seconds)
-    
+
     log.info(json.dumps({
         'type': 'progress',
         'season': season,
@@ -326,6 +326,6 @@ Target for overnight run:
 
 ---
 
-*Generated: October 12, 2025*  
+*Generated: October 12, 2025*
 *Based on: Industry best practices, existing scraper analysis, Basketball Reference characteristics*
 

@@ -224,7 +224,7 @@ done
 psql -h nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com -U postgres -d nba_simulator
 
 -- Check snapshot counts
-SELECT 
+SELECT
   COUNT(*) as total_snapshots,
   COUNT(DISTINCT game_id) as games_processed,
   AVG(snapshot_count) as avg_snapshots_per_game

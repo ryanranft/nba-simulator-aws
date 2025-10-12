@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS game_state_snapshots (
     data_source VARCHAR(50) NOT NULL,  -- 'espn', 'hoopr', 'nba_api', 'kaggle'
     verification_passed BOOLEAN DEFAULT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
-    
+
     -- Ensure uniqueness per game, event, and source
     UNIQUE(game_id, event_num, data_source)
 );
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS player_snapshot_stats (
     player_id VARCHAR(50) NOT NULL,
     player_name VARCHAR(100),
     team_id VARCHAR(10) NOT NULL,
-    
+
     -- Basic Stats
     points INTEGER DEFAULT 0,
     fgm INTEGER DEFAULT 0,  -- Field goals made
@@ -68,27 +68,27 @@ CREATE TABLE IF NOT EXISTS player_snapshot_stats (
     fg3a INTEGER DEFAULT 0,  -- Three-pointers attempted
     ftm INTEGER DEFAULT 0,  -- Free throws made
     fta INTEGER DEFAULT 0,  -- Free throws attempted
-    
+
     -- Rebounds
     oreb INTEGER DEFAULT 0,  -- Offensive rebounds
     dreb INTEGER DEFAULT 0,  -- Defensive rebounds
     reb INTEGER DEFAULT 0,   -- Total rebounds
-    
+
     -- Other Stats
     ast INTEGER DEFAULT 0,   -- Assists
     stl INTEGER DEFAULT 0,   -- Steals
     blk INTEGER DEFAULT 0,   -- Blocks
     tov INTEGER DEFAULT 0,   -- Turnovers
     pf INTEGER DEFAULT 0,    -- Personal fouls
-    
+
     -- Advanced
     plus_minus INTEGER DEFAULT 0,
     minutes DECIMAL(5,2) DEFAULT 0,
     on_court BOOLEAN DEFAULT false,  -- Is player currently on court?
-    
+
     -- Metadata
     created_at TIMESTAMP DEFAULT NOW(),
-    
+
     PRIMARY KEY(snapshot_id, player_id)
 );
 
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS quarter_box_scores (
     player_id VARCHAR(50) NOT NULL,
     player_name VARCHAR(100),
     team_id VARCHAR(10) NOT NULL,
-    
+
     -- Quarter Stats (not cumulative)
     points INTEGER DEFAULT 0,
     fgm INTEGER DEFAULT 0,
@@ -135,11 +135,11 @@ CREATE TABLE IF NOT EXISTS quarter_box_scores (
     pf INTEGER DEFAULT 0,
     plus_minus INTEGER DEFAULT 0,
     minutes DECIMAL(5,2) DEFAULT 0,
-    
+
     -- Metadata
     data_source VARCHAR(50) NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
-    
+
     PRIMARY KEY(game_id, quarter, player_id, data_source)
 );
 
@@ -161,18 +161,18 @@ COMMENT ON COLUMN quarter_box_scores.points IS 'Points scored IN THIS QUARTER ON
 CREATE TABLE IF NOT EXISTS box_score_verification (
     game_id VARCHAR(50) NOT NULL,
     data_source VARCHAR(50) NOT NULL,
-    
+
     -- Verification Results
     final_score_match BOOLEAN,
     home_score_generated INTEGER,
     away_score_generated INTEGER,
     home_score_actual INTEGER,
     away_score_actual INTEGER,
-    
+
     -- Discrepancy Metrics
     total_discrepancies INTEGER DEFAULT 0,
     discrepancy_details JSONB,  -- Detailed breakdown by player and stat
-    
+
     -- Mean Absolute Errors
     mae_points DECIMAL(5,2),
     mae_rebounds DECIMAL(5,2),
@@ -180,16 +180,16 @@ CREATE TABLE IF NOT EXISTS box_score_verification (
     mae_steals DECIMAL(5,2),
     mae_blocks DECIMAL(5,2),
     mae_turnovers DECIMAL(5,2),
-    
+
     -- Quality Grade
     quality_grade CHAR(1) CHECK (quality_grade IN ('A', 'B', 'C', 'D', 'F')),
-    
+
     -- Notes
     notes TEXT,
-    
+
     -- Metadata
     verified_at TIMESTAMP DEFAULT NOW(),
-    
+
     PRIMARY KEY(game_id, data_source)
 );
 
@@ -217,7 +217,7 @@ COMMENT ON VIEW latest_snapshots IS 'Final snapshot for each game (latest event_
 
 -- View: Verification summary by source
 CREATE OR REPLACE VIEW verification_summary AS
-SELECT 
+SELECT
     data_source,
     COUNT(*) as total_games,
     COUNT(*) FILTER (WHERE quality_grade = 'A') as grade_a,
@@ -254,18 +254,18 @@ COMMENT ON VIEW verification_summary IS 'Summary of verification results by data
 -- SELECT * FROM game_state_snapshots WHERE game_id = '401584903' ORDER BY event_num;
 
 -- Example 2: Get player stats at snapshot 500 of a game
--- SELECT pss.* 
+-- SELECT pss.*
 -- FROM player_snapshot_stats pss
 -- JOIN game_state_snapshots gss ON pss.snapshot_id = gss.snapshot_id
 -- WHERE gss.game_id = '401584903' AND gss.event_num = 500;
 
 -- Example 3: Get quarter-by-quarter stats for a player
--- SELECT * FROM quarter_box_scores 
--- WHERE game_id = '401584903' AND player_id = '2544' 
+-- SELECT * FROM quarter_box_scores
+-- WHERE game_id = '401584903' AND player_id = '2544'
 -- ORDER BY quarter;
 
 -- Example 4: Get verification results for all ESPN games
--- SELECT * FROM box_score_verification 
+-- SELECT * FROM box_score_verification
 -- WHERE data_source = 'espn' AND quality_grade IN ('A', 'B')
 -- ORDER BY verified_at DESC;
 
