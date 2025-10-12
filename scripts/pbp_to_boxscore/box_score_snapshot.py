@@ -303,14 +303,14 @@ class VerificationResult:
     mae_points: float
     mae_rebounds: float
     mae_assists: float
-    mae_steals: float = 0.0
-    mae_blocks: float = 0.0
-    mae_turnovers: float = 0.0
     
     # Quality Grade
     quality_grade: str  # 'A', 'B', 'C', 'D', or 'F'
     
-    # Notes
+    # Optional fields with defaults
+    mae_steals: float = 0.0
+    mae_blocks: float = 0.0
+    mae_turnovers: float = 0.0
     notes: str = ""
     verified_at: datetime = field(default_factory=datetime.now)
     
