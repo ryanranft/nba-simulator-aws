@@ -166,6 +166,51 @@ bash scripts/audit/run_data_audit.sh --skip-s3
 ### Phase 5: Documentation Update (if --update-docs)
 - ✅ Update MASTER_DATA_INVENTORY.md timestamp
 - ✅ Record audit results
+- ✅ Update all documents referencing data counts
+- ✅ Archive obsolete documentation
+- ✅ Generate data summary report
+
+---
+
+## Documentation Update Process
+
+When `--update-docs` flag is used, the audit automatically updates all documents that reference data counts:
+
+### Documents Updated Automatically
+
+1. **Primary Data Documents:**
+   - `docs/DATA_QUALITY_BASELINE.md` - Overall data health summary
+   - `docs/MASTER_DATA_INVENTORY.md` - Complete inventory
+   - `docs/DATA_COLLECTION_SUMMARY.md` - Collection timeline
+   - `PROGRESS.md` - Project status summary
+
+2. **Phase Documentation:**
+   - `docs/phases/PHASE_0_INDEX.md` - Data collection phase status
+   - `docs/phases/PHASE_8_INDEX.md` - Audit phase status
+
+3. **Archive Process:**
+   - Identifies obsolete documents (`.old`, `.bak`, `*_backup*`)
+   - Moves to `docs/archive/superseded_documentation/`
+   - Updates archive README
+
+### Manual Documentation Updates
+
+If you need to update additional documents manually:
+
+```bash
+# Find all documents referencing old data counts
+grep -r "147,380\|172,597\|24,419" docs/ --include="*.md"
+
+# Update specific documents
+# Edit files found above with current data counts
+```
+
+### Integration with Other Workflows
+
+This workflow integrates with:
+- **Workflow #13:** File Inventory (`make inventory`)
+- **Workflow #43:** Documentation Consolidation
+- **Workflow #9:** Archive Management
 
 ---
 

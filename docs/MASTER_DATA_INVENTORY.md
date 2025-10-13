@@ -2,7 +2,7 @@
 
 **Version:** 1.0
 **Created:** October 11, 2025
-**Last Updated:** October 11, 2025
+**Last Updated:** October 13, 2025
 **Purpose:** Complete inventory of all NBA data across all storage locations
 
 ---
@@ -10,8 +10,8 @@
 ## Executive Summary
 
 **Total Data Holdings:**
-- **S3 Bucket**: 172,597 files
-- **Local Project**: 146,150 files
+- **S3 Bucket**: 172,600 files
+- **Local Project**: 147,382 files (ESPN only)
 - **External (0espn)**: 1,223,071 files (multi-sport)
 - **RDS PostgreSQL**: 48.4M rows across 23 tables
 - **SQLite Databases**: 3 databases (2.2 GB Kaggle + 2x 21 MB unified)
@@ -27,11 +27,11 @@
 
 ## 1. AWS S3 Bucket (s3://nba-sim-raw-data-lake)
 
-**Total Files:** 172,597
+**Total Files:** 172,600
 **Date Range:** 1993-2025 (33 NBA seasons)
 **Last Verified:** October 11, 2025
 
-### 1.1 ESPN Data (147,380 files)
+### 1.1 ESPN Data (70,522 files)
 
 Primary data source covering 1993-2025 season range.
 
@@ -53,9 +53,9 @@ Primary data source covering 1993-2025 season range.
 
 **Note:** Team stats in S3 (46,093) exceed local count (44,828) by 1,265 files. Investigation needed to determine why S3 has additional team stat files.
 
-### 1.2 NBA API Data (24,419 files)
+### 1.2 NBA API Data (22,256 files)
 
-Official NBA Stats API data covering earlier seasons (1995-2006).
+Official NBA Stats API data covering recent seasons (2020-2025). **NOTE: Incomplete collection - missing historical data and some data types.**
 
 | Data Type | File Count | Date Range | Status |
 |-----------|------------|------------|--------|
