@@ -44,6 +44,7 @@ import sys
 
 try:
     from basketball_reference_web_scraper import client
+
     HAS_BBREF = True
 except ImportError:
     HAS_BBREF = False
@@ -53,37 +54,41 @@ except ImportError:
 
 try:
     import boto3
+
     HAS_BOTO3 = True
 except ImportError:
     HAS_BOTO3 = False
     print("⚠️  boto3 not installed, S3 upload will be disabled")
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+
 
 class BasketballReferenceIncrementalScraper:
     """Incremental scraper for Basketball Reference aggregate data"""
 
-    def __init__(self, s3_bucket: Optional[str] = None, rate_limit: float = 12.0, dry_run: bool = False):
+    def __init__(
+        self,
+        s3_bucket: Optional[str] = None,
+        rate_limit: float = 12.0,
+        dry_run: bool = False,
+    ):
         self.s3_bucket = s3_bucket
-        self.s3_client = boto3.client('s3') if HAS_BOTO3 and s3_bucket else None
+        self.s3_client = boto3.client("s3") if HAS_BOTO3 and s3_bucket else None
         self.rate_limit = rate_limit
         self.last_request_time = 0
         self.dry_run = dry_run
 
         # Statistics
         self.stats = {
-            'requests': 0,
-            'successes': 0,
-            'errors': 0,
-            'retries': 0,
+            "requests": 0,
+            "successes": 0,
+            "errors": 0,
+            "retries": 0,
         }
 
         # Output directory
-        self.output_dir = Path('/tmp/basketball_reference_incremental')
+        self.output_dir = Path("/tmp/basketball_reference_incremental")
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def _rate_limit_wait(self):
@@ -99,9 +104,9 @@ class BasketballReferenceIncrementalScraper:
         """Exponential backoff on errors"""
         if is_rate_limit:
             # For 429 errors, wait much longer (30s, 60s, 120s)
-            wait_time = min(120, 30 * (2 ** attempt))
+            wait_time = min(120, 30 * (2**attempt))
         else:
-            wait_time = min(60, (2 ** attempt))
+            wait_time = min(60, (2**attempt))
         logging.warning(f"  Backing off for {wait_time}s (attempt {attempt})")
         time.sleep(wait_time)
 
@@ -113,7 +118,7 @@ class BasketballReferenceIncrementalScraper:
 
         filepath = Path(filepath)
         filepath.parent.mkdir(parents=True, exist_ok=True)
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(data, f, indent=2, default=str)
         logging.debug(f"  Saved: {filepath}")
 
@@ -139,17 +144,19 @@ class BasketballReferenceIncrementalScraper:
         for attempt in range(max_retries):
             try:
                 self._rate_limit_wait()
-                self.stats['requests'] += 1
+                self.stats["requests"] += 1
                 result = func(*args, **kwargs)
-                self.stats['successes'] += 1
+                self.stats["successes"] += 1
                 return result
             except Exception as e:
-                self.stats['errors'] += 1
+                self.stats["errors"] += 1
                 # Check if it's a 429 rate limit error
-                is_429 = '429' in str(e) or 'Too Many Requests' in str(e)
+                is_429 = "429" in str(e) or "Too Many Requests" in str(e)
                 if attempt < max_retries - 1:
-                    self.stats['retries'] += 1
-                    logging.warning(f"  Request failed (attempt {attempt + 1}/{max_retries}): {e}")
+                    self.stats["retries"] += 1
+                    logging.warning(
+                        f"  Request failed (attempt {attempt + 1}/{max_retries}): {e}"
+                    )
                     self._exponential_backoff(attempt, is_rate_limit=is_429)
                 else:
                     logging.error(f"  Request failed after {max_retries} attempts: {e}")
@@ -174,18 +181,22 @@ class BasketballReferenceIncrementalScraper:
         try:
             # Get season totals
             totals = self._make_request_with_retry(
-                client.players_season_totals,
-                season_end_year=season
+                client.players_season_totals, season_end_year=season
             )
 
             if totals:
                 # Save locally
-                local_path = self.output_dir / 'season_totals' / str(season) / 'player_season_totals.json'
+                local_path = (
+                    self.output_dir
+                    / "season_totals"
+                    / str(season)
+                    / "player_season_totals.json"
+                )
                 self._save_json(totals, local_path)
 
                 # Upload to S3
                 if self.s3_client:
-                    s3_key = f'basketball_reference/season_totals/{season}/player_season_totals.json'
+                    s3_key = f"basketball_reference/season_totals/{season}/player_season_totals.json"
                     self._upload_to_s3(local_path, s3_key)
 
                 logging.info(f"  ✓ Season totals: {len(totals)} player records")
@@ -207,17 +218,22 @@ class BasketballReferenceIncrementalScraper:
             totals = self._make_request_with_retry(
                 client.players_advanced_season_totals,
                 season_end_year=season,
-                include_combined_values=True
+                include_combined_values=True,
             )
 
             if totals:
                 # Save locally
-                local_path = self.output_dir / 'advanced_totals' / str(season) / 'player_advanced_totals.json'
+                local_path = (
+                    self.output_dir
+                    / "advanced_totals"
+                    / str(season)
+                    / "player_advanced_totals.json"
+                )
                 self._save_json(totals, local_path)
 
                 # Upload to S3
                 if self.s3_client:
-                    s3_key = f'basketball_reference/advanced_totals/{season}/player_advanced_totals.json'
+                    s3_key = f"basketball_reference/advanced_totals/{season}/player_advanced_totals.json"
                     self._upload_to_s3(local_path, s3_key)
 
                 logging.info(f"  ✓ Advanced totals: {len(totals)} player records")
@@ -251,7 +267,9 @@ class BasketballReferenceIncrementalScraper:
         # Optionally scrape previous season (for end-of-season finalized stats)
         if also_previous_season:
             seasons_to_scrape.insert(0, current_season - 1)
-            logging.info(f"Also scraping previous season: {current_season-2}-{current_season-1}\n")
+            logging.info(
+                f"Also scraping previous season: {current_season-2}-{current_season-1}\n"
+            )
 
         total_success = 0
         total_failures = 0
@@ -332,38 +350,36 @@ During the season:
 Off-season:
   - Previous season finalized stats
   - No current season data yet
-        """
+        """,
     )
 
     parser.add_argument(
-        '--also-previous-season',
-        action='store_true',
-        help='Also scrape previous season (for end-of-season finalized stats)'
+        "--also-previous-season",
+        action="store_true",
+        help="Also scrape previous season (for end-of-season finalized stats)",
     )
 
     parser.add_argument(
-        '--upload-to-s3',
-        action='store_true',
-        help='Upload scraped data to S3'
+        "--upload-to-s3", action="store_true", help="Upload scraped data to S3"
     )
 
     parser.add_argument(
-        '--s3-bucket',
-        default='nba-sim-raw-data-lake',
-        help='S3 bucket name (default: nba-sim-raw-data-lake)'
+        "--s3-bucket",
+        default="nba-sim-raw-data-lake",
+        help="S3 bucket name (default: nba-sim-raw-data-lake)",
     )
 
     parser.add_argument(
-        '--rate-limit',
+        "--rate-limit",
         type=float,
         default=12.0,
-        help='Seconds between requests (default: 12.0)'
+        help="Seconds between requests (default: 12.0)",
     )
 
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Dry run mode - don\'t save files or upload to S3'
+        "--dry-run",
+        action="store_true",
+        help="Dry run mode - don't save files or upload to S3",
     )
 
     args = parser.parse_args()
@@ -375,7 +391,7 @@ Off-season:
     scraper = BasketballReferenceIncrementalScraper(
         s3_bucket=args.s3_bucket if args.upload_to_s3 else None,
         rate_limit=args.rate_limit,
-        dry_run=args.dry_run
+        dry_run=args.dry_run,
     )
 
     scraper.scrape_incremental(also_previous_season=args.also_previous_season)
@@ -384,5 +400,5 @@ Off-season:
     print(f"✓ Complete: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

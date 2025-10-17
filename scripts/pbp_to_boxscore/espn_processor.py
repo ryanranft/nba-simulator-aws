@@ -44,7 +44,11 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
     - type.text: Event type (Made Shot, Missed Shot, Rebound, etc.)
     """
 
-    def __init__(self, s3_bucket: str = 'nba-sim-raw-data-lake', local_cache_dir: Optional[str] = None):
+    def __init__(
+        self,
+        s3_bucket: str = "nba-sim-raw-data-lake",
+        local_cache_dir: Optional[str] = None,
+    ):
         """
         Initialize ESPN processor.
 
@@ -52,9 +56,9 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
             s3_bucket: S3 bucket name
             local_cache_dir: Optional local directory for caching files
         """
-        super().__init__(data_source='espn')
+        super().__init__(data_source="espn")
         self.s3_bucket = s3_bucket
-        self.s3_client = boto3.client('s3')
+        self.s3_client = boto3.client("s3")
         self.local_cache_dir = Path(local_cache_dir) if local_cache_dir else None
 
         if self.local_cache_dir:
@@ -83,7 +87,7 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
             local_path = self.local_cache_dir / f"{game_id}.json"
             if local_path.exists():
                 self.logger.debug(f"Loading game {game_id} from local cache")
-                with open(local_path, 'r') as f:
+                with open(local_path, "r") as f:
                     raw_data = json.load(f)
             else:
                 raw_data = self._download_from_s3(game_id)
@@ -100,18 +104,18 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
 
         try:
             response = self.s3_client.get_object(Bucket=self.s3_bucket, Key=s3_key)
-            game_data = json.loads(response['Body'].read().decode('utf-8'))
+            game_data = json.loads(response["Body"].read().decode("utf-8"))
 
             # Cache locally if configured
             if self.local_cache_dir:
                 local_path = self.local_cache_dir / f"{game_id}.json"
-                with open(local_path, 'w') as f:
+                with open(local_path, "w") as f:
                     json.dump(game_data, f)
 
             return game_data
 
         except ClientError as e:
-            if e.response['Error']['Code'] == 'NoSuchKey':
+            if e.response["Error"]["Code"] == "NoSuchKey":
                 raise FileNotFoundError(f"Game {game_id} not found in S3: {s3_key}")
             else:
                 raise
@@ -123,9 +127,9 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
         ESPN structure: pbp.playGrps = [[period 1 plays], [period 2 plays], ...]
         We need: {'events': [all plays in order], ...}
         """
-        gp = raw_data.get('page', {}).get('content', {}).get('gamepackage', {})
-        pbp = gp.get('pbp', {})
-        play_groups = pbp.get('playGrps', [])
+        gp = raw_data.get("page", {}).get("content", {}).get("gamepackage", {})
+        pbp = gp.get("pbp", {})
+        play_groups = pbp.get("playGrps", [])
 
         # Flatten nested lists
         events = []
@@ -134,10 +138,7 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
                 events.extend(period_plays)
 
         # Return simplified structure
-        return {
-            'raw_data': raw_data,
-            'events': events
-        }
+        return {"raw_data": raw_data, "events": events}
 
     def get_initial_state(self, game_data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -151,40 +152,40 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
         """
         try:
             # Navigate to gamepackage from raw_data
-            raw_data = game_data.get('raw_data', game_data)
-            gp = raw_data.get('page', {}).get('content', {}).get('gamepackage', {})
-            pbp = gp.get('pbp', {})
-            tms = pbp.get('tms', {})
+            raw_data = game_data.get("raw_data", game_data)
+            gp = raw_data.get("page", {}).get("content", {}).get("gamepackage", {})
+            pbp = gp.get("pbp", {})
+            tms = pbp.get("tms", {})
 
             # Extract team info
-            home_team = tms.get('home', {})
-            away_team = tms.get('away', {})
+            home_team = tms.get("home", {})
+            away_team = tms.get("away", {})
 
             initial_state = {
-                'home_team_id': home_team.get('id', 'unknown'),
-                'away_team_id': away_team.get('id', 'unknown'),
-                'home_team_name': home_team.get('displayName', 'Unknown'),
-                'away_team_name': away_team.get('displayName', 'Unknown'),
-                'home_abbrev': home_team.get('abbrev', ''),
-                'away_abbrev': away_team.get('abbrev', ''),
-                'starting_lineups': {
-                    home_team.get('id', 'unknown'): [],
-                    away_team.get('id', 'unknown'): []
+                "home_team_id": home_team.get("id", "unknown"),
+                "away_team_id": away_team.get("id", "unknown"),
+                "home_team_name": home_team.get("displayName", "Unknown"),
+                "away_team_name": away_team.get("displayName", "Unknown"),
+                "home_abbrev": home_team.get("abbrev", ""),
+                "away_abbrev": away_team.get("abbrev", ""),
+                "starting_lineups": {
+                    home_team.get("id", "unknown"): [],
+                    away_team.get("id", "unknown"): [],
                 },
-                'player_info': {}
+                "player_info": {},
             }
 
             # Extract player info from events
-            events = game_data.get('events', [])
+            events = game_data.get("events", [])
             for event in events[:50]:  # Look at first 50 events to find starters
-                participants = event.get('participants', [])
+                participants = event.get("participants", [])
                 for participant in participants:
-                    athlete = participant.get('athlete', {})
-                    player_id = athlete.get('id')
-                    if player_id and player_id not in initial_state['player_info']:
-                        initial_state['player_info'][player_id] = {
-                            'name': athlete.get('displayName', 'Unknown'),
-                            'team_id': participant.get('team', {}).get('id')
+                    athlete = participant.get("athlete", {})
+                    player_id = athlete.get("id")
+                    if player_id and player_id not in initial_state["player_info"]:
+                        initial_state["player_info"][player_id] = {
+                            "name": athlete.get("displayName", "Unknown"),
+                            "team_id": participant.get("team", {}).get("id"),
                         }
 
             return initial_state
@@ -217,12 +218,12 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
         """
         try:
             # Extract basic info
-            period_num = event.get('period', {}).get('number', 1)
-            clock_display = event.get('clock', {}).get('displayValue', '12:00')
+            period_num = event.get("period", {}).get("number", 1)
+            clock_display = event.get("clock", {}).get("displayValue", "12:00")
 
             # Parse clock to seconds (format: "MM:SS")
             try:
-                clock_parts = clock_display.split(':')
+                clock_parts = clock_display.split(":")
                 if len(clock_parts) == 2:
                     minutes = int(clock_parts[0])
                     seconds = int(clock_parts[1])
@@ -233,23 +234,22 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
                 seconds_remaining = 720.0
 
             parsed = {
-                'event_num': event_num,
-                'play_id': event.get('id'),
-                'text': event.get('text', ''),
-                'quarter': period_num,
-                'time_remaining': clock_display,
-                'game_clock_seconds': self._calculate_game_clock_seconds(
-                    period_num,
-                    seconds_remaining
+                "event_num": event_num,
+                "play_id": event.get("id"),
+                "text": event.get("text", ""),
+                "quarter": period_num,
+                "time_remaining": clock_display,
+                "game_clock_seconds": self._calculate_game_clock_seconds(
+                    period_num, seconds_remaining
                 ),
-                'home_score': event.get('homeScore', 0),
-                'away_score': event.get('awayScore', 0),
-                'scoring_play': False,  # Will detect from score changes
-                'event_type': 'play',  # Generic type for now
-                'stat_updates': {},
-                'substitution': None,
-                'player_id': None,
-                'team_id': None
+                "home_score": event.get("homeScore", 0),
+                "away_score": event.get("awayScore", 0),
+                "scoring_play": False,  # Will detect from score changes
+                "event_type": "play",  # Generic type for now
+                "stat_updates": {},
+                "substitution": None,
+                "player_id": None,
+                "team_id": None,
             }
 
             # Note: ESPN doesn't provide structured player data in this format
@@ -262,20 +262,20 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
             self.logger.warning(f"Error parsing event {event_num}: {e}", exc_info=True)
             # Return minimal event to avoid breaking processing
             return {
-                'event_num': event_num,
-                'play_id': None,
-                'text': '',
-                'quarter': 1,
-                'time_remaining': '12:00',
-                'game_clock_seconds': 0,
-                'home_score': 0,
-                'away_score': 0,
-                'scoring_play': False,
-                'event_type': 'unknown',
-                'stat_updates': {},
-                'substitution': None,
-                'player_id': None,
-                'team_id': None
+                "event_num": event_num,
+                "play_id": None,
+                "text": "",
+                "quarter": 1,
+                "time_remaining": "12:00",
+                "game_clock_seconds": 0,
+                "home_score": 0,
+                "away_score": 0,
+                "scoring_play": False,
+                "event_type": "unknown",
+                "stat_updates": {},
+                "substitution": None,
+                "player_id": None,
+                "team_id": None,
             }
 
     def get_actual_box_score(self, game_id: str) -> Optional[Dict[str, Any]]:
@@ -294,7 +294,7 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
 
         try:
             response = self.s3_client.get_object(Bucket=self.s3_bucket, Key=s3_key)
-            box_score_data = json.loads(response['Body'].read().decode('utf-8'))
+            box_score_data = json.loads(response["Body"].read().decode("utf-8"))
 
             # Parse box score structure (ESPN box score format)
             # TODO: Implement actual box score parsing
@@ -303,7 +303,7 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
             return None
 
         except ClientError as e:
-            if e.response['Error']['Code'] == 'NoSuchKey':
+            if e.response["Error"]["Code"] == "NoSuchKey":
                 self.logger.debug(f"Box score not found for game {game_id}")
                 return None
             else:
@@ -314,7 +314,9 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
     # HELPER METHODS
     # ========================================================================
 
-    def _calculate_game_clock_seconds(self, period: int, seconds_remaining_in_period: float) -> int:
+    def _calculate_game_clock_seconds(
+        self, period: int, seconds_remaining_in_period: float
+    ) -> int:
         """
         Calculate total game seconds elapsed from quarter and clock.
 
@@ -339,7 +341,9 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
 
         return int(seconds_before_period + seconds_elapsed_in_period)
 
-    def process_game_from_s3(self, game_id: str, verify: bool = True) -> tuple[List[BoxScoreSnapshot], Optional[VerificationResult]]:
+    def process_game_from_s3(
+        self, game_id: str, verify: bool = True
+    ) -> tuple[List[BoxScoreSnapshot], Optional[VerificationResult]]:
         """
         Convenience method to process game directly from S3.
 
@@ -355,10 +359,9 @@ class ESPNPlayByPlayProcessor(BasePlayByPlayProcessor):
 
 # Batch processing functions
 
+
 def process_games_batch(
-    game_ids: List[str],
-    output_dir: Optional[str] = None,
-    verify: bool = True
+    game_ids: List[str], output_dir: Optional[str] = None, verify: bool = True
 ) -> Dict[str, Any]:
     """
     Process multiple games in batch.
@@ -374,12 +377,12 @@ def process_games_batch(
     processor = ESPNPlayByPlayProcessor()
 
     stats = {
-        'processed': 0,
-        'failed': 0,
-        'total_snapshots': 0,
-        'verified': 0,
-        'verification_passed': 0,
-        'verification_failed': 0
+        "processed": 0,
+        "failed": 0,
+        "total_snapshots": 0,
+        "verified": 0,
+        "verification_passed": 0,
+        "verification_failed": 0,
     }
 
     for i, game_id in enumerate(game_ids, 1):
@@ -387,15 +390,15 @@ def process_games_batch(
 
         try:
             snapshots, verification = processor.process_game(game_id, verify=verify)
-            stats['processed'] += 1
-            stats['total_snapshots'] += len(snapshots)
+            stats["processed"] += 1
+            stats["total_snapshots"] += len(snapshots)
 
             if verification:
-                stats['verified'] += 1
+                stats["verified"] += 1
                 if verification.is_passing():
-                    stats['verification_passed'] += 1
+                    stats["verification_passed"] += 1
                 else:
-                    stats['verification_failed'] += 1
+                    stats["verification_failed"] += 1
 
             # Save to file if output_dir specified
             if output_dir and snapshots:
@@ -403,17 +406,17 @@ def process_games_batch(
                 output_path.mkdir(parents=True, exist_ok=True)
 
                 # Save snapshots as JSON
-                with open(output_path / f"{game_id}_snapshots.json", 'w') as f:
+                with open(output_path / f"{game_id}_snapshots.json", "w") as f:
                     json.dump([s.to_dict() for s in snapshots], f, indent=2)
 
                 # Save verification if available
                 if verification:
-                    with open(output_path / f"{game_id}_verification.json", 'w') as f:
+                    with open(output_path / f"{game_id}_verification.json", "w") as f:
                         json.dump(verification.to_dict(), f, indent=2)
 
         except Exception as e:
             logger.error(f"Failed to process game {game_id}: {e}", exc_info=True)
-            stats['failed'] += 1
+            stats["failed"] += 1
 
     return stats
 
@@ -422,7 +425,7 @@ def process_season(
     season: int,
     output_dir: Optional[str] = None,
     verify: bool = True,
-    limit: Optional[int] = None
+    limit: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
     Process all games from a season.
@@ -444,4 +447,3 @@ def process_season(
         game_ids = game_ids[:limit]
 
     return process_games_batch(game_ids, output_dir=output_dir, verify=verify)
-

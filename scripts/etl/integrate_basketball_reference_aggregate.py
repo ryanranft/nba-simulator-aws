@@ -34,9 +34,9 @@ UNIFIED_DB = "/tmp/unified_nba.db"
 # S3 configuration
 S3_BUCKET = "nba-sim-raw-data-lake"
 S3_PREFIXES = {
-    'advanced': 'basketball_reference/advanced_totals/',
-    'season': 'basketball_reference/season_totals/',
-    'standings': 'basketball_reference/standings/'
+    "advanced": "basketball_reference/advanced_totals/",
+    "season": "basketball_reference/season_totals/",
+    "standings": "basketball_reference/standings/",
 }
 
 # Local download path
@@ -71,7 +71,7 @@ def download_aggregate_data_from_s3(data_type: Optional[str] = None):
 
     DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-    s3 = boto3.client('s3')
+    s3 = boto3.client("s3")
 
     # Determine which data types to download
     if data_type:
@@ -85,12 +85,12 @@ def download_aggregate_data_from_s3(data_type: Optional[str] = None):
         print(f"Downloading {dtype} data...")
 
         # List all years
-        response = s3.list_objects_v2(Bucket=S3_BUCKET, Prefix=prefix, Delimiter='/')
+        response = s3.list_objects_v2(Bucket=S3_BUCKET, Prefix=prefix, Delimiter="/")
 
         years = []
-        if 'CommonPrefixes' in response:
-            for prefix_obj in response['CommonPrefixes']:
-                year_str = prefix_obj['Prefix'].split('/')[-2]
+        if "CommonPrefixes" in response:
+            for prefix_obj in response["CommonPrefixes"]:
+                year_str = prefix_obj["Prefix"].split("/")[-2]
                 try:
                     years.append(int(year_str))
                 except ValueError:
@@ -109,10 +109,10 @@ def download_aggregate_data_from_s3(data_type: Optional[str] = None):
             # List files in year directory
             year_response = s3.list_objects_v2(Bucket=S3_BUCKET, Prefix=s3_prefix)
 
-            if 'Contents' in year_response:
-                for obj in year_response['Contents']:
-                    s3_key = obj['Key']
-                    filename = s3_key.split('/')[-1]
+            if "Contents" in year_response:
+                for obj in year_response["Contents"]:
+                    s3_key = obj["Key"]
+                    filename = s3_key.split("/")[-1]
                     local_path = local_year_dir / filename
 
                     try:
@@ -143,7 +143,8 @@ def create_aggregate_database():
     cursor = conn.cursor()
 
     # Create player_season_totals table
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS player_season_totals (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             season INTEGER NOT NULL,
@@ -173,10 +174,12 @@ def create_aggregate_database():
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(season, player_slug, team)
         )
-    """)
+    """
+    )
 
     # Create player_advanced_totals table
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS player_advanced_totals (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             season INTEGER NOT NULL,
@@ -211,10 +214,12 @@ def create_aggregate_database():
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(season, player_slug, team)
         )
-    """)
+    """
+    )
 
     # Create team_standings table
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS team_standings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             season INTEGER NOT NULL,
@@ -227,18 +232,33 @@ def create_aggregate_database():
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(season, team)
         )
-    """)
+    """
+    )
 
     # Create indexes
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_season_totals_season ON player_season_totals(season)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_season_totals_player ON player_season_totals(player_slug)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_advanced_totals_season ON player_advanced_totals(season)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_advanced_totals_player ON player_advanced_totals(player_slug)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_standings_season ON team_standings(season)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_standings_team ON team_standings(team)")
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_season_totals_season ON player_season_totals(season)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_season_totals_player ON player_season_totals(player_slug)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_advanced_totals_season ON player_advanced_totals(season)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_advanced_totals_player ON player_advanced_totals(player_slug)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_standings_season ON team_standings(season)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_standings_team ON team_standings(team)"
+    )
 
     conn.commit()
-    print("✓ Created tables: player_season_totals, player_advanced_totals, team_standings")
+    print(
+        "✓ Created tables: player_season_totals, player_advanced_totals, team_standings"
+    )
     print("✓ Created indexes for fast lookups")
     print()
 
@@ -255,7 +275,7 @@ def load_season_totals_to_database(conn):
 
     cursor = conn.cursor()
 
-    season_dirs = sorted((DOWNLOAD_DIR / 'season').glob('*'))
+    season_dirs = sorted((DOWNLOAD_DIR / "season").glob("*"))
 
     if not season_dirs:
         print("⚠️  No season totals files found.")
@@ -271,7 +291,7 @@ def load_season_totals_to_database(conn):
             continue
 
         season = int(season_dir.name)
-        json_file = season_dir / 'player_season_totals.json'
+        json_file = season_dir / "player_season_totals.json"
 
         if not json_file.exists():
             continue
@@ -280,7 +300,8 @@ def load_season_totals_to_database(conn):
             players = json.load(f)
 
         for player in players:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT OR REPLACE INTO player_season_totals (
                     season, player_slug, player_name, position, age, team,
                     games_played, games_started, minutes_played,
@@ -290,40 +311,47 @@ def load_season_totals_to_database(conn):
                     offensive_rebounds, defensive_rebounds, total_rebounds,
                     assists, steals, blocks, turnovers, personal_fouls, points
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                season,
-                player.get('slug'),
-                player.get('name'),
-                ','.join([parse_position(p) for p in player.get('positions', [])]),
-                player.get('age'),
-                parse_team_name(player.get('team', '')),
-                player.get('games_played'),
-                player.get('games_started'),
-                player.get('minutes_played'),
-                player.get('made_field_goals'),
-                player.get('attempted_field_goals'),
-                player.get('made_three_point_field_goals'),
-                player.get('attempted_three_point_field_goals'),
-                player.get('made_free_throws'),
-                player.get('attempted_free_throws'),
-                player.get('offensive_rebounds'),
-                player.get('defensive_rebounds'),
-                player.get('total_rebounds'),
-                player.get('assists'),
-                player.get('steals'),
-                player.get('blocks'),
-                player.get('turnovers'),
-                player.get('personal_fouls'),
-                player.get('points')
-            ))
+            """,
+                (
+                    season,
+                    player.get("slug"),
+                    player.get("name"),
+                    ",".join([parse_position(p) for p in player.get("positions", [])]),
+                    player.get("age"),
+                    parse_team_name(player.get("team", "")),
+                    player.get("games_played"),
+                    player.get("games_started"),
+                    player.get("minutes_played"),
+                    player.get("made_field_goals"),
+                    player.get("attempted_field_goals"),
+                    player.get("made_three_point_field_goals"),
+                    player.get("attempted_three_point_field_goals"),
+                    player.get("made_free_throws"),
+                    player.get("attempted_free_throws"),
+                    player.get("offensive_rebounds"),
+                    player.get("defensive_rebounds"),
+                    player.get("total_rebounds"),
+                    player.get("assists"),
+                    player.get("steals"),
+                    player.get("blocks"),
+                    player.get("turnovers"),
+                    player.get("personal_fouls"),
+                    player.get("points"),
+                ),
+            )
 
             total_players += 1
 
         if (season_dirs.index(season_dir) + 1) % 10 == 0:
-            print(f"  Processed {season_dirs.index(season_dir) + 1}/{len(season_dirs)} seasons...", end='\r')
+            print(
+                f"  Processed {season_dirs.index(season_dir) + 1}/{len(season_dirs)} seasons...",
+                end="\r",
+            )
 
     conn.commit()
-    print(f"\n✓ Loaded {total_players:,} player season records from {len(season_dirs)} seasons")
+    print(
+        f"\n✓ Loaded {total_players:,} player season records from {len(season_dirs)} seasons"
+    )
     print()
 
     return total_players
@@ -339,7 +367,7 @@ def load_advanced_totals_to_database(conn):
 
     cursor = conn.cursor()
 
-    advanced_dirs = sorted((DOWNLOAD_DIR / 'advanced').glob('*'))
+    advanced_dirs = sorted((DOWNLOAD_DIR / "advanced").glob("*"))
 
     if not advanced_dirs:
         print("⚠️  No advanced totals files found.")
@@ -355,7 +383,7 @@ def load_advanced_totals_to_database(conn):
             continue
 
         season = int(advanced_dir.name)
-        json_file = advanced_dir / 'player_advanced_totals.json'
+        json_file = advanced_dir / "player_advanced_totals.json"
 
         if not json_file.exists():
             continue
@@ -364,7 +392,8 @@ def load_advanced_totals_to_database(conn):
             players = json.load(f)
 
         for player in players:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT OR REPLACE INTO player_advanced_totals (
                     season, player_slug, player_name, position, age, team,
                     games_played, minutes_played,
@@ -377,45 +406,52 @@ def load_advanced_totals_to_database(conn):
                     offensive_box_plus_minus, defensive_box_plus_minus, box_plus_minus,
                     value_over_replacement_player, is_combined_totals
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                season,
-                player.get('slug'),
-                player.get('name'),
-                ','.join([parse_position(p) for p in player.get('positions', [])]),
-                player.get('age'),
-                parse_team_name(player.get('team', '')),
-                player.get('games_played'),
-                player.get('minutes_played'),
-                player.get('player_efficiency_rating'),
-                player.get('true_shooting_percentage'),
-                player.get('three_point_attempt_rate'),
-                player.get('free_throw_attempt_rate'),
-                player.get('offensive_rebound_percentage'),
-                player.get('defensive_rebound_percentage'),
-                player.get('total_rebound_percentage'),
-                player.get('assist_percentage'),
-                player.get('steal_percentage'),
-                player.get('block_percentage'),
-                player.get('turnover_percentage'),
-                player.get('usage_percentage'),
-                player.get('offensive_win_shares'),
-                player.get('defensive_win_shares'),
-                player.get('win_shares'),
-                player.get('win_shares_per_48_minutes'),
-                player.get('offensive_box_plus_minus'),
-                player.get('defensive_box_plus_minus'),
-                player.get('box_plus_minus'),
-                player.get('value_over_replacement_player'),
-                player.get('is_combined_totals')
-            ))
+            """,
+                (
+                    season,
+                    player.get("slug"),
+                    player.get("name"),
+                    ",".join([parse_position(p) for p in player.get("positions", [])]),
+                    player.get("age"),
+                    parse_team_name(player.get("team", "")),
+                    player.get("games_played"),
+                    player.get("minutes_played"),
+                    player.get("player_efficiency_rating"),
+                    player.get("true_shooting_percentage"),
+                    player.get("three_point_attempt_rate"),
+                    player.get("free_throw_attempt_rate"),
+                    player.get("offensive_rebound_percentage"),
+                    player.get("defensive_rebound_percentage"),
+                    player.get("total_rebound_percentage"),
+                    player.get("assist_percentage"),
+                    player.get("steal_percentage"),
+                    player.get("block_percentage"),
+                    player.get("turnover_percentage"),
+                    player.get("usage_percentage"),
+                    player.get("offensive_win_shares"),
+                    player.get("defensive_win_shares"),
+                    player.get("win_shares"),
+                    player.get("win_shares_per_48_minutes"),
+                    player.get("offensive_box_plus_minus"),
+                    player.get("defensive_box_plus_minus"),
+                    player.get("box_plus_minus"),
+                    player.get("value_over_replacement_player"),
+                    player.get("is_combined_totals"),
+                ),
+            )
 
             total_players += 1
 
         if (advanced_dirs.index(advanced_dir) + 1) % 10 == 0:
-            print(f"  Processed {advanced_dirs.index(advanced_dir) + 1}/{len(advanced_dirs)} seasons...", end='\r')
+            print(
+                f"  Processed {advanced_dirs.index(advanced_dir) + 1}/{len(advanced_dirs)} seasons...",
+                end="\r",
+            )
 
     conn.commit()
-    print(f"\n✓ Loaded {total_players:,} player advanced records from {len(advanced_dirs)} seasons")
+    print(
+        f"\n✓ Loaded {total_players:,} player advanced records from {len(advanced_dirs)} seasons"
+    )
     print()
 
     return total_players
@@ -431,7 +467,7 @@ def load_standings_to_database(conn):
 
     cursor = conn.cursor()
 
-    standings_dirs = sorted((DOWNLOAD_DIR / 'standings').glob('*'))
+    standings_dirs = sorted((DOWNLOAD_DIR / "standings").glob("*"))
 
     if not standings_dirs:
         print("⚠️  No standings files found.")
@@ -447,7 +483,7 @@ def load_standings_to_database(conn):
             continue
 
         season = int(standings_dir.name)
-        json_file = standings_dir / 'standings.json'
+        json_file = standings_dir / "standings.json"
 
         if not json_file.exists():
             continue
@@ -456,29 +492,44 @@ def load_standings_to_database(conn):
             teams = json.load(f)
 
         for team in teams:
-            team_name = parse_team_name(team.get('team'))
+            team_name = parse_team_name(team.get("team"))
 
             # Skip if no team name (invalid record)
             if not team_name:
                 continue
 
-            wins = team.get('wins', 0)
-            losses = team.get('losses', 0)
+            wins = team.get("wins", 0)
+            losses = team.get("losses", 0)
             win_pct = wins / (wins + losses) if (wins + losses) > 0 else 0
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT OR REPLACE INTO team_standings (
                     season, team, wins, losses, win_percentage, division, conference
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (
-                season,
-                team_name,
-                wins,
-                losses,
-                win_pct,
-                team.get('division', '').replace('Division.', '').replace('_', ' ') if team.get('division') else None,
-                team.get('conference', '').replace('Conference.', '').replace('_', ' ') if team.get('conference') else None
-            ))
+            """,
+                (
+                    season,
+                    team_name,
+                    wins,
+                    losses,
+                    win_pct,
+                    (
+                        team.get("division", "")
+                        .replace("Division.", "")
+                        .replace("_", " ")
+                        if team.get("division")
+                        else None
+                    ),
+                    (
+                        team.get("conference", "")
+                        .replace("Conference.", "")
+                        .replace("_", " ")
+                        if team.get("conference")
+                        else None
+                    ),
+                ),
+            )
 
             total_teams += 1
 
@@ -548,12 +599,12 @@ def run_data_quality_checks(conn):
     print()
 
     return {
-        'season_totals': total_season,
-        'advanced_totals': total_advanced,
-        'standings': total_standings,
-        'seasons_season': seasons_count,
-        'seasons_advanced': seasons_count_adv,
-        'seasons_standings': seasons_count_stand
+        "season_totals": total_season,
+        "advanced_totals": total_advanced,
+        "standings": total_standings,
+        "seasons_season": seasons_count,
+        "seasons_advanced": seasons_count_adv,
+        "seasons_standings": seasons_count_stand,
     }
 
 
@@ -562,19 +613,19 @@ def main():
 
     parser = argparse.ArgumentParser(
         description="Integrate Basketball Reference aggregate data into unified database",
-        formatter_class=argparse.RawDescriptionHelpFormatter
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
     parser.add_argument(
-        '--data-type',
-        choices=['advanced', 'season', 'standings'],
-        help='Process specific data type only'
+        "--data-type",
+        choices=["advanced", "season", "standings"],
+        help="Process specific data type only",
     )
 
     parser.add_argument(
-        '--validate-only',
-        action='store_true',
-        help='Only run data quality checks, do not download or integrate'
+        "--validate-only",
+        action="store_true",
+        help="Only run data quality checks, do not download or integrate",
     )
 
     args = parser.parse_args()
@@ -590,13 +641,13 @@ def main():
         bbref_conn = create_aggregate_database()
 
         # Step 3: Load data to database
-        if not args.data_type or args.data_type == 'season':
+        if not args.data_type or args.data_type == "season":
             load_season_totals_to_database(bbref_conn)
 
-        if not args.data_type or args.data_type == 'advanced':
+        if not args.data_type or args.data_type == "advanced":
             load_advanced_totals_to_database(bbref_conn)
 
-        if not args.data_type or args.data_type == 'standings':
+        if not args.data_type or args.data_type == "standings":
             load_standings_to_database(bbref_conn)
 
         # Step 4: Run data quality checks
@@ -616,5 +667,5 @@ def main():
     print(f"Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

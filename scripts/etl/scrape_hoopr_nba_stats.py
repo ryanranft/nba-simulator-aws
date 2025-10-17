@@ -44,6 +44,7 @@ try:
         load_nba_player_boxscore,
         load_nba_schedule,
     )
+
     HAS_SPORTSDATAVERSE = True
 except ImportError:
     HAS_SPORTSDATAVERSE = False
@@ -52,6 +53,7 @@ except ImportError:
 
 try:
     import boto3
+
     HAS_BOTO3 = True
 except ImportError:
     HAS_BOTO3 = False
@@ -73,35 +75,35 @@ class HoopRNBAStatsScraper:
     def __init__(self, output_dir="/tmp/hoopr_nba_stats", s3_bucket=None):
         self.output_dir = Path(output_dir)
         self.s3_bucket = s3_bucket
-        self.s3_client = boto3.client('s3') if HAS_BOTO3 and s3_bucket else None
+        self.s3_client = boto3.client("s3") if HAS_BOTO3 and s3_bucket else None
 
         # Create category subdirectories
         self.categories = [
-            'pbp',              # Play-by-play
-            'team_box',         # Team box scores
-            'player_box',       # Player box scores
-            'schedule',         # Season schedules
-            'tracking',         # Player/team tracking stats
-            'advanced',         # Advanced metrics
-            'shots',            # Shot charts and shot tracking
-            'lineups',          # Lineup data
-            'draft',            # Draft combine and history
-            'hustle',           # Hustle stats
-            'synergy',          # Synergy play types
-            'matchups',         # Player matchups
-            'clutch',           # Clutch performance
-            'defense',          # Defensive metrics
-            'franchise',        # Historical franchise data
+            "pbp",  # Play-by-play
+            "team_box",  # Team box scores
+            "player_box",  # Player box scores
+            "schedule",  # Season schedules
+            "tracking",  # Player/team tracking stats
+            "advanced",  # Advanced metrics
+            "shots",  # Shot charts and shot tracking
+            "lineups",  # Lineup data
+            "draft",  # Draft combine and history
+            "hustle",  # Hustle stats
+            "synergy",  # Synergy play types
+            "matchups",  # Player matchups
+            "clutch",  # Clutch performance
+            "defense",  # Defensive metrics
+            "franchise",  # Historical franchise data
         ]
 
         for category in self.categories:
             (self.output_dir / category).mkdir(parents=True, exist_ok=True)
 
         self.stats = {
-            'files_created': 0,
-            'data_points': 0,
-            'errors': 0,
-            'seasons_processed': 0,
+            "files_created": 0,
+            "data_points": 0,
+            "errors": 0,
+            "seasons_processed": 0,
         }
 
     def save_json(self, data, filepath):
@@ -110,12 +112,12 @@ class HoopRNBAStatsScraper:
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
         # Handle Polars DataFrames
-        if hasattr(data, 'to_dicts'):
+        if hasattr(data, "to_dicts"):
             data = data.to_dicts()
-        elif hasattr(data, 'to_dict'):
-            data = data.to_dict('records')
+        elif hasattr(data, "to_dict"):
+            data = data.to_dict("records")
 
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(data, f, indent=2, default=str)
 
     def upload_to_s3(self, local_path, s3_key):
@@ -148,18 +150,18 @@ class HoopRNBAStatsScraper:
                 return
 
             # Convert to dict format
-            if hasattr(pbp_df, 'to_dicts'):
+            if hasattr(pbp_df, "to_dicts"):
                 pbp_data = pbp_df.to_dicts()
             else:
-                pbp_data = pbp_df.to_dict('records')
+                pbp_data = pbp_df.to_dict("records")
 
             # Save combined file
             season_str = "_".join(map(str, seasons))
-            pbp_file = self.output_dir / 'pbp' / f"pbp_seasons_{season_str}.json"
+            pbp_file = self.output_dir / "pbp" / f"pbp_seasons_{season_str}.json"
             self.save_json(pbp_data, pbp_file)
 
-            self.stats['files_created'] += 1
-            self.stats['data_points'] += len(pbp_data)
+            self.stats["files_created"] += 1
+            self.stats["data_points"] += len(pbp_data)
 
             print(f"  ✅ Saved {len(pbp_data):,} play-by-play records")
 
@@ -173,7 +175,7 @@ class HoopRNBAStatsScraper:
 
         except Exception as e:
             print(f"  ❌ Error scraping play-by-play: {e}")
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
             return None
 
     def scrape_team_box(self, seasons):
@@ -193,18 +195,20 @@ class HoopRNBAStatsScraper:
                 return
 
             # Convert to dict
-            if hasattr(team_box_df, 'to_dicts'):
+            if hasattr(team_box_df, "to_dicts"):
                 team_box_data = team_box_df.to_dicts()
             else:
-                team_box_data = team_box_df.to_dict('records')
+                team_box_data = team_box_df.to_dict("records")
 
             # Save
             season_str = "_".join(map(str, seasons))
-            box_file = self.output_dir / 'team_box' / f"team_box_seasons_{season_str}.json"
+            box_file = (
+                self.output_dir / "team_box" / f"team_box_seasons_{season_str}.json"
+            )
             self.save_json(team_box_data, box_file)
 
-            self.stats['files_created'] += 1
-            self.stats['data_points'] += len(team_box_data)
+            self.stats["files_created"] += 1
+            self.stats["data_points"] += len(team_box_data)
 
             print(f"  ✅ Saved {len(team_box_data):,} team box score records")
 
@@ -218,7 +222,7 @@ class HoopRNBAStatsScraper:
 
         except Exception as e:
             print(f"  ❌ Error scraping team box scores: {e}")
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
             return None
 
     def scrape_player_box(self, seasons):
@@ -238,24 +242,28 @@ class HoopRNBAStatsScraper:
                 return
 
             # Convert to dict
-            if hasattr(player_box_df, 'to_dicts'):
+            if hasattr(player_box_df, "to_dicts"):
                 player_box_data = player_box_df.to_dicts()
             else:
-                player_box_data = player_box_df.to_dict('records')
+                player_box_data = player_box_df.to_dict("records")
 
             # Save
             season_str = "_".join(map(str, seasons))
-            box_file = self.output_dir / 'player_box' / f"player_box_seasons_{season_str}.json"
+            box_file = (
+                self.output_dir / "player_box" / f"player_box_seasons_{season_str}.json"
+            )
             self.save_json(player_box_data, box_file)
 
-            self.stats['files_created'] += 1
-            self.stats['data_points'] += len(player_box_data)
+            self.stats["files_created"] += 1
+            self.stats["data_points"] += len(player_box_data)
 
             print(f"  ✅ Saved {len(player_box_data):,} player box score records")
 
             # Upload to S3
             if self.s3_client:
-                s3_key = f"hoopr_nba_stats/player_box/player_box_seasons_{season_str}.json"
+                s3_key = (
+                    f"hoopr_nba_stats/player_box/player_box_seasons_{season_str}.json"
+                )
                 if self.upload_to_s3(box_file, s3_key):
                     print(f"  ✅ Uploaded to S3")
 
@@ -263,7 +271,7 @@ class HoopRNBAStatsScraper:
 
         except Exception as e:
             print(f"  ❌ Error scraping player box scores: {e}")
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
             return None
 
     def scrape_schedule(self, seasons):
@@ -283,18 +291,20 @@ class HoopRNBAStatsScraper:
                 return
 
             # Convert to dict
-            if hasattr(schedule_df, 'to_dicts'):
+            if hasattr(schedule_df, "to_dicts"):
                 schedule_data = schedule_df.to_dicts()
             else:
-                schedule_data = schedule_df.to_dict('records')
+                schedule_data = schedule_df.to_dict("records")
 
             # Save
             season_str = "_".join(map(str, seasons))
-            schedule_file = self.output_dir / 'schedule' / f"schedule_seasons_{season_str}.json"
+            schedule_file = (
+                self.output_dir / "schedule" / f"schedule_seasons_{season_str}.json"
+            )
             self.save_json(schedule_data, schedule_file)
 
-            self.stats['files_created'] += 1
-            self.stats['data_points'] += len(schedule_data)
+            self.stats["files_created"] += 1
+            self.stats["data_points"] += len(schedule_data)
 
             print(f"  ✅ Saved {len(schedule_data):,} games")
 
@@ -308,7 +318,7 @@ class HoopRNBAStatsScraper:
 
         except Exception as e:
             print(f"  ❌ Error scraping schedule: {e}")
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
             return None
 
     def scrape_all_loaders(self, seasons):
@@ -332,26 +342,34 @@ class HoopRNBAStatsScraper:
         self.scrape_schedule(seasons)
 
         # Print summary
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("📊 SCRAPING SUMMARY")
-        print("="*60)
+        print("=" * 60)
         print(f"Files created:        {self.stats['files_created']}")
         print(f"Total data points:    {self.stats['data_points']:,}")
         print(f"Seasons processed:    {len(seasons)}")
         print(f"Errors:               {self.stats['errors']}")
-        print("="*60)
+        print("=" * 60)
 
 
 def main():
     parser = argparse.ArgumentParser(
         description="Scrape hoopR NBA Stats API data (200+ endpoints)"
     )
-    parser.add_argument('--season', type=int, help='Single season year (e.g., 2024)')
-    parser.add_argument('--seasons', nargs='+', type=int, help='Multiple seasons (e.g., 2022 2023 2024)')
-    parser.add_argument('--all-endpoints', action='store_true', help='Scrape all available endpoints')
-    parser.add_argument('--output-dir', default='/tmp/hoopr_nba_stats', help='Output directory')
-    parser.add_argument('--upload-to-s3', action='store_true', help='Upload to S3')
-    parser.add_argument('--s3-bucket', default='nba-sim-raw-data-lake', help='S3 bucket name')
+    parser.add_argument("--season", type=int, help="Single season year (e.g., 2024)")
+    parser.add_argument(
+        "--seasons", nargs="+", type=int, help="Multiple seasons (e.g., 2022 2023 2024)"
+    )
+    parser.add_argument(
+        "--all-endpoints", action="store_true", help="Scrape all available endpoints"
+    )
+    parser.add_argument(
+        "--output-dir", default="/tmp/hoopr_nba_stats", help="Output directory"
+    )
+    parser.add_argument("--upload-to-s3", action="store_true", help="Upload to S3")
+    parser.add_argument(
+        "--s3-bucket", default="nba-sim-raw-data-lake", help="S3 bucket name"
+    )
 
     args = parser.parse_args()
 
@@ -385,5 +403,5 @@ def main():
         print(f"☁️  Files uploaded to s3://{s3_bucket}/hoopr_nba_stats/")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

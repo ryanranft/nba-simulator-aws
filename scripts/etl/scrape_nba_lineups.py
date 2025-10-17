@@ -23,20 +23,19 @@ from nba_api.stats.library.parameters import SeasonTypeAllStar
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 # Output directory
-OUTPUT_DIR = Path('/tmp/nba_api_lineups')
+OUTPUT_DIR = Path("/tmp/nba_api_lineups")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 # Rate limiting
 RATE_LIMIT_SECONDS = 0.6  # 600ms between requests
 
 
-def scrape_season_lineups(season, season_type='Regular Season', output_dir=OUTPUT_DIR):
+def scrape_season_lineups(season, season_type="Regular Season", output_dir=OUTPUT_DIR):
     """
     Scrape all lineup combinations for a given season.
 
@@ -56,25 +55,27 @@ def scrape_season_lineups(season, season_type='Regular Season', output_dir=OUTPU
             season=season,
             season_type_all_star=season_type,
             group_quantity=5,  # 5-man lineups
-            per_mode_detailed='PerGame'
+            per_mode_detailed="PerGame",
         )
 
         # Get data
         data = lineups.get_dict()
 
         # Save to file
-        season_clean = season.replace('-', '_')
-        season_type_clean = season_type.replace(' ', '_').lower()
-        output_file = output_dir / f'lineups_{season_clean}_{season_type_clean}.json'
+        season_clean = season.replace("-", "_")
+        season_type_clean = season_type.replace(" ", "_").lower()
+        output_file = output_dir / f"lineups_{season_clean}_{season_type_clean}.json"
 
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(data, f, indent=2)
 
         # Count lineups
-        result_sets = data.get('resultSets', [])
+        result_sets = data.get("resultSets", [])
         if result_sets:
-            lineup_count = len(result_sets[0].get('rowSet', []))
-            logger.info(f"  ✓ Scraped {lineup_count} lineups for {season} {season_type}")
+            lineup_count = len(result_sets[0].get("rowSet", []))
+            logger.info(
+                f"  ✓ Scraped {lineup_count} lineups for {season} {season_type}"
+            )
             logger.info(f"  Saved to: {output_file}")
 
         return data
@@ -94,15 +95,15 @@ def scrape_all_seasons(start_season=1996, end_season=2025, season_types=None):
         season_types: List of season types to scrape
     """
     if season_types is None:
-        season_types = ['Regular Season', 'Playoffs']
+        season_types = ["Regular Season", "Playoffs"]
 
-    logger.info("="*60)
+    logger.info("=" * 60)
     logger.info("NBA LINEUP SCRAPER - ALL SEASONS")
-    logger.info("="*60)
+    logger.info("=" * 60)
     logger.info(f"Seasons: {start_season}-{end_season}")
     logger.info(f"Season types: {', '.join(season_types)}")
     logger.info(f"Output: {OUTPUT_DIR}")
-    logger.info("="*60)
+    logger.info("=" * 60)
     logger.info("")
 
     total_scraped = 0
@@ -125,14 +126,14 @@ def scrape_all_seasons(start_season=1996, end_season=2025, season_types=None):
             time.sleep(RATE_LIMIT_SECONDS)
 
     logger.info("")
-    logger.info("="*60)
+    logger.info("=" * 60)
     logger.info("SCRAPING COMPLETE")
-    logger.info("="*60)
+    logger.info("=" * 60)
     logger.info(f"Successfully scraped: {total_scraped}")
     logger.info(f"Failed: {total_failed}")
     logger.info(f"Total files: {len(list(OUTPUT_DIR.glob('*.json')))}")
     logger.info(f"Output directory: {OUTPUT_DIR}")
-    logger.info("="*60)
+    logger.info("=" * 60)
 
 
 def get_game_lineups(game_id):
@@ -160,26 +161,26 @@ def get_game_lineups(game_id):
     season_str = f"{year}-{str(year + 1)[-2:]}"
 
     # Load season lineup data
-    season_clean = season_str.replace('-', '_')
-    lineup_file = OUTPUT_DIR / f'lineups_{season_clean}_regular_season.json'
+    season_clean = season_str.replace("-", "_")
+    lineup_file = OUTPUT_DIR / f"lineups_{season_clean}_regular_season.json"
 
     if not lineup_file.exists():
         logger.warning(f"No lineup data found for {season_str}")
         return []
 
     try:
-        with open(lineup_file, 'r') as f:
+        with open(lineup_file, "r") as f:
             data = json.load(f)
 
         # Parse lineup data
         # Note: This returns all lineups for the season, not just this game
         # You'd need to match by team_id or use play-by-play to filter
-        result_sets = data.get('resultSets', [])
+        result_sets = data.get("resultSets", [])
         if not result_sets:
             return []
 
-        headers = result_sets[0]['headers']
-        rows = result_sets[0]['rowSet']
+        headers = result_sets[0]["headers"]
+        rows = result_sets[0]["rowSet"]
 
         lineups = []
         for row in rows:
@@ -208,32 +209,36 @@ def parse_lineup_string(lineup_str):
         return []
 
     # Split by dash and clean
-    players = [p.strip() for p in lineup_str.split('-')]
+    players = [p.strip() for p in lineup_str.split("-")]
     return players
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Scrape NBA lineup combinations')
-    parser.add_argument('--season', type=str, help='Season (e.g., 1996-97)')
-    parser.add_argument('--season-type', type=str, default='Regular Season',
-                       choices=['Regular Season', 'Playoffs', 'Pre Season'],
-                       help='Season type')
-    parser.add_argument('--all-seasons', action='store_true',
-                       help='Scrape all seasons from 1996-2025')
-    parser.add_argument('--start-year', type=int, default=1996,
-                       help='Start year for --all-seasons')
-    parser.add_argument('--end-year', type=int, default=2025,
-                       help='End year for --all-seasons')
-    parser.add_argument('--game-id', type=str, help='Get lineups for specific game')
+    parser = argparse.ArgumentParser(description="Scrape NBA lineup combinations")
+    parser.add_argument("--season", type=str, help="Season (e.g., 1996-97)")
+    parser.add_argument(
+        "--season-type",
+        type=str,
+        default="Regular Season",
+        choices=["Regular Season", "Playoffs", "Pre Season"],
+        help="Season type",
+    )
+    parser.add_argument(
+        "--all-seasons", action="store_true", help="Scrape all seasons from 1996-2025"
+    )
+    parser.add_argument(
+        "--start-year", type=int, default=1996, help="Start year for --all-seasons"
+    )
+    parser.add_argument(
+        "--end-year", type=int, default=2025, help="End year for --all-seasons"
+    )
+    parser.add_argument("--game-id", type=str, help="Get lineups for specific game")
 
     args = parser.parse_args()
 
     if args.all_seasons:
         # Scrape all seasons
-        scrape_all_seasons(
-            start_season=args.start_year,
-            end_season=args.end_year
-        )
+        scrape_all_seasons(start_season=args.start_year, end_season=args.end_year)
     elif args.game_id:
         # Get lineups for specific game
         lineups = get_game_lineups(args.game_id)
@@ -252,5 +257,5 @@ def main():
         parser.print_help()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

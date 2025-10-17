@@ -248,7 +248,7 @@ class EnhancedBoxScoreStorageSystem:
                     return
 
                 with open(cache_file, "rb") as f:
-                    self.cache = pickle.load(f)
+                    self.cache = pickle.load(f)  # nosec B301 - Loading from trusted local cache only
                 logger.info(f"✅ Loaded {len(self.cache)} items from cache")
             else:
                 logger.info("No existing cache found, starting fresh")

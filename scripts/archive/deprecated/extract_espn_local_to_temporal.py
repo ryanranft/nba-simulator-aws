@@ -59,9 +59,9 @@ def build_game_date_index() -> Dict[str, datetime]:
     Returns:
         Dictionary mapping game_id to datetime
     """
-    print("="*60)
+    print("=" * 60)
     print("Building Game Date Index")
-    print("="*60)
+    print("=" * 60)
     print(f"Scanning {PBP_DIR}...")
     print()
 
@@ -76,32 +76,34 @@ def build_game_date_index() -> Dict[str, datetime]:
             print(f"  Progress: {i+1:,}/{len(pbp_files):,} files...")
 
         try:
-            with open(pbp_file, 'r') as f:
+            with open(pbp_file, "r") as f:
                 data = json.load(f)
 
                 # Navigate to gamepackage (not gamepackageJSON)
-                if 'page' not in data or 'content' not in data['page']:
+                if "page" not in data or "content" not in data["page"]:
                     continue
 
-                content = data['page']['content']
-                if 'gamepackage' not in content:
+                content = data["page"]["content"]
+                if "gamepackage" not in content:
                     continue
 
-                game_data = content['gamepackage']
-                game_id = game_data.get('gmId')
+                game_data = content["gamepackage"]
+                game_id = game_data.get("gmId")
 
                 # Get date from game info
                 if not game_id:
                     continue
 
                 # Try to get date from game info
-                game_info = game_data.get('gmInfo', {})
-                date_str = game_info.get('dtTm')
+                game_info = game_data.get("gmInfo", {})
+                date_str = game_info.get("dtTm")
 
                 if date_str:
                     # Parse ESPN date format
                     try:
-                        game_dates[str(game_id)] = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+                        game_dates[str(game_id)] = datetime.fromisoformat(
+                            date_str.replace("Z", "+00:00")
+                        )
                     except:
                         pass
 
@@ -113,11 +115,11 @@ def build_game_date_index() -> Dict[str, datetime]:
 
     # Cache to file for future runs
     print(f"Caching to: {GAME_DATE_INDEX_FILE}")
-    with open(GAME_DATE_INDEX_FILE, 'w') as f:
+    with open(GAME_DATE_INDEX_FILE, "w") as f:
         json.dump({k: v.isoformat() for k, v in game_dates.items()}, f)
 
     print("✓ Index cached")
-    print("="*60)
+    print("=" * 60)
     print()
 
     return game_dates
@@ -132,7 +134,7 @@ def load_game_date_index() -> Dict[str, datetime]:
     """
     if GAME_DATE_INDEX_FILE.exists():
         print(f"Loading cached game date index from {GAME_DATE_INDEX_FILE}...")
-        with open(GAME_DATE_INDEX_FILE, 'r') as f:
+        with open(GAME_DATE_INDEX_FILE, "r") as f:
             data = json.load(f)
             game_dates = {k: datetime.fromisoformat(v) for k, v in data.items()}
         print(f"✓ Loaded {len(game_dates):,} game dates from cache")
@@ -156,21 +158,25 @@ def extract_game_date_from_schedule(game_id: str) -> Optional[datetime]:
     # Try to find in schedule files
     for schedule_file in SCHEDULE_DIR.glob("*.json"):
         try:
-            with open(schedule_file, 'r') as f:
+            with open(schedule_file, "r") as f:
                 data = json.load(f)
-                if 'events' in data:
-                    for event in data['events']:
-                        if event.get('id') == game_id:
-                            date_str = event.get('date')
+                if "events" in data:
+                    for event in data["events"]:
+                        if event.get("id") == game_id:
+                            date_str = event.get("date")
                             if date_str:
-                                return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+                                return datetime.fromisoformat(
+                                    date_str.replace("Z", "+00:00")
+                                )
         except:
             continue
 
     return None
 
 
-def parse_espn_pbp_file(filepath: Path, game_date: Optional[datetime] = None) -> List[Dict]:
+def parse_espn_pbp_file(
+    filepath: Path, game_date: Optional[datetime] = None
+) -> List[Dict]:
     """
     Parse ESPN play-by-play JSON file and extract temporal events.
 
@@ -184,98 +190,112 @@ def parse_espn_pbp_file(filepath: Path, game_date: Optional[datetime] = None) ->
     events = []
 
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             data = json.load(f)
 
         # Navigate to gamepackageJSON.plays
-        if 'page' not in data or 'content' not in data['page']:
+        if "page" not in data or "content" not in data["page"]:
             return events
 
-        content = data['page']['content']
-        if 'gamepackage' not in content:
+        content = data["page"]["content"]
+        if "gamepackage" not in content:
             return events
 
-        game_data = content['gamepackage']
+        game_data = content["gamepackage"]
 
         # Extract game metadata
-        game_id = game_data.get('gmId')
+        game_id = game_data.get("gmId")
         if not game_id:
             return events
 
         # Get game date if not provided
         if not game_date:
-            game_info = game_data.get('gmInfo', {})
-            date_str = game_info.get('dtTm')
+            game_info = game_data.get("gmInfo", {})
+            date_str = game_info.get("dtTm")
             if date_str:
-                game_date = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+                game_date = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
 
         # Extract plays
-        plays = game_data.get('plays', [])
+        plays = game_data.get("plays", [])
         if not plays:
             return events
 
         for play in plays:
             # Extract core fields
             event = {
-                'game_id': game_id,
-                'play_id': play.get('id'),
-                'type_id': play.get('type', {}).get('id'),
-                'type_text': play.get('type', {}).get('text'),
-                'text': play.get('text'),
-                'period': play.get('period', {}).get('number'),
-
+                "game_id": game_id,
+                "play_id": play.get("id"),
+                "type_id": play.get("type", {}).get("id"),
+                "type_text": play.get("type", {}).get("text"),
+                "text": play.get("text"),
+                "period": play.get("period", {}).get("number"),
                 # Timestamps
-                'wall_clock_display': play.get('wallclock'),  # e.g., "7:42 PM"
-                'game_clock_display': play.get('clock', {}).get('displayValue'),  # e.g., "11:23"
-                'game_clock_seconds': play.get('clock', {}).get('value'),  # Seconds remaining
-
+                "wall_clock_display": play.get("wallclock"),  # e.g., "7:42 PM"
+                "game_clock_display": play.get("clock", {}).get(
+                    "displayValue"
+                ),  # e.g., "11:23"
+                "game_clock_seconds": play.get("clock", {}).get(
+                    "value"
+                ),  # Seconds remaining
                 # Scoring
-                'scoring_play': play.get('scoringPlay', False),
-                'score_value': play.get('scoreValue'),
-                'home_score': play.get('homeScore'),
-                'away_score': play.get('awayScore'),
-
+                "scoring_play": play.get("scoringPlay", False),
+                "score_value": play.get("scoreValue"),
+                "home_score": play.get("homeScore"),
+                "away_score": play.get("awayScore"),
                 # Shot details (if applicable)
-                'shot_type': play.get('shotType'),
-                'coordinate_x': play.get('coordinate', {}).get('x') if play.get('coordinate') else None,
-                'coordinate_y': play.get('coordinate', {}).get('y') if play.get('coordinate') else None,
-
+                "shot_type": play.get("shotType"),
+                "coordinate_x": (
+                    play.get("coordinate", {}).get("x")
+                    if play.get("coordinate")
+                    else None
+                ),
+                "coordinate_y": (
+                    play.get("coordinate", {}).get("y")
+                    if play.get("coordinate")
+                    else None
+                ),
                 # Participants (can have multiple players involved)
-                'participants': []
+                "participants": [],
             }
 
             # Extract participants (players involved in play)
-            if 'participants' in play:
-                for participant in play['participants']:
-                    event['participants'].append({
-                        'athlete_id': participant.get('athlete', {}).get('id'),
-                        'athlete_name': participant.get('athlete', {}).get('displayName'),
-                        'team_id': participant.get('team', {}).get('id'),
-                    })
+            if "participants" in play:
+                for participant in play["participants"]:
+                    event["participants"].append(
+                        {
+                            "athlete_id": participant.get("athlete", {}).get("id"),
+                            "athlete_name": participant.get("athlete", {}).get(
+                                "displayName"
+                            ),
+                            "team_id": participant.get("team", {}).get("id"),
+                        }
+                    )
 
             # Reconstruct full wall clock timestamp
-            if game_date and event['wall_clock_display']:
+            if game_date and event["wall_clock_display"]:
                 try:
                     # Parse wall clock time (e.g., "7:42 PM")
-                    time_str = event['wall_clock_display'].strip()
+                    time_str = event["wall_clock_display"].strip()
 
                     # Handle different formats
-                    if 'PM' in time_str or 'AM' in time_str:
+                    if "PM" in time_str or "AM" in time_str:
                         # Remove AM/PM and parse
-                        time_part = time_str.replace('PM', '').replace('AM', '').strip()
-                        hour, minute = map(int, time_part.split(':'))
+                        time_part = time_str.replace("PM", "").replace("AM", "").strip()
+                        hour, minute = map(int, time_part.split(":"))
 
                         # Convert to 24-hour
-                        if 'PM' in time_str and hour != 12:
+                        if "PM" in time_str and hour != 12:
                             hour += 12
-                        elif 'AM' in time_str and hour == 12:
+                        elif "AM" in time_str and hour == 12:
                             hour = 0
 
                         # Combine with game date
-                        wall_clock = game_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
-                        event['wall_clock_utc'] = wall_clock
+                        wall_clock = game_date.replace(
+                            hour=hour, minute=minute, second=0, microsecond=0
+                        )
+                        event["wall_clock_utc"] = wall_clock
                 except Exception as e:
-                    event['wall_clock_utc'] = None
+                    event["wall_clock_utc"] = None
 
             events.append(event)
 
@@ -298,43 +318,46 @@ def extract_players_from_box_score(filepath: Path) -> List[Dict]:
     players = []
 
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             data = json.load(f)
 
         # Navigate to boxscore data
-        if 'page' not in data or 'content' not in data['page']:
+        if "page" not in data or "content" not in data["page"]:
             return players
 
-        content = data['page']['content']
-        if 'gamepackage' not in content:
+        content = data["page"]["content"]
+        if "gamepackage" not in content:
             return players
 
-        game_data = content['gamepackage']
-        boxscore = game_data.get('bxscr', {})
+        game_data = content["gamepackage"]
+        boxscore = game_data.get("bxscr", {})
 
         # Extract players from both teams
-        teams_data = boxscore.get('players', [])
+        teams_data = boxscore.get("players", [])
         for team in teams_data:
-            team_id = team.get('team', {}).get('id')
-            team_name = team.get('team', {}).get('displayName')
+            team_id = team.get("team", {}).get("id")
+            team_name = team.get("team", {}).get("displayName")
 
             # Get statistics definitions
-            stat_labels = team.get('statistics', [{}])[0].get('labels', []) if team.get('statistics') else []
+            stat_labels = (
+                team.get("statistics", [{}])[0].get("labels", [])
+                if team.get("statistics")
+                else []
+            )
 
-            for player_data in team.get('statistics', [{}])[0].get('athletes', []):
-                athlete = player_data.get('athlete', {})
+            for player_data in team.get("statistics", [{}])[0].get("athletes", []):
+                athlete = player_data.get("athlete", {})
 
                 player = {
-                    'player_id': athlete.get('id'),
-                    'name': athlete.get('displayName'),
-                    'short_name': athlete.get('shortName'),
-                    'jersey': athlete.get('jersey'),
-                    'position': athlete.get('position', {}).get('abbreviation'),
-                    'team_id': team_id,
-                    'team_name': team_name,
-
+                    "player_id": athlete.get("id"),
+                    "name": athlete.get("displayName"),
+                    "short_name": athlete.get("shortName"),
+                    "jersey": athlete.get("jersey"),
+                    "position": athlete.get("position", {}).get("abbreviation"),
+                    "team_id": team_id,
+                    "team_name": team_name,
                     # Stats (if available)
-                    'stats': dict(zip(stat_labels, player_data.get('stats', [])))
+                    "stats": dict(zip(stat_labels, player_data.get("stats", []))),
                 }
 
                 players.append(player)
@@ -352,9 +375,9 @@ def process_all_espn_data(limit: Optional[int] = None):
     Args:
         limit: Optional limit on number of games to process (for testing)
     """
-    print("="*60)
+    print("=" * 60)
     print("ESPN Local Data → Temporal Format Extraction")
-    print("="*60)
+    print("=" * 60)
     print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
 
@@ -402,7 +425,7 @@ def process_all_espn_data(limit: Optional[int] = None):
             if box_score_file.exists():
                 players = extract_players_from_box_score(box_score_file)
                 for player in players:
-                    player_id = player['player_id']
+                    player_id = player["player_id"]
                     if player_id and player_id not in all_players:
                         all_players[player_id] = player
 
@@ -420,9 +443,9 @@ def process_all_espn_data(limit: Optional[int] = None):
     print()
 
     # Convert to DataFrames and save
-    print("="*60)
+    print("=" * 60)
     print("Saving CSV files...")
-    print("="*60)
+    print("=" * 60)
 
     # Save temporal events
     if all_events:
@@ -430,37 +453,53 @@ def process_all_espn_data(limit: Optional[int] = None):
         events_df = pd.DataFrame(all_events)
 
         # Extract first participant as primary player
-        events_df['player_id'] = events_df['participants'].apply(
-            lambda x: x[0]['athlete_id'] if x and len(x) > 0 else None
+        events_df["player_id"] = events_df["participants"].apply(
+            lambda x: x[0]["athlete_id"] if x and len(x) > 0 else None
         )
-        events_df['team_id'] = events_df['participants'].apply(
-            lambda x: x[0]['team_id'] if x and len(x) > 0 else None
+        events_df["team_id"] = events_df["participants"].apply(
+            lambda x: x[0]["team_id"] if x and len(x) > 0 else None
         )
 
         # Create event_data JSONB column
-        events_df['event_data'] = events_df.apply(lambda row: json.dumps({
-            'text': row['text'],
-            'type_text': row['type_text'],
-            'scoring_play': row['scoring_play'],
-            'score_value': row['score_value'],
-            'home_score': row['home_score'],
-            'away_score': row['away_score'],
-            'shot_type': row['shot_type'],
-            'coordinate_x': row['coordinate_x'],
-            'coordinate_y': row['coordinate_y'],
-            'participants': row['participants']
-        }), axis=1)
+        events_df["event_data"] = events_df.apply(
+            lambda row: json.dumps(
+                {
+                    "text": row["text"],
+                    "type_text": row["type_text"],
+                    "scoring_play": row["scoring_play"],
+                    "score_value": row["score_value"],
+                    "home_score": row["home_score"],
+                    "away_score": row["away_score"],
+                    "shot_type": row["shot_type"],
+                    "coordinate_x": row["coordinate_x"],
+                    "coordinate_y": row["coordinate_y"],
+                    "participants": row["participants"],
+                }
+            ),
+            axis=1,
+        )
 
         # Select columns for temporal_events table
-        events_output = events_df[[
-            'game_id', 'player_id', 'team_id', 'wall_clock_utc',
-            'game_clock_seconds', 'period', 'event_data'
-        ]].copy()
+        events_output = events_df[
+            [
+                "game_id",
+                "player_id",
+                "team_id",
+                "wall_clock_utc",
+                "game_clock_seconds",
+                "period",
+                "event_data",
+            ]
+        ].copy()
 
-        events_output['precision_level'] = 'minute'  # ESPN provides minute-level precision
-        events_output['event_type'] = events_df['type_text'].str.lower().str.replace(' ', '_')
-        events_output['data_source'] = 'espn'
-        events_output['quarter'] = events_df['period']
+        events_output["precision_level"] = (
+            "minute"  # ESPN provides minute-level precision
+        )
+        events_output["event_type"] = (
+            events_df["type_text"].str.lower().str.replace(" ", "_")
+        )
+        events_output["data_source"] = "espn"
+        events_output["quarter"] = events_df["period"]
 
         # Save
         events_file = OUTPUT_DIR / "temporal_events_espn.csv"
@@ -479,20 +518,24 @@ def process_all_espn_data(limit: Optional[int] = None):
         print(f"  Size: {players_file.stat().st_size / 1024 / 1024:.1f} MB")
 
     print()
-    print("="*60)
+    print("=" * 60)
     print("Extraction Complete!")
-    print("="*60)
+    print("=" * 60)
     print(f"Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
     print("Next steps:")
     print("1. Load players to RDS: python scripts/db/load_espn_players.py")
     print("2. Load events to RDS: python scripts/db/load_espn_events.py")
-    print("="*60)
+    print("=" * 60)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Extract local ESPN data to temporal format")
-    parser.add_argument('--limit', type=int, help='Limit number of games to process (for testing)')
+    parser = argparse.ArgumentParser(
+        description="Extract local ESPN data to temporal format"
+    )
+    parser.add_argument(
+        "--limit", type=int, help="Limit number of games to process (for testing)"
+    )
 
     args = parser.parse_args()
 
@@ -508,5 +551,5 @@ def main():
     process_all_espn_data(limit=args.limit)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

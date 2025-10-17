@@ -28,7 +28,7 @@ from datetime import datetime
 import traceback
 
 # Add project root to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 try:
     import psycopg2
@@ -44,11 +44,11 @@ except ImportError as e:
 def get_db_connection():
     """Get PostgreSQL database connection"""
     return psycopg2.connect(
-        host=os.getenv('DB_HOST', 'localhost'),
-        port=os.getenv('DB_PORT', '5432'),
-        database=os.getenv('DB_NAME', 'nba_simulator'),
-        user=os.getenv('DB_USER', 'ryanranft'),
-        password=os.getenv('DB_PASSWORD', '')
+        host=os.getenv("DB_HOST", "localhost"),
+        port=os.getenv("DB_PORT", "5432"),
+        database=os.getenv("DB_NAME", "nba_simulator"),
+        user=os.getenv("DB_USER", "ryanranft"),
+        password=os.getenv("DB_PASSWORD", ""),
     )
 
 
@@ -56,7 +56,8 @@ def create_table(conn, truncate=False):
     """Create possession_panel_pbpstats table"""
     with conn.cursor() as cur:
         # Create table if not exists
-        cur.execute("""
+        cur.execute(
+            """
             CREATE TABLE IF NOT EXISTS possession_panel_pbpstats (
                 id SERIAL PRIMARY KEY,
                 game_id VARCHAR(20) NOT NULL,
@@ -84,21 +85,28 @@ def create_table(conn, truncate=False):
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(game_id, possession_number)
             )
-        """)
+        """
+        )
 
         # Create indexes
-        cur.execute("""
+        cur.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_pbpstats_game
             ON possession_panel_pbpstats(game_id)
-        """)
-        cur.execute("""
+        """
+        )
+        cur.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_pbpstats_teams
             ON possession_panel_pbpstats(offense_team_id, defense_team_id)
-        """)
+        """
+        )
 
         if truncate:
             print("🗑️  Truncating possession_panel_pbpstats table...")
-            cur.execute("TRUNCATE TABLE possession_panel_pbpstats RESTART IDENTITY CASCADE")
+            cur.execute(
+                "TRUNCATE TABLE possession_panel_pbpstats RESTART IDENTITY CASCADE"
+            )
 
         conn.commit()
     print("✅ Table ready")
@@ -127,16 +135,16 @@ def normalize_game_id(game_id):
     """
     game_id = str(game_id)
     if len(game_id) == 8:
-        return '00' + game_id
+        return "00" + game_id
     return game_id
 
 
 def time_to_seconds(time_str):
     """Convert MM:SS to seconds"""
     try:
-        if not time_str or time_str == 'N/A':
+        if not time_str or time_str == "N/A":
             return None
-        parts = time_str.split(':')
+        parts = time_str.split(":")
         return float(parts[0]) * 60 + float(parts[1])
     except:
         return None
@@ -176,7 +184,9 @@ def process_game_with_pbpstats(client, game_id):
         panel_rows = []
         for poss in possessions:
             # Derive defense team (the other team)
-            defense_team_id = team_list[0] if poss.offense_team_id == team_list[1] else team_list[1]
+            defense_team_id = (
+                team_list[0] if poss.offense_team_id == team_list[1] else team_list[1]
+            )
 
             # Calculate possession duration
             start_seconds = time_to_seconds(poss.start_time)
@@ -196,10 +206,10 @@ def process_game_with_pbpstats(client, game_id):
 
             for event in poss.events:
                 # Get player IDs from events
-                if hasattr(event, 'player_id') and event.player_id:
+                if hasattr(event, "player_id") and event.player_id:
                     # Determine if offensive or defensive player
                     # This is a simplified approach - pbpstats has more sophisticated tracking
-                    if hasattr(event, 'team_id'):
+                    if hasattr(event, "team_id"):
                         if event.team_id == poss.offense_team_id:
                             offense_player_ids.add(event.player_id)
                         else:
@@ -215,26 +225,30 @@ def process_game_with_pbpstats(client, game_id):
                 defense_players.append(None)
 
             row = {
-                'game_id': game_id,
-                'possession_number': poss.number,
-                'offense_team_id': int(poss.offense_team_id),
-                'defense_team_id': int(defense_team_id),
-                'period': poss.period,
-                'start_time': poss.start_time,
-                'end_time': poss.end_time,
-                'start_score_margin': poss.start_score_margin if hasattr(poss, 'start_score_margin') else None,
-                'possession_events': len(poss.events),
-                'possession_duration_seconds': duration,
-                'offense_player_1_id': offense_players[0],
-                'offense_player_2_id': offense_players[1],
-                'offense_player_3_id': offense_players[2],
-                'offense_player_4_id': offense_players[3],
-                'offense_player_5_id': offense_players[4],
-                'defense_player_1_id': defense_players[0],
-                'defense_player_2_id': defense_players[1],
-                'defense_player_3_id': defense_players[2],
-                'defense_player_4_id': defense_players[3],
-                'defense_player_5_id': defense_players[4],
+                "game_id": game_id,
+                "possession_number": poss.number,
+                "offense_team_id": int(poss.offense_team_id),
+                "defense_team_id": int(defense_team_id),
+                "period": poss.period,
+                "start_time": poss.start_time,
+                "end_time": poss.end_time,
+                "start_score_margin": (
+                    poss.start_score_margin
+                    if hasattr(poss, "start_score_margin")
+                    else None
+                ),
+                "possession_events": len(poss.events),
+                "possession_duration_seconds": duration,
+                "offense_player_1_id": offense_players[0],
+                "offense_player_2_id": offense_players[1],
+                "offense_player_3_id": offense_players[2],
+                "offense_player_4_id": offense_players[3],
+                "offense_player_5_id": offense_players[4],
+                "defense_player_1_id": defense_players[0],
+                "defense_player_2_id": defense_players[1],
+                "defense_player_3_id": defense_players[2],
+                "defense_player_4_id": defense_players[3],
+                "defense_player_5_id": defense_players[4],
             }
             panel_rows.append(row)
 
@@ -258,7 +272,8 @@ def save_to_database(conn, panel_data):
     with conn.cursor() as cur:
         for _, row in df.iterrows():
             try:
-                cur.execute("""
+                cur.execute(
+                    """
                     INSERT INTO possession_panel_pbpstats (
                         game_id, possession_number, offense_team_id, defense_team_id,
                         period, start_time, end_time, start_score_margin,
@@ -272,16 +287,30 @@ def save_to_database(conn, panel_data):
                         %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                     )
                     ON CONFLICT (game_id, possession_number) DO NOTHING
-                """, (
-                    row['game_id'], row['possession_number'], row['offense_team_id'],
-                    row['defense_team_id'], row['period'], row['start_time'],
-                    row['end_time'], row['start_score_margin'], row['possession_events'],
-                    row['possession_duration_seconds'],
-                    row['offense_player_1_id'], row['offense_player_2_id'], row['offense_player_3_id'],
-                    row['offense_player_4_id'], row['offense_player_5_id'],
-                    row['defense_player_1_id'], row['defense_player_2_id'], row['defense_player_3_id'],
-                    row['defense_player_4_id'], row['defense_player_5_id']
-                ))
+                """,
+                    (
+                        row["game_id"],
+                        row["possession_number"],
+                        row["offense_team_id"],
+                        row["defense_team_id"],
+                        row["period"],
+                        row["start_time"],
+                        row["end_time"],
+                        row["start_score_margin"],
+                        row["possession_events"],
+                        row["possession_duration_seconds"],
+                        row["offense_player_1_id"],
+                        row["offense_player_2_id"],
+                        row["offense_player_3_id"],
+                        row["offense_player_4_id"],
+                        row["offense_player_5_id"],
+                        row["defense_player_1_id"],
+                        row["defense_player_2_id"],
+                        row["defense_player_3_id"],
+                        row["defense_player_4_id"],
+                        row["defense_player_5_id"],
+                    ),
+                )
                 inserted += cur.rowcount
             except Exception as e:
                 print(f"  ⚠️  Error inserting row: {e}")
@@ -292,11 +321,19 @@ def save_to_database(conn, panel_data):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Generate possession panel using pbpstats')
-    parser.add_argument('--truncate', action='store_true', help='Truncate table before inserting')
-    parser.add_argument('--limit', type=int, help='Limit number of games to process')
-    parser.add_argument('--start-season', type=int, help='Start season (not yet implemented)')
-    parser.add_argument('--end-season', type=int, help='End season (not yet implemented)')
+    parser = argparse.ArgumentParser(
+        description="Generate possession panel using pbpstats"
+    )
+    parser.add_argument(
+        "--truncate", action="store_true", help="Truncate table before inserting"
+    )
+    parser.add_argument("--limit", type=int, help="Limit number of games to process")
+    parser.add_argument(
+        "--start-season", type=int, help="Start season (not yet implemented)"
+    )
+    parser.add_argument(
+        "--end-season", type=int, help="End season (not yet implemented)"
+    )
     args = parser.parse_args()
 
     print("=" * 60)
@@ -310,7 +347,7 @@ def main():
     settings = {
         "dir": "/tmp/pbpstats_data",
         "Boxscore": {"source": "web", "data_provider": "stats_nba"},
-        "Possessions": {"source": "web", "data_provider": "stats_nba"}
+        "Possessions": {"source": "web", "data_provider": "stats_nba"},
     }
     client = Client(settings)
     print("✅ pbpstats client ready")
@@ -324,7 +361,9 @@ def main():
     create_table(conn, truncate=args.truncate)
 
     # Get game IDs
-    print(f"\n📋 Fetching game IDs{' (limit: ' + str(args.limit) + ')' if args.limit else ''}...")
+    print(
+        f"\n📋 Fetching game IDs{' (limit: ' + str(args.limit) + ')' if args.limit else ''}..."
+    )
     game_ids = get_all_game_ids(conn, limit=args.limit)
     print(f"✅ Found {len(game_ids)} games to process")
 
@@ -352,8 +391,12 @@ def main():
 
         # Progress update every 10 games
         if i % 10 == 0:
-            avg_poss = total_possessions / successful_games if successful_games > 0 else 0
-            print(f"  Progress: {successful_games} successful, {failed_games} failed, {avg_poss:.1f} avg poss/game")
+            avg_poss = (
+                total_possessions / successful_games if successful_games > 0 else 0
+            )
+            print(
+                f"  Progress: {successful_games} successful, {failed_games} failed, {avg_poss:.1f} avg poss/game"
+            )
 
     conn.close()
 
@@ -373,5 +416,5 @@ def main():
     print()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

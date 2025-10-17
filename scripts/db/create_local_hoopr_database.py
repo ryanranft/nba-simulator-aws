@@ -52,9 +52,9 @@ class HoopRDatabaseCreator:
 
     def create_database(self):
         """Main entry point - create complete database."""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("CREATE LOCAL HOOPR DATABASE")
-        print("="*70)
+        print("=" * 70)
         print(f"\nSource: {self.source_dir}")
         print(f"Output: {self.output_db}")
 
@@ -93,7 +93,9 @@ class HoopRDatabaseCreator:
         to match exact parquet schema. This prevents column mismatch errors.
         """
         print("\n📋 Creating tables...")
-        print("  ✅ Tables will be created automatically from parquet schema (63 columns each)")
+        print(
+            "  ✅ Tables will be created automatically from parquet schema (63 columns each)"
+        )
 
     def _load_play_by_play(self):
         """Load play-by-play data from parquet files."""
@@ -112,11 +114,13 @@ class HoopRDatabaseCreator:
         for i, pf in enumerate(parquet_files, 1):
             df = pd.read_parquet(pf)
             # First file creates table, subsequent files append
-            if_exists = 'replace' if i == 1 else 'append'
-            df.to_sql('play_by_play', self.conn, if_exists=if_exists, index=False)
+            if_exists = "replace" if i == 1 else "append"
+            df.to_sql("play_by_play", self.conn, if_exists=if_exists, index=False)
             total_rows += len(df)
             if i % 5 == 0 or i == len(parquet_files):
-                print(f"  Progress: {i}/{len(parquet_files)} files ({total_rows:,} rows)")
+                print(
+                    f"  Progress: {i}/{len(parquet_files)} files ({total_rows:,} rows)"
+                )
 
         print(f"  ✅ Loaded {total_rows:,} play-by-play events")
 
@@ -136,11 +140,13 @@ class HoopRDatabaseCreator:
         for i, pf in enumerate(parquet_files, 1):
             df = pd.read_parquet(pf)
             # First file creates table, subsequent files append
-            if_exists = 'replace' if i == 1 else 'append'
-            df.to_sql('player_box', self.conn, if_exists=if_exists, index=False)
+            if_exists = "replace" if i == 1 else "append"
+            df.to_sql("player_box", self.conn, if_exists=if_exists, index=False)
             total_rows += len(df)
             if i % 5 == 0 or i == len(parquet_files):
-                print(f"  Progress: {i}/{len(parquet_files)} files ({total_rows:,} rows)")
+                print(
+                    f"  Progress: {i}/{len(parquet_files)} files ({total_rows:,} rows)"
+                )
 
         print(f"  ✅ Loaded {total_rows:,} player box scores")
 
@@ -160,11 +166,13 @@ class HoopRDatabaseCreator:
         for i, pf in enumerate(parquet_files, 1):
             df = pd.read_parquet(pf)
             # First file creates table, subsequent files append
-            if_exists = 'replace' if i == 1 else 'append'
-            df.to_sql('team_box', self.conn, if_exists=if_exists, index=False)
+            if_exists = "replace" if i == 1 else "append"
+            df.to_sql("team_box", self.conn, if_exists=if_exists, index=False)
             total_rows += len(df)
             if i % 5 == 0 or i == len(parquet_files):
-                print(f"  Progress: {i}/{len(parquet_files)} files ({total_rows:,} rows)")
+                print(
+                    f"  Progress: {i}/{len(parquet_files)} files ({total_rows:,} rows)"
+                )
 
         print(f"  ✅ Loaded {total_rows:,} team box scores")
 
@@ -184,11 +192,13 @@ class HoopRDatabaseCreator:
         for i, pf in enumerate(parquet_files, 1):
             df = pd.read_parquet(pf)
             # First file creates table, subsequent files append
-            if_exists = 'replace' if i == 1 else 'append'
-            df.to_sql('schedule', self.conn, if_exists=if_exists, index=False)
+            if_exists = "replace" if i == 1 else "append"
+            df.to_sql("schedule", self.conn, if_exists=if_exists, index=False)
             total_rows += len(df)
             if i % 5 == 0 or i == len(parquet_files):
-                print(f"  Progress: {i}/{len(parquet_files)} files ({total_rows:,} rows)")
+                print(
+                    f"  Progress: {i}/{len(parquet_files)} files ({total_rows:,} rows)"
+                )
 
         print(f"  ✅ Loaded {total_rows:,} games")
 
@@ -208,16 +218,18 @@ class HoopRDatabaseCreator:
 
         for idx_name, table, column in indexes:
             try:
-                self.conn.execute(f"CREATE INDEX IF NOT EXISTS {idx_name} ON {table}({column})")
+                self.conn.execute(
+                    f"CREATE INDEX IF NOT EXISTS {idx_name} ON {table}({column})"
+                )
                 print(f"  ✅ Created index: {idx_name}")
             except Exception as e:
                 print(f"  ⚠️  Skipped index {idx_name}: {e}")
 
     def _print_summary(self):
         """Print database summary statistics."""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("DATABASE SUMMARY")
-        print("="*70)
+        print("=" * 70)
 
         # Table counts
         cursor = self.conn.cursor()
@@ -243,11 +255,13 @@ class HoopRDatabaseCreator:
         min_date, max_date = cursor.fetchone()
 
         # Seasons (extract year from game_date)
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(DISTINCT substr(game_date, 1, 4))
             FROM schedule
             WHERE game_date IS NOT NULL
-        """)
+        """
+        )
         season_count = cursor.fetchone()[0]
 
         print(f"\n📊 Data Summary:")
@@ -286,42 +300,42 @@ Next Steps:
 
 Pattern:
   Local validation BEFORE cloud operations (saves time & cost!)
-        """
+        """,
     )
 
     parser.add_argument(
-        '--source-dir',
+        "--source-dir",
         default=DEFAULT_SOURCE_DIR,
-        help=f'hoopR parquet files directory (default: {DEFAULT_SOURCE_DIR})'
+        help=f"hoopR parquet files directory (default: {DEFAULT_SOURCE_DIR})",
     )
 
     parser.add_argument(
-        '--output-db',
+        "--output-db",
         default=DEFAULT_OUTPUT_DB,
-        help=f'Output SQLite database path (default: {DEFAULT_OUTPUT_DB})'
+        help=f"Output SQLite database path (default: {DEFAULT_OUTPUT_DB})",
     )
 
     args = parser.parse_args()
 
     try:
         creator = HoopRDatabaseCreator(
-            source_dir=args.source_dir,
-            output_db=args.output_db
+            source_dir=args.source_dir, output_db=args.output_db
         )
         creator.create_database()
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("✅ SUCCESS - Ready for local validation!")
-        print("="*70)
+        print("=" * 70)
         print("\nNext step:")
         print("  python scripts/utils/compare_espn_hoopr_local.py")
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
 
         sys.exit(0)
 
     except Exception as e:
         print(f"\n❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 

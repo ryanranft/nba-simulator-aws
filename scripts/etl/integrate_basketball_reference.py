@@ -47,16 +47,16 @@ def download_schedules_from_s3(year: Optional[int] = None):
 
     DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-    s3 = boto3.client('s3')
+    s3 = boto3.client("s3")
 
     # List all years
     print("Listing available years in S3...")
-    response = s3.list_objects_v2(Bucket=S3_BUCKET, Prefix=S3_PREFIX, Delimiter='/')
+    response = s3.list_objects_v2(Bucket=S3_BUCKET, Prefix=S3_PREFIX, Delimiter="/")
 
     years = []
-    if 'CommonPrefixes' in response:
-        for prefix in response['CommonPrefixes']:
-            year_str = prefix['Prefix'].split('/')[-2]
+    if "CommonPrefixes" in response:
+        for prefix in response["CommonPrefixes"]:
+            year_str = prefix["Prefix"].split("/")[-2]
             try:
                 years.append(int(year_str))
             except ValueError:
@@ -82,7 +82,7 @@ def download_schedules_from_s3(year: Optional[int] = None):
             s3.download_file(S3_BUCKET, s3_key, str(local_path))
             downloaded += 1
             if downloaded % 10 == 0:
-                print(f"  Downloaded {downloaded}/{len(years)} schedules...", end='\r')
+                print(f"  Downloaded {downloaded}/{len(years)} schedules...", end="\r")
         except Exception as e:
             print(f"⚠️  Failed to download {year_val}: {e}")
 
@@ -104,7 +104,8 @@ def create_bbref_database():
     cursor = conn.cursor()
 
     # Create games table
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS games (
             game_id TEXT PRIMARY KEY,
             game_date TEXT NOT NULL,
@@ -116,12 +117,15 @@ def create_bbref_database():
             start_time TEXT,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
-    """)
+    """
+    )
 
     # Create indexes
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_games_date ON games(game_date)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_games_season ON games(season)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_games_teams ON games(home_team, away_team)")
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_games_teams ON games(home_team, away_team)"
+    )
 
     conn.commit()
     print("✓ Created games table with indexes")
@@ -160,47 +164,59 @@ def load_schedules_to_database(conn):
     total_games = 0
 
     for schedule_file in schedule_files:
-        year = int(schedule_file.stem.split('_')[0])
+        year = int(schedule_file.stem.split("_")[0])
 
         with open(schedule_file) as f:
             games = json.load(f)
 
         for game in games:
             # Parse game details
-            start_time = game.get('start_time', '')
-            game_date = start_time.split()[0] if start_time else ''
+            start_time = game.get("start_time", "")
+            game_date = start_time.split()[0] if start_time else ""
 
-            home_team = parse_team_name(game.get('home_team', ''))
-            away_team = parse_team_name(game.get('away_team', ''))
-            home_score = game.get('home_team_score')
-            away_score = game.get('away_team_score')
+            home_team = parse_team_name(game.get("home_team", ""))
+            away_team = parse_team_name(game.get("away_team", ""))
+            home_score = game.get("home_team_score")
+            away_score = game.get("away_team_score")
 
             # Create game ID (Basketball Reference doesn't provide one)
             # Format: bbref_YYYYMMDD_HOMETEAM_AWAYTEAM
-            date_part = game_date.replace('-', '')
-            home_abbr = ''.join([w[0] for w in home_team.split()[:3]])  # First letter of each word
-            away_abbr = ''.join([w[0] for w in away_team.split()[:3]])
+            date_part = game_date.replace("-", "")
+            home_abbr = "".join(
+                [w[0] for w in home_team.split()[:3]]
+            )  # First letter of each word
+            away_abbr = "".join([w[0] for w in away_team.split()[:3]])
             game_id = f"bbref_{date_part}_{home_abbr}_{away_abbr}"
 
             # Insert game
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT OR REPLACE INTO games (
                     game_id, game_date, season,
                     home_team, away_team,
                     home_score, away_score,
                     start_time
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                game_id, game_date, year,
-                home_team, away_team,
-                home_score, away_score,
-                start_time
-            ))
+            """,
+                (
+                    game_id,
+                    game_date,
+                    year,
+                    home_team,
+                    away_team,
+                    home_score,
+                    away_score,
+                    start_time,
+                ),
+            )
 
             total_games += 1
 
         if (schedule_files.index(schedule_file) + 1) % 10 == 0:
-            print(f"  Processed {schedule_files.index(schedule_file) + 1}/{len(schedule_files)} years...", end='\r')
+            print(
+                f"  Processed {schedule_files.index(schedule_file) + 1}/{len(schedule_files)} years...",
+                end="\r",
+            )
 
     conn.commit()
     print(f"\n✓ Loaded {total_games:,} games from {len(schedule_files)} years")
@@ -225,35 +241,49 @@ def run_data_quality_checks(conn):
     print(f"Total games: {total_games:,}")
 
     # Games by season
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT season, COUNT(*)
         FROM games
         GROUP BY season
         ORDER BY season
-    """)
+    """
+    )
 
     seasons = cursor.fetchall()
-    print(f"Seasons covered: {seasons[0][0]} - {seasons[-1][0]} ({len(seasons)} seasons)")
+    print(
+        f"Seasons covered: {seasons[0][0]} - {seasons[-1][0]} ({len(seasons)} seasons)"
+    )
 
     # Games with scores
-    cursor.execute("SELECT COUNT(*) FROM games WHERE home_score IS NOT NULL AND away_score IS NOT NULL")
+    cursor.execute(
+        "SELECT COUNT(*) FROM games WHERE home_score IS NOT NULL AND away_score IS NOT NULL"
+    )
     games_with_scores = cursor.fetchone()[0]
-    print(f"Games with scores: {games_with_scores:,} ({games_with_scores/total_games*100:.1f}%)")
+    print(
+        f"Games with scores: {games_with_scores:,} ({games_with_scores/total_games*100:.1f}%)"
+    )
 
     # Games missing scores
-    cursor.execute("SELECT COUNT(*) FROM games WHERE home_score IS NULL OR away_score IS NULL")
+    cursor.execute(
+        "SELECT COUNT(*) FROM games WHERE home_score IS NULL OR away_score IS NULL"
+    )
     games_missing_scores = cursor.fetchone()[0]
     if games_missing_scores > 0:
-        print(f"⚠️  Games missing scores: {games_missing_scores:,} ({games_missing_scores/total_games*100:.1f}%)")
+        print(
+            f"⚠️  Games missing scores: {games_missing_scores:,} ({games_missing_scores/total_games*100:.1f}%)"
+        )
 
     # Unique teams
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT COUNT(DISTINCT team) FROM (
             SELECT home_team as team FROM games
             UNION
             SELECT away_team as team FROM games
         )
-    """)
+    """
+    )
     unique_teams = cursor.fetchone()[0]
     print(f"Unique teams: {unique_teams}")
 
@@ -275,12 +305,12 @@ def run_data_quality_checks(conn):
     print()
 
     return {
-        'total_games': total_games,
-        'games_with_scores': games_with_scores,
-        'seasons': len(seasons),
-        'unique_teams': unique_teams,
-        'coverage_start': seasons[0][0],
-        'coverage_end': seasons[-1][0]
+        "total_games": total_games,
+        "games_with_scores": games_with_scores,
+        "seasons": len(seasons),
+        "unique_teams": unique_teams,
+        "coverage_start": seasons[0][0],
+        "coverage_end": seasons[-1][0],
     }
 
 
@@ -303,20 +333,26 @@ def integrate_into_unified_database(bbref_stats: Dict):
     unified_cursor.execute("PRAGMA table_info(source_coverage)")
     columns = [row[1] for row in unified_cursor.fetchall()]
 
-    if 'has_basketball_reference' not in columns:
+    if "has_basketball_reference" not in columns:
         print("Adding basketball_reference columns to source_coverage...")
-        unified_cursor.execute("ALTER TABLE source_coverage ADD COLUMN has_basketball_reference BOOLEAN DEFAULT 0")
-        unified_cursor.execute("ALTER TABLE source_coverage ADD COLUMN bbref_game_id TEXT")
+        unified_cursor.execute(
+            "ALTER TABLE source_coverage ADD COLUMN has_basketball_reference BOOLEAN DEFAULT 0"
+        )
+        unified_cursor.execute(
+            "ALTER TABLE source_coverage ADD COLUMN bbref_game_id TEXT"
+        )
         unified_conn.commit()
         print("✓ Added columns")
         print()
 
     # Get all Basketball Reference games
-    bbref_cursor.execute("""
+    bbref_cursor.execute(
+        """
         SELECT game_id, game_date, home_team, away_team, home_score, away_score
         FROM games
         ORDER BY game_date
-    """)
+    """
+    )
 
     bbref_games = bbref_cursor.fetchall()
     print(f"Processing {len(bbref_games):,} Basketball Reference games...")
@@ -328,43 +364,56 @@ def integrate_into_unified_database(bbref_stats: Dict):
 
     for game_id, game_date, home_team, away_team, home_score, away_score in bbref_games:
         # Check if game exists in unified database (by date and teams)
-        unified_cursor.execute("""
+        unified_cursor.execute(
+            """
             SELECT game_id FROM source_coverage
             WHERE game_date = ?
             LIMIT 1
-        """, (game_date,))
+        """,
+            (game_date,),
+        )
 
         existing = unified_cursor.fetchone()
 
         if existing:
             # Update existing game to include Basketball Reference
-            unified_cursor.execute("""
+            unified_cursor.execute(
+                """
                 UPDATE source_coverage
                 SET has_basketball_reference = 1,
                     bbref_game_id = ?,
                     total_sources = total_sources + 1
                 WHERE game_id = ?
-            """, (game_id, existing[0]))
+            """,
+                (game_id, existing[0]),
+            )
             updated += 1
         else:
             # Add new game (Basketball Reference only)
-            unified_cursor.execute("""
+            unified_cursor.execute(
+                """
                 INSERT INTO source_coverage (
                     game_id, game_date,
                     has_espn, has_hoopr, has_basketball_reference,
                     bbref_game_id,
                     total_sources, overall_quality_score
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                game_id, game_date,
-                False, False, True,
-                game_id,
-                1, 80  # Quality score for Basketball Reference only
-            ))
+            """,
+                (
+                    game_id,
+                    game_date,
+                    False,
+                    False,
+                    True,
+                    game_id,
+                    1,
+                    80,  # Quality score for Basketball Reference only
+                ),
+            )
             added += 1
 
         if (added + updated) % 1000 == 0:
-            print(f"  Processed {added + updated:,} games...", end='\r')
+            print(f"  Processed {added + updated:,} games...", end="\r")
 
     unified_conn.commit()
     print(f"\n✓ Added {added:,} new games, updated {updated:,} existing games")
@@ -372,7 +421,8 @@ def integrate_into_unified_database(bbref_stats: Dict):
 
     # Print updated coverage summary
     print("Updated source coverage:")
-    unified_cursor.execute("""
+    unified_cursor.execute(
+        """
         SELECT
             COUNT(*) as total,
             SUM(CASE WHEN has_espn = 1 THEN 1 ELSE 0 END) as espn_count,
@@ -381,7 +431,8 @@ def integrate_into_unified_database(bbref_stats: Dict):
             SUM(CASE WHEN has_espn = 1 AND has_hoopr = 1 AND has_basketball_reference = 1 THEN 1 ELSE 0 END) as all_three,
             SUM(CASE WHEN total_sources >= 2 THEN 1 ELSE 0 END) as two_or_more
         FROM source_coverage
-    """)
+    """
+    )
 
     row = unified_cursor.fetchone()
     total, espn, hoopr, bbref, all_three, two_or_more = row
@@ -420,19 +471,15 @@ Result:
   - Local Basketball Reference database created
   - Data quality checks performed
   - Unified database updated with Basketball Reference as third source
-        """
+        """,
     )
 
-    parser.add_argument(
-        '--year',
-        type=int,
-        help='Process specific year only'
-    )
+    parser.add_argument("--year", type=int, help="Process specific year only")
 
     parser.add_argument(
-        '--download-only',
-        action='store_true',
-        help='Only download schedules, do not integrate'
+        "--download-only",
+        action="store_true",
+        help="Only download schedules, do not integrate",
     )
 
     args = parser.parse_args()
@@ -474,5 +521,5 @@ Result:
     print(f"Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

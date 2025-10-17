@@ -52,7 +52,7 @@ class MLflowTracker:
 
     def log_model(self, model, artifact_path: str, **kwargs):
         """Log model"""
-        if hasattr(model, 'get_params'):  # Sklearn-style
+        if hasattr(model, "get_params"):  # Sklearn-style
             mlflow.sklearn.log_model(model, artifact_path, **kwargs)
         else:
             logger.warning(f"Unsupported model type: {type(model)}")

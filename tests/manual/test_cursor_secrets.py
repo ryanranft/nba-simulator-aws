@@ -7,21 +7,22 @@ Run this as a Background Agent task to test secret access
 import os
 import sys
 
+
 def test_environment_variables():
     """Test that environment variables are accessible"""
     print("=== Environment Variable Test ===")
 
     # List of expected environment variables
     expected_vars = [
-        'AWS_ACCESS_KEY_ID',
-        'AWS_SECRET_ACCESS_KEY',
-        'AWS_DEFAULT_REGION',
-        'S3_BUCKET',
-        'DB_HOST',
-        'DB_PORT',
-        'DB_NAME',
-        'DB_USER',
-        'DB_PASSWORD'
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "AWS_DEFAULT_REGION",
+        "S3_BUCKET",
+        "DB_HOST",
+        "DB_PORT",
+        "DB_NAME",
+        "DB_USER",
+        "DB_PASSWORD",
     ]
 
     found_vars = []
@@ -31,8 +32,12 @@ def test_environment_variables():
         value = os.environ.get(var)
         if value:
             # Mask sensitive values for security
-            if 'KEY' in var or 'PASSWORD' in var or 'SECRET' in var:
-                masked_value = value[:4] + '*' * (len(value) - 8) + value[-4:] if len(value) > 8 else '*' * len(value)
+            if "KEY" in var or "PASSWORD" in var or "SECRET" in var:
+                masked_value = (
+                    value[:4] + "*" * (len(value) - 8) + value[-4:]
+                    if len(value) > 8
+                    else "*" * len(value)
+                )
                 print(f"✅ {var}: {masked_value}")
             else:
                 print(f"✅ {var}: {value}")
@@ -50,10 +55,7 @@ def test_environment_variables():
 
     return len(missing_vars) == 0
 
+
 if __name__ == "__main__":
     success = test_environment_variables()
     sys.exit(0 if success else 1)
-
-
-
-

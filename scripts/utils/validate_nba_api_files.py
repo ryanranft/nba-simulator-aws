@@ -46,27 +46,27 @@ class NBAAPIFileValidator:
         # Minimum file sizes (bytes) for different categories
         # Files smaller than this are suspicious
         self.min_sizes = {
-            'play_by_play': 500,      # Play-by-play should have substantial data
-            'boxscores_advanced': 300, # Box scores have multiple result sets
-            'player_info': 200,        # Player info has biographical data
-            'shot_charts': 100,        # Shot charts can be empty (no shots)
-            'draft': 100,              # Draft data can be sparse
-            'tracking': 100,           # Tracking can be empty for old seasons
-            'hustle': 100,             # Hustle stats only 2016+
-            'synergy': 100,            # Synergy only 2016+
-            'league_dashboards': 200,  # League dashboards should have player/team lists
-            'player_stats': 200,       # Player stats should have multiple columns
-            'team_stats': 200,         # Team stats should have multiple columns
-            'game_logs': 200,          # Game logs should have game data
-            'common': 100,             # Common endpoints vary
+            "play_by_play": 500,  # Play-by-play should have substantial data
+            "boxscores_advanced": 300,  # Box scores have multiple result sets
+            "player_info": 200,  # Player info has biographical data
+            "shot_charts": 100,  # Shot charts can be empty (no shots)
+            "draft": 100,  # Draft data can be sparse
+            "tracking": 100,  # Tracking can be empty for old seasons
+            "hustle": 100,  # Hustle stats only 2016+
+            "synergy": 100,  # Synergy only 2016+
+            "league_dashboards": 200,  # League dashboards should have player/team lists
+            "player_stats": 200,  # Player stats should have multiple columns
+            "team_stats": 200,  # Team stats should have multiple columns
+            "game_logs": 200,  # Game logs should have game data
+            "common": 100,  # Common endpoints vary
         }
 
         self.stats = {
-            'total_files': 0,
-            'valid_files': 0,
-            'invalid_files': 0,
-            'deleted_files': 0,
-            'errors': {},  # category -> count
+            "total_files": 0,
+            "valid_files": 0,
+            "invalid_files": 0,
+            "deleted_files": 0,
+            "errors": {},  # category -> count
         }
 
     def log(self, message, force=False):
@@ -100,7 +100,7 @@ class NBAAPIFileValidator:
 
         # Validate JSON syntax
         try:
-            with open(filepath, 'r') as f:
+            with open(filepath, "r") as f:
                 data = json.load(f)
         except json.JSONDecodeError as e:
             return False, f"Invalid JSON: {e}"
@@ -115,7 +115,11 @@ class NBAAPIFileValidator:
             return False, "JSON dictionary is empty"
 
         # Check for expected nba_api structure (resource, resultSets, or parameters)
-        if 'resultSets' not in data and 'resource' not in data and 'parameters' not in data:
+        if (
+            "resultSets" not in data
+            and "resource" not in data
+            and "parameters" not in data
+        ):
             # Some endpoints might have different structures, but most have these
             # Don't fail, but warn
             pass
@@ -131,7 +135,9 @@ class NBAAPIFileValidator:
             Dict with validation results
         """
         if not self.output_dir.exists():
-            self.log(f"❌ Output directory does not exist: {self.output_dir}", force=True)
+            self.log(
+                f"❌ Output directory does not exist: {self.output_dir}", force=True
+            )
             return self.stats
 
         self.log(f"\n{'='*70}")
@@ -150,9 +156,9 @@ class NBAAPIFileValidator:
             pattern = "**/*.json"
 
         json_files = list(self.output_dir.glob(pattern))
-        self.stats['total_files'] = len(json_files)
+        self.stats["total_files"] = len(json_files)
 
-        if self.stats['total_files'] == 0:
+        if self.stats["total_files"] == 0:
             self.log(f"⚠️  No JSON files found matching pattern: {pattern}", force=True)
             return self.stats
 
@@ -163,21 +169,28 @@ class NBAAPIFileValidator:
         # Validate each file
         for i, filepath in enumerate(json_files, 1):
             if i % 100 == 0 and not self.quiet:
-                print(f"  Progress: {i}/{self.stats['total_files']} files validated", end='\r')
+                print(
+                    f"  Progress: {i}/{self.stats['total_files']} files validated",
+                    end="\r",
+                )
 
             is_valid, error_msg = self.validate_json_file(filepath)
 
             if is_valid:
-                self.stats['valid_files'] += 1
+                self.stats["valid_files"] += 1
             else:
-                self.stats['invalid_files'] += 1
+                self.stats["invalid_files"] += 1
                 invalid_files.append((filepath, error_msg))
 
                 # Track errors by category
                 category = filepath.parent.name
-                self.stats['errors'][category] = self.stats['errors'].get(category, 0) + 1
+                self.stats["errors"][category] = (
+                    self.stats["errors"].get(category, 0) + 1
+                )
 
-                self.log(f"❌ INVALID: {filepath.relative_to(self.output_dir)}", force=True)
+                self.log(
+                    f"❌ INVALID: {filepath.relative_to(self.output_dir)}", force=True
+                )
                 self.log(f"   Reason: {error_msg}", force=True)
 
         if not self.quiet:
@@ -209,7 +222,7 @@ class NBAAPIFileValidator:
             except Exception as e:
                 self.log(f"❌ Failed to delete {filepath}: {e}", force=True)
 
-        self.stats['deleted_files'] = deleted_count
+        self.stats["deleted_files"] = deleted_count
         return deleted_count
 
     def print_summary(self):
@@ -220,27 +233,31 @@ class NBAAPIFileValidator:
         self.log(f"Total files:      {self.stats['total_files']}")
         self.log(f"Valid files:      {self.stats['valid_files']} ✅")
         self.log(f"Invalid files:    {self.stats['invalid_files']} ❌")
-        if self.stats['deleted_files'] > 0:
+        if self.stats["deleted_files"] > 0:
             self.log(f"Deleted files:    {self.stats['deleted_files']} 🗑️")
         self.log(f"{'='*70}")
 
-        if self.stats['errors']:
+        if self.stats["errors"]:
             self.log(f"\nErrors by category:")
-            for category, count in sorted(self.stats['errors'].items()):
+            for category, count in sorted(self.stats["errors"].items()):
                 self.log(f"  {category}: {count}")
 
         print()
 
         # Return exit code
-        if self.stats['invalid_files'] > 0 and self.stats['deleted_files'] == 0:
-            self.log(f"⚠️  Found {self.stats['invalid_files']} invalid files", force=True)
+        if self.stats["invalid_files"] > 0 and self.stats["deleted_files"] == 0:
+            self.log(
+                f"⚠️  Found {self.stats['invalid_files']} invalid files", force=True
+            )
             self.log(f"   Run with --delete-invalid to remove them", force=True)
             return 1
-        elif self.stats['invalid_files'] == 0:
+        elif self.stats["invalid_files"] == 0:
             self.log(f"✅ All files are valid!", force=True)
             return 0
         else:
-            self.log(f"✅ Cleaned up {self.stats['deleted_files']} invalid files", force=True)
+            self.log(
+                f"✅ Cleaned up {self.stats['deleted_files']} invalid files", force=True
+            )
             return 0
 
 
@@ -249,33 +266,28 @@ def main():
         description="Validate NBA API JSON files and detect partial/corrupted data"
     )
     parser.add_argument(
-        '--output-dir',
-        default='/tmp/nba_api_comprehensive',
-        help='NBA API output directory (default: /tmp/nba_api_comprehensive)'
+        "--output-dir",
+        default="/tmp/nba_api_comprehensive",
+        help="NBA API output directory (default: /tmp/nba_api_comprehensive)",
     )
     parser.add_argument(
-        '--season',
+        "--season",
         type=int,
-        help='Validate only files from specific season (e.g., 1996)'
+        help="Validate only files from specific season (e.g., 1996)",
     )
     parser.add_argument(
-        '--delete-invalid',
-        action='store_true',
-        help='Delete invalid/partial files (use with caution!)'
+        "--delete-invalid",
+        action="store_true",
+        help="Delete invalid/partial files (use with caution!)",
     )
     parser.add_argument(
-        '--quiet',
-        action='store_true',
-        help='Quiet mode - only show errors and summary'
+        "--quiet", action="store_true", help="Quiet mode - only show errors and summary"
     )
 
     args = parser.parse_args()
 
     # Create validator
-    validator = NBAAPIFileValidator(
-        output_dir=args.output_dir,
-        quiet=args.quiet
-    )
+    validator = NBAAPIFileValidator(output_dir=args.output_dir, quiet=args.quiet)
 
     # Validate files
     invalid_files = validator.validate_season_files(season=args.season)
@@ -289,5 +301,5 @@ def main():
     sys.exit(exit_code)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

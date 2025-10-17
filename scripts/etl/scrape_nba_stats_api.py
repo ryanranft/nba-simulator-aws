@@ -23,6 +23,7 @@ import sys
 
 try:
     import boto3
+
     HAS_BOTO3 = True
 except ImportError:
     HAS_BOTO3 = False
@@ -36,33 +37,33 @@ class NBAStatsAPIScraper:
 
     # Required headers to avoid 403 errors
     HEADERS = {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Referer': 'https://www.nba.com/',
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive',
-        'x-nba-stats-origin': 'stats',
-        'x-nba-stats-token': 'true'
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "Referer": "https://www.nba.com/",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Connection": "keep-alive",
+        "x-nba-stats-origin": "stats",
+        "x-nba-stats-token": "true",
     }
 
     def __init__(self, output_dir="/tmp/nba_stats_api", s3_bucket=None):
         self.output_dir = Path(output_dir)
         self.s3_bucket = s3_bucket
-        self.s3_client = boto3.client('s3') if HAS_BOTO3 and s3_bucket else None
+        self.s3_client = boto3.client("s3") if HAS_BOTO3 and s3_bucket else None
 
         # Create output directories
-        for subdir in ['scoreboard', 'boxscore', 'playbyplay']:
+        for subdir in ["scoreboard", "boxscore", "playbyplay"]:
             (self.output_dir / subdir).mkdir(parents=True, exist_ok=True)
 
         # Stats
         self.stats = {
-            'scoreboard_files': 0,
-            'boxscore_files': 0,
-            'playbyplay_files': 0,
-            'errors': 0,
-            'games_found': 0,
-            'api_calls': 0
+            "scoreboard_files": 0,
+            "boxscore_files": 0,
+            "playbyplay_files": 0,
+            "errors": 0,
+            "games_found": 0,
+            "api_calls": 0,
         }
 
         # Rate limiting
@@ -93,9 +94,11 @@ class NBAStatsAPIScraper:
         url = f"{self.BASE_URL}/{endpoint}"
 
         try:
-            response = requests.get(url, params=params, headers=self.HEADERS, timeout=15)
+            response = requests.get(
+                url, params=params, headers=self.HEADERS, timeout=15
+            )
             response.raise_for_status()
-            self.stats['api_calls'] += 1
+            self.stats["api_calls"] += 1
             return response.json()
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 403:
@@ -103,11 +106,11 @@ class NBAStatsAPIScraper:
                 print(f"   Try increasing rate limit or updating headers")
             else:
                 print(f"❌ HTTP Error {e.response.status_code}: {e}")
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
             return None
         except Exception as e:
             print(f"❌ Error: {e}")
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
             return None
 
     def get_scoreboard(self, game_date):
@@ -122,13 +125,9 @@ class NBAStatsAPIScraper:
         """
         date_str = game_date.strftime("%m/%d/%Y")
 
-        params = {
-            'GameDate': date_str,
-            'LeagueID': '00',  # NBA
-            'DayOffset': '0'
-        }
+        params = {"GameDate": date_str, "LeagueID": "00", "DayOffset": "0"}  # NBA
 
-        return self._make_request('scoreboardV2', params)
+        return self._make_request("scoreboardV2", params)
 
     def get_boxscore(self, game_id):
         """
@@ -141,15 +140,15 @@ class NBAStatsAPIScraper:
             dict: Box score JSON or None if error
         """
         params = {
-            'GameID': game_id,
-            'StartPeriod': '0',
-            'EndPeriod': '10',
-            'RangeType': '2',
-            'StartRange': '0',
-            'EndRange': '28800'
+            "GameID": game_id,
+            "StartPeriod": "0",
+            "EndPeriod": "10",
+            "RangeType": "2",
+            "StartRange": "0",
+            "EndRange": "28800",
         }
 
-        return self._make_request('boxscoretraditionalv2', params)
+        return self._make_request("boxscoretraditionalv2", params)
 
     def get_playbyplay(self, game_id):
         """
@@ -161,20 +160,16 @@ class NBAStatsAPIScraper:
         Returns:
             dict: Play-by-play JSON or None if error
         """
-        params = {
-            'GameID': game_id,
-            'StartPeriod': '0',
-            'EndPeriod': '10'
-        }
+        params = {"GameID": game_id, "StartPeriod": "0", "EndPeriod": "10"}
 
-        return self._make_request('playbyplayv2', params)
+        return self._make_request("playbyplayv2", params)
 
     def save_json(self, data, filepath):
         """Save JSON data to file"""
         filepath = Path(filepath)
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(data, f, indent=2)
 
     def upload_to_s3(self, local_path, s3_key):
@@ -206,9 +201,11 @@ class NBAStatsAPIScraper:
             return
 
         # Save scoreboard
-        scoreboard_file = self.output_dir / 'scoreboard' / f"{date_obj.strftime('%Y%m%d')}.json"
+        scoreboard_file = (
+            self.output_dir / "scoreboard" / f"{date_obj.strftime('%Y%m%d')}.json"
+        )
         self.save_json(scoreboard_data, scoreboard_file)
-        self.stats['scoreboard_files'] += 1
+        self.stats["scoreboard_files"] += 1
 
         # Upload to S3 if configured
         if self.s3_client:
@@ -217,7 +214,7 @@ class NBAStatsAPIScraper:
                 print(f"  ✅ Uploaded scoreboard to S3")
 
         # 2. Extract game IDs
-        result_sets = scoreboard_data.get('resultSets', [])
+        result_sets = scoreboard_data.get("resultSets", [])
         if not result_sets:
             print(f"  ⚠️  No games on {date_str}")
             return
@@ -225,7 +222,7 @@ class NBAStatsAPIScraper:
         # Find GameHeader result set
         game_headers = None
         for rs in result_sets:
-            if rs.get('name') == 'GameHeader':
+            if rs.get("name") == "GameHeader":
                 game_headers = rs
                 break
 
@@ -233,19 +230,19 @@ class NBAStatsAPIScraper:
             print(f"  ⚠️  No GameHeader in scoreboard")
             return
 
-        headers = game_headers.get('headers', [])
-        rows = game_headers.get('rowSet', [])
+        headers = game_headers.get("headers", [])
+        rows = game_headers.get("rowSet", [])
 
         if not rows:
             print(f"  ⚠️  No games on {date_str}")
             return
 
         print(f"  Found {len(rows)} games")
-        self.stats['games_found'] += len(rows)
+        self.stats["games_found"] += len(rows)
 
         # Find GAME_ID column index
         try:
-            game_id_idx = headers.index('GAME_ID')
+            game_id_idx = headers.index("GAME_ID")
         except ValueError:
             print(f"  ❌ GAME_ID not found in headers")
             return
@@ -256,8 +253,8 @@ class NBAStatsAPIScraper:
 
             # Get team names for logging
             try:
-                home_team_idx = headers.index('HOME_TEAM_ID')
-                visitor_team_idx = headers.index('VISITOR_TEAM_ID')
+                home_team_idx = headers.index("HOME_TEAM_ID")
+                visitor_team_idx = headers.index("VISITOR_TEAM_ID")
                 home_team = row[home_team_idx]
                 visitor_team = row[visitor_team_idx]
                 game_name = f"{visitor_team} @ {home_team}"
@@ -269,9 +266,9 @@ class NBAStatsAPIScraper:
             # Get box score
             boxscore_data = self.get_boxscore(game_id)
             if boxscore_data:
-                boxscore_file = self.output_dir / 'boxscore' / f"{game_id}.json"
+                boxscore_file = self.output_dir / "boxscore" / f"{game_id}.json"
                 self.save_json(boxscore_data, boxscore_file)
-                self.stats['boxscore_files'] += 1
+                self.stats["boxscore_files"] += 1
 
                 if self.s3_client:
                     s3_key = f"nba_stats_api/boxscore/{game_id}.json"
@@ -280,9 +277,9 @@ class NBAStatsAPIScraper:
             # Get play-by-play
             pbp_data = self.get_playbyplay(game_id)
             if pbp_data:
-                pbp_file = self.output_dir / 'playbyplay' / f"{game_id}.json"
+                pbp_file = self.output_dir / "playbyplay" / f"{game_id}.json"
                 self.save_json(pbp_data, pbp_file)
-                self.stats['playbyplay_files'] += 1
+                self.stats["playbyplay_files"] += 1
 
                 if self.s3_client:
                     s3_key = f"nba_stats_api/playbyplay/{game_id}.json"
@@ -306,7 +303,9 @@ class NBAStatsAPIScraper:
         total_days = (end_date - start_date).days + 1
 
         print(f"🚀 Starting NBA.com Stats API scraper")
-        print(f"📅 Date range: {start_date.date()} to {end_date.date()} ({total_days} days)")
+        print(
+            f"📅 Date range: {start_date.date()} to {end_date.date()} ({total_days} days)"
+        )
         print(f"💾 Output directory: {self.output_dir}")
         print(f"⏱️  Rate limit: {self.min_request_interval} seconds between requests")
         if self.s3_client:
@@ -321,26 +320,37 @@ class NBAStatsAPIScraper:
             current_date += timedelta(days=1)
 
         # Print summary
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("📊 SCRAPING SUMMARY")
-        print("="*60)
+        print("=" * 60)
         print(f"Scoreboard files:    {self.stats['scoreboard_files']:,}")
         print(f"Box score files:     {self.stats['boxscore_files']:,}")
         print(f"Play-by-play files:  {self.stats['playbyplay_files']:,}")
         print(f"Total games found:   {self.stats['games_found']:,}")
         print(f"Total API calls:     {self.stats['api_calls']:,}")
         print(f"Errors:              {self.stats['errors']:,}")
-        print("="*60)
+        print("=" * 60)
 
 
 def main():
     parser = argparse.ArgumentParser(description="Scrape NBA.com Stats API")
-    parser.add_argument('--start-date', required=True, help='Start date (YYYY-MM-DD)')
-    parser.add_argument('--end-date', required=True, help='End date (YYYY-MM-DD)')
-    parser.add_argument('--output-dir', default='/tmp/nba_stats_api', help='Local output directory')
-    parser.add_argument('--upload-to-s3', action='store_true', help='Upload to S3 after scraping')
-    parser.add_argument('--s3-bucket', default='nba-sim-raw-data-lake', help='S3 bucket name')
-    parser.add_argument('--rate-limit', type=float, default=3.0, help='Seconds between requests (default: 3.0)')
+    parser.add_argument("--start-date", required=True, help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end-date", required=True, help="End date (YYYY-MM-DD)")
+    parser.add_argument(
+        "--output-dir", default="/tmp/nba_stats_api", help="Local output directory"
+    )
+    parser.add_argument(
+        "--upload-to-s3", action="store_true", help="Upload to S3 after scraping"
+    )
+    parser.add_argument(
+        "--s3-bucket", default="nba-sim-raw-data-lake", help="S3 bucket name"
+    )
+    parser.add_argument(
+        "--rate-limit",
+        type=float,
+        default=3.0,
+        help="Seconds between requests (default: 3.0)",
+    )
 
     args = parser.parse_args()
 
@@ -374,5 +384,5 @@ def main():
         print(f"☁️  Files uploaded to s3://{s3_bucket}/nba_stats_api/")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

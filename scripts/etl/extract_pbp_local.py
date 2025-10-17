@@ -31,16 +31,17 @@ import psycopg2
 from psycopg2.extras import execute_values
 
 # Configuration from environment
-S3_BUCKET = os.environ.get('S3_RAW_DATA_BUCKET', 'nba-sim-raw-data-lake')
-DB_HOST = os.environ.get('DB_HOST')
-DB_NAME = os.environ.get('DB_NAME')
-DB_USER = os.environ.get('DB_USER')
-DB_PASSWORD = os.environ.get('DB_PASSWORD')
-DB_PORT = os.environ.get('DB_PORT', '5432')
+S3_BUCKET = os.environ.get("S3_RAW_DATA_BUCKET", "nba-sim-raw-data-lake")
+DB_HOST = os.environ.get("DB_HOST")
+DB_NAME = os.environ.get("DB_NAME")
+DB_USER = os.environ.get("DB_USER")
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
+DB_PORT = os.environ.get("DB_PORT", "5432")
+
 
 def validate_environment():
     """Ensure all required environment variables are set"""
-    required_vars = ['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASSWORD']
+    required_vars = ["DB_HOST", "DB_NAME", "DB_USER", "DB_PASSWORD"]
     missing = [var for var in required_vars if not os.environ.get(var)]
 
     if missing:
@@ -49,6 +50,7 @@ def validate_environment():
             print(f"  - {var}")
         print("\nRun: source /Users/ryanranft/nba-sim-credentials.env")
         sys.exit(1)
+
 
 def get_game_ids_for_year(year: int, cursor) -> List[str]:
     """Get list of game IDs for a specific year from database"""
@@ -59,8 +61,9 @@ def get_game_ids_for_year(year: int, cursor) -> List[str]:
         WHERE game_date >= %s AND game_date < %s
         ORDER BY game_date
     """
-    cursor.execute(query, (f'{year}-01-01', f'{year+1}-01-01'))
+    cursor.execute(query, (f"{year}-01-01", f"{year+1}-01-01"))
     return [row[0] for row in cursor.fetchall()]
+
 
 def extract_pbp_data(json_content: dict, game_id: str) -> List[Dict]:
     """
@@ -72,15 +75,15 @@ def extract_pbp_data(json_content: dict, game_id: str) -> List[Dict]:
 
     try:
         # Navigate to gamepackage.pbp
-        if 'page' not in json_content:
+        if "page" not in json_content:
             return plays_list
 
-        page = json_content['page']
-        content = page.get('content', {})
-        gamepackage = content.get('gamepackage', {})
-        pbp = gamepackage.get('pbp', {})
+        page = json_content["page"]
+        content = page.get("content", {})
+        gamepackage = content.get("gamepackage", {})
+        pbp = gamepackage.get("pbp", {})
 
-        play_groups = pbp.get('playGrps', [])
+        play_groups = pbp.get("playGrps", [])
 
         if not play_groups:
             return plays_list
@@ -91,28 +94,28 @@ def extract_pbp_data(json_content: dict, game_id: str) -> List[Dict]:
                 continue
 
             for play in period_plays:
-                play_id = play.get('id')
+                play_id = play.get("id")
                 if not play_id:
                     continue
 
-                period = play.get('period', {})
-                period_number = period.get('number')
-                period_display = period.get('displayValue')
+                period = play.get("period", {})
+                period_number = period.get("number")
+                period_display = period.get("displayValue")
 
-                clock = play.get('clock', {})
-                clock_display = clock.get('displayValue')
+                clock = play.get("clock", {})
+                clock_display = clock.get("displayValue")
 
                 play_record = {
-                    'play_id': str(play_id),
-                    'game_id': str(game_id),
-                    'period_number': period_number,
-                    'period_display': period_display,
-                    'clock_display': clock_display,
-                    'play_text': play.get('text'),
-                    'home_away': play.get('homeAway'),
-                    'scoring_play': play.get('scoringPlay', False),
-                    'away_score': play.get('awayScore'),
-                    'home_score': play.get('homeScore'),
+                    "play_id": str(play_id),
+                    "game_id": str(game_id),
+                    "period_number": period_number,
+                    "period_display": period_display,
+                    "clock_display": clock_display,
+                    "play_text": play.get("text"),
+                    "home_away": play.get("homeAway"),
+                    "scoring_play": play.get("scoringPlay", False),
+                    "away_score": play.get("awayScore"),
+                    "home_score": play.get("homeScore"),
                 }
                 plays_list.append(play_record)
 
@@ -120,6 +123,7 @@ def extract_pbp_data(json_content: dict, game_id: str) -> List[Dict]:
         print(f"  Warning: Error extracting PBP data from game {game_id}: {e}")
 
     return plays_list
+
 
 def process_year(year: int, dry_run: bool = False) -> Dict:
     """
@@ -139,13 +143,13 @@ def process_year(year: int, dry_run: bool = False) -> Dict:
                 database=DB_NAME,
                 user=DB_USER,
                 password=DB_PASSWORD,
-                port=DB_PORT
+                port=DB_PORT,
             )
             cursor = conn.cursor()
             print(f"✅ Connected to database: {DB_HOST}")
         except Exception as e:
             print(f"❌ Database connection failed: {e}")
-            return {'processed': 0, 'inserted': 0, 'skipped': 0, 'errors': 0}
+            return {"processed": 0, "inserted": 0, "skipped": 0, "errors": 0}
 
     # Get game IDs for this year from database
     print("Fetching game IDs from database...")
@@ -156,15 +160,15 @@ def process_year(year: int, dry_run: bool = False) -> Dict:
         if not dry_run:
             cursor.close()
             conn.close()
-        return {'processed': 0, 'inserted': 0, 'skipped': 0, 'errors': 0}
+        return {"processed": 0, "inserted": 0, "skipped": 0, "errors": 0}
 
     print(f"Found {len(game_ids)} games for year {year}")
 
     # Connect to S3
-    s3 = boto3.client('s3')
+    s3 = boto3.client("s3")
 
     # Process each game's PBP file
-    stats = {'processed': 0, 'inserted': 0, 'skipped': 0, 'errors': 0}
+    stats = {"processed": 0, "inserted": 0, "skipped": 0, "errors": 0}
     plays_to_insert = []
 
     for i, game_id in enumerate(game_ids, 1):
@@ -173,25 +177,27 @@ def process_year(year: int, dry_run: bool = False) -> Dict:
         try:
             # Download and parse JSON
             response = s3.get_object(Bucket=S3_BUCKET, Key=s3_key)
-            json_content = json.loads(response['Body'].read())
+            json_content = json.loads(response["Body"].read())
 
             # Extract play-by-play data
             plays_from_game = extract_pbp_data(json_content, game_id)
 
             if plays_from_game:
                 plays_to_insert.extend(plays_from_game)
-                stats['processed'] += len(plays_from_game)
+                stats["processed"] += len(plays_from_game)
             else:
-                stats['skipped'] += 1
+                stats["skipped"] += 1
 
             # Progress update every 100 games
             if i % 100 == 0:
-                print(f"  Progress: {i}/{len(game_ids)} games | {len(plays_to_insert)} plays extracted")
+                print(
+                    f"  Progress: {i}/{len(game_ids)} games | {len(plays_to_insert)} plays extracted"
+                )
 
         except Exception as e:
             if "NoSuchKey" not in str(e):
                 print(f"  ❌ Error processing {s3_key}: {e}")
-            stats['errors'] += 1
+            stats["errors"] += 1
 
     print(f"\nExtraction complete: {len(plays_to_insert)} plays ready to insert")
 
@@ -199,12 +205,14 @@ def process_year(year: int, dry_run: bool = False) -> Dict:
     seen_ids = set()
     unique_plays = []
     for play in plays_to_insert:
-        if play['play_id'] not in seen_ids:
-            seen_ids.add(play['play_id'])
+        if play["play_id"] not in seen_ids:
+            seen_ids.add(play["play_id"])
             unique_plays.append(play)
 
     if len(plays_to_insert) != len(unique_plays):
-        print(f"⚠️  Removed {len(plays_to_insert) - len(unique_plays)} duplicate play_ids")
+        print(
+            f"⚠️  Removed {len(plays_to_insert) - len(unique_plays)} duplicate play_ids"
+        )
         plays_to_insert = unique_plays
 
     # Insert into database (batch)
@@ -229,16 +237,16 @@ def process_year(year: int, dry_run: bool = False) -> Dict:
 
             values = [
                 (
-                    play['play_id'],
-                    play['game_id'],
-                    play['period_number'],
-                    play['period_display'],
-                    play['clock_display'],
-                    play['play_text'],
-                    play['home_away'],
-                    play['scoring_play'],
-                    play['away_score'],
-                    play['home_score']
+                    play["play_id"],
+                    play["game_id"],
+                    play["period_number"],
+                    play["period_display"],
+                    play["clock_display"],
+                    play["play_text"],
+                    play["home_away"],
+                    play["scoring_play"],
+                    play["away_score"],
+                    play["home_score"],
                 )
                 for play in plays_to_insert
             ]
@@ -246,14 +254,14 @@ def process_year(year: int, dry_run: bool = False) -> Dict:
             execute_values(cursor, insert_query, values)
             conn.commit()
 
-            stats['inserted'] = len(plays_to_insert)
+            stats["inserted"] = len(plays_to_insert)
             print(f"✅ Inserted {stats['inserted']} plays into database")
 
         except Exception as e:
             print(f"❌ Database insert failed: {e}")
             conn.rollback()
-            stats['errors'] += stats['processed']
-            stats['inserted'] = 0
+            stats["errors"] += stats["processed"]
+            stats["inserted"] = 0
         finally:
             cursor.close()
             conn.close()
@@ -266,11 +274,20 @@ def process_year(year: int, dry_run: bool = False) -> Dict:
 
     return stats
 
+
 def main():
-    parser = argparse.ArgumentParser(description='Extract NBA play-by-play data from S3 to RDS PostgreSQL')
-    parser.add_argument('--year', type=int, help='Process single year (e.g., 1997)')
-    parser.add_argument('--year-range', type=str, help='Process year range (e.g., 1997-2025)')
-    parser.add_argument('--dry-run', action='store_true', help='Show what would be done without inserting')
+    parser = argparse.ArgumentParser(
+        description="Extract NBA play-by-play data from S3 to RDS PostgreSQL"
+    )
+    parser.add_argument("--year", type=int, help="Process single year (e.g., 1997)")
+    parser.add_argument(
+        "--year-range", type=str, help="Process year range (e.g., 1997-2025)"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without inserting",
+    )
 
     args = parser.parse_args()
 
@@ -282,14 +299,14 @@ def main():
     if args.year:
         years = [args.year]
     elif args.year_range:
-        start_year, end_year = map(int, args.year_range.split('-'))
+        start_year, end_year = map(int, args.year_range.split("-"))
         years = list(range(start_year, end_year + 1))
     else:
         print("ERROR: Must specify --year or --year-range")
         sys.exit(1)
 
     # Process each year
-    total_stats = {'processed': 0, 'inserted': 0, 'skipped': 0, 'errors': 0}
+    total_stats = {"processed": 0, "inserted": 0, "skipped": 0, "errors": 0}
 
     for year in years:
         stats = process_year(year, dry_run=args.dry_run)
@@ -307,5 +324,6 @@ def main():
     print(f"Errors: {total_stats['errors']}")
     print()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

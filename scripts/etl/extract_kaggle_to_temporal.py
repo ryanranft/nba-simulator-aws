@@ -32,9 +32,9 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 def extract_player_biographical():
     """Extract player biographical data with birth dates."""
-    print("="*60)
+    print("=" * 60)
     print("Extracting Player Biographical Data")
-    print("="*60)
+    print("=" * 60)
 
     conn = sqlite3.connect(KAGGLE_DB)
 
@@ -61,11 +61,11 @@ def extract_player_biographical():
     df = pd.read_sql_query(query, conn)
 
     # Parse birth dates
-    df['birth_date'] = pd.to_datetime(df['birth_date'], errors='coerce')
+    df["birth_date"] = pd.to_datetime(df["birth_date"], errors="coerce")
 
     # Determine birth date precision
-    df['birth_date_precision'] = df['birth_date'].apply(
-        lambda x: 'day' if pd.notna(x) else 'unknown'
+    df["birth_date_precision"] = df["birth_date"].apply(
+        lambda x: "day" if pd.notna(x) else "unknown"
     )
 
     # Parse height (format: "6-10" → inches)
@@ -73,22 +73,33 @@ def extract_player_biographical():
         if pd.isna(height_str):
             return None
         try:
-            feet, inches = height_str.split('-')
+            feet, inches = height_str.split("-")
             return int(feet) * 12 + int(inches)
         except:
             return None
 
-    df['height_inches'] = df['height'].apply(parse_height)
+    df["height_inches"] = df["height"].apply(parse_height)
 
     # Add data source
-    df['data_source'] = 'kaggle'
+    df["data_source"] = "kaggle"
 
     # Select final columns
     output_cols = [
-        'player_id', 'name', 'birth_date', 'birth_date_precision',
-        'height_inches', 'weight', 'position', 'college', 'country',
-        'draft_year', 'draft_round', 'draft_number',
-        'nba_debut_year', 'nba_retirement_year', 'data_source'
+        "player_id",
+        "name",
+        "birth_date",
+        "birth_date_precision",
+        "height_inches",
+        "weight",
+        "position",
+        "college",
+        "country",
+        "draft_year",
+        "draft_round",
+        "draft_number",
+        "nba_debut_year",
+        "nba_retirement_year",
+        "data_source",
     ]
 
     df_final = df[output_cols]
@@ -98,7 +109,9 @@ def extract_player_biographical():
     df_final.to_csv(output_file, index=False)
 
     print(f"\n✓ Extracted {len(df_final):,} players")
-    print(f"  - With birth dates: {df_final['birth_date'].notna().sum():,} ({df_final['birth_date'].notna().sum()/len(df_final)*100:.1f}%)")
+    print(
+        f"  - With birth dates: {df_final['birth_date'].notna().sum():,} ({df_final['birth_date'].notna().sum()/len(df_final)*100:.1f}%)"
+    )
     print(f"  - Output: {output_file}")
 
     conn.close()
@@ -120,19 +133,19 @@ def parse_wall_clock_time(wctimestring, game_date):
         time_str = wctimestring.strip().upper()
 
         # Handle formats like "14:43 PM" (should be 2:43 PM)
-        if 'PM' in time_str or 'AM' in time_str:
+        if "PM" in time_str or "AM" in time_str:
             # Remove AM/PM for now
-            time_part = time_str.replace('PM', '').replace('AM', '').strip()
-            hour, minute = map(int, time_part.split(':'))
+            time_part = time_str.replace("PM", "").replace("AM", "").strip()
+            hour, minute = map(int, time_part.split(":"))
 
             # Fix hour if > 12 (e.g., "14:43 PM" → 2:43 PM)
             if hour > 12:
                 hour = hour - 12
 
             # Reconstruct with proper AM/PM
-            if 'PM' in time_str and hour != 12:
+            if "PM" in time_str and hour != 12:
                 hour += 12
-            elif 'AM' in time_str and hour == 12:
+            elif "AM" in time_str and hour == 12:
                 hour = 0
 
             # Combine with game date
@@ -158,7 +171,7 @@ def parse_game_clock(pctimestring):
         return None
 
     try:
-        minutes, seconds = map(int, pctimestring.split(':'))
+        minutes, seconds = map(int, pctimestring.split(":"))
         return minutes * 60 + seconds
     except:
         return None
@@ -166,9 +179,9 @@ def parse_game_clock(pctimestring):
 
 def extract_temporal_events(batch_size=100000):
     """Extract play-by-play events with timestamps in batches."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Extracting Temporal Events (Play-by-Play)")
-    print("="*60)
+    print("=" * 60)
 
     conn = sqlite3.connect(KAGGLE_DB)
 
@@ -176,8 +189,8 @@ def extract_temporal_events(batch_size=100000):
     print("\nLoading game dates...")
     game_dates_query = "SELECT game_id, game_date FROM game"
     df_games = pd.read_sql_query(game_dates_query, conn)
-    df_games['game_date'] = pd.to_datetime(df_games['game_date'])
-    game_date_map = dict(zip(df_games['game_id'], df_games['game_date']))
+    df_games["game_date"] = pd.to_datetime(df_games["game_date"])
+    game_date_map = dict(zip(df_games["game_id"], df_games["game_date"]))
 
     print(f"✓ Loaded {len(game_date_map):,} game dates")
 
@@ -192,7 +205,9 @@ def extract_temporal_events(batch_size=100000):
     first_batch = True
 
     for offset in range(0, total_rows, batch_size):
-        print(f"\nProcessing batch {offset:,} to {min(offset+batch_size, total_rows):,}...")
+        print(
+            f"\nProcessing batch {offset:,} to {min(offset+batch_size, total_rows):,}..."
+        )
 
         query = f"""
         SELECT
@@ -219,66 +234,78 @@ def extract_temporal_events(batch_size=100000):
             break
 
         # Add game dates
-        df['game_date'] = df['game_id'].map(game_date_map)
+        df["game_date"] = df["game_id"].map(game_date_map)
 
         # Parse timestamps
         print("  Parsing wall clock timestamps...")
-        df['wall_clock_utc'] = df.apply(
-            lambda row: parse_wall_clock_time(row['wctimestring'], row['game_date']),
-            axis=1
+        df["wall_clock_utc"] = df.apply(
+            lambda row: parse_wall_clock_time(row["wctimestring"], row["game_date"]),
+            axis=1,
         )
 
         # Parse game clock
         print("  Parsing game clocks...")
-        df['game_clock_seconds'] = df['pctimestring'].apply(parse_game_clock)
+        df["game_clock_seconds"] = df["pctimestring"].apply(parse_game_clock)
 
         # Set precision level (Kaggle data is minute-level)
-        df['precision_level'] = 'minute'
+        df["precision_level"] = "minute"
 
         # Map event type codes to names (simplified)
         event_type_map = {
-            1: 'made_shot',
-            2: 'missed_shot',
-            3: 'free_throw',
-            4: 'rebound',
-            5: 'turnover',
-            6: 'foul',
-            8: 'substitution',
-            9: 'timeout',
-            10: 'jump_ball',
-            12: 'period_start',
-            13: 'period_end'
+            1: "made_shot",
+            2: "missed_shot",
+            3: "free_throw",
+            4: "rebound",
+            5: "turnover",
+            6: "foul",
+            8: "substitution",
+            9: "timeout",
+            10: "jump_ball",
+            12: "period_start",
+            13: "period_end",
         }
-        df['event_type'] = df['event_type_code'].map(event_type_map).fillna('other')
+        df["event_type"] = df["event_type_code"].map(event_type_map).fillna("other")
 
         # Create event_data JSONB (store original descriptions)
         # Use json.dumps() to properly escape special characters like apostrophes
-        df['event_data'] = df.apply(lambda row: json.dumps({
-            'home_description': row['homedescription'],
-            'visitor_description': row['visitordescription'],
-            'neutral_description': row['neutraldescription'],
-            'score': row['score'],
-            'score_margin': row['scoremargin']
-        }), axis=1)
+        df["event_data"] = df.apply(
+            lambda row: json.dumps(
+                {
+                    "home_description": row["homedescription"],
+                    "visitor_description": row["visitordescription"],
+                    "neutral_description": row["neutraldescription"],
+                    "score": row["score"],
+                    "score_margin": row["scoremargin"],
+                }
+            ),
+            axis=1,
+        )
 
         # Data source
-        df['data_source'] = 'kaggle'
+        df["data_source"] = "kaggle"
 
         # Select final columns
         output_cols = [
-            'game_id', 'player_id', 'team_id', 'wall_clock_utc',
-            'game_clock_seconds', 'quarter', 'precision_level',
-            'event_type', 'event_data', 'data_source'
+            "game_id",
+            "player_id",
+            "team_id",
+            "wall_clock_utc",
+            "game_clock_seconds",
+            "quarter",
+            "precision_level",
+            "event_type",
+            "event_data",
+            "data_source",
         ]
 
         df_output = df[output_cols]
 
         # Save batch
         if first_batch:
-            df_output.to_csv(output_file, index=False, mode='w')
+            df_output.to_csv(output_file, index=False, mode="w")
             first_batch = False
         else:
-            df_output.to_csv(output_file, index=False, mode='a', header=False)
+            df_output.to_csv(output_file, index=False, mode="a", header=False)
 
         print(f"  ✓ Saved {len(df_output):,} events")
 
@@ -293,9 +320,9 @@ def extract_temporal_events(batch_size=100000):
 
 def print_summary():
     """Print summary of extracted data."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Extraction Summary")
-    print("="*60)
+    print("=" * 60)
 
     files = list(OUTPUT_DIR.glob("*.csv"))
 
@@ -315,9 +342,9 @@ def print_summary():
 
 def main():
     """Main execution function."""
-    print("="*60)
+    print("=" * 60)
     print("Kaggle to Temporal Data Extraction")
-    print("="*60)
+    print("=" * 60)
     print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
 
@@ -336,18 +363,18 @@ def main():
     # Print summary
     print_summary()
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Next Steps:")
-    print("="*60)
+    print("=" * 60)
     print("1. Create temporal database tables:")
     print("   python scripts/db/create_temporal_tables.py")
     print("")
     print("2. Load Kaggle data to RDS:")
     print("   python scripts/db/load_kaggle_to_rds.py")
-    print("="*60)
+    print("=" * 60)
 
     print(f"\nCompleted: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

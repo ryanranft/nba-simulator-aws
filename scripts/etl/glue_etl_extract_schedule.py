@@ -30,22 +30,25 @@ from pyspark.sql.functions import *
 from pyspark.sql.types import *
 
 # Initialize Glue context
-args = getResolvedOptions(sys.argv, [
-    'JOB_NAME',
-    'year',  # Process one year at a time
-    'db_host',
-    'db_name',
-    'db_user',
-    'db_password'
-])
+args = getResolvedOptions(
+    sys.argv,
+    [
+        "JOB_NAME",
+        "year",  # Process one year at a time
+        "db_host",
+        "db_name",
+        "db_user",
+        "db_password",
+    ],
+)
 
 sc = SparkContext()
 glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 job = Job(glueContext)
-job.init(args['JOB_NAME'], args)
+job.init(args["JOB_NAME"], args)
 
-year = args['year']
+year = args["year"]
 print(f"Processing schedule data for year {year}")
 
 # Read from Glue Catalog (created by crawler)
@@ -56,8 +59,7 @@ print(f"Reading table: {database_name}.{table_name}")
 
 # Read the Glue table
 dynamic_frame = glueContext.create_dynamic_frame.from_catalog(
-    database=database_name,
-    table_name=table_name
+    database=database_name, table_name=table_name
 )
 
 # Convert to Spark DataFrame for easier manipulation
@@ -65,6 +67,7 @@ df = dynamic_frame.toDF()
 
 print(f"Schema of source table:")
 df.printSchema()
+
 
 # Define UDF to extract game data from the nested JSON structure
 def extract_games(row):
@@ -87,16 +90,16 @@ def extract_games(row):
 
             for game in date_games:
                 # Extract basic game info
-                game_id = game.get('id')
-                game_date = game.get('date')
-                completed = game.get('completed', False)
+                game_id = game.get("id")
+                game_date = game.get("date")
+                completed = game.get("completed", False)
 
                 # Extract status
-                status = game.get('status', {})
-                status_detail = status.get('detail', 'Unknown')
+                status = game.get("status", {})
+                status_detail = status.get("detail", "Unknown")
 
                 # Extract teams (competitors or teams array)
-                teams_data = game.get('competitors') or game.get('teams', [])
+                teams_data = game.get("competitors") or game.get("teams", [])
 
                 if len(teams_data) < 2:
                     continue
@@ -106,42 +109,64 @@ def extract_games(row):
                 away_team = None
 
                 for team in teams_data:
-                    if team.get('isHome'):
+                    if team.get("isHome"):
                         home_team = team
                     else:
                         away_team = team
 
                 # If not clearly marked, first is home, second is away
                 if not home_team:
-                    home_team = teams_data[0] if teams_data[0].get('isHome', True) else teams_data[1]
-                    away_team = teams_data[1] if teams_data[0].get('isHome', True) else teams_data[0]
+                    home_team = (
+                        teams_data[0]
+                        if teams_data[0].get("isHome", True)
+                        else teams_data[1]
+                    )
+                    away_team = (
+                        teams_data[1]
+                        if teams_data[0].get("isHome", True)
+                        else teams_data[0]
+                    )
 
                 # Extract venue
-                venue = game.get('venue', {})
-                venue_name = venue.get('fullName')
-                venue_address = venue.get('address', {})
-                venue_city = venue_address.get('city')
-                venue_state = venue_address.get('state')
+                venue = game.get("venue", {})
+                venue_name = venue.get("fullName")
+                venue_address = venue.get("address", {})
+                venue_city = venue_address.get("city")
+                venue_state = venue_address.get("state")
 
                 # Create game record
                 game_record = {
-                    'game_id': str(game_id),
-                    'game_date': game_date,
-                    'season_year': int(year),
-                    'home_team_id': str(home_team.get('id')) if home_team else None,
-                    'home_team_name': home_team.get('displayName') if home_team else None,
-                    'home_team_abbrev': home_team.get('abbrev') if home_team else None,
-                    'home_score': int(home_team.get('score', 0)) if home_team and home_team.get('score') else None,
-                    'away_team_id': str(away_team.get('id')) if away_team else None,
-                    'away_team_name': away_team.get('displayName') if away_team else None,
-                    'away_team_abbrev': away_team.get('abbrev') if away_team else None,
-                    'away_score': int(away_team.get('score', 0)) if away_team and away_team.get('score') else None,
-                    'venue_name': venue_name,
-                    'venue_city': venue_city,
-                    'venue_state': venue_state,
-                    'status': status_detail,
-                    'completed': completed,
-                    'home_winner': home_team.get('winner', False) if home_team else False
+                    "game_id": str(game_id),
+                    "game_date": game_date,
+                    "season_year": int(year),
+                    "home_team_id": str(home_team.get("id")) if home_team else None,
+                    "home_team_name": (
+                        home_team.get("displayName") if home_team else None
+                    ),
+                    "home_team_abbrev": home_team.get("abbrev") if home_team else None,
+                    "home_score": (
+                        int(home_team.get("score", 0))
+                        if home_team and home_team.get("score")
+                        else None
+                    ),
+                    "away_team_id": str(away_team.get("id")) if away_team else None,
+                    "away_team_name": (
+                        away_team.get("displayName") if away_team else None
+                    ),
+                    "away_team_abbrev": away_team.get("abbrev") if away_team else None,
+                    "away_score": (
+                        int(away_team.get("score", 0))
+                        if away_team and away_team.get("score")
+                        else None
+                    ),
+                    "venue_name": venue_name,
+                    "venue_city": venue_city,
+                    "venue_state": venue_state,
+                    "status": status_detail,
+                    "completed": completed,
+                    "home_winner": (
+                        home_team.get("winner", False) if home_team else False
+                    ),
                 }
 
                 games.append(game_record)
@@ -151,29 +176,39 @@ def extract_games(row):
 
     return games
 
+
 # Register UDF
-extract_games_udf = udf(extract_games, ArrayType(StructType([
-    StructField("game_id", StringType(), True),
-    StructField("game_date", StringType(), True),
-    StructField("season_year", IntegerType(), True),
-    StructField("home_team_id", StringType(), True),
-    StructField("home_team_name", StringType(), True),
-    StructField("home_team_abbrev", StringType(), True),
-    StructField("home_score", IntegerType(), True),
-    StructField("away_team_id", StringType(), True),
-    StructField("away_team_name", StringType(), True),
-    StructField("away_team_abbrev", StringType(), True),
-    StructField("away_score", IntegerType(), True),
-    StructField("venue_name", StringType(), True),
-    StructField("venue_city", StringType(), True),
-    StructField("venue_state", StringType(), True),
-    StructField("status", StringType(), True),
-    StructField("completed", BooleanType(), True),
-    StructField("home_winner", BooleanType(), True)
-])))
+extract_games_udf = udf(
+    extract_games,
+    ArrayType(
+        StructType(
+            [
+                StructField("game_id", StringType(), True),
+                StructField("game_date", StringType(), True),
+                StructField("season_year", IntegerType(), True),
+                StructField("home_team_id", StringType(), True),
+                StructField("home_team_name", StringType(), True),
+                StructField("home_team_abbrev", StringType(), True),
+                StructField("home_score", IntegerType(), True),
+                StructField("away_team_id", StringType(), True),
+                StructField("away_team_name", StringType(), True),
+                StructField("away_team_abbrev", StringType(), True),
+                StructField("away_score", IntegerType(), True),
+                StructField("venue_name", StringType(), True),
+                StructField("venue_city", StringType(), True),
+                StructField("venue_state", StringType(), True),
+                StructField("status", StringType(), True),
+                StructField("completed", BooleanType(), True),
+                StructField("home_winner", BooleanType(), True),
+            ]
+        )
+    ),
+)
 
 # Apply UDF to extract games
-games_df = df.withColumn("games", extract_games_udf(struct([df[x] for x in df.columns])))
+games_df = df.withColumn(
+    "games", extract_games_udf(struct([df[x] for x in df.columns]))
+)
 
 # Explode the games array to individual rows
 games_exploded = games_df.select(explode("games").alias("game"))
@@ -188,15 +223,13 @@ final_df.show(5, truncate=False)
 # Write to RDS PostgreSQL
 jdbc_url = f"jdbc:postgresql://{args['db_host']}:5432/{args['db_name']}"
 
-final_df.write \
-    .format("jdbc") \
-    .option("url", jdbc_url) \
-    .option("dbtable", "games") \
-    .option("user", args['db_user']) \
-    .option("password", args['db_password']) \
-    .option("driver", "org.postgresql.Driver") \
-    .mode("append") \
-    .save()
+final_df.write.format("jdbc").option("url", jdbc_url).option("dbtable", "games").option(
+    "user", args["db_user"]
+).option("password", args["db_password"]).option(
+    "driver", "org.postgresql.Driver"
+).mode(
+    "append"
+).save()
 
 print(f"✅ Successfully loaded {final_df.count()} games from year {year} to RDS")
 

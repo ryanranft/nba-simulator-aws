@@ -10,12 +10,13 @@ from datetime import datetime
 
 # Local PostgreSQL connection settings
 LOCAL_DB_CONFIG = {
-    'host': 'localhost',
-    'port': 5432,
-    'dbname': 'nba_simulator',
-    'user': 'ryanranft',  # Change if needed
-    'password': ''  # Local PostgreSQL usually doesn't need password
+    "host": "localhost",
+    "port": 5432,
+    "dbname": "nba_simulator",
+    "user": "ryanranft",  # Change if needed
+    "password": "",  # Local PostgreSQL usually doesn't need password
 }
+
 
 def main():
     print("=" * 60)
@@ -44,7 +45,8 @@ def main():
     print("Creating tables if needed...")
 
     # Create games table
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS games (
             game_id VARCHAR(20) PRIMARY KEY,
             game_date DATE,
@@ -53,10 +55,12 @@ def main():
             away_team_id VARCHAR(20),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    """)
+    """
+    )
 
     # Create temporal_events table
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS temporal_events (
             event_id BIGSERIAL PRIMARY KEY,
             game_id VARCHAR(20) NOT NULL,
@@ -71,10 +75,12 @@ def main():
             CONSTRAINT chk_quarter CHECK (quarter BETWEEN 1 AND 10),
             CONSTRAINT chk_game_clock CHECK (game_clock_seconds BETWEEN 0 AND 720)
         )
-    """)
+    """
+    )
 
     # Create possession_panel table
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS possession_panel (
             possession_id BIGSERIAL PRIMARY KEY,
             game_id VARCHAR(20) NOT NULL,
@@ -97,7 +103,8 @@ def main():
 
             CONSTRAINT unique_possession UNIQUE (game_id, possession_number)
         )
-    """)
+    """
+    )
 
     conn.commit()
     print("✓ Tables created")
@@ -110,7 +117,7 @@ def main():
     print()
 
     # Load CSV
-    csv_path = '/tmp/kaggle_temporal_events.csv'
+    csv_path = "/tmp/kaggle_temporal_events.csv"
     print(f"Loading events from {csv_path}...")
 
     try:
@@ -120,7 +127,9 @@ def main():
 
         from io import StringIO
 
-        for chunk_num, chunk in enumerate(pd.read_csv(csv_path, chunksize=chunk_size), 1):
+        for chunk_num, chunk in enumerate(
+            pd.read_csv(csv_path, chunksize=chunk_size), 1
+        ):
             # Write to database using COPY for speed
             buffer = StringIO()
             chunk.to_csv(buffer, index=False, header=False)
@@ -135,7 +144,7 @@ def main():
                 )
                 FROM STDIN WITH CSV
                 """,
-                buffer
+                buffer,
             )
 
             total_loaded += len(chunk)
@@ -162,14 +171,18 @@ def main():
 
     # Create indexes for performance
     print("Creating indexes...")
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE INDEX IF NOT EXISTS idx_temporal_game_time
         ON temporal_events(game_id, quarter DESC, game_clock_seconds DESC)
-    """)
-    cursor.execute("""
+    """
+    )
+    cursor.execute(
+        """
         CREATE INDEX IF NOT EXISTS idx_temporal_source
         ON temporal_events(data_source)
-    """)
+    """
+    )
     conn.commit()
     print("✓ Indexes created")
     print()
@@ -190,5 +203,6 @@ def main():
     cursor.close()
     conn.close()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

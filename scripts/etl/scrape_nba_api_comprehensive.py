@@ -67,6 +67,7 @@ import traceback
 
 try:
     from nba_api.stats import endpoints as nba_endpoints
+
     HAS_NBA_API = True
 except ImportError:
     HAS_NBA_API = False
@@ -76,6 +77,7 @@ except ImportError:
 
 try:
     import boto3
+
     HAS_BOTO3 = True
 except ImportError:
     HAS_BOTO3 = False
@@ -91,42 +93,44 @@ class ComprehensiveNBAStatsScraper:
     def __init__(self, output_dir="/tmp/nba_api_comprehensive", s3_bucket=None):
         self.output_dir = Path(output_dir)
         self.s3_bucket = s3_bucket
-        self.s3_client = boto3.client('s3') if HAS_BOTO3 and s3_bucket else None
+        self.s3_client = boto3.client("s3") if HAS_BOTO3 and s3_bucket else None
 
         # Create category subdirectories
         self.categories = [
-            'league_dashboards',
-            'boxscores_advanced',
-            'player_stats',
-            'team_stats',
-            'draft',
-            'shot_charts',
-            'tracking',
-            'hustle',
-            'synergy',
-            'common',
-            'game_logs',
-            'play_by_play',  # NEW: For temporal panel data
-            'player_info',   # NEW: For birth dates and age calculations
+            "league_dashboards",
+            "boxscores_advanced",
+            "player_stats",
+            "team_stats",
+            "draft",
+            "shot_charts",
+            "tracking",
+            "hustle",
+            "synergy",
+            "common",
+            "game_logs",
+            "play_by_play",  # NEW: For temporal panel data
+            "player_info",  # NEW: For birth dates and age calculations
         ]
 
         for category in self.categories:
             (self.output_dir / category).mkdir(parents=True, exist_ok=True)
 
         # Create checkpoint directory
-        self.checkpoint_dir = self.output_dir / '.checkpoints'
+        self.checkpoint_dir = self.output_dir / ".checkpoints"
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
         self.stats = {
-            'endpoints_scraped': 0,
-            'files_created': 0,
-            'errors': 0,
-            'api_calls': 0,
+            "endpoints_scraped": 0,
+            "files_created": 0,
+            "errors": 0,
+            "api_calls": 0,
         }
 
         # Rate limiting (increased for production stability and to avoid NBA.com blocking)
         self.last_request_time = 0
-        self.min_request_interval = 2.5  # 2.5s between requests (very conservative to avoid rate limiting)
+        self.min_request_interval = (
+            2.5  # 2.5s between requests (very conservative to avoid rate limiting)
+        )
 
     def check_season_complete(self, season: int) -> bool:
         """
@@ -152,13 +156,13 @@ class ComprehensiveNBAStatsScraper:
         checkpoint_data = {
             "season": season,
             "completed_at": datetime.now().isoformat(),
-            "files_created": self.stats['files_created'],
-            "api_calls": self.stats['api_calls'],
-            "errors": self.stats['errors'],
-            "endpoints_scraped": self.stats['endpoints_scraped']
+            "files_created": self.stats["files_created"],
+            "api_calls": self.stats["api_calls"],
+            "errors": self.stats["errors"],
+            "endpoints_scraped": self.stats["endpoints_scraped"],
         }
 
-        with open(checkpoint_file, 'w') as f:
+        with open(checkpoint_file, "w") as f:
             json.dump(checkpoint_data, f, indent=2)
 
         print(f"\n✅ Season {season} checkpoint created")
@@ -176,7 +180,7 @@ class ComprehensiveNBAStatsScraper:
         filepath = Path(filepath)
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(data, f, indent=2, default=str)
 
     def upload_to_s3(self, local_path, s3_key):
@@ -206,7 +210,7 @@ class ComprehensiveNBAStatsScraper:
         try:
             # Call endpoint
             response = endpoint_func(**params)
-            self.stats['api_calls'] += 1
+            self.stats["api_calls"] += 1
 
             # Get data as dict
             data = response.get_dict()
@@ -214,7 +218,7 @@ class ComprehensiveNBAStatsScraper:
             # Save to file
             filepath = self.output_dir / category / filename
             self.save_json(data, filepath)
-            self.stats['files_created'] += 1
+            self.stats["files_created"] += 1
 
             # Upload to S3
             if self.s3_client:
@@ -225,7 +229,7 @@ class ComprehensiveNBAStatsScraper:
 
         except Exception as e:
             print(f"  ❌ Error: {e}")
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
             return None
 
     def scrape_league_dashboards(self, season):
@@ -235,20 +239,48 @@ class ComprehensiveNBAStatsScraper:
         season_str = f"{season-1}-{str(season)[-2:]}"  # e.g., "2023-24"
 
         endpoint_list = [
-            ('Player Stats', nba_endpoints.leaguedashplayerstats.LeagueDashPlayerStats, {'season': season_str}),
-            ('Team Stats', nba_endpoints.leaguedashteamstats.LeagueDashTeamStats, {'season': season_str}),
-            ('Lineups', nba_endpoints.leaguedashlineups.LeagueDashLineups, {'season': season_str}),
-            ('Player Tracking Defense', nba_endpoints.leaguedashptdefend.LeagueDashPtDefend, {'season': season_str}),
-            ('Player Tracking Stats', nba_endpoints.leaguedashptstats.LeagueDashPtStats, {'season': season_str}),
-            ('Team Tracking Defense', nba_endpoints.leaguedashptteamdefend.LeagueDashPtTeamDefend, {'season': season_str}),
-            ('League Leaders', nba_endpoints.leagueleaders.LeagueLeaders, {'season': season_str}),
+            (
+                "Player Stats",
+                nba_endpoints.leaguedashplayerstats.LeagueDashPlayerStats,
+                {"season": season_str},
+            ),
+            (
+                "Team Stats",
+                nba_endpoints.leaguedashteamstats.LeagueDashTeamStats,
+                {"season": season_str},
+            ),
+            (
+                "Lineups",
+                nba_endpoints.leaguedashlineups.LeagueDashLineups,
+                {"season": season_str},
+            ),
+            (
+                "Player Tracking Defense",
+                nba_endpoints.leaguedashptdefend.LeagueDashPtDefend,
+                {"season": season_str},
+            ),
+            (
+                "Player Tracking Stats",
+                nba_endpoints.leaguedashptstats.LeagueDashPtStats,
+                {"season": season_str},
+            ),
+            (
+                "Team Tracking Defense",
+                nba_endpoints.leaguedashptteamdefend.LeagueDashPtTeamDefend,
+                {"season": season_str},
+            ),
+            (
+                "League Leaders",
+                nba_endpoints.leagueleaders.LeagueLeaders,
+                {"season": season_str},
+            ),
         ]
 
         for name, func, params in endpoint_list:
             print(f"  → {name}")
             filename = f"{name.lower().replace(' ', '_')}_{season}.json"
-            self.scrape_endpoint(func, params, 'league_dashboards', filename)
-            self.stats['endpoints_scraped'] += 1
+            self.scrape_endpoint(func, params, "league_dashboards", filename)
+            self.stats["endpoints_scraped"] += 1
 
     def scrape_advanced_boxscores(self, season):
         """Scrape advanced box score endpoints for all games in season"""
@@ -258,21 +290,26 @@ class ComprehensiveNBAStatsScraper:
 
         # First get all games for the season
         print(f"  → Getting game list...")
-        games_response = nba_endpoints.leaguegamefinder.LeagueGameFinder(season_nullable=season_str)
+        games_response = nba_endpoints.leaguegamefinder.LeagueGameFinder(
+            season_nullable=season_str
+        )
         games_df = games_response.get_data_frames()[0]
-        game_ids = games_df['GAME_ID'].unique()  # PRODUCTION: Get ALL games
+        game_ids = games_df["GAME_ID"].unique()  # PRODUCTION: Get ALL games
 
         print(f"  → Found {len(game_ids)} games (scraping all)")
 
         boxscore_endpoints = [
-            ('Advanced', nba_endpoints.boxscoreadvancedv2.BoxScoreAdvancedV2),
-            ('Defensive', nba_endpoints.boxscoredefensivev2.BoxScoreDefensiveV2),
-            ('Four Factors', nba_endpoints.boxscorefourfactorsv2.BoxScoreFourFactorsV2),
-            ('Misc', nba_endpoints.boxscoremiscv2.BoxScoreMiscV2),
-            ('Player Tracking', nba_endpoints.boxscoreplayertrackv2.BoxScorePlayerTrackV2),
-            ('Scoring', nba_endpoints.boxscorescoringv2.BoxScoreScoringV2),
-            ('Traditional', nba_endpoints.boxscoretraditionalv2.BoxScoreTraditionalV2),
-            ('Usage', nba_endpoints.boxscoreusagev2.BoxScoreUsageV2),
+            ("Advanced", nba_endpoints.boxscoreadvancedv2.BoxScoreAdvancedV2),
+            ("Defensive", nba_endpoints.boxscoredefensivev2.BoxScoreDefensiveV2),
+            ("Four Factors", nba_endpoints.boxscorefourfactorsv2.BoxScoreFourFactorsV2),
+            ("Misc", nba_endpoints.boxscoremiscv2.BoxScoreMiscV2),
+            (
+                "Player Tracking",
+                nba_endpoints.boxscoreplayertrackv2.BoxScorePlayerTrackV2,
+            ),
+            ("Scoring", nba_endpoints.boxscorescoringv2.BoxScoreScoringV2),
+            ("Traditional", nba_endpoints.boxscoretraditionalv2.BoxScoreTraditionalV2),
+            ("Usage", nba_endpoints.boxscoreusagev2.BoxScoreUsageV2),
         ]
 
         for i, game_id in enumerate(game_ids, 1):
@@ -281,16 +318,20 @@ class ComprehensiveNBAStatsScraper:
 
             for name, func in boxscore_endpoints:
                 filename = f"{name.lower().replace(' ', '_')}_{game_id}.json"
-                self.scrape_endpoint(func, {'game_id': game_id}, 'boxscores_advanced', filename)
+                self.scrape_endpoint(
+                    func, {"game_id": game_id}, "boxscores_advanced", filename
+                )
 
-        self.stats['endpoints_scraped'] += 1
+        self.stats["endpoints_scraped"] += 1
 
     def scrape_player_tracking(self, season):
         """Scrape player tracking stats (2014+ only - SportVU era)"""
 
         # SEASON CUTOFF: Player tracking only available 2014+
         if season < 2014:
-            print(f"\n⏭️  Skipping player tracking for {season} (not available before 2014)")
+            print(
+                f"\n⏭️  Skipping player tracking for {season} (not available before 2014)"
+            )
             return
 
         print(f"\n🏃 Scraping player tracking stats for {season}...")
@@ -298,47 +339,61 @@ class ComprehensiveNBAStatsScraper:
         season_str = f"{season-1}-{str(season)[-2:]}"
 
         # Get all players for the season with team info
-        players_response = nba_endpoints.commonallplayers.CommonAllPlayers(season=season_str, is_only_current_season=1)
+        players_response = nba_endpoints.commonallplayers.CommonAllPlayers(
+            season=season_str, is_only_current_season=1
+        )
         players_df = players_response.get_data_frames()[0]
 
         # Filter to only players with teams (TEAM_ID != 0) and active roster status
-        players_df = players_df[(players_df['TEAM_ID'] != 0) & (players_df['ROSTERSTATUS'] == 1)]
+        players_df = players_df[
+            (players_df["TEAM_ID"] != 0) & (players_df["ROSTERSTATUS"] == 1)
+        ]
 
         # Get player and team IDs
-        player_data = players_df[['PERSON_ID', 'TEAM_ID']].to_dict('records')  # PRODUCTION: Get ALL players
+        player_data = players_df[["PERSON_ID", "TEAM_ID"]].to_dict(
+            "records"
+        )  # PRODUCTION: Get ALL players
 
         print(f"  → Found {len(player_data)} active players with teams (scraping all)")
 
         tracking_endpoints = [
-            ('Passing', nba_endpoints.playerdashptpass.PlayerDashPtPass),
-            ('Rebounding', nba_endpoints.playerdashptreb.PlayerDashPtReb),
-            ('Shot Defense', nba_endpoints.playerdashptshotdefend.PlayerDashPtShotDefend),
-            ('Shots', nba_endpoints.playerdashptshots.PlayerDashPtShots),
+            ("Passing", nba_endpoints.playerdashptpass.PlayerDashPtPass),
+            ("Rebounding", nba_endpoints.playerdashptreb.PlayerDashPtReb),
+            (
+                "Shot Defense",
+                nba_endpoints.playerdashptshotdefend.PlayerDashPtShotDefend,
+            ),
+            ("Shots", nba_endpoints.playerdashptshots.PlayerDashPtShots),
         ]
 
         for i, player_info in enumerate(player_data, 1):
             if i % 10 == 0:
                 print(f"  → Progress: {i}/{len(player_data)} players")
 
-            player_id = player_info['PERSON_ID']
-            team_id = player_info['TEAM_ID']
+            player_id = player_info["PERSON_ID"]
+            team_id = player_info["TEAM_ID"]
 
             for name, func in tracking_endpoints:
-                filename = f"{name.lower().replace(' ', '_')}_player_{player_id}_{season}.json"
-                self.scrape_endpoint(func, {
-                    'player_id': player_id,
-                    'team_id': team_id,
-                    'season': season_str
-                }, 'tracking', filename)
+                filename = (
+                    f"{name.lower().replace(' ', '_')}_player_{player_id}_{season}.json"
+                )
+                self.scrape_endpoint(
+                    func,
+                    {"player_id": player_id, "team_id": team_id, "season": season_str},
+                    "tracking",
+                    filename,
+                )
 
-        self.stats['endpoints_scraped'] += 1
+        self.stats["endpoints_scraped"] += 1
 
     def scrape_hustle_stats(self, season):
         """Scrape hustle stats (2016+ only)"""
 
         # SEASON CUTOFF: Hustle stats only available 2016+
         if season < 2016:
-            print(f"\n⏭️  Skipping hustle stats for {season} (not available before 2016)")
+            print(
+                f"\n⏭️  Skipping hustle stats for {season} (not available before 2016)"
+            )
             return
 
         print(f"\n💪 Scraping hustle stats for {season}...")
@@ -346,15 +401,23 @@ class ComprehensiveNBAStatsScraper:
         season_str = f"{season-1}-{str(season)[-2:]}"
 
         endpoints = [
-            ('Player Hustle', nba_endpoints.leaguehustlestatsplayer.LeagueHustleStatsPlayer, {'season': season_str}),
-            ('Team Hustle', nba_endpoints.leaguehustlestatsteam.LeagueHustleStatsTeam, {'season': season_str}),
+            (
+                "Player Hustle",
+                nba_endpoints.leaguehustlestatsplayer.LeagueHustleStatsPlayer,
+                {"season": season_str},
+            ),
+            (
+                "Team Hustle",
+                nba_endpoints.leaguehustlestatsteam.LeagueHustleStatsTeam,
+                {"season": season_str},
+            ),
         ]
 
         for name, func, params in endpoints:
             print(f"  → {name}")
             filename = f"{name.lower().replace(' ', '_')}_{season}.json"
-            self.scrape_endpoint(func, params, 'hustle', filename)
-            self.stats['endpoints_scraped'] += 1
+            self.scrape_endpoint(func, params, "hustle", filename)
+            self.stats["endpoints_scraped"] += 1
 
     def scrape_draft_data(self, season):
         """Scrape draft combine and history data"""
@@ -363,31 +426,43 @@ class ComprehensiveNBAStatsScraper:
         season_str = f"{season-1}-{str(season)[-2:]}"
 
         endpoints = [
-            ('Draft Combine Stats', nba_endpoints.draftcombinestats.DraftCombineStats, {'season_all_time': season_str}),
-            ('Draft History', nba_endpoints.drafthistory.DraftHistory, {'season_year_nullable': season_str}),
+            (
+                "Draft Combine Stats",
+                nba_endpoints.draftcombinestats.DraftCombineStats,
+                {"season_all_time": season_str},
+            ),
+            (
+                "Draft History",
+                nba_endpoints.drafthistory.DraftHistory,
+                {"season_year_nullable": season_str},
+            ),
         ]
 
         for name, func, params in endpoints:
             print(f"  → {name}")
             filename = f"{name.lower().replace(' ', '_')}_{season}.json"
-            self.scrape_endpoint(func, params, 'draft', filename)
-            self.stats['endpoints_scraped'] += 1
+            self.scrape_endpoint(func, params, "draft", filename)
+            self.stats["endpoints_scraped"] += 1
 
     def scrape_shot_charts(self, season):
         """Scrape shot chart data (quality warning for 1996-2000)"""
 
         # DATA QUALITY WARNING: 1996-2000 has 25% missing shot coordinates
         if 1996 <= season <= 2000:
-            print(f"\n⚠️  WARNING: {season} shot chart data has known quality issues (25% missing coordinates)")
+            print(
+                f"\n⚠️  WARNING: {season} shot chart data has known quality issues (25% missing coordinates)"
+            )
 
         print(f"\n🎯 Scraping shot charts for {season}...")
 
         season_str = f"{season-1}-{str(season)[-2:]}"
 
         # Get all players
-        players_response = nba_endpoints.commonallplayers.CommonAllPlayers(season=season_str, is_only_current_season=1)
+        players_response = nba_endpoints.commonallplayers.CommonAllPlayers(
+            season=season_str, is_only_current_season=1
+        )
         players_df = players_response.get_data_frames()[0]
-        player_ids = players_df['PERSON_ID'].tolist()  # PRODUCTION: Get ALL players
+        player_ids = players_df["PERSON_ID"].tolist()  # PRODUCTION: Get ALL players
 
         print(f"  → Scraping shot charts for {len(player_ids)} players")
 
@@ -399,31 +474,43 @@ class ComprehensiveNBAStatsScraper:
             self.scrape_endpoint(
                 nba_endpoints.shotchartdetail.ShotChartDetail,
                 {
-                    'player_id': player_id,
-                    'season_nullable': season_str,
-                    'team_id': 0,
-                    'context_measure_simple': 'FGA'
+                    "player_id": player_id,
+                    "season_nullable": season_str,
+                    "team_id": 0,
+                    "context_measure_simple": "FGA",
                 },
-                'shot_charts',
-                filename
+                "shot_charts",
+                filename,
             )
 
-        self.stats['endpoints_scraped'] += 1
+        self.stats["endpoints_scraped"] += 1
 
     def scrape_synergy_stats(self, season):
         """Scrape synergy play type stats (2016+ only)"""
 
         # SEASON CUTOFF: Synergy play types only available 2016+
         if season < 2016:
-            print(f"\n⏭️  Skipping synergy play types for {season} (not available before 2016)")
+            print(
+                f"\n⏭️  Skipping synergy play types for {season} (not available before 2016)"
+            )
             return
 
         print(f"\n⚡ Scraping synergy play types for {season}...")
 
         season_str = f"{season-1}-{str(season)[-2:]}"
 
-        play_types = ['Transition', 'Isolation', 'PRBallHandler', 'PRRollman', 'Postup',
-                     'Spotup', 'Handoff', 'Cut', 'OffScreen', 'OffRebound']
+        play_types = [
+            "Transition",
+            "Isolation",
+            "PRBallHandler",
+            "PRRollman",
+            "Postup",
+            "Spotup",
+            "Handoff",
+            "Cut",
+            "OffScreen",
+            "OffRebound",
+        ]
 
         for play_type in play_types:
             print(f"  → {play_type}")
@@ -431,17 +518,17 @@ class ComprehensiveNBAStatsScraper:
             self.scrape_endpoint(
                 nba_endpoints.synergyplaytypes.SynergyPlayTypes,
                 {
-                    'season': season_str,
-                    'season_type_all_star': 'Regular Season',
-                    'play_type_nullable': play_type,
-                    'player_or_team_abbreviation': 'P',
-                    'type_grouping_nullable': 'offensive'
+                    "season": season_str,
+                    "season_type_all_star": "Regular Season",
+                    "play_type_nullable": play_type,
+                    "player_or_team_abbreviation": "P",
+                    "type_grouping_nullable": "offensive",
                 },
-                'synergy',
-                filename
+                "synergy",
+                filename,
             )
 
-        self.stats['endpoints_scraped'] += 1
+        self.stats["endpoints_scraped"] += 1
 
     def scrape_play_by_play(self, season):
         """Scrape play-by-play data with wall clock timestamps for temporal panel data"""
@@ -451,9 +538,11 @@ class ComprehensiveNBAStatsScraper:
 
         # Get all games for the season
         print(f"  → Getting game list...")
-        games_response = nba_endpoints.leaguegamefinder.LeagueGameFinder(season_nullable=season_str)
+        games_response = nba_endpoints.leaguegamefinder.LeagueGameFinder(
+            season_nullable=season_str
+        )
         games_df = games_response.get_data_frames()[0]
-        game_ids = games_df['GAME_ID'].unique()
+        game_ids = games_df["GAME_ID"].unique()
 
         print(f"  → Found {len(game_ids)} games (scraping all)")
 
@@ -464,12 +553,12 @@ class ComprehensiveNBAStatsScraper:
             filename = f"play_by_play_{game_id}.json"
             self.scrape_endpoint(
                 nba_endpoints.playbyplayv2.PlayByPlayV2,
-                {'game_id': game_id},
-                'play_by_play',
-                filename
+                {"game_id": game_id},
+                "play_by_play",
+                filename,
             )
 
-        self.stats['endpoints_scraped'] += 1
+        self.stats["endpoints_scraped"] += 1
 
     def scrape_player_info(self, season):
         """Scrape player birth dates and biographical info for age calculations"""
@@ -478,9 +567,11 @@ class ComprehensiveNBAStatsScraper:
         season_str = f"{season-1}-{str(season)[-2:]}"
 
         # Get all players for the season
-        players_response = nba_endpoints.commonallplayers.CommonAllPlayers(season=season_str, is_only_current_season=1)
+        players_response = nba_endpoints.commonallplayers.CommonAllPlayers(
+            season=season_str, is_only_current_season=1
+        )
         players_df = players_response.get_data_frames()[0]
-        player_ids = players_df['PERSON_ID'].tolist()
+        player_ids = players_df["PERSON_ID"].tolist()
 
         print(f"  → Found {len(player_ids)} players (scraping all)")
 
@@ -491,12 +582,12 @@ class ComprehensiveNBAStatsScraper:
             filename = f"player_info_{player_id}_{season}.json"
             self.scrape_endpoint(
                 nba_endpoints.commonplayerinfo.CommonPlayerInfo,
-                {'player_id': player_id},
-                'player_info',
-                filename
+                {"player_id": player_id},
+                "player_info",
+                filename,
             )
 
-        self.stats['endpoints_scraped'] += 1
+        self.stats["endpoints_scraped"] += 1
 
     def scrape_all_endpoints(self, season):
         """Scrape all available endpoints for a season"""
@@ -508,15 +599,15 @@ class ComprehensiveNBAStatsScraper:
         # Scrape each category
         try:
             # TEMPORAL PANEL DATA - Priority endpoints
-            self.scrape_play_by_play(season)      # Wall clock timestamps
-            self.scrape_player_info(season)        # Birth dates for age calculations
+            self.scrape_play_by_play(season)  # Wall clock timestamps
+            self.scrape_player_info(season)  # Birth dates for age calculations
 
             # Traditional endpoints
             self.scrape_league_dashboards(season)
-            self.scrape_hustle_stats(season)       # 2016+ only
+            self.scrape_hustle_stats(season)  # 2016+ only
             self.scrape_draft_data(season)
             self.scrape_shot_charts(season)
-            self.scrape_synergy_stats(season)      # 2016+ only
+            self.scrape_synergy_stats(season)  # 2016+ only
 
             # Tier 1 endpoints - HIGH PRIORITY (40-50 features)
             self.scrape_advanced_boxscores(season)
@@ -528,14 +619,14 @@ class ComprehensiveNBAStatsScraper:
             traceback.print_exc()
 
         # Print summary
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("📊 SCRAPING SUMMARY")
-        print("="*60)
+        print("=" * 60)
         print(f"Endpoint categories:  {self.stats['endpoints_scraped']}")
         print(f"Files created:        {self.stats['files_created']}")
         print(f"API calls made:       {self.stats['api_calls']}")
         print(f"Errors:               {self.stats['errors']}")
-        print("="*60)
+        print("=" * 60)
 
         # Create checkpoint marker for successful completion
         self.create_season_checkpoint(season)
@@ -545,11 +636,19 @@ def main():
     parser = argparse.ArgumentParser(
         description="Comprehensive NBA Stats API scraper using nba_api (200+ endpoints)"
     )
-    parser.add_argument('--season', type=int, required=True, help='Season year (e.g., 2024)')
-    parser.add_argument('--all-endpoints', action='store_true', help='Scrape all available endpoints')
-    parser.add_argument('--output-dir', default='/tmp/nba_api_comprehensive', help='Output directory')
-    parser.add_argument('--upload-to-s3', action='store_true', help='Upload to S3')
-    parser.add_argument('--s3-bucket', default='nba-sim-raw-data-lake', help='S3 bucket name')
+    parser.add_argument(
+        "--season", type=int, required=True, help="Season year (e.g., 2024)"
+    )
+    parser.add_argument(
+        "--all-endpoints", action="store_true", help="Scrape all available endpoints"
+    )
+    parser.add_argument(
+        "--output-dir", default="/tmp/nba_api_comprehensive", help="Output directory"
+    )
+    parser.add_argument("--upload-to-s3", action="store_true", help="Upload to S3")
+    parser.add_argument(
+        "--s3-bucket", default="nba-sim-raw-data-lake", help="S3 bucket name"
+    )
 
     args = parser.parse_args()
 
@@ -563,7 +662,9 @@ def main():
         sys.exit(1)
 
     # Create scraper
-    scraper = ComprehensiveNBAStatsScraper(output_dir=args.output_dir, s3_bucket=s3_bucket)
+    scraper = ComprehensiveNBAStatsScraper(
+        output_dir=args.output_dir, s3_bucket=s3_bucket
+    )
 
     # Scrape data
     scraper.scrape_all_endpoints(args.season)
@@ -574,5 +675,5 @@ def main():
         print(f"☁️  Files uploaded to s3://{s3_bucket}/nba_api_comprehensive/")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

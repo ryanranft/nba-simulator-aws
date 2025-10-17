@@ -20,27 +20,29 @@ from datetime import datetime
 import sys
 
 # Load environment variables from external credentials file
-load_dotenv('/Users/ryanranft/nba-sim-credentials.env')
+load_dotenv("/Users/ryanranft/nba-sim-credentials.env")
 
 # Database configuration
 DB_CONFIG = {
-    'host': os.getenv('DB_HOST', 'nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com'),
-    'database': os.getenv('DB_NAME', 'nba_simulator'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'port': os.getenv('DB_PORT', 5432),
-    'sslmode': 'require'
+    "host": os.getenv("DB_HOST", "nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com"),
+    "database": os.getenv("DB_NAME", "nba_simulator"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "port": os.getenv("DB_PORT", 5432),
+    "sslmode": "require",
 }
 
 
 def check_table_size(cursor, table_name):
     """Check current table size."""
-    cursor.execute(f"""
+    cursor.execute(
+        f"""
         SELECT
             pg_size_pretty(pg_total_relation_size('{table_name}'::regclass)) AS total_size,
             pg_size_pretty(pg_relation_size('{table_name}'::regclass)) AS table_size,
             pg_size_pretty(pg_indexes_size('{table_name}'::regclass)) AS indexes_size
-    """)
+    """
+    )
     return cursor.fetchone()
 
 
@@ -55,91 +57,113 @@ def create_brin_indexes(cursor):
     print("1. temporal_events table:")
     print("   Creating BRIN index on wall_clock_utc...")
 
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE INDEX IF NOT EXISTS idx_temporal_events_time_brin
         ON temporal_events USING BRIN (wall_clock_utc)
         WITH (pages_per_range = 128);
-    """)
+    """
+    )
     print("   ✓ idx_temporal_events_time_brin created")
 
     # B-tree indexes for lookups
     print("\n   Creating B-tree indexes for fast lookups...")
 
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE INDEX IF NOT EXISTS idx_temporal_events_game_id
         ON temporal_events (game_id);
-    """)
+    """
+    )
     print("   ✓ idx_temporal_events_game_id created")
 
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE INDEX IF NOT EXISTS idx_temporal_events_player_id
         ON temporal_events (player_id) WHERE player_id IS NOT NULL;
-    """)
+    """
+    )
     print("   ✓ idx_temporal_events_player_id created")
 
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE INDEX IF NOT EXISTS idx_temporal_events_event_type
         ON temporal_events (event_type);
-    """)
+    """
+    )
     print("   ✓ idx_temporal_events_event_type created")
 
     # GIN index for JSONB queries
     print("\n   Creating GIN index for event_data JSONB...")
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE INDEX IF NOT EXISTS idx_temporal_events_event_data_gin
         ON temporal_events USING GIN (event_data);
-    """)
+    """
+    )
     print("   ✓ idx_temporal_events_event_data_gin created")
 
     # BRIN indexes for player_snapshots
     print("\n2. player_snapshots table:")
     print("   Creating BRIN index on snapshot_time...")
 
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE INDEX IF NOT EXISTS idx_player_snapshots_time_brin
         ON player_snapshots USING BRIN (snapshot_time)
         WITH (pages_per_range = 128);
-    """)
+    """
+    )
     print("   ✓ idx_player_snapshots_time_brin created")
 
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE INDEX IF NOT EXISTS idx_player_snapshots_player_id
         ON player_snapshots (player_id);
-    """)
+    """
+    )
     print("   ✓ idx_player_snapshots_player_id created")
 
     # Composite index for snapshot queries
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE INDEX IF NOT EXISTS idx_player_snapshots_player_time
         ON player_snapshots (player_id, snapshot_time);
-    """)
+    """
+    )
     print("   ✓ idx_player_snapshots_player_time created")
 
     # BRIN index for game_states
     print("\n3. game_states table:")
     print("   Creating BRIN index on state_time...")
 
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE INDEX IF NOT EXISTS idx_game_states_time_brin
         ON game_states USING BRIN (state_time)
         WITH (pages_per_range = 128);
-    """)
+    """
+    )
     print("   ✓ idx_game_states_time_brin created")
 
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE INDEX IF NOT EXISTS idx_game_states_game_id
         ON game_states (game_id);
-    """)
+    """
+    )
     print("   ✓ idx_game_states_game_id created")
 
     # player_biographical indexes
     print("\n4. player_biographical table:")
     print("   Creating B-tree indexes...")
 
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE INDEX IF NOT EXISTS idx_player_biographical_birth_date
         ON player_biographical (birth_date) WHERE birth_date IS NOT NULL;
-    """)
+    """
+    )
     print("   ✓ idx_player_biographical_birth_date created")
 
     print()
@@ -152,7 +176,8 @@ def print_index_summary(cursor):
     print("=" * 60)
     print()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             schemaname,
             tablename,
@@ -161,7 +186,8 @@ def print_index_summary(cursor):
         FROM pg_indexes
         WHERE tablename IN ('temporal_events', 'player_snapshots', 'game_states', 'player_biographical')
         ORDER BY tablename, indexname;
-    """)
+    """
+    )
 
     current_table = None
     for row in cursor.fetchall():
@@ -185,7 +211,8 @@ def print_storage_comparison(cursor):
     print("=" * 60)
     print()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             table_name,
             pg_size_pretty(pg_total_relation_size(table_name::regclass)) AS total_size,
@@ -195,7 +222,8 @@ def print_storage_comparison(cursor):
         FROM information_schema.tables
         WHERE table_name IN ('temporal_events', 'player_snapshots', 'game_states', 'player_biographical')
         ORDER BY table_name;
-    """)
+    """
+    )
 
     print(f"{'Table':<25} {'Total':<12} {'Table':<12} {'Indexes':<12} {'Index %':<10}")
     print("-" * 75)
@@ -221,7 +249,7 @@ def main():
     print()
 
     # Validate credentials
-    if not DB_CONFIG['user'] or not DB_CONFIG['password']:
+    if not DB_CONFIG["user"] or not DB_CONFIG["password"]:
         print("ERROR: Database credentials not found in .env file")
         sys.exit(1)
 
@@ -254,9 +282,13 @@ def main():
         print("=" * 60)
         print("Next Steps:")
         print("=" * 60)
-        print("1. Create stored procedures: python scripts/db/create_stored_procedures.py")
+        print(
+            "1. Create stored procedures: python scripts/db/create_stored_procedures.py"
+        )
         print("2. Run validation tests:     pytest tests/test_temporal_queries.py")
-        print("3. Try a temporal query:     python scripts/queries/test_temporal_query.py")
+        print(
+            "3. Try a temporal query:     python scripts/queries/test_temporal_query.py"
+        )
         print("=" * 60)
         print()
 
@@ -275,5 +307,5 @@ def main():
         print("\nDatabase connection closed")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -54,7 +54,7 @@ def extract_espn_id_from_uid(uid: str) -> str:
         return None
 
     # Pattern: e:{ESPN_ID}
-    match = re.search(r'~e:(\d+)~', uid)
+    match = re.search(r"~e:(\d+)~", uid)
     if match:
         return match.group(1)
 
@@ -84,7 +84,8 @@ def extract_mapping_from_hoopr(db_path: str = HOOPR_DB):
 
     # Get all games with uid
     print("📊 Extracting ESPN IDs from uid field...")
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             game_id,
             uid,
@@ -94,7 +95,8 @@ def extract_mapping_from_hoopr(db_path: str = HOOPR_DB):
         FROM schedule
         WHERE uid IS NOT NULL
         ORDER BY game_date;
-    """)
+    """
+    )
 
     rows = cursor.fetchall()
     print(f"✓ Found {len(rows):,} games with uid")
@@ -111,14 +113,16 @@ def extract_mapping_from_hoopr(db_path: str = HOOPR_DB):
         espn_id = extract_espn_id_from_uid(uid)
 
         if espn_id:
-            mappings.append({
-                'espn_game_id': espn_id,
-                'hoopr_game_id': str(hoopr_game_id),
-                'game_date': game_date,
-                'home_team': home_team,
-                'away_team': away_team,
-                'uid': uid
-            })
+            mappings.append(
+                {
+                    "espn_game_id": espn_id,
+                    "hoopr_game_id": str(hoopr_game_id),
+                    "game_date": game_date,
+                    "home_team": home_team,
+                    "away_team": away_team,
+                    "uid": uid,
+                }
+            )
         else:
             no_espn_id += 1
 
@@ -138,11 +142,18 @@ def save_to_csv(mappings: list, output_path: Path = CSV_OUTPUT):
 
     print(f"💾 Saving to CSV: {output_path}")
 
-    with open(output_path, 'w', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=[
-            'espn_game_id', 'hoopr_game_id', 'game_date',
-            'home_team', 'away_team', 'uid'
-        ])
+    with open(output_path, "w", newline="") as f:
+        writer = csv.DictWriter(
+            f,
+            fieldnames=[
+                "espn_game_id",
+                "hoopr_game_id",
+                "game_date",
+                "home_team",
+                "away_team",
+                "uid",
+            ],
+        )
         writer.writeheader()
         writer.writerows(mappings)
 
@@ -157,17 +168,17 @@ def save_to_json(mappings: list, output_path: Path = JSON_OUTPUT):
 
     # Create lookup dictionaries
     output = {
-        'metadata': {
-            'created': datetime.now().isoformat(),
-            'total_mappings': len(mappings),
-            'source': 'hoopR uid field'
+        "metadata": {
+            "created": datetime.now().isoformat(),
+            "total_mappings": len(mappings),
+            "source": "hoopR uid field",
         },
-        'mappings': mappings,
-        'espn_to_hoopr': {m['espn_game_id']: m['hoopr_game_id'] for m in mappings},
-        'hoopr_to_espn': {m['hoopr_game_id']: m['espn_game_id'] for m in mappings}
+        "mappings": mappings,
+        "espn_to_hoopr": {m["espn_game_id"]: m["hoopr_game_id"] for m in mappings},
+        "hoopr_to_espn": {m["hoopr_game_id"]: m["espn_game_id"] for m in mappings},
     }
 
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         json.dump(output, f, indent=2)
 
     print(f"✓ Saved {len(mappings):,} mappings")
@@ -185,15 +196,15 @@ def save_to_rds(mappings: list):
         return
 
     # Load credentials
-    load_dotenv('/Users/ryanranft/nba-sim-credentials.env')
+    load_dotenv("/Users/ryanranft/nba-sim-credentials.env")
 
     DB_CONFIG = {
-        'host': os.getenv('DB_HOST'),
-        'database': os.getenv('DB_NAME'),
-        'user': os.getenv('DB_USER'),
-        'password': os.getenv('DB_PASSWORD'),
-        'port': os.getenv('DB_PORT', 5432),
-        'sslmode': 'require'
+        "host": os.getenv("DB_HOST"),
+        "database": os.getenv("DB_NAME"),
+        "user": os.getenv("DB_USER"),
+        "password": os.getenv("DB_PASSWORD"),
+        "port": os.getenv("DB_PORT", 5432),
+        "sslmode": "require",
     }
 
     print(f"🌐 Connecting to RDS: {DB_CONFIG['database']}...")
@@ -204,7 +215,8 @@ def save_to_rds(mappings: list):
 
     # Create mapping table
     print("📋 Creating game_id_mapping table...")
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS game_id_mapping (
             espn_game_id TEXT PRIMARY KEY,
             hoopr_game_id TEXT NOT NULL,
@@ -219,7 +231,8 @@ def save_to_rds(mappings: list):
             ON game_id_mapping(hoopr_game_id);
         CREATE INDEX IF NOT EXISTS idx_game_mapping_date
             ON game_id_mapping(game_date);
-    """)
+    """
+    )
     print("✓ Table created")
     print()
 
@@ -227,7 +240,8 @@ def save_to_rds(mappings: list):
     print(f"💾 Inserting {len(mappings):,} mappings...")
 
     for mapping in mappings:
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO game_id_mapping
                 (espn_game_id, hoopr_game_id, game_date, home_team, away_team, uid)
             VALUES (%s, %s, %s, %s, %s, %s)
@@ -237,14 +251,16 @@ def save_to_rds(mappings: list):
                 home_team = EXCLUDED.home_team,
                 away_team = EXCLUDED.away_team,
                 uid = EXCLUDED.uid;
-        """, (
-            mapping['espn_game_id'],
-            mapping['hoopr_game_id'],
-            mapping['game_date'],
-            mapping['home_team'],
-            mapping['away_team'],
-            mapping['uid']
-        ))
+        """,
+            (
+                mapping["espn_game_id"],
+                mapping["hoopr_game_id"],
+                mapping["game_date"],
+                mapping["home_team"],
+                mapping["away_team"],
+                mapping["uid"],
+            ),
+        )
 
     conn.commit()
     print("✓ Mappings saved to RDS")
@@ -266,7 +282,7 @@ def print_summary(mappings: list):
     print()
 
     # Date range
-    dates = [m['game_date'] for m in mappings if m['game_date']]
+    dates = [m["game_date"] for m in mappings if m["game_date"]]
     if dates:
         print(f"Date range: {min(dates)} to {max(dates)}")
         print()
@@ -277,8 +293,10 @@ def print_summary(mappings: list):
     print("-" * 80)
     for mapping in mappings[:5]:
         matchup = f"{mapping['away_team']} @ {mapping['home_team']}"
-        print(f"{mapping['espn_game_id']:<15} {mapping['hoopr_game_id']:<15} "
-              f"{mapping['game_date']:<12} {matchup:<40}")
+        print(
+            f"{mapping['espn_game_id']:<15} {mapping['hoopr_game_id']:<15} "
+            f"{mapping['game_date']:<12} {matchup:<40}"
+        )
 
     print()
     print("=" * 70)
@@ -303,20 +321,18 @@ Examples:
 
   # Both CSV and JSON
   python scripts/mapping/extract_espn_hoopr_game_mapping.py --output-format both
-        """
+        """,
     )
 
     parser.add_argument(
-        '--output-format',
-        choices=['csv', 'json', 'both'],
-        default='csv',
-        help='Output format (default: csv)'
+        "--output-format",
+        choices=["csv", "json", "both"],
+        default="csv",
+        help="Output format (default: csv)",
     )
 
     parser.add_argument(
-        '--save-to-rds',
-        action='store_true',
-        help='Also save mapping to RDS PostgreSQL'
+        "--save-to-rds", action="store_true", help="Also save mapping to RDS PostgreSQL"
     )
 
     args = parser.parse_args()
@@ -328,10 +344,10 @@ Examples:
     mappings = extract_mapping_from_hoopr()
 
     # Save to requested formats
-    if args.output_format in ['csv', 'both']:
+    if args.output_format in ["csv", "both"]:
         save_to_csv(mappings)
 
-    if args.output_format in ['json', 'both']:
+    if args.output_format in ["json", "both"]:
         save_to_json(mappings)
 
     if args.save_to_rds:
@@ -344,5 +360,5 @@ Examples:
     print(f"Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

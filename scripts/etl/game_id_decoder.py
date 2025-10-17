@@ -60,7 +60,7 @@ def decode_game_id(game_id: str) -> Optional[dict]:
         return None
 
     # Remove .json extension if present
-    game_id = game_id.replace('.json', '')
+    game_id = game_id.replace(".json", "")
 
     # Try schedule format first (YYYYMMDD - 8 digits exactly)
     if len(game_id) == 8 and game_id.isdigit():
@@ -69,7 +69,7 @@ def decode_game_id(game_id: str) -> Optional[dict]:
             return result
 
     # Try 401 format (2018+)
-    if game_id.startswith('401'):
+    if game_id.startswith("401"):
         return _decode_401_format(game_id)
 
     # Try standard YYMMDD### format (pre-2018)
@@ -112,12 +112,12 @@ def _decode_standard_format(game_id: str) -> Optional[dict]:
         game_date = f"{year:04d}-{month:02d}-{day:02d}"
 
         return {
-            'year': year,
-            'month': month,
-            'day': day,
-            'season': season,
-            'game_date': game_date,
-            'format': 'standard'
+            "year": year,
+            "month": month,
+            "day": day,
+            "season": season,
+            "game_date": game_date,
+            "format": "standard",
         }
 
     except (ValueError, IndexError):
@@ -153,12 +153,12 @@ def _decode_schedule_format(schedule_id: str) -> Optional[dict]:
         game_date = f"{year:04d}-{month:02d}-{day:02d}"
 
         return {
-            'year': year,
-            'month': month,
-            'day': day,
-            'season': season,
-            'game_date': game_date,
-            'format': 'schedule'
+            "year": year,
+            "month": month,
+            "day": day,
+            "season": season,
+            "game_date": game_date,
+            "format": "schedule",
         }
 
     except (ValueError, IndexError):
@@ -174,7 +174,7 @@ def _decode_401_format(game_id: str) -> Optional[dict]:
 
     Future enhancement: Reverse engineer exact year from game_id digits.
     """
-    if not game_id.startswith('401') or len(game_id) < 9:
+    if not game_id.startswith("401") or len(game_id) < 9:
         return None
 
     try:
@@ -209,13 +209,13 @@ def _decode_401_format(game_id: str) -> Optional[dict]:
         season = f"{year - 1}-{str(year)[-2:]}"
 
         return {
-            'year': year,
-            'month': None,  # Cannot extract from 401 format yet
-            'day': None,
-            'season': season,
-            'game_date': None,
-            'format': '401',
-            'note': 'Year estimated - 401 format decoding incomplete'
+            "year": year,
+            "month": None,  # Cannot extract from 401 format yet
+            "day": None,
+            "season": season,
+            "game_date": None,
+            "format": "401",
+            "note": "Year estimated - 401 format decoding incomplete",
         }
 
     except (ValueError, IndexError):
@@ -240,11 +240,11 @@ def extract_year_from_filename(filename: str) -> Optional[int]:
         2021
     """
     # Extract just the filename
-    filename = filename.split('/')[-1]
-    filename = filename.replace('.json', '')
+    filename = filename.split("/")[-1]
+    filename = filename.replace(".json", "")
 
     result = decode_game_id(filename)
-    return result['year'] if result else None
+    return result["year"] if result else None
 
 
 def get_season_from_game_id(game_id: str) -> Optional[str]:
@@ -265,7 +265,7 @@ def get_season_from_game_id(game_id: str) -> Optional[str]:
         '1999-00'
     """
     result = decode_game_id(game_id)
-    return result['season'] if result else None
+    return result["season"] if result else None
 
 
 # PySpark UDF-compatible version
@@ -290,7 +290,7 @@ def decode_game_id_udf(game_id: str) -> Tuple[Optional[int], Optional[str]]:
     """
     result = decode_game_id(game_id)
     if result:
-        return (result['year'], result['season'])
+        return (result["year"], result["season"])
     else:
         return (None, None)
 
@@ -299,10 +299,9 @@ if __name__ == "__main__":
     # Test examples
     test_cases = [
         # Schedule IDs (YYYYMMDD format)
-        "19961219",    # Dec 19, 1996 (schedule)
-        "20001031",    # Oct 31, 2000 (schedule)
-        "20211012",    # Oct 12, 2021 (schedule)
-
+        "19961219",  # Dec 19, 1996 (schedule)
+        "20001031",  # Oct 31, 2000 (schedule)
+        "20211012",  # Oct 12, 2021 (schedule)
         # Game IDs (YYMMDD### format with 1980 offset)
         "171031017",  # Oct 31, 1997
         "171101024",  # Nov 1, 1997
@@ -319,26 +318,29 @@ if __name__ == "__main__":
         "291027005",  # Oct 27, 2009
         "300102017",  # Jan 2, 2010
         "311011004",  # Oct 11, 2011
-
         # 401 format (2018+)
         "401307856",  # 2021 (401 format)
     ]
 
     print("ESPN Game ID Decoder - Test Results")
     print("=" * 80)
-    print(f"{'Game ID':<15} {'Year':<6} {'Month':<7} {'Day':<5} {'Season':<10} {'Game Date':<12}")
+    print(
+        f"{'Game ID':<15} {'Year':<6} {'Month':<7} {'Day':<5} {'Season':<10} {'Game Date':<12}"
+    )
     print("-" * 80)
 
     for game_id in test_cases:
         result = decode_game_id(game_id)
         if result:
-            year = result['year']
-            month = result.get('month') or 'N/A'
-            day = result.get('day') or 'N/A'
-            season = result['season']
-            game_date = result.get('game_date') or 'N/A'
-            print(f"{game_id:<15} {year:<6} {str(month):<7} "
-                  f"{str(day):<5} {season:<10} {game_date:<12}")
+            year = result["year"]
+            month = result.get("month") or "N/A"
+            day = result.get("day") or "N/A"
+            season = result["season"]
+            game_date = result.get("game_date") or "N/A"
+            print(
+                f"{game_id:<15} {year:<6} {str(month):<7} "
+                f"{str(day):<5} {season:<10} {game_date:<12}"
+            )
         else:
             print(f"{game_id:<15} ERROR: Unable to decode")
 

@@ -22,39 +22,53 @@ from datetime import datetime
 import sys
 
 # Load environment variables
-load_dotenv('/Users/ryanranft/nba-sim-credentials.env')
+load_dotenv("/Users/ryanranft/nba-sim-credentials.env")
 
 # Database configuration
 DB_CONFIG = {
-    'host': os.getenv('DB_HOST', 'nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com'),
-    'database': os.getenv('DB_NAME', 'nba_simulator'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'port': os.getenv('DB_PORT', 5432),
-    'sslmode': 'require'
+    "host": os.getenv("DB_HOST", "nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com"),
+    "database": os.getenv("DB_NAME", "nba_simulator"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "port": os.getenv("DB_PORT", 5432),
+    "sslmode": "require",
 }
 
 # SQL script path
-SQL_FILE = Path(__file__).parent.parent.parent / 'sql' / 'temporal' / '03_create_stored_procedures.sql'
+SQL_FILE = (
+    Path(__file__).parent.parent.parent
+    / "sql"
+    / "temporal"
+    / "03_create_stored_procedures.sql"
+)
 
 
 def check_prerequisites(cursor):
     """Check that temporal tables exist."""
     print("Checking prerequisites...")
 
-    tables_to_check = ['temporal_events', 'player_snapshots', 'game_states', 'player_biographical']
+    tables_to_check = [
+        "temporal_events",
+        "player_snapshots",
+        "game_states",
+        "player_biographical",
+    ]
 
     for table in tables_to_check:
-        cursor.execute(f"""
+        cursor.execute(
+            f"""
             SELECT EXISTS (
                 SELECT FROM information_schema.tables
                 WHERE table_name = '{table}'
             );
-        """)
+        """
+        )
         exists = cursor.fetchone()[0]
 
         if not exists:
-            raise Exception(f"ERROR: Table '{table}' does not exist. Run create_temporal_tables.py first.")
+            raise Exception(
+                f"ERROR: Table '{table}' does not exist. Run create_temporal_tables.py first."
+            )
 
     print("✓ All temporal tables exist")
     print()
@@ -73,7 +87,7 @@ def create_procedures(cursor):
         raise Exception(f"ERROR: SQL file not found: {SQL_FILE}")
 
     # Read and execute SQL
-    with open(SQL_FILE, 'r') as f:
+    with open(SQL_FILE, "r") as f:
         sql = f.read()
 
     print("Executing SQL...")
@@ -88,19 +102,22 @@ def validate_procedures(cursor):
     print("Validating procedure creation...")
 
     expected_procedures = [
-        'get_player_snapshot_at_time',
-        'calculate_player_age',
-        'get_game_state_at_time',
-        'get_events_in_time_range',
-        'aggregate_player_stats_in_period'
+        "get_player_snapshot_at_time",
+        "calculate_player_age",
+        "get_game_state_at_time",
+        "get_events_in_time_range",
+        "aggregate_player_stats_in_period",
     ]
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT routine_name
         FROM information_schema.routines
         WHERE routine_name = ANY(%s)
         ORDER BY routine_name;
-    """, (expected_procedures,))
+    """,
+        (expected_procedures,),
+    )
 
     found_procedures = [row[0] for row in cursor.fetchall()]
 
@@ -124,52 +141,62 @@ def print_usage_examples(cursor):
     print()
 
     print("1. Get player snapshot at exact time:")
-    print("""
+    print(
+        """
     SELECT *
     FROM get_player_snapshot_at_time(
         '977',  -- Kobe Bryant
         '2016-06-19 19:02:34-05:00'::TIMESTAMPTZ
     );
-    """)
+    """
+    )
 
     print("\n2. Calculate player age:")
-    print("""
+    print(
+        """
     SELECT age_string
     FROM calculate_player_age(
         '977',
         '2016-06-19 19:02:34-05:00'::TIMESTAMPTZ,
         'second'
     );
-    """)
+    """
+    )
 
     print("\n3. Get game state at specific time:")
-    print("""
+    print(
+        """
     SELECT quarter, game_clock_seconds, home_score, away_score
     FROM get_game_state_at_time(
         '0021500001',
         '2015-10-27 22:30:00-05:00'::TIMESTAMPTZ
     );
-    """)
+    """
+    )
 
     print("\n4. Get events in time range:")
-    print("""
+    print(
+        """
     SELECT *
     FROM get_events_in_time_range(
         '2016-06-19 19:00:00-05:00'::TIMESTAMPTZ,
         '2016-06-19 19:02:00-05:00'::TIMESTAMPTZ,
         'made_shot'  -- Event type filter (optional)
     );
-    """)
+    """
+    )
 
     print("\n5. Aggregate stats in custom period:")
-    print("""
+    print(
+        """
     SELECT *
     FROM aggregate_player_stats_in_period(
         '977',
         '2016-01-01 00:00:00-05:00'::TIMESTAMPTZ,
         '2016-06-30 23:59:59-05:00'::TIMESTAMPTZ
     );
-    """)
+    """
+    )
 
     print()
 
@@ -183,7 +210,7 @@ def main():
     print()
 
     # Validate credentials
-    if not DB_CONFIG['user'] or not DB_CONFIG['password']:
+    if not DB_CONFIG["user"] or not DB_CONFIG["password"]:
         print("ERROR: Database credentials not found in .env file")
         sys.exit(1)
 
@@ -223,7 +250,9 @@ def main():
         print("=" * 60)
         print("1. Run validation tests:  pytest tests/test_temporal_queries.py")
         print("2. Try a temporal query:  python scripts/queries/test_temporal_query.py")
-        print("3. Generate snapshots:    python scripts/etl/generate_player_snapshots.py")
+        print(
+            "3. Generate snapshots:    python scripts/etl/generate_player_snapshots.py"
+        )
         print("=" * 60)
         print()
 
@@ -242,5 +271,5 @@ def main():
         print("\nDatabase connection closed")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

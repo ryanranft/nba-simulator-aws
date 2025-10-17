@@ -12,7 +12,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -21,10 +23,10 @@ def setup_mlflow_directories():
     base_dir = Path(__file__).parent.parent.parent  # nba-simulator-aws root
 
     directories = {
-        'mlruns': base_dir / 'mlruns',
-        'mlartifacts': base_dir / 'mlartifacts',
-        'models': base_dir / 'models',
-        'logs': base_dir / 'logs' / 'mlflow'
+        "mlruns": base_dir / "mlruns",
+        "mlartifacts": base_dir / "mlartifacts",
+        "models": base_dir / "models",
+        "logs": base_dir / "logs" / "mlflow",
     }
 
     created = []
@@ -61,9 +63,9 @@ MLFLOW_REGISTRY_URI=file://./mlruns
 MLFLOW_LOG_LEVEL=INFO
 """
 
-    config_file = base_dir / '.mlflowrc'
+    config_file = base_dir / ".mlflowrc"
 
-    with open(config_file, 'w') as f:
+    with open(config_file, "w") as f:
         f.write(config_content)
 
     logger.info(f"✓ Created MLflow config: {config_file}")
@@ -170,9 +172,9 @@ if __name__ == "__main__":
         print("✓ MLflow tracking test successful!")
 '''
 
-    wrapper_file = base_dir / 'scripts' / 'ml' / 'mlflow_tracker.py'
+    wrapper_file = base_dir / "scripts" / "ml" / "mlflow_tracker.py"
 
-    with open(wrapper_file, 'w') as f:
+    with open(wrapper_file, "w") as f:
         f.write(wrapper_content)
 
     logger.info(f"✓ Created MLflow wrapper: {wrapper_file}")
@@ -183,29 +185,25 @@ if __name__ == "__main__":
 def create_requirements_mlflow():
     """Add MLflow to requirements if not present"""
     base_dir = Path(__file__).parent.parent.parent
-    req_file = base_dir / 'requirements.txt'
+    req_file = base_dir / "requirements.txt"
 
-    mlflow_packages = [
-        'mlflow>=2.8.0',
-        'scikit-learn>=1.3.0',
-        'xgboost>=2.0.0'
-    ]
+    mlflow_packages = ["mlflow>=2.8.0", "scikit-learn>=1.3.0", "xgboost>=2.0.0"]
 
     if req_file.exists():
-        with open(req_file, 'r') as f:
+        with open(req_file, "r") as f:
             existing = f.read()
 
         missing = []
         for package in mlflow_packages:
-            package_name = package.split('>=')[0]
+            package_name = package.split(">=")[0]
             if package_name not in existing:
                 missing.append(package)
 
         if missing:
-            with open(req_file, 'a') as f:
-                f.write('\n# MLflow and ML dependencies\n')
+            with open(req_file, "a") as f:
+                f.write("\n# MLflow and ML dependencies\n")
                 for package in missing:
-                    f.write(f'{package}\n')
+                    f.write(f"{package}\n")
             logger.info(f"✓ Added {len(missing)} packages to requirements.txt")
         else:
             logger.info("  All MLflow packages already in requirements.txt")
@@ -290,7 +288,9 @@ def main():
         logger.info("\n✅ MLflow setup COMPLETE!")
         logger.info("\nNext steps:")
         logger.info("  1. Install MLflow: pip install mlflow")
-        logger.info("  2. Import tracker: from scripts.ml.mlflow_tracker import MLflowTracker")
+        logger.info(
+            "  2. Import tracker: from scripts.ml.mlflow_tracker import MLflowTracker"
+        )
         logger.info("  3. Start tracking experiments in your training scripts")
         logger.info("  4. View UI: mlflow ui --backend-store-uri ./mlruns")
     else:

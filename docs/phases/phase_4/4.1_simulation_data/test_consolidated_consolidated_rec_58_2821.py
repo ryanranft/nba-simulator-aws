@@ -17,23 +17,30 @@ from unittest.mock import Mock, patch, MagicMock
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from implement_consolidated_consolidated_rec_58_2821 import ImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulation
+from implement_consolidated_consolidated_rec_58_2821 import (
+    ImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulation,
+)
 
 
-class TestImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulation(unittest.TestCase):
+class TestImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulation(
+    unittest.TestCase
+):
     """Test suite for ImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulation."""
 
     def setUp(self):
         """Set up test fixtures."""
         self.config = {
             # TODO: Add test configuration
-            
         }
-        self.implementation = ImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulation(self.config)
+        self.implementation = (
+            ImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulation(
+                self.config
+            )
+        )
 
     def tearDown(self):
         """Clean up after tests."""
-        if hasattr(self.implementation, 'cleanup'):
+        if hasattr(self.implementation, "cleanup"):
             self.implementation.cleanup()
 
     def test_initialization(self):
@@ -64,13 +71,12 @@ class TestImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulatio
         results = self.implementation.execute()
 
         self.assertIsNotNone(results)
-        self.assertIn('success', results)
-        self.assertTrue(results['success'])
-        self.assertIn('execution_time', results)
-        self.assertGreater(results['execution_time'], 0)
+        self.assertIn("success", results)
+        self.assertTrue(results["success"])
+        self.assertIn("execution_time", results)
+        self.assertGreater(results["execution_time"], 0)
 
     # TODO: Add specific test cases
-    
 
     def test_cleanup(self):
         """Test cleanup process."""
@@ -80,16 +86,21 @@ class TestImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulatio
         pass
 
 
-class TestImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulationIntegration(unittest.TestCase):
+class TestImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulationIntegration(
+    unittest.TestCase
+):
     """Integration tests for ImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulation."""
 
     def setUp(self):
         """Set up integration test fixtures."""
         self.config = {
             # TODO: Add integration test configuration
-            
         }
-        self.implementation = ImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulation(self.config)
+        self.implementation = (
+            ImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulation(
+                self.config
+            )
+        )
 
     def test_end_to_end_workflow(self):
         """Test complete end-to-end workflow."""
@@ -99,7 +110,7 @@ class TestImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulatio
 
         # Execute
         exec_result = self.implementation.execute()
-        self.assertTrue(exec_result['success'])
+        self.assertTrue(exec_result["success"])
 
         # Cleanup
         self.implementation.cleanup()
@@ -108,7 +119,6 @@ class TestImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulatio
         pass
 
     # TODO: Add integration test cases
-    
 
 
 def run_tests():
@@ -117,8 +127,16 @@ def run_tests():
     suite = unittest.TestSuite()
 
     # Add test classes
-    suite.addTests(loader.loadTestsFromTestCase(TestImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulation))
-    suite.addTests(loader.loadTestsFromTestCase(TestImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulationIntegration))
+    suite.addTests(
+        loader.loadTestsFromTestCase(
+            TestImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulation
+        )
+    )
+    suite.addTests(
+        loader.loadTestsFromTestCase(
+            TestImplementRetrievalaugmentedGenerationRagForContextualizedGameSimulationIntegration
+        )
+    )
 
     # Run tests
     runner = unittest.TextTestRunner(verbosity=2)
@@ -128,9 +146,5 @@ def run_tests():
     return 0 if result.wasSuccessful() else 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(run_tests())
-
-
-
-

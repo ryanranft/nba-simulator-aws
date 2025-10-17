@@ -17,6 +17,7 @@ from copy import deepcopy
 @dataclass(frozen=True)
 class PlayerStats:
     """Immutable player statistics at a snapshot"""
+
     player_id: str
     player_name: str
     team_id: str
@@ -33,14 +34,14 @@ class PlayerStats:
     # Rebounds
     oreb: int = 0  # Offensive rebounds
     dreb: int = 0  # Defensive rebounds
-    reb: int = 0   # Total rebounds
+    reb: int = 0  # Total rebounds
 
     # Other stats
-    ast: int = 0   # Assists
-    stl: int = 0   # Steals
-    blk: int = 0   # Blocks
-    tov: int = 0   # Turnovers
-    pf: int = 0    # Personal fouls
+    ast: int = 0  # Assists
+    stl: int = 0  # Steals
+    blk: int = 0  # Blocks
+    tov: int = 0  # Turnovers
+    pf: int = 0  # Personal fouls
 
     # Advanced
     plus_minus: int = 0
@@ -50,27 +51,27 @@ class PlayerStats:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for storage"""
         return {
-            'player_id': self.player_id,
-            'player_name': self.player_name,
-            'team_id': self.team_id,
-            'points': self.points,
-            'fgm': self.fgm,
-            'fga': self.fga,
-            'fg3m': self.fg3m,
-            'fg3a': self.fg3a,
-            'ftm': self.ftm,
-            'fta': self.fta,
-            'oreb': self.oreb,
-            'dreb': self.dreb,
-            'reb': self.reb,
-            'ast': self.ast,
-            'stl': self.stl,
-            'blk': self.blk,
-            'tov': self.tov,
-            'pf': self.pf,
-            'plus_minus': self.plus_minus,
-            'minutes': self.minutes,
-            'on_court': self.on_court
+            "player_id": self.player_id,
+            "player_name": self.player_name,
+            "team_id": self.team_id,
+            "points": self.points,
+            "fgm": self.fgm,
+            "fga": self.fga,
+            "fg3m": self.fg3m,
+            "fg3a": self.fg3a,
+            "ftm": self.ftm,
+            "fta": self.fta,
+            "oreb": self.oreb,
+            "dreb": self.dreb,
+            "reb": self.reb,
+            "ast": self.ast,
+            "stl": self.stl,
+            "blk": self.blk,
+            "tov": self.tov,
+            "pf": self.pf,
+            "plus_minus": self.plus_minus,
+            "minutes": self.minutes,
+            "on_court": self.on_court,
         }
 
     def validate(self) -> List[str]:
@@ -81,10 +82,14 @@ class PlayerStats:
         errors = []
 
         # No negative stats
-        if self.points < 0: errors.append(f"Negative points: {self.points}")
-        if self.fgm < 0: errors.append(f"Negative FGM: {self.fgm}")
-        if self.fga < 0: errors.append(f"Negative FGA: {self.fga}")
-        if self.minutes < 0: errors.append(f"Negative minutes: {self.minutes}")
+        if self.points < 0:
+            errors.append(f"Negative points: {self.points}")
+        if self.fgm < 0:
+            errors.append(f"Negative FGM: {self.fgm}")
+        if self.fga < 0:
+            errors.append(f"Negative FGA: {self.fga}")
+        if self.minutes < 0:
+            errors.append(f"Negative minutes: {self.minutes}")
 
         # FGM <= FGA
         if self.fgm > self.fga:
@@ -100,7 +105,9 @@ class PlayerStats:
 
         # Total rebounds = offensive + defensive
         if self.reb != self.oreb + self.dreb:
-            errors.append(f"REB ({self.reb}) != OREB ({self.oreb}) + DREB ({self.dreb})")
+            errors.append(
+                f"REB ({self.reb}) != OREB ({self.oreb}) + DREB ({self.dreb})"
+            )
 
         # Minutes reasonable (<=48 for regulation, <=65 for OT games)
         if self.minutes > 65:
@@ -112,6 +119,7 @@ class PlayerStats:
 @dataclass(frozen=True)
 class TeamStats:
     """Immutable team statistics at a snapshot"""
+
     team_id: str
     team_name: str
 
@@ -141,23 +149,23 @@ class TeamStats:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
-            'team_id': self.team_id,
-            'team_name': self.team_name,
-            'points': self.points,
-            'fgm': self.fgm,
-            'fga': self.fga,
-            'fg3m': self.fg3m,
-            'fg3a': self.fg3a,
-            'ftm': self.ftm,
-            'fta': self.fta,
-            'oreb': self.oreb,
-            'dreb': self.dreb,
-            'reb': self.reb,
-            'ast': self.ast,
-            'stl': self.stl,
-            'blk': self.blk,
-            'tov': self.tov,
-            'pf': self.pf
+            "team_id": self.team_id,
+            "team_name": self.team_name,
+            "points": self.points,
+            "fgm": self.fgm,
+            "fga": self.fga,
+            "fg3m": self.fg3m,
+            "fg3a": self.fg3a,
+            "ftm": self.ftm,
+            "fta": self.fta,
+            "oreb": self.oreb,
+            "dreb": self.dreb,
+            "reb": self.reb,
+            "ast": self.ast,
+            "stl": self.stl,
+            "blk": self.blk,
+            "tov": self.tov,
+            "pf": self.pf,
         }
 
 
@@ -198,21 +206,21 @@ class BoxScoreSnapshot:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for storage/serialization"""
         return {
-            'game_id': self.game_id,
-            'event_num': self.event_num,
-            'data_source': self.data_source,
-            'quarter': self.quarter,
-            'time_remaining': self.time_remaining,
-            'game_clock_seconds': self.game_clock_seconds,
-            'home_score': self.home_score,
-            'away_score': self.away_score,
-            'players': {pid: pstats.to_dict() for pid, pstats in self.players.items()},
-            'teams': {tid: tstats.to_dict() for tid, tstats in self.teams.items()},
-            'quarter_box_scores': {
+            "game_id": self.game_id,
+            "event_num": self.event_num,
+            "data_source": self.data_source,
+            "quarter": self.quarter,
+            "time_remaining": self.time_remaining,
+            "game_clock_seconds": self.game_clock_seconds,
+            "home_score": self.home_score,
+            "away_score": self.away_score,
+            "players": {pid: pstats.to_dict() for pid, pstats in self.players.items()},
+            "teams": {tid: tstats.to_dict() for tid, tstats in self.teams.items()},
+            "quarter_box_scores": {
                 q: {pid: pstats.to_dict() for pid, pstats in players.items()}
                 for q, players in self.quarter_box_scores.items()
             },
-            'created_at': self.created_at.isoformat()
+            "created_at": self.created_at.isoformat(),
         }
 
     def validate(self) -> Dict[str, List[str]]:
@@ -221,27 +229,33 @@ class BoxScoreSnapshot:
         Returns dict of validation errors by category.
         """
         errors = {
-            'game_state': [],
-            'player_stats': [],
-            'team_stats': [],
-            'consistency': []
+            "game_state": [],
+            "player_stats": [],
+            "team_stats": [],
+            "consistency": [],
         }
 
         # Game state validations
         if self.quarter < 1:
-            errors['game_state'].append(f"Invalid quarter: {self.quarter}")
+            errors["game_state"].append(f"Invalid quarter: {self.quarter}")
 
         if self.game_clock_seconds < 0:
-            errors['game_state'].append(f"Negative game clock: {self.game_clock_seconds}")
+            errors["game_state"].append(
+                f"Negative game clock: {self.game_clock_seconds}"
+            )
 
         if self.home_score < 0 or self.away_score < 0:
-            errors['game_state'].append(f"Negative score: H={self.home_score}, A={self.away_score}")
+            errors["game_state"].append(
+                f"Negative score: H={self.home_score}, A={self.away_score}"
+            )
 
         # Player stat validations
         for player_id, player_stats in self.players.items():
             player_errors = player_stats.validate()
             if player_errors:
-                errors['player_stats'].extend([f"{player_id}: {e}" for e in player_errors])
+                errors["player_stats"].extend(
+                    [f"{player_id}: {e}" for e in player_errors]
+                )
 
         # Team stats consistency (sum of player stats should equal team totals)
         for team_id, team_stats in self.teams.items():
@@ -249,13 +263,13 @@ class BoxScoreSnapshot:
 
             player_total_points = sum(p.points for p in team_players)
             if player_total_points != team_stats.points:
-                errors['consistency'].append(
+                errors["consistency"].append(
                     f"Team {team_id}: Player points ({player_total_points}) != Team points ({team_stats.points})"
                 )
 
             player_total_reb = sum(p.reb for p in team_players)
             if player_total_reb != team_stats.reb:
-                errors['consistency'].append(
+                errors["consistency"].append(
                     f"Team {team_id}: Player rebounds ({player_total_reb}) != Team rebounds ({team_stats.reb})"
                 )
 
@@ -285,6 +299,7 @@ class VerificationResult:
     Result of comparing generated box score vs actual box score.
     Used to assess quality of PBP processing.
     """
+
     game_id: str
     data_source: str
 
@@ -297,7 +312,9 @@ class VerificationResult:
 
     # Discrepancy Metrics
     total_discrepancies: int
-    discrepancy_details: Dict[str, Dict[str, Any]]  # player_id -> {stat: {gen, act, diff}}
+    discrepancy_details: Dict[
+        str, Dict[str, Any]
+    ]  # player_id -> {stat: {gen, act, diff}}
 
     # Mean Absolute Errors
     mae_points: float
@@ -317,32 +334,33 @@ class VerificationResult:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for storage"""
         return {
-            'game_id': self.game_id,
-            'data_source': self.data_source,
-            'final_score_match': self.final_score_match,
-            'home_score_generated': self.home_score_generated,
-            'away_score_generated': self.away_score_generated,
-            'home_score_actual': self.home_score_actual,
-            'away_score_actual': self.away_score_actual,
-            'total_discrepancies': self.total_discrepancies,
-            'discrepancy_details': self.discrepancy_details,
-            'mae_points': self.mae_points,
-            'mae_rebounds': self.mae_rebounds,
-            'mae_assists': self.mae_assists,
-            'mae_steals': self.mae_steals,
-            'mae_blocks': self.mae_blocks,
-            'mae_turnovers': self.mae_turnovers,
-            'quality_grade': self.quality_grade,
-            'notes': self.notes,
-            'verified_at': self.verified_at.isoformat()
+            "game_id": self.game_id,
+            "data_source": self.data_source,
+            "final_score_match": self.final_score_match,
+            "home_score_generated": self.home_score_generated,
+            "away_score_generated": self.away_score_generated,
+            "home_score_actual": self.home_score_actual,
+            "away_score_actual": self.away_score_actual,
+            "total_discrepancies": self.total_discrepancies,
+            "discrepancy_details": self.discrepancy_details,
+            "mae_points": self.mae_points,
+            "mae_rebounds": self.mae_rebounds,
+            "mae_assists": self.mae_assists,
+            "mae_steals": self.mae_steals,
+            "mae_blocks": self.mae_blocks,
+            "mae_turnovers": self.mae_turnovers,
+            "quality_grade": self.quality_grade,
+            "notes": self.notes,
+            "verified_at": self.verified_at.isoformat(),
         }
 
     def is_passing(self) -> bool:
         """Check if verification passed (grade A, B, or C)"""
-        return self.quality_grade in ['A', 'B', 'C']
+        return self.quality_grade in ["A", "B", "C"]
 
 
 # Utility functions
+
 
 def calculate_quality_grade(total_discrepancies: int, final_score_match: bool) -> str:
     """
@@ -355,18 +373,18 @@ def calculate_quality_grade(total_discrepancies: int, final_score_match: bool) -
     Grade F: Failed (>30 discrepancies OR final score doesn't match)
     """
     if not final_score_match:
-        return 'F'
+        return "F"
 
     if total_discrepancies == 0:
-        return 'A'
+        return "A"
     elif total_discrepancies <= 5:
-        return 'B'
+        return "B"
     elif total_discrepancies <= 15:
-        return 'C'
+        return "C"
     elif total_discrepancies <= 30:
-        return 'D'
+        return "D"
     else:
-        return 'F'
+        return "F"
 
 
 def merge_quarter_stats(q1_stats: PlayerStats, q2_stats: PlayerStats) -> PlayerStats:
@@ -395,6 +413,5 @@ def merge_quarter_stats(q1_stats: PlayerStats, q2_stats: PlayerStats) -> PlayerS
         pf=q1_stats.pf + q2_stats.pf,
         plus_minus=q1_stats.plus_minus + q2_stats.plus_minus,
         minutes=q1_stats.minutes + q2_stats.minutes,
-        on_court=q2_stats.on_court  # Use most recent status
+        on_court=q2_stats.on_court,  # Use most recent status
     )
-

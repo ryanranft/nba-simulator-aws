@@ -21,13 +21,12 @@ from scripts.pbp_to_boxscore.espn_processor import ESPNPlayByPlayProcessor
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
-def test_single_game(game_id: str = '131105001'):
+def test_single_game(game_id: str = "131105001"):
     """
     Test processing a single game.
 
@@ -39,7 +38,7 @@ def test_single_game(game_id: str = '131105001'):
     print(f"{'='*60}\n")
 
     # Initialize processor
-    processor = ESPNPlayByPlayProcessor(local_cache_dir='/tmp/pbp_cache')
+    processor = ESPNPlayByPlayProcessor(local_cache_dir="/tmp/pbp_cache")
 
     try:
         # Process game
@@ -69,11 +68,15 @@ def test_single_game(game_id: str = '131105001'):
             # Validate snapshots
             print(f"\n🔍 Validation:")
             valid_count = sum(1 for s in snapshots if s.is_valid())
-            print(f"   - Valid snapshots: {valid_count}/{len(snapshots)} ({valid_count/len(snapshots)*100:.1f}%)")
+            print(
+                f"   - Valid snapshots: {valid_count}/{len(snapshots)} ({valid_count/len(snapshots)*100:.1f}%)"
+            )
 
             # Show some player stats from final snapshot
             print(f"\n🏀 Final Player Stats (Top 5 Scorers):")
-            players = sorted(last.players.values(), key=lambda p: p.points, reverse=True)[:5]
+            players = sorted(
+                last.players.values(), key=lambda p: p.points, reverse=True
+            )[:5]
             for p in players:
                 print(f"   - {p.player_name}: {p.points} pts, {p.reb} reb, {p.ast} ast")
 
@@ -86,6 +89,7 @@ def test_single_game(game_id: str = '131105001'):
     except Exception as e:
         print(f"\n❌ Error processing game: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -97,7 +101,9 @@ def test_data_structure():
     print(f"{'='*60}\n")
 
     from scripts.pbp_to_boxscore.box_score_snapshot import (
-        PlayerStats, TeamStats, BoxScoreSnapshot
+        PlayerStats,
+        TeamStats,
+        BoxScoreSnapshot,
     )
 
     # Test PlayerStats
@@ -112,7 +118,7 @@ def test_data_structure():
         oreb=3,
         dreb=5,
         reb=8,
-        ast=5
+        ast=5,
     )
     assert player.points == 25
     errors = player.validate()
@@ -121,12 +127,7 @@ def test_data_structure():
 
     # Test TeamStats
     print("✅ Testing TeamStats...")
-    team = TeamStats(
-        team_id="1",
-        team_name="Test Team",
-        points=100,
-        reb=45
-    )
+    team = TeamStats(team_id="1", team_name="Test Team", points=100, reb=45)
     assert team.points == 100
     print("   ✓ TeamStats working correctly")
 
@@ -142,7 +143,7 @@ def test_data_structure():
         home_score=54,
         away_score=48,
         players={player.player_id: player},
-        teams={team.team_id: team}
+        teams={team.team_id: team},
     )
     assert snapshot.home_score == 54
 
@@ -162,21 +163,23 @@ def test_data_structure():
 
 def main():
     """Main test runner"""
-    parser = argparse.ArgumentParser(description='Test ESPN PBP to Box Score Processor')
-    parser.add_argument('--game-id', type=str, help='ESPN game ID to test')
-    parser.add_argument('--skip-game', action='store_true', help='Skip game processing test')
+    parser = argparse.ArgumentParser(description="Test ESPN PBP to Box Score Processor")
+    parser.add_argument("--game-id", type=str, help="ESPN game ID to test")
+    parser.add_argument(
+        "--skip-game", action="store_true", help="Skip game processing test"
+    )
 
     args = parser.parse_args()
 
     results = []
 
     # Test data structures
-    results.append(('Data Structures', test_data_structure()))
+    results.append(("Data Structures", test_data_structure()))
 
     # Test game processing
     if not args.skip_game:
-        game_id = args.game_id or '131105001'  # Default: first 2011 game
-        results.append(('Game Processing', test_single_game(game_id)))
+        game_id = args.game_id or "131105001"  # Default: first 2011 game
+        results.append(("Game Processing", test_single_game(game_id)))
 
     # Summary
     print(f"\n{'='*60}")
@@ -195,6 +198,5 @@ def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-

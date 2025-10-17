@@ -430,7 +430,7 @@ class ScraperErrorHandler:
         if strategy.jitter:
             import random
 
-            delay *= 0.5 + random.random() * 0.5  # 50-100% of calculated delay
+            delay *= 0.5 + random.random() * 0.5  # nosec B311 - Random jitter for rate limiting, not security-critical
 
         return delay
 

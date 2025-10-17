@@ -29,6 +29,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 try:
     import boto3
+
     HAS_BOTO3 = True
 except ImportError:
     HAS_BOTO3 = False
@@ -43,20 +44,20 @@ class ESPNScraper:
     def __init__(self, output_dir="/tmp/espn_data", s3_bucket=None):
         self.output_dir = Path(output_dir)
         self.s3_bucket = s3_bucket
-        self.s3_client = boto3.client('s3') if HAS_BOTO3 and s3_bucket else None
+        self.s3_client = boto3.client("s3") if HAS_BOTO3 and s3_bucket else None
 
         # Create output directories
-        for subdir in ['schedule', 'box_scores', 'team_stats', 'pbp']:
+        for subdir in ["schedule", "box_scores", "team_stats", "pbp"]:
             (self.output_dir / subdir).mkdir(parents=True, exist_ok=True)
 
         # Stats
         self.stats = {
-            'schedule_files': 0,
-            'box_score_files': 0,
-            'team_stats_files': 0,
-            'pbp_files': 0,
-            'errors': 0,
-            'games_found': 0
+            "schedule_files": 0,
+            "box_score_files": 0,
+            "team_stats_files": 0,
+            "pbp_files": 0,
+            "errors": 0,
+            "games_found": 0,
         }
 
     def get_schedule(self, date_str):
@@ -70,10 +71,7 @@ class ESPNScraper:
             dict: Schedule JSON or None if error
         """
         url = f"{self.BASE_URL}/scoreboard"
-        params = {
-            'dates': date_str,
-            'limit': 100
-        }
+        params = {"dates": date_str, "limit": 100}
 
         try:
             response = requests.get(url, params=params, timeout=30)
@@ -81,7 +79,7 @@ class ESPNScraper:
             return response.json()
         except Exception as e:
             print(f"❌ Error fetching schedule for {date_str}: {e}")
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
             return None
 
     def get_box_score(self, game_id):
@@ -95,7 +93,7 @@ class ESPNScraper:
             dict: Box score JSON or None if error
         """
         url = f"{self.BASE_URL}/summary"
-        params = {'event': game_id}
+        params = {"event": game_id}
 
         try:
             response = requests.get(url, params=params, timeout=10)
@@ -103,7 +101,7 @@ class ESPNScraper:
             return response.json()
         except Exception as e:
             print(f"❌ Error fetching box score for game {game_id}: {e}")
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
             return None
 
     def get_play_by_play(self, game_id):
@@ -117,7 +115,7 @@ class ESPNScraper:
             dict: Play-by-play JSON or None if error
         """
         url = f"{self.BASE_URL}/playbyplay"
-        params = {'event': game_id}
+        params = {"event": game_id}
 
         try:
             response = requests.get(url, params=params, timeout=10)
@@ -125,7 +123,7 @@ class ESPNScraper:
             return response.json()
         except Exception as e:
             print(f"❌ Error fetching play-by-play for game {game_id}: {e}")
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
             return None
 
     def save_json(self, data, filepath):
@@ -133,7 +131,7 @@ class ESPNScraper:
         filepath = Path(filepath)
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(data, f, indent=2)
 
     def upload_to_s3(self, local_path, s3_key):
@@ -164,9 +162,9 @@ class ESPNScraper:
             return
 
         # Save schedule
-        schedule_file = self.output_dir / 'schedule' / f"{date_str}.json"
+        schedule_file = self.output_dir / "schedule" / f"{date_str}.json"
         self.save_json(schedule_data, schedule_file)
-        self.stats['schedule_files'] += 1
+        self.stats["schedule_files"] += 1
 
         # Upload to S3 if configured
         if self.s3_client:
@@ -175,24 +173,34 @@ class ESPNScraper:
                 print(f"  ✅ Uploaded schedule/{date_str}.json to S3")
 
         # 2. Extract game IDs and scrape game data
-        events = schedule_data.get('events', [])
+        events = schedule_data.get("events", [])
         if not events:
             print(f"  ⚠️  No games on {date_str}")
             return
 
         print(f"  Found {len(events)} games")
-        self.stats['games_found'] += len(events)
+        self.stats["games_found"] += len(events)
 
         for event in events:
-            game_id = event.get('id')
+            game_id = event.get("id")
             if not game_id:
                 continue
 
             # Get game name for logging
-            competitions = event.get('competitions', [])
+            competitions = event.get("competitions", [])
             if competitions:
-                home_team = competitions[0].get('competitors', [{}])[0].get('team', {}).get('abbreviation', 'UNK')
-                away_team = competitions[0].get('competitors', [{}])[1].get('team', {}).get('abbreviation', 'UNK')
+                home_team = (
+                    competitions[0]
+                    .get("competitors", [{}])[0]
+                    .get("team", {})
+                    .get("abbreviation", "UNK")
+                )
+                away_team = (
+                    competitions[0]
+                    .get("competitors", [{}])[1]
+                    .get("team", {})
+                    .get("abbreviation", "UNK")
+                )
                 game_name = f"{away_team} @ {home_team}"
             else:
                 game_name = f"Game {game_id}"
@@ -202,9 +210,9 @@ class ESPNScraper:
             # 3. Get box score
             box_score_data = self.get_box_score(game_id)
             if box_score_data:
-                box_file = self.output_dir / 'box_scores' / f"{game_id}.json"
+                box_file = self.output_dir / "box_scores" / f"{game_id}.json"
                 self.save_json(box_score_data, box_file)
-                self.stats['box_score_files'] += 1
+                self.stats["box_score_files"] += 1
 
                 if self.s3_client:
                     s3_key = f"box_scores/{game_id}.json"
@@ -212,9 +220,9 @@ class ESPNScraper:
 
             # 4. Get team stats (extracted from box score)
             if box_score_data:
-                team_stats_file = self.output_dir / 'team_stats' / f"{game_id}.json"
+                team_stats_file = self.output_dir / "team_stats" / f"{game_id}.json"
                 self.save_json(box_score_data, team_stats_file)
-                self.stats['team_stats_files'] += 1
+                self.stats["team_stats_files"] += 1
 
                 if self.s3_client:
                     s3_key = f"team_stats/{game_id}.json"
@@ -223,9 +231,9 @@ class ESPNScraper:
             # 5. Get play-by-play
             pbp_data = self.get_play_by_play(game_id)
             if pbp_data:
-                pbp_file = self.output_dir / 'pbp' / f"{game_id}.json"
+                pbp_file = self.output_dir / "pbp" / f"{game_id}.json"
                 self.save_json(pbp_data, pbp_file)
-                self.stats['pbp_files'] += 1
+                self.stats["pbp_files"] += 1
 
                 if self.s3_client:
                     s3_key = f"pbp/{game_id}.json"
@@ -255,7 +263,9 @@ class ESPNScraper:
         total_days = (end_date - start_date).days + 1
 
         print(f"🚀 Starting ESPN scraper")
-        print(f"📅 Date range: {start_date.date()} to {end_date.date()} ({total_days} days)")
+        print(
+            f"📅 Date range: {start_date.date()} to {end_date.date()} ({total_days} days)"
+        )
         print(f"💾 Output directory: {self.output_dir}")
         if self.s3_client:
             print(f"☁️  S3 bucket: {self.s3_bucket}")
@@ -269,25 +279,33 @@ class ESPNScraper:
             current_date += timedelta(days=1)
 
         # Print summary
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("📊 SCRAPING SUMMARY")
-        print("="*60)
+        print("=" * 60)
         print(f"Schedule files:   {self.stats['schedule_files']:,}")
         print(f"Box score files:  {self.stats['box_score_files']:,}")
         print(f"Team stats files: {self.stats['team_stats_files']:,}")
         print(f"Play-by-play files: {self.stats['pbp_files']:,}")
         print(f"Total games found: {self.stats['games_found']:,}")
         print(f"Errors: {self.stats['errors']:,}")
-        print("="*60)
+        print("=" * 60)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Scrape ESPN NBA data for missing dates")
-    parser.add_argument('--start-date', required=True, help='Start date (YYYY-MM-DD)')
-    parser.add_argument('--end-date', required=True, help='End date (YYYY-MM-DD)')
-    parser.add_argument('--output-dir', default='/tmp/espn_data', help='Local output directory')
-    parser.add_argument('--upload-to-s3', action='store_true', help='Upload to S3 after scraping')
-    parser.add_argument('--s3-bucket', default='nba-sim-raw-data-lake', help='S3 bucket name')
+    parser = argparse.ArgumentParser(
+        description="Scrape ESPN NBA data for missing dates"
+    )
+    parser.add_argument("--start-date", required=True, help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end-date", required=True, help="End date (YYYY-MM-DD)")
+    parser.add_argument(
+        "--output-dir", default="/tmp/espn_data", help="Local output directory"
+    )
+    parser.add_argument(
+        "--upload-to-s3", action="store_true", help="Upload to S3 after scraping"
+    )
+    parser.add_argument(
+        "--s3-bucket", default="nba-sim-raw-data-lake", help="S3 bucket name"
+    )
 
     args = parser.parse_args()
 
@@ -320,5 +338,5 @@ def main():
         print(f"☁️  Files uploaded to s3://{s3_bucket}/")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

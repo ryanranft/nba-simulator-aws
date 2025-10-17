@@ -32,6 +32,7 @@ import pandas as pd
 # Import sportsdataverse (hoopR Python wrapper)
 try:
     from sportsdataverse.nba import load_nba_pbp, load_nba_schedule
+
     HAS_SPORTSDATAVERSE = True
 except ImportError:
     HAS_SPORTSDATAVERSE = False
@@ -42,6 +43,7 @@ except ImportError:
 # Database path
 HOOPR_DB = "/tmp/hoopr_local.db"
 
+
 class HoopRIncrementalScraper:
     """Incremental scraper for hoopR NBA data"""
 
@@ -51,11 +53,11 @@ class HoopRIncrementalScraper:
         self.dry_run = dry_run
 
         self.stats = {
-            'games_found': 0,
-            'games_new': 0,
-            'games_skipped': 0,
-            'events_loaded': 0,
-            'errors': 0
+            "games_found": 0,
+            "games_new": 0,
+            "games_skipped": 0,
+            "events_loaded": 0,
+            "errors": 0,
         }
 
     def get_latest_game_date(self):
@@ -64,10 +66,12 @@ class HoopRIncrementalScraper:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT MAX(game_date)
             FROM schedule
-        """)
+        """
+        )
 
         latest_date = cursor.fetchone()[0]
         cursor.close()
@@ -118,33 +122,36 @@ class HoopRIncrementalScraper:
 
         try:
             for _, row in schedule_df.iterrows():
-                cursor.execute("""
+                cursor.execute(
+                    """
                     INSERT OR REPLACE INTO schedule (
                         game_id, game_date, season, season_type,
                         home_team_id, home_display_name, home_score,
                         away_team_id, away_display_name, away_score,
                         status, uid, created_at, updated_at
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-                """, (
-                    str(row.get('game_id')),
-                    row.get('game_date'),
-                    row.get('season'),
-                    row.get('season_type'),
-                    row.get('home_team_id'),
-                    row.get('home_display_name'),
-                    row.get('home_score'),
-                    row.get('away_team_id'),
-                    row.get('away_display_name'),
-                    row.get('away_score'),
-                    row.get('status'),
-                    row.get('uid')
-                ))
+                """,
+                    (
+                        str(row.get("game_id")),
+                        row.get("game_date"),
+                        row.get("season"),
+                        row.get("season_type"),
+                        row.get("home_team_id"),
+                        row.get("home_display_name"),
+                        row.get("home_score"),
+                        row.get("away_team_id"),
+                        row.get("away_display_name"),
+                        row.get("away_score"),
+                        row.get("status"),
+                        row.get("uid"),
+                    ),
+                )
 
             conn.commit()
 
         except Exception as e:
             print(f"  ❌ Error loading schedule: {e}")
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
             conn.rollback()
         finally:
             cursor.close()
@@ -154,7 +161,7 @@ class HoopRIncrementalScraper:
         """Load play-by-play data to hoopR database."""
 
         if self.dry_run:
-            self.stats['events_loaded'] += len(pbp_df)
+            self.stats["events_loaded"] += len(pbp_df)
             return
 
         conn = sqlite3.connect(self.db_path)
@@ -162,11 +169,14 @@ class HoopRIncrementalScraper:
 
         try:
             # Clear existing PBP for this game
-            cursor.execute("DELETE FROM play_by_play WHERE game_id = ?", (str(game_id),))
+            cursor.execute(
+                "DELETE FROM play_by_play WHERE game_id = ?", (str(game_id),)
+            )
 
             # Insert new PBP
             for _, row in pbp_df.iterrows():
-                cursor.execute("""
+                cursor.execute(
+                    """
                     INSERT INTO play_by_play (
                         id, game_id, sequence_number, type_id, type_text,
                         period_number, clock_display_value, clock_value,
@@ -177,39 +187,45 @@ class HoopRIncrementalScraper:
                         coordinate_x, coordinate_y, season, season_type,
                         game_date, created_at, updated_at
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-                """, (
-                    row.get('id'),
-                    str(row.get('game_id')),
-                    row.get('sequence_number'),
-                    row.get('type_id'),
-                    row.get('type_text'),
-                    row.get('period_number'),
-                    row.get('clock_display_value'),
-                    row.get('clock_value'),
-                    row.get('home_score'),
-                    row.get('away_score'),
-                    row.get('scoring_play'),
-                    row.get('score_value'),
-                    row.get('team_id'),
-                    str(row.get('participants_json')) if row.get('participants_json') else None,
-                    row.get('wallclock'),
-                    row.get('shooting_play'),
-                    row.get('text'),
-                    row.get('away_score_before'),
-                    row.get('home_score_before'),
-                    row.get('coordinate_x'),
-                    row.get('coordinate_y'),
-                    row.get('season'),
-                    row.get('season_type'),
-                    row.get('game_date')
-                ))
+                """,
+                    (
+                        row.get("id"),
+                        str(row.get("game_id")),
+                        row.get("sequence_number"),
+                        row.get("type_id"),
+                        row.get("type_text"),
+                        row.get("period_number"),
+                        row.get("clock_display_value"),
+                        row.get("clock_value"),
+                        row.get("home_score"),
+                        row.get("away_score"),
+                        row.get("scoring_play"),
+                        row.get("score_value"),
+                        row.get("team_id"),
+                        (
+                            str(row.get("participants_json"))
+                            if row.get("participants_json")
+                            else None
+                        ),
+                        row.get("wallclock"),
+                        row.get("shooting_play"),
+                        row.get("text"),
+                        row.get("away_score_before"),
+                        row.get("home_score_before"),
+                        row.get("coordinate_x"),
+                        row.get("coordinate_y"),
+                        row.get("season"),
+                        row.get("season_type"),
+                        row.get("game_date"),
+                    ),
+                )
 
             conn.commit()
-            self.stats['events_loaded'] += len(pbp_df)
+            self.stats["events_loaded"] += len(pbp_df)
 
         except Exception as e:
             print(f"    ❌ Error loading PBP: {e}")
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
             conn.rollback()
         finally:
             cursor.close()
@@ -249,19 +265,21 @@ class HoopRIncrementalScraper:
                 return
 
             # Convert to pandas if it's a Polars DataFrame
-            if hasattr(schedule_df, 'to_pandas'):
+            if hasattr(schedule_df, "to_pandas"):
                 schedule_df = schedule_df.to_pandas()
 
             print(f"✓ Loaded {len(schedule_df):,} games from hoopR schedule")
 
             # Filter to recent games only
-            schedule_df['game_date_parsed'] = schedule_df['game_date'].apply(
+            schedule_df["game_date_parsed"] = schedule_df["game_date"].apply(
                 lambda x: datetime.strptime(x, "%Y-%m-%d") if isinstance(x, str) else x
             )
 
-            recent_games = schedule_df[schedule_df['game_date_parsed'] >= target_date]
+            recent_games = schedule_df[schedule_df["game_date_parsed"] >= target_date]
 
-            print(f"✓ Filtered to {len(recent_games):,} games from last {self.days_back} days")
+            print(
+                f"✓ Filtered to {len(recent_games):,} games from last {self.days_back} days"
+            )
             print()
 
             if len(recent_games) == 0:
@@ -277,24 +295,28 @@ class HoopRIncrementalScraper:
             # Process each game for play-by-play
             print("Loading play-by-play data...")
 
-            self.stats['games_found'] = len(recent_games)
+            self.stats["games_found"] = len(recent_games)
 
             for _, game in recent_games.iterrows():
-                game_id = str(game['game_id'])
-                game_date = game['game_date']
+                game_id = str(game["game_id"])
+                game_date = game["game_date"]
                 matchup = f"{game.get('away_display_name', 'UNK')} @ {game.get('home_display_name', 'UNK')}"
 
                 # Check if we already have PBP for this game
                 conn = sqlite3.connect(self.db_path)
                 cursor = conn.cursor()
-                cursor.execute("SELECT COUNT(*) FROM play_by_play WHERE game_id = ?", (game_id,))
+                cursor.execute(
+                    "SELECT COUNT(*) FROM play_by_play WHERE game_id = ?", (game_id,)
+                )
                 pbp_count = cursor.fetchone()[0]
                 cursor.close()
                 conn.close()
 
                 if pbp_count > 0 and not self.dry_run:
-                    print(f"  ⏭️  {matchup} ({game_date}) - PBP exists ({pbp_count} events), skipping")
-                    self.stats['games_skipped'] += 1
+                    print(
+                        f"  ⏭️  {matchup} ({game_date}) - PBP exists ({pbp_count} events), skipping"
+                    )
+                    self.stats["games_skipped"] += 1
                     continue
 
                 print(f"  🏀 {matchup} ({game_date})")
@@ -306,16 +328,16 @@ class HoopRIncrementalScraper:
 
                     if pbp_df is not None and len(pbp_df) > 0:
                         # Convert to pandas if it's a Polars DataFrame
-                        if hasattr(pbp_df, 'to_pandas'):
+                        if hasattr(pbp_df, "to_pandas"):
                             pbp_df = pbp_df.to_pandas()
 
                         # Filter to this game
-                        game_pbp = pbp_df[pbp_df['game_id'] == int(game_id)]
+                        game_pbp = pbp_df[pbp_df["game_id"] == int(game_id)]
 
                         if len(game_pbp) > 0:
                             print(f"    ✓ Found {len(game_pbp):,} PBP events")
                             self.load_pbp_to_db(game_pbp, game_id)
-                            self.stats['games_new'] += 1
+                            self.stats["games_new"] += 1
                         else:
                             print(f"    ⚠️  No PBP data available")
                     else:
@@ -323,7 +345,7 @@ class HoopRIncrementalScraper:
 
                 except Exception as e:
                     print(f"    ❌ Error: {e}")
-                    self.stats['errors'] += 1
+                    self.stats["errors"] += 1
 
             # Print summary
             print()
@@ -339,7 +361,7 @@ class HoopRIncrementalScraper:
 
         except Exception as e:
             print(f"❌ Error loading hoopR data: {e}")
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
 
 
 def main():
@@ -360,26 +382,22 @@ Examples:
 Purpose:
   Designed for nightly automation. Only fetches recent games, NOT historical seasons.
   For historical backfills, use: scripts/etl/run_hoopr_comprehensive_overnight.sh
-        """
+        """,
     )
 
     parser.add_argument(
-        '--days-back',
+        "--days-back",
         type=int,
         default=7,
-        help='Number of days to look back (default: 7)'
+        help="Number of days to look back (default: 7)",
     )
 
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Dry run mode - don\'t modify database'
+        "--dry-run", action="store_true", help="Dry run mode - don't modify database"
     )
 
     parser.add_argument(
-        '--db-path',
-        default=HOOPR_DB,
-        help=f'hoopR database path (default: {HOOPR_DB})'
+        "--db-path", default=HOOPR_DB, help=f"hoopR database path (default: {HOOPR_DB})"
     )
 
     args = parser.parse_args()
@@ -389,9 +407,7 @@ Purpose:
 
     # Create scraper and run
     scraper = HoopRIncrementalScraper(
-        db_path=args.db_path,
-        days_back=args.days_back,
-        dry_run=args.dry_run
+        db_path=args.db_path, days_back=args.days_back, dry_run=args.dry_run
     )
 
     scraper.scrape_incremental()
@@ -400,5 +416,5 @@ Purpose:
     print(f"✓ Complete: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

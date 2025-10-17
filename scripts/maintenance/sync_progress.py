@@ -29,7 +29,11 @@ class ProgressSync:
         """Run shell command and return output"""
         try:
             result = subprocess.run(
-                cmd, shell=True, capture_output=True, text=True, timeout=30
+                cmd,
+                shell=True,  # nosec B602 - Required for AWS CLI pipe/redirect, commands are static
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
             return result.stdout.strip(), result.returncode
         except Exception as e:

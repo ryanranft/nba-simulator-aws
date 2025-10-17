@@ -33,6 +33,7 @@ import sys
 # Import hoopR/sportsdataverse
 try:
     from sportsdataverse.nba import load_nba_pbp, load_nba_schedule
+
     HAS_SPORTSDATAVERSE = True
 except ImportError:
     HAS_SPORTSDATAVERSE = False
@@ -48,7 +49,9 @@ GAP_LIST = "/tmp/missing_from_hoopr.csv"
 DELAY_BETWEEN_GAMES = 0.6  # 600ms between requests
 
 
-def load_gap_list(limit: Optional[int] = None, year: Optional[int] = None) -> List[Dict]:
+def load_gap_list(
+    limit: Optional[int] = None, year: Optional[int] = None
+) -> List[Dict]:
     """Load list of games missing from hoopR."""
 
     print("=" * 70)
@@ -65,12 +68,12 @@ def load_gap_list(limit: Optional[int] = None, year: Optional[int] = None) -> Li
     print(f"📂 Reading: {GAP_LIST}")
 
     gaps = []
-    with open(GAP_LIST, 'r') as f:
+    with open(GAP_LIST, "r") as f:
         reader = csv.DictReader(f)
         for row in reader:
             # Filter by year if specified
             if year:
-                game_year = int(row['game_date'].split('-')[0])
+                game_year = int(row["game_date"].split("-")[0])
                 if game_year != year:
                     continue
 
@@ -84,7 +87,7 @@ def load_gap_list(limit: Optional[int] = None, year: Optional[int] = None) -> Li
     # Show year distribution
     year_counts = {}
     for gap in gaps:
-        game_year = gap['game_date'].split('-')[0]
+        game_year = gap["game_date"].split("-")[0]
         year_counts[game_year] = year_counts.get(game_year, 0) + 1
 
     print()
@@ -105,8 +108,8 @@ def scrape_game_from_hoopr(game_id: str, game_date: str) -> Optional[List[Dict]]
 
     try:
         # Extract season from game date (YYYY-MM-DD)
-        year = int(game_date.split('-')[0])
-        month = int(game_date.split('-')[1])
+        year = int(game_date.split("-")[0])
+        month = int(game_date.split("-")[1])
 
         # NBA season logic: Oct-June spans two calendar years
         # If month >= 10, season is current year
@@ -120,10 +123,10 @@ def scrape_game_from_hoopr(game_id: str, game_date: str) -> Optional[List[Dict]]
         # Check if data was returned
         if pbp_data is not None and len(pbp_data) > 0:
             # Filter to specific game_id
-            game_pbp = pbp_data[pbp_data['game_id'] == int(game_id)]
+            game_pbp = pbp_data[pbp_data["game_id"] == int(game_id)]
 
             if len(game_pbp) > 0:
-                return game_pbp.to_dict('records')
+                return game_pbp.to_dict("records")
 
         return None
 
@@ -158,14 +161,17 @@ def load_to_hoopr_database(game_id: str, pbp_events: List[Dict]) -> int:
             values.append(event.get(col))
 
         # Build INSERT statement
-        placeholders = ','.join(['?' for _ in columns])
-        column_list = ','.join(columns)
+        placeholders = ",".join(["?" for _ in columns])
+        column_list = ",".join(columns)
 
         try:
-            cursor.execute(f"""
+            cursor.execute(
+                f"""
                 INSERT OR IGNORE INTO play_by_play ({column_list})
                 VALUES ({placeholders})
-            """, values)
+            """,
+                values,
+            )
 
             if cursor.rowcount > 0:
                 loaded_count += 1
@@ -202,8 +208,8 @@ def scrape_and_fill_gaps(gaps: List[Dict], sync_to_rds: bool = False):
 
     # Process each gap
     for i, gap in enumerate(gaps, 1):
-        game_id = gap['hoopr_game_id']
-        game_date = gap['game_date']
+        game_id = gap["hoopr_game_id"]
+        game_date = gap["game_date"]
         matchup = f"{gap['away_team']} @ {gap['home_team']}"
 
         # Rate limiting
@@ -216,13 +222,17 @@ def scrape_and_fill_gaps(gaps: List[Dict], sync_to_rds: bool = False):
         if pbp_events is None:
             games_no_data += 1
             if i % 50 == 0 or i <= 10:
-                print(f"  [{i}/{total_games}] ⚠️  No data: {game_id} ({game_date}) - {matchup}")
+                print(
+                    f"  [{i}/{total_games}] ⚠️  No data: {game_id} ({game_date}) - {matchup}"
+                )
             continue
 
         if not pbp_events:
             games_no_data += 1
             if i % 50 == 0 or i <= 10:
-                print(f"  [{i}/{total_games}] ⚠️  Empty: {game_id} ({game_date}) - {matchup}")
+                print(
+                    f"  [{i}/{total_games}] ⚠️  Empty: {game_id} ({game_date}) - {matchup}"
+                )
             continue
 
         # Load to hoopR database
@@ -233,18 +243,24 @@ def scrape_and_fill_gaps(gaps: List[Dict], sync_to_rds: bool = False):
             events_loaded += loaded
 
             if i % 50 == 0 or i <= 10:
-                print(f"  [{i}/{total_games}] ✓ {game_id} - {loaded:,} events - {matchup}")
+                print(
+                    f"  [{i}/{total_games}] ✓ {game_id} - {loaded:,} events - {matchup}"
+                )
         else:
             games_failed += 1
             if i % 50 == 0 or i <= 10:
-                print(f"  [{i}/{total_games}] ❌ Failed: {game_id} ({game_date}) - {matchup}")
+                print(
+                    f"  [{i}/{total_games}] ❌ Failed: {game_id} ({game_date}) - {matchup}"
+                )
 
         # Progress update every 100 games
         if i % 100 == 0:
             pct = i / total_games * 100
-            print(f"\n  Progress: {i:,}/{total_games:,} ({pct:.1f}%) | "
-                  f"Scraped: {games_scraped:,} | "
-                  f"Events: {events_loaded:,}\n")
+            print(
+                f"\n  Progress: {i:,}/{total_games:,} ({pct:.1f}%) | "
+                f"Scraped: {games_scraped:,} | "
+                f"Events: {events_loaded:,}\n"
+            )
 
     print()
     print("=" * 70)
@@ -286,10 +302,12 @@ def verify_hoopr_coverage():
     cursor = conn.cursor()
 
     # Count games with PBP
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT COUNT(DISTINCT game_id)
         FROM play_by_play;
-    """)
+    """
+    )
     games_with_pbp = cursor.fetchone()[0]
 
     # Count total events
@@ -297,7 +315,8 @@ def verify_hoopr_coverage():
     total_events = cursor.fetchone()[0]
 
     # Coverage by year
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             CAST(strftime('%Y', game_date) AS INTEGER) as year,
             COUNT(DISTINCT game_id) as games
@@ -305,7 +324,8 @@ def verify_hoopr_coverage():
         GROUP BY year
         ORDER BY year DESC
         LIMIT 10;
-    """)
+    """
+    )
 
     print(f"hoopR Database Status:")
     print(f"  Games with PBP:  {games_with_pbp:,}")
@@ -345,25 +365,19 @@ Impact:
   - Fills 2,464 missing games in hoopR
   - Increases coverage: 92.1% → 100%
   - Maintains data integrity (hoopR → hoopR only)
-        """
+        """,
     )
 
     parser.add_argument(
-        '--limit',
-        type=int,
-        help='Limit number of games to scrape (for testing)'
+        "--limit", type=int, help="Limit number of games to scrape (for testing)"
     )
 
-    parser.add_argument(
-        '--year',
-        type=int,
-        help='Scrape only games from specific year'
-    )
+    parser.add_argument("--year", type=int, help="Scrape only games from specific year")
 
     parser.add_argument(
-        '--sync-to-rds',
-        action='store_true',
-        help='Also sync filled data to RDS PostgreSQL'
+        "--sync-to-rds",
+        action="store_true",
+        help="Also sync filled data to RDS PostgreSQL",
     )
 
     args = parser.parse_args()
@@ -384,7 +398,9 @@ Impact:
         sys.exit(0)
 
     # Scrape and fill
-    games_scraped, events_loaded = scrape_and_fill_gaps(gaps, sync_to_rds=args.sync_to_rds)
+    games_scraped, events_loaded = scrape_and_fill_gaps(
+        gaps, sync_to_rds=args.sync_to_rds
+    )
 
     print("=" * 70)
     print(f"✓ Gap filling complete!")
@@ -393,5 +409,5 @@ Impact:
     print(f"Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

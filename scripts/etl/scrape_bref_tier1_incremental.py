@@ -55,6 +55,7 @@ except ImportError:
 
 try:
     import boto3
+
     HAS_BOTO3 = True
 except ImportError:
     HAS_BOTO3 = False
@@ -63,58 +64,58 @@ except ImportError:
 # Logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s: %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    format="%(asctime)s - %(levelname)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
 
 # Configuration
-BASE_URL = 'https://www.basketball-reference.com'
+BASE_URL = "https://www.basketball-reference.com"
 RATE_LIMIT = 12.0  # seconds
-S3_BUCKET = 'nba-sim-raw-data-lake'
-S3_PREFIX = 'basketball_reference'
-CHECKPOINT_FILE = 'tier1_progress.json'
+S3_BUCKET = "nba-sim-raw-data-lake"
+S3_PREFIX = "basketball_reference"
+CHECKPOINT_FILE = "tier1_progress.json"
 
 # Tier 1 Data Types
 TIER1_TYPES = {
-    'game_logs': {
-        'name': 'Player Game Logs',
-        'priority': 'CRITICAL',
-        'granularity': 'player',  # Save per player
-        'url_pattern': '/players/{first}/{slug}/gamelog/{season}',
-        'table_id': 'pgl_basic',
-        's3_path': 'nba/player_game_logs/{slug}/{season}.json'
+    "game_logs": {
+        "name": "Player Game Logs",
+        "priority": "CRITICAL",
+        "granularity": "player",  # Save per player
+        "url_pattern": "/players/{first}/{slug}/gamelog/{season}",
+        "table_id": "pgl_basic",
+        "s3_path": "nba/player_game_logs/{slug}/{season}.json",
     },
-    'play_by_play': {
-        'name': 'Event-Level Play-by-Play',
-        'priority': 'HIGH',
-        'granularity': 'game',  # Save per game
-        'url_pattern': '/boxscores/pbp/{game_id}.html',
-        'table_id': 'pbp',
-        's3_path': 'nba/event_pbp/{season}/{game_id}.json'
+    "play_by_play": {
+        "name": "Event-Level Play-by-Play",
+        "priority": "HIGH",
+        "granularity": "game",  # Save per game
+        "url_pattern": "/boxscores/pbp/{game_id}.html",
+        "table_id": "pbp",
+        "s3_path": "nba/event_pbp/{season}/{game_id}.json",
     },
-    'shot_charts': {
-        'name': 'Shot Charts',
-        'priority': 'HIGH',
-        'granularity': 'game',  # Save per game
-        'url_pattern': '/boxscores/shot-chart/{game_id}.html',
-        's3_path': 'nba/shot_charts/{season}/{game_id}.json'
+    "shot_charts": {
+        "name": "Shot Charts",
+        "priority": "HIGH",
+        "granularity": "game",  # Save per game
+        "url_pattern": "/boxscores/shot-chart/{game_id}.html",
+        "s3_path": "nba/shot_charts/{season}/{game_id}.json",
     },
-    'tracking': {
-        'name': 'Player Tracking',
-        'priority': 'MEDIUM-HIGH',
-        'granularity': 'season',  # Save per season
-        'url_pattern': '/leagues/NBA_{season}_tracking.html',
-        's3_path': 'nba/player_tracking/{season}.json'
+    "tracking": {
+        "name": "Player Tracking",
+        "priority": "MEDIUM-HIGH",
+        "granularity": "season",  # Save per season
+        "url_pattern": "/leagues/NBA_{season}_tracking.html",
+        "s3_path": "nba/player_tracking/{season}.json",
     },
-    'lineups': {
-        'name': 'Lineup Data',
-        'priority': 'MEDIUM',
-        'granularity': 'team-season',  # Save per team per season
-        'url_pattern': '/teams/{team}/{season}_lineups.html',
-        'table_id': 'lineups',
-        's3_path': 'nba/lineups/{team}/{season}.json'
-    }
+    "lineups": {
+        "name": "Lineup Data",
+        "priority": "MEDIUM",
+        "granularity": "team-season",  # Save per team per season
+        "url_pattern": "/teams/{team}/{season}_lineups.html",
+        "table_id": "lineups",
+        "s3_path": "nba/lineups/{team}/{season}.json",
+    },
 }
 
 
@@ -130,65 +131,65 @@ class CheckpointManager:
         if Path(self.checkpoint_file).exists():
             with open(self.checkpoint_file) as f:
                 data = json.load(f)
-                logger.info(f"✓ Loaded checkpoint: {len(data.get('completed', {}))} items completed")
+                logger.info(
+                    f"✓ Loaded checkpoint: {len(data.get('completed', {}))} items completed"
+                )
                 return data
         return {
-            'started_at': datetime.now().isoformat(),
-            'completed': {},  # item_id -> {timestamp, records, s3_key}
-            'failed': {},     # item_id -> {timestamp, error}
-            'in_progress': {},  # item_id -> {timestamp}
-            'stats': defaultdict(int)
+            "started_at": datetime.now().isoformat(),
+            "completed": {},  # item_id -> {timestamp, records, s3_key}
+            "failed": {},  # item_id -> {timestamp, error}
+            "in_progress": {},  # item_id -> {timestamp}
+            "stats": defaultdict(int),
         }
 
     def save(self):
         """Save checkpoint immediately."""
-        self.data['last_updated'] = datetime.now().isoformat()
-        with open(self.checkpoint_file, 'w') as f:
+        self.data["last_updated"] = datetime.now().isoformat()
+        with open(self.checkpoint_file, "w") as f:
             json.dump(self.data, f, indent=2)
         logger.debug(f"✓ Checkpoint saved: {self.checkpoint_file}")
 
     def mark_in_progress(self, item_id: str):
         """Mark item as in progress."""
-        self.data['in_progress'][item_id] = {
-            'started_at': datetime.now().isoformat()
-        }
+        self.data["in_progress"][item_id] = {"started_at": datetime.now().isoformat()}
         self.save()
 
     def mark_completed(self, item_id: str, records: int, s3_key: str):
         """Mark item as completed."""
-        self.data['completed'][item_id] = {
-            'completed_at': datetime.now().isoformat(),
-            'records': records,
-            's3_key': s3_key
+        self.data["completed"][item_id] = {
+            "completed_at": datetime.now().isoformat(),
+            "records": records,
+            "s3_key": s3_key,
         }
-        if item_id in self.data['in_progress']:
-            del self.data['in_progress'][item_id]
-        self.data['stats']['completed'] += 1
-        self.data['stats']['total_records'] += records
+        if item_id in self.data["in_progress"]:
+            del self.data["in_progress"][item_id]
+        self.data["stats"]["completed"] += 1
+        self.data["stats"]["total_records"] += records
         self.save()
 
     def mark_failed(self, item_id: str, error: str):
         """Mark item as failed."""
-        self.data['failed'][item_id] = {
-            'failed_at': datetime.now().isoformat(),
-            'error': str(error)
+        self.data["failed"][item_id] = {
+            "failed_at": datetime.now().isoformat(),
+            "error": str(error),
         }
-        if item_id in self.data['in_progress']:
-            del self.data['in_progress'][item_id]
-        self.data['stats']['failed'] += 1
+        if item_id in self.data["in_progress"]:
+            del self.data["in_progress"][item_id]
+        self.data["stats"]["failed"] += 1
         self.save()
 
     def is_completed(self, item_id: str) -> bool:
         """Check if item is already completed."""
-        return item_id in self.data['completed']
+        return item_id in self.data["completed"]
 
     def get_stats(self) -> Dict:
         """Get summary statistics."""
         return {
-            'completed': len(self.data['completed']),
-            'failed': len(self.data['failed']),
-            'in_progress': len(self.data['in_progress']),
-            'total_records': self.data['stats'].get('total_records', 0)
+            "completed": len(self.data["completed"]),
+            "failed": len(self.data["failed"]),
+            "in_progress": len(self.data["in_progress"]),
+            "total_records": self.data["stats"].get("total_records", 0),
         }
 
 
@@ -197,9 +198,11 @@ class Tier1IncrementalScraper:
 
     def __init__(self, checkpoint_file: str = CHECKPOINT_FILE, dry_run: bool = False):
         self.session = requests.Session()
-        self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-        })
+        self.session.headers.update(
+            {
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+            }
+        )
 
         self.checkpoint = CheckpointManager(checkpoint_file)
         self.dry_run = dry_run
@@ -207,20 +210,22 @@ class Tier1IncrementalScraper:
 
         # S3 client
         if HAS_BOTO3 and not dry_run:
-            self.s3 = boto3.client('s3')
+            self.s3 = boto3.client("s3")
         else:
             self.s3 = None
 
-        logger.info("="*70)
+        logger.info("=" * 70)
         logger.info("BASKETBALL REFERENCE TIER 1 - INCREMENTAL SCRAPER")
-        logger.info("="*70)
+        logger.info("=" * 70)
         logger.info(f"Checkpoint: {checkpoint_file}")
         logger.info(f"Dry Run: {dry_run}")
         logger.info(f"S3 Upload: {'Enabled' if self.s3 else 'Disabled'}")
 
         stats = self.checkpoint.get_stats()
-        logger.info(f"Progress: {stats['completed']} completed, {stats['failed']} failed, {stats['in_progress']} in progress")
-        logger.info("="*70)
+        logger.info(
+            f"Progress: {stats['completed']} completed, {stats['failed']} failed, {stats['in_progress']} in progress"
+        )
+        logger.info("=" * 70)
 
     def _rate_limit(self):
         """Enforce rate limit."""
@@ -260,7 +265,7 @@ class Tier1IncrementalScraper:
         Uncomment HTML tables (Basketball Reference hides them in comments).
         Uses BeautifulSoup Comment parsing for robust extraction.
         """
-        soup = BeautifulSoup(html, 'lxml')
+        soup = BeautifulSoup(html, "lxml")
 
         # Find all HTML comments
         comments = soup.find_all(string=lambda text: isinstance(text, Comment))
@@ -269,14 +274,14 @@ class Tier1IncrementalScraper:
         for comment in comments:
             comment_str = str(comment)
             # Only uncomment if it contains table or div elements
-            if '<table' in comment_str or '<div' in comment_str:
+            if "<table" in comment_str or "<div" in comment_str:
                 # Parse the comment content and replace the comment
                 try:
-                    comment_soup = BeautifulSoup(comment_str, 'lxml')
+                    comment_soup = BeautifulSoup(comment_str, "lxml")
                     comment.replace_with(comment_soup)
                 except:
                     # Fallback: simple string replacement
-                    comment.replace_with(BeautifulSoup(comment_str, 'lxml'))
+                    comment.replace_with(BeautifulSoup(comment_str, "lxml"))
 
         return str(soup)
 
@@ -294,32 +299,32 @@ class Tier1IncrementalScraper:
         table = None
 
         # Strategy 1: Direct table lookup
-        table = soup.find('table', {'id': table_id})
+        table = soup.find("table", {"id": table_id})
 
         # Strategy 2: Table within div wrappers
         if not table:
-            for div_id in [f'div_{table_id}', f'all_{table_id}', table_id]:
-                div = soup.find('div', {'id': div_id})
+            for div_id in [f"div_{table_id}", f"all_{table_id}", table_id]:
+                div = soup.find("div", {"id": div_id})
                 if div:
-                    table = div.find('table')
+                    table = div.find("table")
                     if table:
                         logger.debug(f"Found table via div: {div_id}")
                         break
 
         # Strategy 3: Search all tables for matching ID
         if not table:
-            all_tables = soup.find_all('table')
+            all_tables = soup.find_all("table")
             for t in all_tables:
-                if t.get('id') and table_id in t.get('id'):
+                if t.get("id") and table_id in t.get("id"):
                     table = t
                     logger.debug(f"Found table via partial match: {t.get('id')}")
                     break
 
         # Strategy 4: Last resort - first table with data-stat attributes
         if not table:
-            all_tables = soup.find_all('table')
+            all_tables = soup.find_all("table")
             for t in all_tables:
-                if t.find('td', attrs={'data-stat': True}):
+                if t.find("td", attrs={"data-stat": True}):
                     table = t
                     logger.warning(f"Using first table with data-stat as fallback")
                     break
@@ -329,17 +334,17 @@ class Tier1IncrementalScraper:
             return []
 
         records = []
-        tbody = table.find('tbody')
+        tbody = table.find("tbody")
         if not tbody:
             logger.warning(f"No tbody found in table: {table_id}")
             return []
 
-        for row in tbody.find_all('tr', class_=lambda x: x != 'thead'):
+        for row in tbody.find_all("tr", class_=lambda x: x != "thead"):
             record = {}
             has_data = False
 
-            for cell in row.find_all(['th', 'td']):
-                stat = cell.get('data-stat', 'unknown')
+            for cell in row.find_all(["th", "td"]):
+                stat = cell.get("data-stat", "unknown")
                 value = cell.get_text(strip=True)
 
                 if value:  # Only store non-empty values
@@ -347,14 +352,14 @@ class Tier1IncrementalScraper:
                     has_data = True
 
                 # Extract player slug from link (multiple stat names possible)
-                if stat in ('player', 'name_display', 'player_name', 'name'):
-                    link = cell.find('a')
-                    if link and link.get('href'):
-                        href = link['href']
+                if stat in ("player", "name_display", "player_name", "name"):
+                    link = cell.find("a")
+                    if link and link.get("href"):
+                        href = link["href"]
                         # /players/j/jamesle01.html -> jamesle01
-                        if '/players/' in href:
-                            slug = href.split('/')[-1].replace('.html', '')
-                            record['player_slug'] = slug
+                        if "/players/" in href:
+                            slug = href.split("/")[-1].replace(".html", "")
+                            record["player_slug"] = slug
                             has_data = True
 
             if has_data and record:
@@ -374,7 +379,7 @@ class Tier1IncrementalScraper:
             # Save locally as backup
             local_path = Path(f"data/tier1_backup/{s3_key}")
             local_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(local_path, 'w') as f:
+            with open(local_path, "w") as f:
                 json.dump(data, f, indent=2)
             return True
 
@@ -384,8 +389,8 @@ class Tier1IncrementalScraper:
             self.s3.put_object(
                 Bucket=S3_BUCKET,
                 Key=full_key,
-                Body=json_data.encode('utf-8'),
-                ContentType='application/json'
+                Body=json_data.encode("utf-8"),
+                ContentType="application/json",
             )
             logger.info(f"✅ Saved to S3: s3://{S3_BUCKET}/{full_key}")
             return True
@@ -400,7 +405,7 @@ class Tier1IncrementalScraper:
         """
         logger.info(f"\n📋 PLAYER GAME LOGS - Season {season}")
         logger.info(f"Players: {len(players)}")
-        logger.info("="*70)
+        logger.info("=" * 70)
 
         for idx, player_slug in enumerate(players, 1):
             item_id = f"gamelogs_{season}_{player_slug}"
@@ -425,8 +430,8 @@ class Tier1IncrementalScraper:
 
                 # Parse with comment extraction
                 uncommented_html = self._uncomment_html(html)
-                soup = BeautifulSoup(uncommented_html, 'lxml')
-                games = self._parse_table(soup, 'pgl_basic')
+                soup = BeautifulSoup(uncommented_html, "lxml")
+                games = self._parse_table(soup, "pgl_basic")
 
                 if not games:
                     logger.warning(f"  ⚠️  No games found for {player_slug}")
@@ -435,12 +440,12 @@ class Tier1IncrementalScraper:
 
                 # Save IMMEDIATELY
                 data = {
-                    'player_slug': player_slug,
-                    'season': season,
-                    'scraped_at': datetime.now().isoformat(),
-                    'source_url': url,
-                    'game_count': len(games),
-                    'games': games
+                    "player_slug": player_slug,
+                    "season": season,
+                    "scraped_at": datetime.now().isoformat(),
+                    "source_url": url,
+                    "game_count": len(games),
+                    "games": games,
                 }
 
                 s3_key = f"nba/player_game_logs/{player_slug}/{season}.json"
@@ -455,7 +460,9 @@ class Tier1IncrementalScraper:
                 self.checkpoint.mark_failed(item_id, str(e))
 
         stats = self.checkpoint.get_stats()
-        logger.info(f"\n✅ Game logs complete: {stats['completed']} players, {stats['total_records']} games")
+        logger.info(
+            f"\n✅ Game logs complete: {stats['completed']} players, {stats['total_records']} games"
+        )
 
     def get_top_players(self, season: int, limit: int = 300) -> List[str]:
         """Get top N players by minutes for season."""
@@ -469,14 +476,14 @@ class Tier1IncrementalScraper:
             return []
 
         uncommented_html = self._uncomment_html(html)
-        soup = BeautifulSoup(uncommented_html, 'lxml')
-        players = self._parse_table(soup, 'per_game_stats')
+        soup = BeautifulSoup(uncommented_html, "lxml")
+        players = self._parse_table(soup, "per_game_stats")
 
         # Extract player slugs
         slugs = []
         for player in players[:limit]:
-            if 'player_slug' in player:
-                slugs.append(player['player_slug'])
+            if "player_slug" in player:
+                slugs.append(player["player_slug"])
 
         logger.info(f"✓ Found {len(slugs)} players")
         return slugs
@@ -485,44 +492,52 @@ class Tier1IncrementalScraper:
         """Print final summary."""
         stats = self.checkpoint.get_stats()
 
-        logger.info("\n" + "="*70)
+        logger.info("\n" + "=" * 70)
         logger.info("TIER 1 SCRAPING SUMMARY")
-        logger.info("="*70)
+        logger.info("=" * 70)
         logger.info(f"Completed: {stats['completed']}")
         logger.info(f"Failed: {stats['failed']}")
         logger.info(f"In Progress: {stats['in_progress']}")
         logger.info(f"Total Records: {stats['total_records']:,}")
         logger.info(f"Checkpoint: {self.checkpoint.checkpoint_file}")
-        logger.info("="*70)
+        logger.info("=" * 70)
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Basketball Reference Tier 1 - Incremental Scraper')
+    parser = argparse.ArgumentParser(
+        description="Basketball Reference Tier 1 - Incremental Scraper"
+    )
 
     # Execution mode
-    parser.add_argument('--tier', type=int, choices=[1], default=1, help='Tier to scrape')
-    parser.add_argument('--season', help='Season (e.g., 2024) or range (2020-2024)')
-    parser.add_argument('--resume', help='Resume from checkpoint file')
+    parser.add_argument(
+        "--tier", type=int, choices=[1], default=1, help="Tier to scrape"
+    )
+    parser.add_argument("--season", help="Season (e.g., 2024) or range (2020-2024)")
+    parser.add_argument("--resume", help="Resume from checkpoint file")
 
     # Data types
-    parser.add_argument('--all', action='store_true', help='All Tier 1 data types')
-    parser.add_argument('--game-logs', action='store_true', help='Player game logs')
-    parser.add_argument('--play-by-play', action='store_true', help='Event-level PBP')
-    parser.add_argument('--shot-charts', action='store_true', help='Shot charts')
-    parser.add_argument('--tracking', action='store_true', help='Player tracking')
-    parser.add_argument('--lineups', action='store_true', help='Lineup data')
+    parser.add_argument("--all", action="store_true", help="All Tier 1 data types")
+    parser.add_argument("--game-logs", action="store_true", help="Player game logs")
+    parser.add_argument("--play-by-play", action="store_true", help="Event-level PBP")
+    parser.add_argument("--shot-charts", action="store_true", help="Shot charts")
+    parser.add_argument("--tracking", action="store_true", help="Player tracking")
+    parser.add_argument("--lineups", action="store_true", help="Lineup data")
 
     # Options
-    parser.add_argument('--dry-run', action='store_true', help='Dry run (no S3)')
-    parser.add_argument('--checkpoint-file', default=CHECKPOINT_FILE, help='Checkpoint file')
-    parser.add_argument('--player-limit', type=int, default=300, help='Number of players to scrape')
+    parser.add_argument("--dry-run", action="store_true", help="Dry run (no S3)")
+    parser.add_argument(
+        "--checkpoint-file", default=CHECKPOINT_FILE, help="Checkpoint file"
+    )
+    parser.add_argument(
+        "--player-limit", type=int, default=300, help="Number of players to scrape"
+    )
 
     args = parser.parse_args()
 
     # Parse seasons
     if args.season:
-        if '-' in args.season:
-            start, end = map(int, args.season.split('-'))
+        if "-" in args.season:
+            start, end = map(int, args.season.split("-"))
             seasons = list(range(start, end + 1))
         else:
             seasons = [int(args.season)]
@@ -531,8 +546,7 @@ def main():
 
     # Create scraper
     scraper = Tier1IncrementalScraper(
-        checkpoint_file=args.checkpoint_file,
-        dry_run=args.dry_run
+        checkpoint_file=args.checkpoint_file, dry_run=args.dry_run
     )
 
     try:
@@ -570,6 +584,5 @@ def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-

@@ -34,19 +34,19 @@ import argparse
 from pathlib import Path
 
 # Load credentials
-load_dotenv('/Users/ryanranft/nba-sim-credentials.env')
+load_dotenv("/Users/ryanranft/nba-sim-credentials.env")
 
 # Database paths
 UNIFIED_LOCAL_DB = "/tmp/unified_nba.db"
 
 # RDS configuration
 RDS_CONFIG = {
-    'host': os.getenv('DB_HOST'),
-    'database': os.getenv('DB_NAME'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'port': os.getenv('DB_PORT', 5432),
-    'sslmode': 'require'
+    "host": os.getenv("DB_HOST"),
+    "database": os.getenv("DB_NAME"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "port": os.getenv("DB_PORT", 5432),
+    "sslmode": "require",
 }
 
 
@@ -64,7 +64,7 @@ def create_local_unified_database():
     # Remove existing if present
     if Path(UNIFIED_LOCAL_DB).exists():
         response = input("Database exists. Overwrite? (yes/no): ").strip().lower()
-        if response == 'yes':
+        if response == "yes":
             Path(UNIFIED_LOCAL_DB).unlink()
             print("✓ Removed existing database")
         else:
@@ -83,7 +83,8 @@ def create_local_unified_database():
 
     # 1. Unified play-by-play
     print("  Creating: unified_play_by_play")
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE unified_play_by_play (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             game_id TEXT NOT NULL,
@@ -119,16 +120,26 @@ def create_local_unified_database():
             is_primary BOOLEAN DEFAULT FALSE,  -- TRUE if recommended source
             loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-    """)
+    """
+    )
 
-    cursor.execute("CREATE INDEX idx_unified_pbp_game_id ON unified_play_by_play(game_id);")
-    cursor.execute("CREATE INDEX idx_unified_pbp_source ON unified_play_by_play(source);")
-    cursor.execute("CREATE INDEX idx_unified_pbp_date ON unified_play_by_play(game_date);")
-    cursor.execute("CREATE INDEX idx_unified_pbp_primary ON unified_play_by_play(is_primary);")
+    cursor.execute(
+        "CREATE INDEX idx_unified_pbp_game_id ON unified_play_by_play(game_id);"
+    )
+    cursor.execute(
+        "CREATE INDEX idx_unified_pbp_source ON unified_play_by_play(source);"
+    )
+    cursor.execute(
+        "CREATE INDEX idx_unified_pbp_date ON unified_play_by_play(game_date);"
+    )
+    cursor.execute(
+        "CREATE INDEX idx_unified_pbp_primary ON unified_play_by_play(is_primary);"
+    )
 
     # 2. Unified schedule
     print("  Creating: unified_schedule")
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE unified_schedule (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             game_id TEXT NOT NULL,
@@ -156,15 +167,23 @@ def create_local_unified_database():
             is_primary BOOLEAN DEFAULT FALSE,
             loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-    """)
+    """
+    )
 
-    cursor.execute("CREATE INDEX idx_unified_schedule_game_id ON unified_schedule(game_id);")
-    cursor.execute("CREATE INDEX idx_unified_schedule_source ON unified_schedule(source);")
-    cursor.execute("CREATE INDEX idx_unified_schedule_date ON unified_schedule(game_date);")
+    cursor.execute(
+        "CREATE INDEX idx_unified_schedule_game_id ON unified_schedule(game_id);"
+    )
+    cursor.execute(
+        "CREATE INDEX idx_unified_schedule_source ON unified_schedule(source);"
+    )
+    cursor.execute(
+        "CREATE INDEX idx_unified_schedule_date ON unified_schedule(game_date);"
+    )
 
     # 3. Source coverage tracking
     print("  Creating: source_coverage")
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE source_coverage (
             game_id TEXT PRIMARY KEY,
             game_date DATE NOT NULL,
@@ -195,15 +214,21 @@ def create_local_unified_database():
             -- Metadata
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-    """)
+    """
+    )
 
     cursor.execute("CREATE INDEX idx_coverage_date ON source_coverage(game_date);")
-    cursor.execute("CREATE INDEX idx_coverage_primary_source ON source_coverage(primary_source);")
-    cursor.execute("CREATE INDEX idx_coverage_discrepancies ON source_coverage(has_discrepancies);")
+    cursor.execute(
+        "CREATE INDEX idx_coverage_primary_source ON source_coverage(primary_source);"
+    )
+    cursor.execute(
+        "CREATE INDEX idx_coverage_discrepancies ON source_coverage(has_discrepancies);"
+    )
 
     # 4. Data quality discrepancies
     print("  Creating: data_quality_discrepancies")
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE data_quality_discrepancies (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             game_id TEXT NOT NULL,
@@ -230,15 +255,23 @@ def create_local_unified_database():
             detected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             resolution_status TEXT DEFAULT 'UNRESOLVED'
         );
-    """)
+    """
+    )
 
-    cursor.execute("CREATE INDEX idx_discrepancy_game_id ON data_quality_discrepancies(game_id);")
-    cursor.execute("CREATE INDEX idx_discrepancy_severity ON data_quality_discrepancies(severity);")
-    cursor.execute("CREATE INDEX idx_discrepancy_status ON data_quality_discrepancies(resolution_status);")
+    cursor.execute(
+        "CREATE INDEX idx_discrepancy_game_id ON data_quality_discrepancies(game_id);"
+    )
+    cursor.execute(
+        "CREATE INDEX idx_discrepancy_severity ON data_quality_discrepancies(severity);"
+    )
+    cursor.execute(
+        "CREATE INDEX idx_discrepancy_status ON data_quality_discrepancies(resolution_status);"
+    )
 
     # 5. Quality scores (ML-ready)
     print("  Creating: quality_scores")
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE quality_scores (
             game_id TEXT PRIMARY KEY,
             game_date DATE NOT NULL,
@@ -261,11 +294,16 @@ def create_local_unified_database():
             -- Metadata
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-    """)
+    """
+    )
 
     cursor.execute("CREATE INDEX idx_quality_scores_date ON quality_scores(game_date);")
-    cursor.execute("CREATE INDEX idx_quality_scores_source ON quality_scores(recommended_source);")
-    cursor.execute("CREATE INDEX idx_quality_scores_training ON quality_scores(use_for_training);")
+    cursor.execute(
+        "CREATE INDEX idx_quality_scores_source ON quality_scores(recommended_source);"
+    )
+    cursor.execute(
+        "CREATE INDEX idx_quality_scores_training ON quality_scores(use_for_training);"
+    )
 
     print()
     print("✓ All tables created successfully")
@@ -300,7 +338,7 @@ def create_rds_unified_database():
     print()
 
     # Validate credentials
-    if not RDS_CONFIG['user'] or not RDS_CONFIG['password']:
+    if not RDS_CONFIG["user"] or not RDS_CONFIG["password"]:
         print("ERROR: RDS credentials not found")
         sys.exit(1)
 
@@ -322,7 +360,8 @@ def create_rds_unified_database():
 
     # 1. Unified play-by-play
     print("  Creating: unified_play_by_play")
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS unified_play_by_play (
             id SERIAL PRIMARY KEY,
             game_id TEXT NOT NULL,
@@ -363,11 +402,13 @@ def create_rds_unified_database():
         CREATE INDEX IF NOT EXISTS idx_unified_pbp_source ON unified_play_by_play(source);
         CREATE INDEX IF NOT EXISTS idx_unified_pbp_date ON unified_play_by_play(game_date);
         CREATE INDEX IF NOT EXISTS idx_unified_pbp_primary ON unified_play_by_play(is_primary);
-    """)
+    """
+    )
 
     # 2. Unified schedule
     print("  Creating: unified_schedule_v2")  # v2 to avoid conflict with views
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS unified_schedule_v2 (
             id SERIAL PRIMARY KEY,
             game_id TEXT NOT NULL,
@@ -399,11 +440,13 @@ def create_rds_unified_database():
         CREATE INDEX IF NOT EXISTS idx_unified_schedule_v2_game_id ON unified_schedule_v2(game_id);
         CREATE INDEX IF NOT EXISTS idx_unified_schedule_v2_source ON unified_schedule_v2(source);
         CREATE INDEX IF NOT EXISTS idx_unified_schedule_v2_date ON unified_schedule_v2(game_date);
-    """)
+    """
+    )
 
     # 3. Source coverage
     print("  Creating: source_coverage")
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS source_coverage (
             game_id TEXT PRIMARY KEY,
             game_date DATE NOT NULL,
@@ -438,11 +481,13 @@ def create_rds_unified_database():
         CREATE INDEX IF NOT EXISTS idx_coverage_date ON source_coverage(game_date);
         CREATE INDEX IF NOT EXISTS idx_coverage_primary_source ON source_coverage(primary_source);
         CREATE INDEX IF NOT EXISTS idx_coverage_discrepancies ON source_coverage(has_discrepancies);
-    """)
+    """
+    )
 
     # 4. Discrepancies
     print("  Creating: data_quality_discrepancies")
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS data_quality_discrepancies (
             id SERIAL PRIMARY KEY,
             game_id TEXT NOT NULL,
@@ -473,11 +518,13 @@ def create_rds_unified_database():
         CREATE INDEX IF NOT EXISTS idx_discrepancy_game_id ON data_quality_discrepancies(game_id);
         CREATE INDEX IF NOT EXISTS idx_discrepancy_severity ON data_quality_discrepancies(severity);
         CREATE INDEX IF NOT EXISTS idx_discrepancy_status ON data_quality_discrepancies(resolution_status);
-    """)
+    """
+    )
 
     # 5. Quality scores
     print("  Creating: quality_scores")
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS quality_scores (
             game_id TEXT PRIMARY KEY,
             game_date DATE NOT NULL,
@@ -504,7 +551,8 @@ def create_rds_unified_database():
         CREATE INDEX IF NOT EXISTS idx_quality_scores_date ON quality_scores(game_date);
         CREATE INDEX IF NOT EXISTS idx_quality_scores_source ON quality_scores(recommended_source);
         CREATE INDEX IF NOT EXISTS idx_quality_scores_training ON quality_scores(use_for_training);
-    """)
+    """
+    )
 
     print()
     conn.commit()
@@ -512,23 +560,27 @@ def create_rds_unified_database():
     print()
 
     # Print summary
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT table_name
         FROM information_schema.tables
         WHERE table_schema = 'public'
           AND table_name IN ('unified_play_by_play', 'unified_schedule_v2', 'source_coverage',
                              'data_quality_discrepancies', 'quality_scores')
         ORDER BY table_name;
-    """)
+    """
+    )
     tables = cursor.fetchall()
 
     print(f"Created {len(tables)} unified tables in RDS:")
     for table in tables:
-        cursor.execute(f"""
+        cursor.execute(
+            f"""
             SELECT COUNT(*)
             FROM information_schema.columns
             WHERE table_name = '{table[0]}';
-        """)
+        """
+        )
         col_count = cursor.fetchone()[0]
         print(f"  ✓ {table[0]} ({col_count} columns)")
 
@@ -564,25 +616,23 @@ Purpose:
 
   CRITICAL: Source databases remain pure (no cross-contamination).
   This unified database is SEPARATE and combines all sources.
-        """
+        """,
     )
 
     parser.add_argument(
-        '--create-local',
-        action='store_true',
-        help='Create local SQLite unified database'
+        "--create-local",
+        action="store_true",
+        help="Create local SQLite unified database",
     )
 
     parser.add_argument(
-        '--create-rds',
-        action='store_true',
-        help='Create RDS PostgreSQL unified database'
+        "--create-rds",
+        action="store_true",
+        help="Create RDS PostgreSQL unified database",
     )
 
     parser.add_argument(
-        '--create-both',
-        action='store_true',
-        help='Create both local and RDS databases'
+        "--create-both", action="store_true", help="Create both local and RDS databases"
     )
 
     args = parser.parse_args()
@@ -606,5 +656,5 @@ Purpose:
     print(f"Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

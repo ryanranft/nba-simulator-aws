@@ -39,7 +39,8 @@ def create_schema(conn):
     print("Creating database schema...")
 
     # Games table
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS games (
             game_id TEXT PRIMARY KEY,
             game_date TEXT NOT NULL,
@@ -56,10 +57,12 @@ def create_schema(conn):
             json_file_path TEXT,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
-    """)
+    """
+    )
 
     # Play-by-play events table
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS pbp_events (
             event_id INTEGER PRIMARY KEY AUTOINCREMENT,
             game_id TEXT NOT NULL,
@@ -72,10 +75,12 @@ def create_schema(conn):
             event_sequence INTEGER,
             FOREIGN KEY (game_id) REFERENCES games(game_id)
         )
-    """)
+    """
+    )
 
     # Data coverage summary table
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS data_coverage (
             year INTEGER PRIMARY KEY,
             games_total INTEGER,
@@ -85,14 +90,17 @@ def create_schema(conn):
             earliest_game_date TEXT,
             latest_game_date TEXT
         )
-    """)
+    """
+    )
 
     # Create indexes
     print("Creating indexes...")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_games_date ON games(game_date)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_games_season ON games(season)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_pbp_game ON pbp_events(game_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_pbp_period ON pbp_events(game_id, period)")
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_pbp_period ON pbp_events(game_id, period)"
+    )
 
     conn.commit()
     print("✓ Schema created")
@@ -110,32 +118,32 @@ def extract_game_info(filepath: Path) -> dict:
             data = json.load(f)
 
         # Navigate to game package
-        game = data.get('page', {}).get('content', {}).get('gamepackage', {})
+        game = data.get("page", {}).get("content", {}).get("gamepackage", {})
         if not game:
             return None
 
-        gmStrp = game.get('gmStrp', {})
-        pbp = game.get('pbp', {})
+        gmStrp = game.get("gmStrp", {})
+        pbp = game.get("pbp", {})
 
         # Extract game metadata
-        game_id = gmStrp.get('gid')
+        game_id = gmStrp.get("gid")
         if not game_id:
             return None
 
-        date_str = gmStrp.get('dt')
-        status = gmStrp.get('status', {}).get('desc', 'Unknown')
+        date_str = gmStrp.get("dt")
+        status = gmStrp.get("status", {}).get("desc", "Unknown")
 
         # Extract teams and scores
-        teams = gmStrp.get('tms', [])
+        teams = gmStrp.get("tms", [])
         home_team = None
         away_team = None
         home_score = 0
         away_score = 0
 
         for team in teams:
-            team_name = team.get('displayName', '')
-            score = team.get('score', 0)
-            is_home = team.get('homeAway') == 'home'
+            team_name = team.get("displayName", "")
+            score = team.get("score", 0)
+            is_home = team.get("homeAway") == "home"
 
             if is_home:
                 home_team = team_name
@@ -145,7 +153,7 @@ def extract_game_info(filepath: Path) -> dict:
                 away_score = score
 
         # Extract play-by-play data
-        play_grps = pbp.get('playGrps', [])
+        play_grps = pbp.get("playGrps", [])
         events = []
 
         for period_idx, grp in enumerate(play_grps):
@@ -156,23 +164,25 @@ def extract_game_info(filepath: Path) -> dict:
                 if not isinstance(play, dict):
                     continue
 
-                events.append({
-                    'period': period_idx + 1,
-                    'sequence': seq,
-                    'clock': play.get('clock', {}).get('displayValue'),
-                    'text': play.get('text', ''),
-                    'away_score': play.get('awayScore', 0),
-                    'home_score': play.get('homeScore', 0),
-                    'team': play.get('homeAway', '')
-                })
+                events.append(
+                    {
+                        "period": period_idx + 1,
+                        "sequence": seq,
+                        "clock": play.get("clock", {}).get("displayValue"),
+                        "text": play.get("text", ""),
+                        "away_score": play.get("awayScore", 0),
+                        "home_score": play.get("homeScore", 0),
+                        "team": play.get("homeAway", ""),
+                    }
+                )
 
         # Parse date to get season
         season = None
         game_date = None
         if date_str:
             try:
-                dt = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
-                game_date = dt.strftime('%Y-%m-%d')
+                dt = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+                game_date = dt.strftime("%Y-%m-%d")
                 # NBA season spans calendar years (Oct-Jun)
                 year = dt.year
                 season = year if dt.month >= 10 else year - 1
@@ -180,19 +190,19 @@ def extract_game_info(filepath: Path) -> dict:
                 pass
 
         return {
-            'game_id': str(game_id),
-            'game_date': game_date,
-            'season': season,
-            'status': status,
-            'home_team': home_team,
-            'away_team': away_team,
-            'home_score': int(home_score) if home_score else 0,
-            'away_score': int(away_score) if away_score else 0,
-            'quarters_played': len(play_grps),
-            'has_pbp': len(events) > 0,
-            'pbp_event_count': len(events),
-            'events': events,
-            'json_file_path': str(filepath)
+            "game_id": str(game_id),
+            "game_date": game_date,
+            "season": season,
+            "status": status,
+            "home_team": home_team,
+            "away_team": away_team,
+            "home_score": int(home_score) if home_score else 0,
+            "away_score": int(away_score) if away_score else 0,
+            "quarters_played": len(play_grps),
+            "has_pbp": len(events) > 0,
+            "pbp_event_count": len(events),
+            "events": events,
+            "json_file_path": str(filepath),
         }
 
     except Exception as e:
@@ -203,45 +213,51 @@ def extract_game_info(filepath: Path) -> dict:
 def insert_game(cursor, game_info: dict):
     """Insert game and events into database"""
     # Insert game
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT OR REPLACE INTO games (
             game_id, game_date, season, status, home_team, away_team,
             home_score, away_score, quarters_played, has_pbp,
             pbp_event_count, json_file_path
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        game_info['game_id'],
-        game_info['game_date'],
-        game_info['season'],
-        game_info['status'],
-        game_info['home_team'],
-        game_info['away_team'],
-        game_info['home_score'],
-        game_info['away_score'],
-        game_info['quarters_played'],
-        game_info['has_pbp'],
-        game_info['pbp_event_count'],
-        game_info['json_file_path']
-    ))
+    """,
+        (
+            game_info["game_id"],
+            game_info["game_date"],
+            game_info["season"],
+            game_info["status"],
+            game_info["home_team"],
+            game_info["away_team"],
+            game_info["home_score"],
+            game_info["away_score"],
+            game_info["quarters_played"],
+            game_info["has_pbp"],
+            game_info["pbp_event_count"],
+            game_info["json_file_path"],
+        ),
+    )
 
     # Insert events
-    if game_info['events']:
-        for event in game_info['events']:
-            cursor.execute("""
+    if game_info["events"]:
+        for event in game_info["events"]:
+            cursor.execute(
+                """
                 INSERT INTO pbp_events (
                     game_id, period, clock_display, event_text,
                     home_score, away_score, team_possession, event_sequence
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                game_info['game_id'],
-                event['period'],
-                event['clock'],
-                event['text'],
-                event['home_score'],
-                event['away_score'],
-                event['team'],
-                event['sequence']
-            ))
+            """,
+                (
+                    game_info["game_id"],
+                    event["period"],
+                    event["clock"],
+                    event["text"],
+                    event["home_score"],
+                    event["away_score"],
+                    event["team"],
+                    event["sequence"],
+                ),
+            )
 
 
 def calculate_coverage(conn):
@@ -250,7 +266,8 @@ def calculate_coverage(conn):
 
     print("\nCalculating coverage statistics...")
 
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT OR REPLACE INTO data_coverage (
             year, games_total, games_with_pbp, pbp_coverage_pct,
             avg_events_per_game, earliest_game_date, latest_game_date
@@ -267,7 +284,8 @@ def calculate_coverage(conn):
         WHERE season IS NOT NULL
         GROUP BY season
         ORDER BY season
-    """)
+    """
+    )
 
     conn.commit()
     print("✓ Coverage statistics calculated")
@@ -277,9 +295,9 @@ def print_summary(conn):
     """Print database summary"""
     cursor = conn.cursor()
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("ESPN LOCAL DATABASE SUMMARY")
-    print("="*80)
+    print("=" * 80)
 
     # Total games
     cursor.execute("SELECT COUNT(*) FROM games")
@@ -300,16 +318,21 @@ def print_summary(conn):
     print(f"Average events per game: {avg_events:.0f}")
 
     # Date range
-    cursor.execute("SELECT MIN(game_date), MAX(game_date) FROM games WHERE game_date IS NOT NULL")
+    cursor.execute(
+        "SELECT MIN(game_date), MAX(game_date) FROM games WHERE game_date IS NOT NULL"
+    )
     min_date, max_date = cursor.fetchone()
     print(f"Date range: {min_date} to {max_date}")
 
     # Coverage by era
     print("\nCoverage by Era:")
-    print(f"{'Era':<20} {'Games':<10} {'With PBP':<12} {'Avg Events':<12} {'Coverage %'}")
-    print("-"*70)
+    print(
+        f"{'Era':<20} {'Games':<10} {'With PBP':<12} {'Avg Events':<12} {'Coverage %'}"
+    )
+    print("-" * 70)
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             CASE
                 WHEN season < 2002 THEN '1993-2001 (Early)'
@@ -324,44 +347,55 @@ def print_summary(conn):
         WHERE season IS NOT NULL
         GROUP BY era
         ORDER BY MIN(season)
-    """)
+    """
+    )
 
     for row in cursor.fetchall():
         era, games, with_pbp, avg_events, coverage = row
-        print(f"{era:<20} {games:<10,} {with_pbp:<12,} {avg_events:<12.0f} {coverage:.1f}%")
+        print(
+            f"{era:<20} {games:<10,} {with_pbp:<12,} {avg_events:<12.0f} {coverage:.1f}%"
+        )
 
     # Top 10 years by coverage
     print("\nTop 10 Years by Play-by-Play Coverage:")
-    print(f"{'Year':<8} {'Games':<10} {'With PBP':<12} {'Coverage %':<12} {'Avg Events'}")
-    print("-"*60)
+    print(
+        f"{'Year':<8} {'Games':<10} {'With PBP':<12} {'Coverage %':<12} {'Avg Events'}"
+    )
+    print("-" * 60)
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT year, games_total, games_with_pbp, pbp_coverage_pct, avg_events_per_game
         FROM data_coverage
         ORDER BY pbp_coverage_pct DESC, avg_events_per_game DESC
         LIMIT 10
-    """)
+    """
+    )
 
     for row in cursor.fetchall():
         year, total, with_pbp, pct, avg_events = row
         print(f"{year:<8} {total:<10,} {with_pbp:<12,} {pct:<12.1f} {avg_events:.0f}")
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
 
 
 def main():
     parser = argparse.ArgumentParser(description="Create local ESPN SQLite database")
-    parser.add_argument('--output', default=str(DEFAULT_OUTPUT), help='Output database path')
-    parser.add_argument('--sample', type=int, help='Process only first N files (for testing)')
-    parser.add_argument('--verbose', action='store_true', help='Verbose output')
+    parser.add_argument(
+        "--output", default=str(DEFAULT_OUTPUT), help="Output database path"
+    )
+    parser.add_argument(
+        "--sample", type=int, help="Process only first N files (for testing)"
+    )
+    parser.add_argument("--verbose", action="store_true", help="Verbose output")
 
     args = parser.parse_args()
 
     output_path = Path(args.output)
 
-    print("="*80)
+    print("=" * 80)
     print("CREATE LOCAL ESPN DATABASE")
-    print("="*80)
+    print("=" * 80)
     print(f"Input directory: {ESPN_DATA_DIR}")
     print(f"Output database: {output_path}")
     print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -384,7 +418,7 @@ def main():
 
     # Apply sample limit if specified
     if args.sample:
-        json_files = json_files[:args.sample]
+        json_files = json_files[: args.sample]
         print(f"TEST MODE: Processing first {len(json_files):,} files")
 
     print()
@@ -413,7 +447,9 @@ def main():
     for i, filepath in enumerate(json_files, 1):
         if args.verbose or i % 1000 == 0:
             pct = (i / len(json_files)) * 100
-            print(f"Progress: {i:,}/{len(json_files):,} ({pct:.1f}%) - {games_inserted:,} games, {events_inserted:,} events")
+            print(
+                f"Progress: {i:,}/{len(json_files):,} ({pct:.1f}%) - {games_inserted:,} games, {events_inserted:,} events"
+            )
 
         try:
             game_info = extract_game_info(filepath)
@@ -421,7 +457,7 @@ def main():
             if game_info:
                 insert_game(cursor, game_info)
                 games_inserted += 1
-                events_inserted += game_info['pbp_event_count']
+                events_inserted += game_info["pbp_event_count"]
                 processed += 1
 
             # Commit every 1000 files
@@ -455,17 +491,19 @@ def main():
     print(f"\nDatabase size: {db_size_mb:.1f} MB")
     print(f"Saved to: {output_path}")
     print()
-    print("="*80)
+    print("=" * 80)
     print("COMPLETE")
-    print("="*80)
+    print("=" * 80)
     print(f"Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
     print("Next steps:")
     print("1. Query database: sqlite3 /tmp/espn_local.db")
     print("2. Compare with RDS: python scripts/analysis/compare_espn_local_vs_rds.py")
-    print("3. Generate reports: python scripts/analysis/generate_espn_coverage_report.py")
-    print("="*80)
+    print(
+        "3. Generate reports: python scripts/analysis/generate_espn_coverage_report.py"
+    )
+    print("=" * 80)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

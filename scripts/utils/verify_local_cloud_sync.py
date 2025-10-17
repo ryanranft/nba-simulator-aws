@@ -46,7 +46,7 @@ class LocalCloudVerifier:
         self.verification_results = {
             "hoopr_s3_sync": None,
             "espn_rds_sync": None,
-            "overall_status": "PENDING"
+            "overall_status": "PENDING",
         }
 
     def verify_all(self, skip_espn_rds: bool = False) -> Dict:
@@ -55,23 +55,23 @@ class LocalCloudVerifier:
         Returns:
             Dict with verification results and overall status
         """
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("LOCAL-CLOUD SYNCHRONIZATION VERIFICATION")
-        print("="*70)
+        print("=" * 70)
         print(f"\nTimestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
         # Check 1: hoopR local parquet vs S3
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("CHECK 1: hoopR Local Parquet ↔ S3 Sync")
-        print("="*70)
+        print("=" * 70)
         hoopr_result = self._verify_hoopr_s3_sync()
         self.verification_results["hoopr_s3_sync"] = hoopr_result
 
         # Check 2: ESPN local SQLite vs RDS (optional)
         if not skip_espn_rds:
-            print("\n" + "="*70)
+            print("\n" + "=" * 70)
             print("CHECK 2: ESPN Local SQLite ↔ RDS Sync")
-            print("="*70)
+            print("=" * 70)
             espn_result = self._verify_espn_rds_sync()
             self.verification_results["espn_rds_sync"] = espn_result
         else:
@@ -104,7 +104,7 @@ class LocalCloudVerifier:
             "s3_files": 0,
             "local_size_mb": 0,
             "s3_size_mb": 0,
-            "issues": []
+            "issues": [],
         }
 
         # Get local parquet file inventory
@@ -112,7 +112,9 @@ class LocalCloudVerifier:
         local_files = self._get_local_parquet_inventory()
         result["local_files"] = local_files["count"]
         result["local_size_mb"] = local_files["size_mb"]
-        print(f"  Found: {local_files['count']} files ({local_files['size_mb']:.1f} MB)")
+        print(
+            f"  Found: {local_files['count']} files ({local_files['size_mb']:.1f} MB)"
+        )
 
         # Get S3 parquet file inventory
         print("\n☁️  Scanning S3 hoopR parquet files...")
@@ -128,7 +130,11 @@ class LocalCloudVerifier:
             print(f"  ⚠️  {issue}")
 
         # Compare sizes (allow 1% variance for compression)
-        size_diff_pct = abs(local_files["size_mb"] - s3_files["size_mb"]) / local_files["size_mb"] * 100
+        size_diff_pct = (
+            abs(local_files["size_mb"] - s3_files["size_mb"])
+            / local_files["size_mb"]
+            * 100
+        )
         if size_diff_pct > 1.0:
             issue = f"Size variance {size_diff_pct:.1f}% (expected <1%)"
             result["issues"].append(issue)
@@ -140,8 +146,7 @@ class LocalCloudVerifier:
         if self.detailed:
             print("\n🔍 Performing detailed checksum verification...")
             checksum_result = self._verify_sample_checksums(
-                local_files["files"],
-                s3_files["files"]
+                local_files["files"], s3_files["files"]
             )
             if not checksum_result["all_match"]:
                 result["issues"].extend(checksum_result["mismatches"])
@@ -171,7 +176,7 @@ class LocalCloudVerifier:
             "status": "UNKNOWN",
             "script_exit_code": None,
             "output": "",
-            "issues": []
+            "issues": [],
         }
 
         # Check if comparison script exists
@@ -189,10 +194,7 @@ class LocalCloudVerifier:
         try:
             cmd = [sys.executable, str(comparison_script)]
             proc = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=300  # 5 minute timeout
+                cmd, capture_output=True, text=True, timeout=300  # 5 minute timeout
             )
 
             result["script_exit_code"] = proc.returncode
@@ -204,7 +206,9 @@ class LocalCloudVerifier:
             else:
                 result["status"] = "SYNC_ISSUES"
                 result["issues"].append(f"Script exit code: {proc.returncode}")
-                print(f"  ⚠️  ESPN sync check returned non-zero exit code: {proc.returncode}")
+                print(
+                    f"  ⚠️  ESPN sync check returned non-zero exit code: {proc.returncode}"
+                )
 
             # Print script output if detailed
             if self.detailed and proc.stdout:
@@ -237,7 +241,7 @@ class LocalCloudVerifier:
             "load_nba_pbp/parquet",
             "load_nba_player_box/parquet",
             "load_nba_schedule/parquet",
-            "load_nba_team_box/parquet"
+            "load_nba_team_box/parquet",
         ]
 
         for subdir in parquet_dirs:
@@ -247,19 +251,12 @@ class LocalCloudVerifier:
 
             for pf in dir_path.glob("*.parquet"):
                 size = pf.stat().st_size
-                files.append({
-                    "path": str(pf),
-                    "name": pf.name,
-                    "size": size,
-                    "subdir": subdir
-                })
+                files.append(
+                    {"path": str(pf), "name": pf.name, "size": size, "subdir": subdir}
+                )
                 total_size += size
 
-        return {
-            "count": len(files),
-            "size_mb": total_size / (1024**2),
-            "files": files
-        }
+        return {"count": len(files), "size_mb": total_size / (1024**2), "files": files}
 
     def _get_s3_parquet_inventory(self) -> Dict:
         """Get inventory of S3 hoopR parquet files.
@@ -276,22 +273,13 @@ class LocalCloudVerifier:
         s3_prefix = f"{self.s3_bucket}/hoopr_parquet/"
 
         try:
-            cmd = [
-                "aws", "s3", "ls", s3_prefix,
-                "--recursive",
-                "--human-readable"
-            ]
+            cmd = ["aws", "s3", "ls", s3_prefix, "--recursive", "--human-readable"]
 
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                check=True
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
             # Parse output (format: date time size filename)
-            for line in result.stdout.strip().split('\n'):
-                if not line or '.parquet' not in line:
+            for line in result.stdout.strip().split("\n"):
+                if not line or ".parquet" not in line:
                     continue
 
                 parts = line.split()
@@ -303,11 +291,13 @@ class LocalCloudVerifier:
                     # Parse filename
                     filename = parts[3]
 
-                    files.append({
-                        "name": Path(filename).name,
-                        "size_mb": size_mb,
-                        "s3_path": filename
-                    })
+                    files.append(
+                        {
+                            "name": Path(filename).name,
+                            "size_mb": size_mb,
+                            "s3_path": filename,
+                        }
+                    )
                     total_size += size_mb
 
         except subprocess.CalledProcessError as e:
@@ -315,11 +305,7 @@ class LocalCloudVerifier:
         except Exception as e:
             print(f"  ⚠️  Error parsing S3 output: {e}")
 
-        return {
-            "count": len(files),
-            "size_mb": total_size,
-            "files": files
-        }
+        return {"count": len(files), "size_mb": total_size, "files": files}
 
     def _parse_s3_size(self, size_str: str) -> float:
         """Parse S3 size string to MB.
@@ -341,7 +327,9 @@ class LocalCloudVerifier:
         except:
             return 0.0
 
-    def _verify_sample_checksums(self, local_files: List[Dict], s3_files: List[Dict]) -> Dict:
+    def _verify_sample_checksums(
+        self, local_files: List[Dict], s3_files: List[Dict]
+    ) -> Dict:
         """Verify checksums for sample of files (detailed mode).
 
         Samples 10% of files or max 20 files.
@@ -353,12 +341,7 @@ class LocalCloudVerifier:
         Returns:
             Dict with checksum verification results
         """
-        result = {
-            "all_match": True,
-            "checked": 0,
-            "matched": 0,
-            "mismatches": []
-        }
+        result = {"all_match": True, "checked": 0, "matched": 0, "mismatches": []}
 
         # Create lookup by filename
         local_lookup = {f["name"]: f for f in local_files}
@@ -388,15 +371,17 @@ class LocalCloudVerifier:
             result["matched"] += 1
 
         if result["checked"] > 0:
-            print(f"  ✅ Verified {result['matched']}/{result['checked']} file checksums")
+            print(
+                f"  ✅ Verified {result['matched']}/{result['checked']} file checksums"
+            )
 
         return result
 
     def _compute_md5(self, file_path: str) -> str:
         """Compute MD5 checksum for local file."""
         md5 = hashlib.md5()
-        with open(file_path, 'rb') as f:
-            for chunk in iter(lambda: f.read(8192), b''):
+        with open(file_path, "rb") as f:
+            for chunk in iter(lambda: f.read(8192), b""):
                 md5.update(chunk)
         return md5.hexdigest()
 
@@ -406,7 +391,11 @@ class LocalCloudVerifier:
         espn_status = self.verification_results["espn_rds_sync"]["status"]
 
         # Priority: ERROR > OUT_OF_SYNC > WARNING > SYNCED
-        if hoopr_status == "OUT_OF_SYNC" or espn_status in ["SYNC_ISSUES", "ERROR", "TIMEOUT"]:
+        if hoopr_status == "OUT_OF_SYNC" or espn_status in [
+            "SYNC_ISSUES",
+            "ERROR",
+            "TIMEOUT",
+        ]:
             self.verification_results["overall_status"] = "FAILED"
         elif hoopr_status == "WARNING" or espn_status == "WARNING":
             self.verification_results["overall_status"] = "PASSED_WITH_WARNINGS"
@@ -417,15 +406,17 @@ class LocalCloudVerifier:
 
     def _print_summary(self):
         """Print verification summary."""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("VERIFICATION SUMMARY")
-        print("="*70)
+        print("=" * 70)
 
         # hoopR S3 sync
         hoopr = self.verification_results["hoopr_s3_sync"]
         print(f"\n📊 hoopR Local ↔ S3 Sync:")
         print(f"  Status:       {hoopr['status']}")
-        print(f"  Local files:  {hoopr['local_files']} ({hoopr['local_size_mb']:.1f} MB)")
+        print(
+            f"  Local files:  {hoopr['local_files']} ({hoopr['local_size_mb']:.1f} MB)"
+        )
         print(f"  S3 files:     {hoopr['s3_files']} ({hoopr['s3_size_mb']:.1f} MB)")
         if hoopr["issues"]:
             print(f"  Issues:       {len(hoopr['issues'])} found")
@@ -446,19 +437,23 @@ class LocalCloudVerifier:
         print(f"\n🎯 Overall Status: {overall}")
 
         if overall == "PASSED":
-            print("\n✅ All checks passed - Local validation will accurately reflect cloud data")
+            print(
+                "\n✅ All checks passed - Local validation will accurately reflect cloud data"
+            )
         elif overall == "PASSED_PARTIAL":
             print("\n⚠️  Partial verification - hoopR sync verified, ESPN RDS skipped")
         elif overall == "PASSED_WITH_WARNINGS":
             print("\n⚠️  Minor issues detected - Review warnings before proceeding")
         else:
-            print("\n❌ Verification failed - Local validation may not reflect cloud data")
+            print(
+                "\n❌ Verification failed - Local validation may not reflect cloud data"
+            )
             print("   Fix sync issues before relying on local validation results")
 
         # Next steps
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("NEXT STEPS")
-        print("="*70)
+        print("=" * 70)
 
         if overall in ["PASSED", "PASSED_PARTIAL"]:
             print("\n✅ Proceed with local validation:")
@@ -467,10 +462,7 @@ class LocalCloudVerifier:
             print("  3. Load to RDS (if validation passes)")
         else:
             print("\n⚠️  Fix sync issues first:")
-            for check_name, check_result in [
-                ("hoopR S3", hoopr),
-                ("ESPN RDS", espn)
-            ]:
+            for check_name, check_result in [("hoopR S3", hoopr), ("ESPN RDS", espn)]:
                 if check_result["issues"]:
                     print(f"\n{check_name}:")
                     for issue in check_result["issues"]:
@@ -498,37 +490,34 @@ Purpose:
 
 Pattern:
   Reusable template for any data source (NBA API, Basketball Reference, etc.)
-        """
+        """,
     )
 
     parser.add_argument(
-        '--hoopr-local-dir',
+        "--hoopr-local-dir",
         default=DEFAULT_HOOPR_LOCAL_PARQUET,
-        help=f'hoopR local parquet directory (default: {DEFAULT_HOOPR_LOCAL_PARQUET})'
+        help=f"hoopR local parquet directory (default: {DEFAULT_HOOPR_LOCAL_PARQUET})",
     )
 
     parser.add_argument(
-        '--s3-bucket',
+        "--s3-bucket",
         default=DEFAULT_S3_BUCKET,
-        help=f'S3 bucket name (default: {DEFAULT_S3_BUCKET})'
+        help=f"S3 bucket name (default: {DEFAULT_S3_BUCKET})",
     )
 
     parser.add_argument(
-        '--skip-espn-rds',
-        action='store_true',
-        help='Skip ESPN local SQLite vs RDS verification'
+        "--skip-espn-rds",
+        action="store_true",
+        help="Skip ESPN local SQLite vs RDS verification",
     )
 
     parser.add_argument(
-        '--detailed',
-        action='store_true',
-        help='Enable detailed output (includes sample checksum verification)'
+        "--detailed",
+        action="store_true",
+        help="Enable detailed output (includes sample checksum verification)",
     )
 
-    parser.add_argument(
-        '--export-json',
-        help='Export results to JSON file'
-    )
+    parser.add_argument("--export-json", help="Export results to JSON file")
 
     args = parser.parse_args()
 
@@ -536,14 +525,14 @@ Pattern:
         verifier = LocalCloudVerifier(
             hoopr_local_dir=args.hoopr_local_dir,
             s3_bucket=args.s3_bucket,
-            detailed=args.detailed
+            detailed=args.detailed,
         )
 
         results = verifier.verify_all(skip_espn_rds=args.skip_espn_rds)
 
         # Export JSON if requested
         if args.export_json:
-            with open(args.export_json, 'w') as f:
+            with open(args.export_json, "w") as f:
                 json.dump(results, f, indent=2)
             print(f"\n📄 Results exported to: {args.export_json}")
 
@@ -558,6 +547,7 @@ Pattern:
     except Exception as e:
         print(f"\n❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(3)
 

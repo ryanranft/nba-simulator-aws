@@ -70,7 +70,7 @@ def decode_espn_game_id(game_id: str) -> Optional[Dict]:
     game_id = str(game_id)
 
     # New format (2018+): 401######
-    if game_id.startswith('401') or game_id.startswith('400'):
+    if game_id.startswith("401") or game_id.startswith("400"):
         # New format doesn't encode date in same way
         # Return None to indicate we can't decode it
         return None
@@ -89,11 +89,11 @@ def decode_espn_game_id(game_id: str) -> Optional[Dict]:
             # Validation
             if 1 <= month <= 12 and 1 <= day <= 31 and 1980 <= year <= 2020:
                 return {
-                    'year': year,
-                    'month': month,
-                    'day': day,
-                    'sequence': sequence,
-                    'date_str': f"{year:04d}{month:02d}{day:02d}"
+                    "year": year,
+                    "month": month,
+                    "day": day,
+                    "sequence": sequence,
+                    "date_str": f"{year:04d}{month:02d}{day:02d}",
                 }
         except (ValueError, IndexError):
             pass
@@ -213,11 +213,7 @@ class NBAStatsVerifier:
             formatted_date = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:8]}"
 
             url = f"{NBA_API_BASE}/scoreboardV2"
-            params = {
-                "GameDate": formatted_date,
-                "LeagueID": "00",
-                "DayOffset": "0"
-            }
+            params = {"GameDate": formatted_date, "LeagueID": "00", "DayOffset": "0"}
 
             response = requests.get(url, headers=HEADERS, params=params, timeout=10)
             time.sleep(REQUEST_DELAY)  # Rate limiting
@@ -269,23 +265,27 @@ class NBAStatsVerifier:
                         home_team = {
                             "abbreviation": team_info.get("abbreviation"),
                             "score": team.get("score"),
-                            "name": team_info.get("displayName")
+                            "name": team_info.get("displayName"),
                         }
                     else:
                         away_team = {
                             "abbreviation": team_info.get("abbreviation"),
                             "score": team.get("score"),
-                            "name": team_info.get("displayName")
+                            "name": team_info.get("displayName"),
                         }
 
                 if home_team and away_team:
-                    games.append({
-                        "game_id": event.get("id"),
-                        "date": comp.get("date", "")[:10],  # YYYY-MM-DD
-                        "home": home_team,
-                        "away": away_team,
-                        "status": comp.get("status", {}).get("type", {}).get("description")
-                    })
+                    games.append(
+                        {
+                            "game_id": event.get("id"),
+                            "date": comp.get("date", "")[:10],  # YYYY-MM-DD
+                            "home": home_team,
+                            "away": away_team,
+                            "status": comp.get("status", {})
+                            .get("type", {})
+                            .get("description"),
+                        }
+                    )
 
             except (KeyError, IndexError, TypeError) as e:
                 continue
@@ -326,20 +326,24 @@ class NBAStatsVerifier:
                     team_abbr = score_dict.get("TEAM_ABBREVIATION")
                     scores[team_abbr] = {
                         "score": score_dict.get("PTS"),
-                        "team_id": score_dict.get("TEAM_ID")
+                        "team_id": score_dict.get("TEAM_ID"),
                     }
 
-            games.append({
-                "game_id": game_id,
-                "date": game_dict.get("GAME_DATE_EST"),
-                "home_team_id": game_dict.get("HOME_TEAM_ID"),
-                "away_team_id": game_dict.get("VISITOR_TEAM_ID"),
-                "scores": scores
-            })
+            games.append(
+                {
+                    "game_id": game_id,
+                    "date": game_dict.get("GAME_DATE_EST"),
+                    "home_team_id": game_dict.get("HOME_TEAM_ID"),
+                    "away_team_id": game_dict.get("VISITOR_TEAM_ID"),
+                    "scores": scores,
+                }
+            )
 
         return games
 
-    def match_and_compare_games(self, date_str: str, espn_games: List[Dict], nba_games: List[Dict]):
+    def match_and_compare_games(
+        self, date_str: str, espn_games: List[Dict], nba_games: List[Dict]
+    ):
         """Match ESPN games to NBA.com games and compare"""
 
         # Group ESPN games by team matchup to detect duplicates
@@ -374,7 +378,10 @@ class NBAStatsVerifier:
                 print(f"    ⚠️ Duplicate IDs for {matchup}: {', '.join(decoded_ids)}")
 
                 # Use the game with the highest score (most complete data)
-                espn_game = max(games, key=lambda g: (g["home"]["score"] or 0) + (g["away"]["score"] or 0))
+                espn_game = max(
+                    games,
+                    key=lambda g: (g["home"]["score"] or 0) + (g["away"]["score"] or 0),
+                )
             else:
                 espn_game = games[0]
 
@@ -387,8 +394,10 @@ class NBAStatsVerifier:
             game_id_info = decode_espn_game_id(espn_game["game_id"])
             if game_id_info:
                 # Verify decoded date matches expected date
-                if game_id_info['date_str'] != date_str:
-                    print(f"    ⚠️ Game ID date mismatch: {espn_game['game_id']} decodes to {game_id_info['date_str']}, expected {date_str}")
+                if game_id_info["date_str"] != date_str:
+                    print(
+                        f"    ⚠️ Game ID date mismatch: {espn_game['game_id']} decodes to {game_id_info['date_str']}, expected {date_str}"
+                    )
 
             # Find matching NBA.com game
             nba_match = None
@@ -427,18 +436,24 @@ class NBAStatsVerifier:
                     "date": date_str,
                     "game_id": espn_game["game_id"],
                     "teams": f"{espn_away} @ {espn_home}",
-                    "issues": [f"Home score: ESPN={espn_home_score}, NBA.com={nba_home_score}"]
+                    "issues": [
+                        f"Home score: ESPN={espn_home_score}, NBA.com={nba_home_score}"
+                    ],
                 }
 
             if str(espn_away_score) != str(nba_away_score):
                 if discrepancy:
-                    discrepancy["issues"].append(f"Away score: ESPN={espn_away_score}, NBA.com={nba_away_score}")
+                    discrepancy["issues"].append(
+                        f"Away score: ESPN={espn_away_score}, NBA.com={nba_away_score}"
+                    )
                 else:
                     discrepancy = {
                         "date": date_str,
                         "game_id": espn_game["game_id"],
                         "teams": f"{espn_away} @ {espn_home}",
-                        "issues": [f"Away score: ESPN={espn_away_score}, NBA.com={nba_away_score}"]
+                        "issues": [
+                            f"Away score: ESPN={espn_away_score}, NBA.com={nba_away_score}"
+                        ],
                     }
 
             if discrepancy:
@@ -463,7 +478,10 @@ class NBAStatsVerifier:
         dates_processed = 0
         for date_str in date_sample:
             dates_processed += 1
-            print(f"[{dates_processed}/{len(date_sample)}] Processing {date_str}...", end=" ")
+            print(
+                f"[{dates_processed}/{len(date_sample)}] Processing {date_str}...",
+                end=" ",
+            )
 
             # Get ESPN data for this date
             espn_data = self.get_espn_schedule_data(date_str)
@@ -507,18 +525,14 @@ class NBAStatsVerifier:
         if total == 0:
             return
 
-        self.results["score_accuracy"] = (
-            self.results["score_matches"] / total * 100
-        )
-        self.results["date_accuracy"] = (
-            self.results["date_matches"] / total * 100
-        )
+        self.results["score_accuracy"] = self.results["score_matches"] / total * 100
+        self.results["date_accuracy"] = self.results["date_matches"] / total * 100
         self.results["data_completeness"] = (
-            self.results["found_in_nba_api"] / total * 100
-        ) if total > 0 else 0
+            (self.results["found_in_nba_api"] / total * 100) if total > 0 else 0
+        )
         self.results["discrepancy_rate"] = (
-            len(self.results["discrepancies"]) / total * 100
-        ) if total > 0 else 0
+            (len(self.results["discrepancies"]) / total * 100) if total > 0 else 0
+        )
 
     def write_results(self):
         """Write results to VERIFICATION_RESULTS.md"""
@@ -555,7 +569,9 @@ class NBAStatsVerifier:
 
         if self.results["discrepancies"]:
             for disc in self.results["discrepancies"]:
-                content += f"\n### {disc['date']} - {disc['teams']} (Game {disc['game_id']})\n"
+                content += (
+                    f"\n### {disc['date']} - {disc['teams']} (Game {disc['game_id']})\n"
+                )
                 for issue in disc["issues"]:
                     content += f"- {issue}\n"
         else:
@@ -582,7 +598,9 @@ class NBAStatsVerifier:
         if passed:
             content += "✅ **VERIFICATION PASSED** - ESPN data quality meets all success criteria\n"
         else:
-            content += "❌ **VERIFICATION FAILED** - Some metrics below success criteria\n"
+            content += (
+                "❌ **VERIFICATION FAILED** - Some metrics below success criteria\n"
+            )
 
         content += f"\n*Next verification: Run monthly or after data updates*\n"
 

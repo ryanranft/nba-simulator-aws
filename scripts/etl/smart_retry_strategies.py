@@ -217,7 +217,7 @@ class SmartRetryManager:
         # Add jitter if enabled
         if config.jitter:
             jitter_range = delay * 0.1  # 10% jitter
-            delay += random.uniform(-jitter_range, jitter_range)
+            delay += random.uniform(-jitter_range, jitter_range)  # nosec B311 - Random jitter for retry timing, not security-critical
 
         return max(0.0, delay)
 
@@ -544,7 +544,7 @@ if __name__ == "__main__":
         async def fetch_data(url: str) -> str:
             # Simulate network call
             await asyncio.sleep(0.1)
-            if random.random() < 0.7:  # 70% failure rate
+            if random.random() < 0.7:  # nosec B311 - Test/example code only, not security-critical
                 raise ConnectionError("Network error")
             return f"Data from {url}"
 
@@ -568,7 +568,7 @@ if __name__ == "__main__":
         circuit_breaker = CircuitBreaker(failure_threshold=3, timeout=10)
 
         async def risky_function() -> str:
-            if random.random() < 0.8:  # 80% failure rate
+            if random.random() < 0.8:  # nosec B311 - Test/example code only, not security-critical
                 raise Exception("Service unavailable")
             return "Success"
 

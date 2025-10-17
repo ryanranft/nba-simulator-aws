@@ -33,7 +33,7 @@ from typing import Dict, Set, Tuple
 from dotenv import load_dotenv
 
 # Load environment variables from credentials file
-load_dotenv('/Users/ryanranft/nba-sim-credentials.env')
+load_dotenv("/Users/ryanranft/nba-sim-credentials.env")
 
 # Configuration
 ESPN_LOCAL_DB = "/tmp/espn_local.db"
@@ -59,12 +59,14 @@ class DatabaseComparator:
         """Connect to RDS PostgreSQL database."""
         try:
             self.rds_conn = psycopg2.connect(
-                host=os.getenv('DB_HOST', 'nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com'),
-                database=os.getenv('DB_NAME', 'nba_simulator'),
-                user=os.getenv('DB_USER'),
-                password=os.getenv('DB_PASSWORD'),
-                port=os.getenv('DB_PORT', 5432),
-                sslmode='require'
+                host=os.getenv(
+                    "DB_HOST", "nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com"
+                ),
+                database=os.getenv("DB_NAME", "nba_simulator"),
+                user=os.getenv("DB_USER"),
+                password=os.getenv("DB_PASSWORD"),
+                port=os.getenv("DB_PORT", 5432),
+                sslmode="require",
             )
             print(f"✅ Connected to RDS database: {os.getenv('DB_HOST')}")
         except Exception as e:
@@ -97,11 +99,11 @@ class DatabaseComparator:
         cursor.close()
 
         return {
-            'total_games': total_games,
-            'games_with_pbp': games_with_pbp,
-            'total_events': total_events,
-            'game_ids': game_ids,
-            'date_range': (min_date, max_date)
+            "total_games": total_games,
+            "games_with_pbp": games_with_pbp,
+            "total_events": total_events,
+            "game_ids": game_ids,
+            "date_range": (min_date, max_date),
         }
 
     def get_rds_statistics(self, fetch_all_ids: bool = True) -> Dict:
@@ -127,28 +129,30 @@ class DatabaseComparator:
             game_ids = set(row[0] for row in cursor.fetchall())
 
         # Date range
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT
                 MIN(wall_clock_utc::date),
                 MAX(wall_clock_utc::date)
             FROM temporal_events
-        """)
+        """
+        )
         min_date, max_date = cursor.fetchone()
 
         cursor.close()
 
         return {
-            'total_events': total_events,
-            'unique_games': unique_games,
-            'game_ids': game_ids,
-            'date_range': (str(min_date), str(max_date))
+            "total_events": total_events,
+            "unique_games": unique_games,
+            "game_ids": game_ids,
+            "date_range": (str(min_date), str(max_date)),
         }
 
     def compare_databases_summary(self) -> Dict:
         """Compare databases using aggregate statistics only (fast)."""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("ESPN DATABASE COMPARISON: Local SQLite vs RDS PostgreSQL")
-        print("="*70)
+        print("=" * 70)
 
         # Connect to both databases
         self.connect_local()
@@ -179,16 +183,18 @@ class DatabaseComparator:
         rds_cursor.execute("SELECT COUNT(DISTINCT game_id) FROM temporal_events")
         rds_unique_games = rds_cursor.fetchone()[0]
 
-        rds_cursor.execute("""
+        rds_cursor.execute(
+            """
             SELECT MIN(wall_clock_utc::date), MAX(wall_clock_utc::date)
             FROM temporal_events
-        """)
+        """
+        )
         rds_date_range = rds_cursor.fetchone()
 
         # Print summary
-        print("\n" + "-"*70)
+        print("\n" + "-" * 70)
         print("SUMMARY STATISTICS")
-        print("-"*70)
+        print("-" * 70)
 
         print("\nLocal SQLite Database:")
         print(f"  Total games: {local_total_games:,}")
@@ -202,39 +208,43 @@ class DatabaseComparator:
         print(f"  Date range: {rds_date_range[0]} to {rds_date_range[1]}")
 
         # Event count comparison
-        print("\n" + "-"*70)
+        print("\n" + "-" * 70)
         print("EVENT COUNT COMPARISON")
-        print("-"*70)
+        print("-" * 70)
 
         if local_total_events == rds_total_events:
             print(f"\n✅ Event counts MATCH: {local_total_events:,} events")
         else:
             diff = rds_total_events - local_total_events
-            pct_diff = (diff / local_total_events) * 100 if local_total_events > 0 else 0
+            pct_diff = (
+                (diff / local_total_events) * 100 if local_total_events > 0 else 0
+            )
             print(f"\n⚠️  Event count MISMATCH:")
             print(f"   Local: {local_total_events:,} events")
             print(f"   RDS:   {rds_total_events:,} events")
             print(f"   Difference: {diff:+,} events ({pct_diff:+.2f}%)")
 
         # Game count comparison
-        print("\n" + "-"*70)
+        print("\n" + "-" * 70)
         print("GAME COUNT COMPARISON")
-        print("-"*70)
+        print("-" * 70)
 
         if local_games_with_pbp == rds_unique_games:
             print(f"\n✅ Game counts MATCH: {local_games_with_pbp:,} games")
         else:
             diff = rds_unique_games - local_games_with_pbp
-            pct_diff = (diff / local_games_with_pbp) * 100 if local_games_with_pbp > 0 else 0
+            pct_diff = (
+                (diff / local_games_with_pbp) * 100 if local_games_with_pbp > 0 else 0
+            )
             print(f"\n⚠️  Game count MISMATCH:")
             print(f"   Local: {local_games_with_pbp:,} games with PBP")
             print(f"   RDS:   {rds_unique_games:,} unique games")
             print(f"   Difference: {diff:+,} games ({pct_diff:+.2f}%)")
 
         # Overall assessment
-        print("\n" + "-"*70)
+        print("\n" + "-" * 70)
         print("ASSESSMENT")
-        print("-"*70)
+        print("-" * 70)
 
         issues = []
         if local_total_events != rds_total_events:
@@ -253,25 +263,25 @@ class DatabaseComparator:
                 print(f"   • {issue}")
             print("\nNote: Run with --detailed flag for game-by-game comparison")
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
 
         local_cursor.close()
         rds_cursor.close()
 
         return {
-            'local_total_games': local_total_games,
-            'local_games_with_pbp': local_games_with_pbp,
-            'local_total_events': local_total_events,
-            'rds_unique_games': rds_unique_games,
-            'rds_total_events': rds_total_events,
-            'issues': issues
+            "local_total_games": local_total_games,
+            "local_games_with_pbp": local_games_with_pbp,
+            "local_total_events": local_total_events,
+            "rds_unique_games": rds_unique_games,
+            "rds_total_events": rds_total_events,
+            "issues": issues,
         }
 
     def compare_databases(self) -> Dict:
         """Full comparison including game-by-game (slow, for detailed analysis)."""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("ESPN DATABASE COMPARISON: Local SQLite vs RDS PostgreSQL")
-        print("="*70)
+        print("=" * 70)
 
         # Connect to both databases
         self.connect_local()
@@ -283,28 +293,32 @@ class DatabaseComparator:
         rds_stats = self.get_rds_statistics()
 
         # Print summary
-        print("\n" + "-"*70)
+        print("\n" + "-" * 70)
         print("SUMMARY STATISTICS")
-        print("-"*70)
+        print("-" * 70)
 
         print("\nLocal SQLite Database:")
         print(f"  Total games: {local_stats['total_games']:,}")
         print(f"  Games with PBP: {local_stats['games_with_pbp']:,}")
         print(f"  Total PBP events: {local_stats['total_events']:,}")
-        print(f"  Date range: {local_stats['date_range'][0]} to {local_stats['date_range'][1]}")
+        print(
+            f"  Date range: {local_stats['date_range'][0]} to {local_stats['date_range'][1]}"
+        )
 
         print("\nRDS PostgreSQL Database (temporal_events):")
         print(f"  Unique games: {rds_stats['unique_games']:,}")
         print(f"  Total events: {rds_stats['total_events']:,}")
-        print(f"  Date range: {rds_stats['date_range'][0]} to {rds_stats['date_range'][1]}")
+        print(
+            f"  Date range: {rds_stats['date_range'][0]} to {rds_stats['date_range'][1]}"
+        )
 
         # Compare game IDs
-        print("\n" + "-"*70)
+        print("\n" + "-" * 70)
         print("GAME ID COMPARISON")
-        print("-"*70)
+        print("-" * 70)
 
-        local_ids = local_stats['game_ids']
-        rds_ids = rds_stats['game_ids']
+        local_ids = local_stats["game_ids"]
+        rds_ids = rds_stats["game_ids"]
 
         # Find differences
         only_in_local = local_ids - rds_ids
@@ -324,31 +338,35 @@ class DatabaseComparator:
             print(f"   Sample game IDs: {list(only_in_rds)[:5]}")
 
         # Event count comparison
-        print("\n" + "-"*70)
+        print("\n" + "-" * 70)
         print("EVENT COUNT COMPARISON")
-        print("-"*70)
+        print("-" * 70)
 
-        if local_stats['total_events'] == rds_stats['total_events']:
+        if local_stats["total_events"] == rds_stats["total_events"]:
             print(f"\n✅ Event counts MATCH: {local_stats['total_events']:,} events")
         else:
-            diff = rds_stats['total_events'] - local_stats['total_events']
-            pct_diff = (diff / local_stats['total_events']) * 100 if local_stats['total_events'] > 0 else 0
+            diff = rds_stats["total_events"] - local_stats["total_events"]
+            pct_diff = (
+                (diff / local_stats["total_events"]) * 100
+                if local_stats["total_events"] > 0
+                else 0
+            )
             print(f"\n⚠️  Event count MISMATCH:")
             print(f"   Local: {local_stats['total_events']:,} events")
             print(f"   RDS:   {rds_stats['total_events']:,} events")
             print(f"   Difference: {diff:+,} events ({pct_diff:+.2f}%)")
 
         # Overall assessment
-        print("\n" + "-"*70)
+        print("\n" + "-" * 70)
         print("ASSESSMENT")
-        print("-"*70)
+        print("-" * 70)
 
         issues = []
         if only_in_local:
             issues.append(f"{len(only_in_local):,} games missing from RDS")
         if only_in_rds:
             issues.append(f"{len(only_in_rds):,} games missing from local DB")
-        if local_stats['total_events'] != rds_stats['total_events']:
+        if local_stats["total_events"] != rds_stats["total_events"]:
             issues.append("Event count mismatch")
 
         if not issues:
@@ -360,15 +378,15 @@ class DatabaseComparator:
             for issue in issues:
                 print(f"   • {issue}")
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
 
         return {
-            'local_stats': local_stats,
-            'rds_stats': rds_stats,
-            'only_in_local': only_in_local,
-            'only_in_rds': only_in_rds,
-            'in_both': in_both,
-            'issues': issues
+            "local_stats": local_stats,
+            "rds_stats": rds_stats,
+            "only_in_local": only_in_local,
+            "only_in_rds": only_in_rds,
+            "in_both": in_both,
+            "issues": issues,
         }
 
     def detailed_comparison(self):
@@ -377,21 +395,25 @@ class DatabaseComparator:
 
         # Get game IDs from both sources
         local_cursor = self.local_conn.cursor()
-        local_cursor.execute("""
+        local_cursor.execute(
+            """
             SELECT game_id, game_date, pbp_event_count
             FROM games
             WHERE has_pbp = 1
             ORDER BY game_date
-        """)
+        """
+        )
         local_games = {row[0]: (row[1], row[2]) for row in local_cursor.fetchall()}
 
         rds_cursor = self.rds_conn.cursor()
-        rds_cursor.execute("""
+        rds_cursor.execute(
+            """
             SELECT game_id, COUNT(*) as event_count
             FROM temporal_events
             GROUP BY game_id
             ORDER BY game_id
-        """)
+        """
+        )
         rds_games = {row[0]: row[1] for row in rds_cursor.fetchall()}
 
         # Compare event counts for matching games
@@ -402,7 +424,9 @@ class DatabaseComparator:
                 rds_count = rds_games[game_id]
                 if local_count != rds_count:
                     diff = rds_count - local_count
-                    mismatches.append((game_id, local_games[game_id][0], local_count, rds_count, diff))
+                    mismatches.append(
+                        (game_id, local_games[game_id][0], local_count, rds_count, diff)
+                    )
 
         if mismatches:
             print(f"\n⚠️  Found {len(mismatches):,} games with event count mismatches:")
@@ -429,21 +453,24 @@ class DatabaseComparator:
         local_stats = self.get_local_statistics()
         rds_stats = self.get_rds_statistics()
 
-        only_in_local = local_stats['game_ids'] - rds_stats['game_ids']
-        only_in_rds = rds_stats['game_ids'] - local_stats['game_ids']
+        only_in_local = local_stats["game_ids"] - rds_stats["game_ids"]
+        only_in_rds = rds_stats["game_ids"] - local_stats["game_ids"]
 
         # Get details for games only in local
         cursor = self.local_conn.cursor()
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             f.write("source,game_id,game_date,event_count\n")
 
             # Games only in local DB
             for game_id in sorted(only_in_local):
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT game_date, pbp_event_count
                     FROM games
                     WHERE game_id = ?
-                """, (game_id,))
+                """,
+                    (game_id,),
+                )
                 row = cursor.fetchone()
                 if row:
                     f.write(f"local_only,{game_id},{row[0]},{row[1]}\n")
@@ -466,19 +493,17 @@ class DatabaseComparator:
 def main():
     parser = argparse.ArgumentParser(
         description="Compare ESPN local SQLite database with RDS PostgreSQL database",
-        formatter_class=argparse.RawDescriptionHelpFormatter
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
     parser.add_argument(
-        '--detailed',
-        action='store_true',
-        help='Perform detailed game-by-game comparison'
+        "--detailed",
+        action="store_true",
+        help="Perform detailed game-by-game comparison",
     )
 
     parser.add_argument(
-        '--export-missing',
-        action='store_true',
-        help='Export missing games to CSV file'
+        "--export-missing", action="store_true", help="Export missing games to CSV file"
     )
 
     args = parser.parse_args()
@@ -505,11 +530,12 @@ def main():
         comparator.close_connections()
 
         # Exit code based on whether issues were found
-        sys.exit(0 if not results['issues'] else 1)
+        sys.exit(0 if not results["issues"] else 1)
 
     except Exception as e:
         print(f"\n❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 

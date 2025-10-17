@@ -27,6 +27,7 @@ import sys
 try:
     from basketball_reference_web_scraper import client
     from basketball_reference_web_scraper.data import OutputType
+
     HAS_BBREF = True
 except ImportError:
     HAS_BBREF = False
@@ -36,6 +37,7 @@ except ImportError:
 
 try:
     import boto3
+
     HAS_BOTO3 = True
 except ImportError:
     HAS_BOTO3 = False
@@ -43,27 +45,28 @@ except ImportError:
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
 
 class BasketballReferenceCompleteHistoricalScraper:
     """Scrape complete historical data from Basketball Reference"""
 
-    def __init__(self, output_dir: str, s3_bucket: Optional[str] = None, rate_limit: float = 12.0):
+    def __init__(
+        self, output_dir: str, s3_bucket: Optional[str] = None, rate_limit: float = 12.0
+    ):
         self.output_dir = Path(output_dir)
         self.s3_bucket = s3_bucket
-        self.s3_client = boto3.client('s3') if HAS_BOTO3 and s3_bucket else None
+        self.s3_client = boto3.client("s3") if HAS_BOTO3 and s3_bucket else None
         self.rate_limit = rate_limit
         self.last_request_time = 0
 
         # Statistics
         self.stats = {
-            'requests': 0,
-            'successes': 0,
-            'errors': 0,
-            'retries': 0,
+            "requests": 0,
+            "successes": 0,
+            "errors": 0,
+            "retries": 0,
         }
 
     def _rate_limit_wait(self):
@@ -79,9 +82,9 @@ class BasketballReferenceCompleteHistoricalScraper:
         """Exponential backoff on errors"""
         if is_rate_limit:
             # For 429 errors, wait much longer (30s, 60s, 120s)
-            wait_time = min(120, 30 * (2 ** attempt))  # 30s, 60s, 120s
+            wait_time = min(120, 30 * (2**attempt))  # 30s, 60s, 120s
         else:
-            wait_time = min(60, (2 ** attempt))  # 1s, 2s, 4s, 8s, max 60s
+            wait_time = min(60, (2**attempt))  # 1s, 2s, 4s, 8s, max 60s
         logging.warning(f"Backing off for {wait_time}s (attempt {attempt})")
         time.sleep(wait_time)
 
@@ -89,7 +92,7 @@ class BasketballReferenceCompleteHistoricalScraper:
         """Save data to JSON file"""
         filepath = Path(filepath)
         filepath.parent.mkdir(parents=True, exist_ok=True)
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(data, f, indent=2, default=str)
         logging.debug(f"Saved: {filepath}")
 
@@ -109,7 +112,7 @@ class BasketballReferenceCompleteHistoricalScraper:
         """Load checkpoint file"""
         if checkpoint_file and checkpoint_file.exists():
             try:
-                with open(checkpoint_file, 'r') as f:
+                with open(checkpoint_file, "r") as f:
                     checkpoint = json.load(f)
                 logging.info(f"Loaded checkpoint: {checkpoint}")
                 return checkpoint
@@ -121,7 +124,7 @@ class BasketballReferenceCompleteHistoricalScraper:
         """Save checkpoint file"""
         if checkpoint_file:
             checkpoint_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(checkpoint_file, 'w') as f:
+            with open(checkpoint_file, "w") as f:
                 json.dump(checkpoint_data, f, indent=2, default=str)
             logging.debug(f"Saved checkpoint: {checkpoint_file}")
 
@@ -130,61 +133,77 @@ class BasketballReferenceCompleteHistoricalScraper:
         for attempt in range(max_retries):
             try:
                 self._rate_limit_wait()
-                self.stats['requests'] += 1
+                self.stats["requests"] += 1
                 result = func(*args, **kwargs)
-                self.stats['successes'] += 1
+                self.stats["successes"] += 1
                 return result
             except Exception as e:
-                self.stats['errors'] += 1
+                self.stats["errors"] += 1
                 # Check if it's a 429 rate limit error
-                is_429 = '429' in str(e) or 'Too Many Requests' in str(e)
+                is_429 = "429" in str(e) or "Too Many Requests" in str(e)
                 if attempt < max_retries - 1:
-                    self.stats['retries'] += 1
-                    logging.warning(f"Request failed (attempt {attempt + 1}/{max_retries}): {e}")
+                    self.stats["retries"] += 1
+                    logging.warning(
+                        f"Request failed (attempt {attempt + 1}/{max_retries}): {e}"
+                    )
                     self._exponential_backoff(attempt, is_rate_limit=is_429)
                 else:
                     logging.error(f"Request failed after {max_retries} attempts: {e}")
                     raise
         return None
 
-    def scrape_schedules(self, season_start: int, season_end: int, checkpoint_file: Optional[Path] = None):
+    def scrape_schedules(
+        self, season_start: int, season_end: int, checkpoint_file: Optional[Path] = None
+    ):
         """Scrape season schedules for all seasons"""
         logging.info(f"Starting schedule scrape: {season_start}-{season_end}")
 
         checkpoint = self._load_checkpoint(checkpoint_file) if checkpoint_file else None
-        start_season = checkpoint.get('current_season', season_start) if checkpoint else season_start
+        start_season = (
+            checkpoint.get("current_season", season_start)
+            if checkpoint
+            else season_start
+        )
 
         for season in range(start_season, season_end + 1):
             try:
-                logging.info(f"Scraping schedule for {season-1}-{season} season (end year: {season})")
+                logging.info(
+                    f"Scraping schedule for {season-1}-{season} season (end year: {season})"
+                )
 
                 # Get schedule data
                 schedule = self._make_request_with_retry(
-                    client.season_schedule,
-                    season_end_year=season
+                    client.season_schedule, season_end_year=season
                 )
 
                 if schedule:
                     # Save locally
-                    local_path = self.output_dir / 'schedules' / str(season) / 'schedule.json'
+                    local_path = (
+                        self.output_dir / "schedules" / str(season) / "schedule.json"
+                    )
                     self._save_json(schedule, local_path)
 
                     # Upload to S3
                     if self.s3_client:
-                        s3_key = f'basketball_reference/schedules/{season}/schedule.json'
+                        s3_key = (
+                            f"basketball_reference/schedules/{season}/schedule.json"
+                        )
                         self._upload_to_s3(local_path, s3_key)
 
                     logging.info(f"✓ Season {season}: {len(schedule)} games")
 
                 # Update checkpoint
                 if checkpoint_file:
-                    self._save_checkpoint(checkpoint_file, {
-                        'data_type': 'schedules',
-                        'start_season': season_start,
-                        'end_season': season_end,
-                        'current_season': season + 1,
-                        'last_updated': datetime.now().isoformat()
-                    })
+                    self._save_checkpoint(
+                        checkpoint_file,
+                        {
+                            "data_type": "schedules",
+                            "start_season": season_start,
+                            "end_season": season_end,
+                            "current_season": season + 1,
+                            "last_updated": datetime.now().isoformat(),
+                        },
+                    )
 
             except Exception as e:
                 logging.error(f"Failed to scrape schedule for season {season}: {e}")
@@ -192,22 +211,29 @@ class BasketballReferenceCompleteHistoricalScraper:
 
         logging.info(f"Schedule scrape complete. Stats: {self.stats}")
 
-    def scrape_player_box_scores(self, season_start: int, season_end: int, checkpoint_file: Optional[Path] = None):
+    def scrape_player_box_scores(
+        self, season_start: int, season_end: int, checkpoint_file: Optional[Path] = None
+    ):
         """Scrape player box scores for all games"""
         logging.info(f"Starting player box scores scrape: {season_start}-{season_end}")
 
         # First, we need schedules to know which dates to scrape
         checkpoint = self._load_checkpoint(checkpoint_file) if checkpoint_file else None
-        start_season = checkpoint.get('current_season', season_start) if checkpoint else season_start
+        start_season = (
+            checkpoint.get("current_season", season_start)
+            if checkpoint
+            else season_start
+        )
 
         for season in range(start_season, season_end + 1):
             try:
-                logging.info(f"Getting player box scores for {season-1}-{season} season")
+                logging.info(
+                    f"Getting player box scores for {season-1}-{season} season"
+                )
 
                 # Get schedule first to know game dates
                 schedule = self._make_request_with_retry(
-                    client.season_schedule,
-                    season_end_year=season
+                    client.season_schedule, season_end_year=season
                 )
 
                 if not schedule:
@@ -217,7 +243,7 @@ class BasketballReferenceCompleteHistoricalScraper:
                 # Extract unique dates from schedule
                 unique_dates = set()
                 for game in schedule:
-                    if hasattr(game, 'start_time'):
+                    if hasattr(game, "start_time"):
                         unique_dates.add(game.start_time.date())
 
                 logging.info(f"Season {season}: {len(unique_dates)} unique game dates")
@@ -229,42 +255,53 @@ class BasketballReferenceCompleteHistoricalScraper:
                         month = game_date.month
                         year = game_date.year
 
-                        logging.info(f"Scraping player box scores for {year}-{month:02d}-{day:02d}")
+                        logging.info(
+                            f"Scraping player box scores for {year}-{month:02d}-{day:02d}"
+                        )
 
                         # Get player box scores
                         box_scores = self._make_request_with_retry(
-                            client.player_box_scores,
-                            day=day,
-                            month=month,
-                            year=year
+                            client.player_box_scores, day=day, month=month, year=year
                         )
 
                         if box_scores:
                             # Save locally
                             date_str = f"{year}{month:02d}{day:02d}"
-                            local_path = self.output_dir / 'player_box_scores' / str(season) / f'{date_str}_player_box_scores.json'
+                            local_path = (
+                                self.output_dir
+                                / "player_box_scores"
+                                / str(season)
+                                / f"{date_str}_player_box_scores.json"
+                            )
                             self._save_json(box_scores, local_path)
 
                             # Upload to S3
                             if self.s3_client:
-                                s3_key = f'basketball_reference/player_box_scores/{season}/{date_str}_player_box_scores.json'
+                                s3_key = f"basketball_reference/player_box_scores/{season}/{date_str}_player_box_scores.json"
                                 self._upload_to_s3(local_path, s3_key)
 
-                            logging.info(f"✓ {date_str}: {len(box_scores)} player records")
+                            logging.info(
+                                f"✓ {date_str}: {len(box_scores)} player records"
+                            )
 
                     except Exception as e:
-                        logging.error(f"Failed to scrape player box scores for {game_date}: {e}")
+                        logging.error(
+                            f"Failed to scrape player box scores for {game_date}: {e}"
+                        )
                         continue
 
                 # Update checkpoint
                 if checkpoint_file:
-                    self._save_checkpoint(checkpoint_file, {
-                        'data_type': 'player_box_scores',
-                        'start_season': season_start,
-                        'end_season': season_end,
-                        'current_season': season + 1,
-                        'last_updated': datetime.now().isoformat()
-                    })
+                    self._save_checkpoint(
+                        checkpoint_file,
+                        {
+                            "data_type": "player_box_scores",
+                            "start_season": season_start,
+                            "end_season": season_end,
+                            "current_season": season + 1,
+                            "last_updated": datetime.now().isoformat(),
+                        },
+                    )
 
             except Exception as e:
                 logging.error(f"Failed to process season {season}: {e}")
@@ -272,12 +309,18 @@ class BasketballReferenceCompleteHistoricalScraper:
 
         logging.info(f"Player box scores scrape complete. Stats: {self.stats}")
 
-    def scrape_team_box_scores(self, season_start: int, season_end: int, checkpoint_file: Optional[Path] = None):
+    def scrape_team_box_scores(
+        self, season_start: int, season_end: int, checkpoint_file: Optional[Path] = None
+    ):
         """Scrape team box scores for all games"""
         logging.info(f"Starting team box scores scrape: {season_start}-{season_end}")
 
         checkpoint = self._load_checkpoint(checkpoint_file) if checkpoint_file else None
-        start_season = checkpoint.get('current_season', season_start) if checkpoint else season_start
+        start_season = (
+            checkpoint.get("current_season", season_start)
+            if checkpoint
+            else season_start
+        )
 
         for season in range(start_season, season_end + 1):
             try:
@@ -285,8 +328,7 @@ class BasketballReferenceCompleteHistoricalScraper:
 
                 # Get schedule first
                 schedule = self._make_request_with_retry(
-                    client.season_schedule,
-                    season_end_year=season
+                    client.season_schedule, season_end_year=season
                 )
 
                 if not schedule:
@@ -296,7 +338,7 @@ class BasketballReferenceCompleteHistoricalScraper:
                 # Extract unique dates
                 unique_dates = set()
                 for game in schedule:
-                    if hasattr(game, 'start_time'):
+                    if hasattr(game, "start_time"):
                         unique_dates.add(game.start_time.date())
 
                 logging.info(f"Season {season}: {len(unique_dates)} unique game dates")
@@ -308,42 +350,53 @@ class BasketballReferenceCompleteHistoricalScraper:
                         month = game_date.month
                         year = game_date.year
 
-                        logging.info(f"Scraping team box scores for {year}-{month:02d}-{day:02d}")
+                        logging.info(
+                            f"Scraping team box scores for {year}-{month:02d}-{day:02d}"
+                        )
 
                         # Get team box scores
                         box_scores = self._make_request_with_retry(
-                            client.team_box_scores,
-                            day=day,
-                            month=month,
-                            year=year
+                            client.team_box_scores, day=day, month=month, year=year
                         )
 
                         if box_scores:
                             # Save locally
                             date_str = f"{year}{month:02d}{day:02d}"
-                            local_path = self.output_dir / 'team_box_scores' / str(season) / f'{date_str}_team_box_scores.json'
+                            local_path = (
+                                self.output_dir
+                                / "team_box_scores"
+                                / str(season)
+                                / f"{date_str}_team_box_scores.json"
+                            )
                             self._save_json(box_scores, local_path)
 
                             # Upload to S3
                             if self.s3_client:
-                                s3_key = f'basketball_reference/team_box_scores/{season}/{date_str}_team_box_scores.json'
+                                s3_key = f"basketball_reference/team_box_scores/{season}/{date_str}_team_box_scores.json"
                                 self._upload_to_s3(local_path, s3_key)
 
-                            logging.info(f"✓ {date_str}: {len(box_scores)} team records")
+                            logging.info(
+                                f"✓ {date_str}: {len(box_scores)} team records"
+                            )
 
                     except Exception as e:
-                        logging.error(f"Failed to scrape team box scores for {game_date}: {e}")
+                        logging.error(
+                            f"Failed to scrape team box scores for {game_date}: {e}"
+                        )
                         continue
 
                 # Update checkpoint
                 if checkpoint_file:
-                    self._save_checkpoint(checkpoint_file, {
-                        'data_type': 'team_box_scores',
-                        'start_season': season_start,
-                        'end_season': season_end,
-                        'current_season': season + 1,
-                        'last_updated': datetime.now().isoformat()
-                    })
+                    self._save_checkpoint(
+                        checkpoint_file,
+                        {
+                            "data_type": "team_box_scores",
+                            "start_season": season_start,
+                            "end_season": season_end,
+                            "current_season": season + 1,
+                            "last_updated": datetime.now().isoformat(),
+                        },
+                    )
 
             except Exception as e:
                 logging.error(f"Failed to process season {season}: {e}")
@@ -351,135 +404,188 @@ class BasketballReferenceCompleteHistoricalScraper:
 
         logging.info(f"Team box scores scrape complete. Stats: {self.stats}")
 
-    def scrape_season_totals(self, season_start: int, season_end: int, checkpoint_file: Optional[Path] = None):
+    def scrape_season_totals(
+        self, season_start: int, season_end: int, checkpoint_file: Optional[Path] = None
+    ):
         """Scrape player season totals"""
         logging.info(f"Starting season totals scrape: {season_start}-{season_end}")
 
         checkpoint = self._load_checkpoint(checkpoint_file) if checkpoint_file else None
-        start_season = checkpoint.get('current_season', season_start) if checkpoint else season_start
+        start_season = (
+            checkpoint.get("current_season", season_start)
+            if checkpoint
+            else season_start
+        )
 
         for season in range(start_season, season_end + 1):
             try:
-                logging.info(f"Scraping season totals for {season-1}-{season} season (end year: {season})")
+                logging.info(
+                    f"Scraping season totals for {season-1}-{season} season (end year: {season})"
+                )
 
                 # Get season totals
                 totals = self._make_request_with_retry(
-                    client.players_season_totals,
-                    season_end_year=season
+                    client.players_season_totals, season_end_year=season
                 )
 
                 if totals:
                     # Save locally
-                    local_path = self.output_dir / 'season_totals' / str(season) / 'player_season_totals.json'
+                    local_path = (
+                        self.output_dir
+                        / "season_totals"
+                        / str(season)
+                        / "player_season_totals.json"
+                    )
                     self._save_json(totals, local_path)
 
                     # Upload to S3
                     if self.s3_client:
-                        s3_key = f'basketball_reference/season_totals/{season}/player_season_totals.json'
+                        s3_key = f"basketball_reference/season_totals/{season}/player_season_totals.json"
                         self._upload_to_s3(local_path, s3_key)
 
-                    logging.info(f"✓ Season {season}: {len(totals)} player season records")
+                    logging.info(
+                        f"✓ Season {season}: {len(totals)} player season records"
+                    )
 
                 # Update checkpoint
                 if checkpoint_file:
-                    self._save_checkpoint(checkpoint_file, {
-                        'data_type': 'season_totals',
-                        'start_season': season_start,
-                        'end_season': season_end,
-                        'current_season': season + 1,
-                        'last_updated': datetime.now().isoformat()
-                    })
+                    self._save_checkpoint(
+                        checkpoint_file,
+                        {
+                            "data_type": "season_totals",
+                            "start_season": season_start,
+                            "end_season": season_end,
+                            "current_season": season + 1,
+                            "last_updated": datetime.now().isoformat(),
+                        },
+                    )
 
             except Exception as e:
-                logging.error(f"Failed to scrape season totals for season {season}: {e}")
+                logging.error(
+                    f"Failed to scrape season totals for season {season}: {e}"
+                )
                 continue
 
         logging.info(f"Season totals scrape complete. Stats: {self.stats}")
 
-    def scrape_advanced_totals(self, season_start: int, season_end: int, checkpoint_file: Optional[Path] = None):
+    def scrape_advanced_totals(
+        self, season_start: int, season_end: int, checkpoint_file: Optional[Path] = None
+    ):
         """Scrape player advanced season totals"""
         logging.info(f"Starting advanced totals scrape: {season_start}-{season_end}")
 
         checkpoint = self._load_checkpoint(checkpoint_file) if checkpoint_file else None
-        start_season = checkpoint.get('current_season', season_start) if checkpoint else season_start
+        start_season = (
+            checkpoint.get("current_season", season_start)
+            if checkpoint
+            else season_start
+        )
 
         for season in range(start_season, season_end + 1):
             try:
-                logging.info(f"Scraping advanced totals for {season-1}-{season} season (end year: {season})")
+                logging.info(
+                    f"Scraping advanced totals for {season-1}-{season} season (end year: {season})"
+                )
 
                 # Get advanced totals with combined values for traded players
                 totals = self._make_request_with_retry(
                     client.players_advanced_season_totals,
                     season_end_year=season,
-                    include_combined_values=True
+                    include_combined_values=True,
                 )
 
                 if totals:
                     # Save locally
-                    local_path = self.output_dir / 'advanced_totals' / str(season) / 'player_advanced_totals.json'
+                    local_path = (
+                        self.output_dir
+                        / "advanced_totals"
+                        / str(season)
+                        / "player_advanced_totals.json"
+                    )
                     self._save_json(totals, local_path)
 
                     # Upload to S3
                     if self.s3_client:
-                        s3_key = f'basketball_reference/advanced_totals/{season}/player_advanced_totals.json'
+                        s3_key = f"basketball_reference/advanced_totals/{season}/player_advanced_totals.json"
                         self._upload_to_s3(local_path, s3_key)
 
-                    logging.info(f"✓ Season {season}: {len(totals)} player advanced records")
+                    logging.info(
+                        f"✓ Season {season}: {len(totals)} player advanced records"
+                    )
 
                 # Update checkpoint
                 if checkpoint_file:
-                    self._save_checkpoint(checkpoint_file, {
-                        'data_type': 'advanced_totals',
-                        'start_season': season_start,
-                        'end_season': season_end,
-                        'current_season': season + 1,
-                        'last_updated': datetime.now().isoformat()
-                    })
+                    self._save_checkpoint(
+                        checkpoint_file,
+                        {
+                            "data_type": "advanced_totals",
+                            "start_season": season_start,
+                            "end_season": season_end,
+                            "current_season": season + 1,
+                            "last_updated": datetime.now().isoformat(),
+                        },
+                    )
 
             except Exception as e:
-                logging.error(f"Failed to scrape advanced totals for season {season}: {e}")
+                logging.error(
+                    f"Failed to scrape advanced totals for season {season}: {e}"
+                )
                 continue
 
         logging.info(f"Advanced totals scrape complete. Stats: {self.stats}")
 
-    def scrape_standings(self, season_start: int, season_end: int, checkpoint_file: Optional[Path] = None):
+    def scrape_standings(
+        self, season_start: int, season_end: int, checkpoint_file: Optional[Path] = None
+    ):
         """Scrape standings for all seasons"""
         logging.info(f"Starting standings scrape: {season_start}-{season_end}")
 
         checkpoint = self._load_checkpoint(checkpoint_file) if checkpoint_file else None
-        start_season = checkpoint.get('current_season', season_start) if checkpoint else season_start
+        start_season = (
+            checkpoint.get("current_season", season_start)
+            if checkpoint
+            else season_start
+        )
 
         for season in range(start_season, season_end + 1):
             try:
-                logging.info(f"Scraping standings for {season-1}-{season} season (end year: {season})")
+                logging.info(
+                    f"Scraping standings for {season-1}-{season} season (end year: {season})"
+                )
 
                 # Get standings
                 standings = self._make_request_with_retry(
-                    client.standings,
-                    season_end_year=season
+                    client.standings, season_end_year=season
                 )
 
                 if standings:
                     # Save locally
-                    local_path = self.output_dir / 'standings' / str(season) / 'standings.json'
+                    local_path = (
+                        self.output_dir / "standings" / str(season) / "standings.json"
+                    )
                     self._save_json(standings, local_path)
 
                     # Upload to S3
                     if self.s3_client:
-                        s3_key = f'basketball_reference/standings/{season}/standings.json'
+                        s3_key = (
+                            f"basketball_reference/standings/{season}/standings.json"
+                        )
                         self._upload_to_s3(local_path, s3_key)
 
                     logging.info(f"✓ Season {season}: {len(standings)} team standings")
 
                 # Update checkpoint
                 if checkpoint_file:
-                    self._save_checkpoint(checkpoint_file, {
-                        'data_type': 'standings',
-                        'start_season': season_start,
-                        'end_season': season_end,
-                        'current_season': season + 1,
-                        'last_updated': datetime.now().isoformat()
-                    })
+                    self._save_checkpoint(
+                        checkpoint_file,
+                        {
+                            "data_type": "standings",
+                            "start_season": season_start,
+                            "end_season": season_end,
+                            "current_season": season + 1,
+                            "last_updated": datetime.now().isoformat(),
+                        },
+                    )
 
             except Exception as e:
                 logging.error(f"Failed to scrape standings for season {season}: {e}")
@@ -487,13 +593,19 @@ class BasketballReferenceCompleteHistoricalScraper:
 
         logging.info(f"Standings scrape complete. Stats: {self.stats}")
 
-    def scrape_play_by_play(self, season_start: int, season_end: int, checkpoint_file: Optional[Path] = None):
+    def scrape_play_by_play(
+        self, season_start: int, season_end: int, checkpoint_file: Optional[Path] = None
+    ):
         """Scrape play-by-play data (modern era only - likely 2000+)"""
         logging.info(f"Starting play-by-play scrape: {season_start}-{season_end}")
         logging.info("Note: Play-by-play data is only available for modern era games")
 
         checkpoint = self._load_checkpoint(checkpoint_file) if checkpoint_file else None
-        start_season = checkpoint.get('current_season', season_start) if checkpoint else season_start
+        start_season = (
+            checkpoint.get("current_season", season_start)
+            if checkpoint
+            else season_start
+        )
 
         for season in range(start_season, season_end + 1):
             try:
@@ -501,8 +613,7 @@ class BasketballReferenceCompleteHistoricalScraper:
 
                 # Get schedule first
                 schedule = self._make_request_with_retry(
-                    client.season_schedule,
-                    season_end_year=season
+                    client.season_schedule, season_end_year=season
                 )
 
                 if not schedule:
@@ -515,7 +626,9 @@ class BasketballReferenceCompleteHistoricalScraper:
 
                 for game in schedule:
                     try:
-                        if not hasattr(game, 'start_time') or not hasattr(game, 'home_team'):
+                        if not hasattr(game, "start_time") or not hasattr(
+                            game, "home_team"
+                        ):
                             games_skipped += 1
                             continue
 
@@ -525,7 +638,9 @@ class BasketballReferenceCompleteHistoricalScraper:
                         year = game_date.year
                         home_team = game.home_team
 
-                        logging.info(f"Scraping play-by-play for {year}-{month:02d}-{day:02d} ({home_team.name})")
+                        logging.info(
+                            f"Scraping play-by-play for {year}-{month:02d}-{day:02d} ({home_team.name})"
+                        )
 
                         # Get play-by-play
                         pbp = self._make_request_with_retry(
@@ -533,22 +648,29 @@ class BasketballReferenceCompleteHistoricalScraper:
                             home_team=home_team,
                             day=day,
                             month=month,
-                            year=year
+                            year=year,
                         )
 
                         if pbp:
                             # Save locally
                             date_str = f"{year}{month:02d}{day:02d}"
-                            team_abbr = home_team.name.replace(' ', '_')
-                            local_path = self.output_dir / 'play_by_play' / str(season) / f'{date_str}_{team_abbr}_play_by_play.json'
+                            team_abbr = home_team.name.replace(" ", "_")
+                            local_path = (
+                                self.output_dir
+                                / "play_by_play"
+                                / str(season)
+                                / f"{date_str}_{team_abbr}_play_by_play.json"
+                            )
                             self._save_json(pbp, local_path)
 
                             # Upload to S3
                             if self.s3_client:
-                                s3_key = f'basketball_reference/play_by_play/{season}/{date_str}_{team_abbr}_play_by_play.json'
+                                s3_key = f"basketball_reference/play_by_play/{season}/{date_str}_{team_abbr}_play_by_play.json"
                                 self._upload_to_s3(local_path, s3_key)
 
-                            logging.info(f"✓ {date_str} {team_abbr}: {len(pbp)} play-by-play events")
+                            logging.info(
+                                f"✓ {date_str} {team_abbr}: {len(pbp)} play-by-play events"
+                            )
                             games_processed += 1
                         else:
                             games_skipped += 1
@@ -559,18 +681,23 @@ class BasketballReferenceCompleteHistoricalScraper:
                         games_skipped += 1
                         continue
 
-                logging.info(f"Season {season}: {games_processed} games with play-by-play, {games_skipped} skipped")
+                logging.info(
+                    f"Season {season}: {games_processed} games with play-by-play, {games_skipped} skipped"
+                )
 
                 # Update checkpoint
                 if checkpoint_file:
-                    self._save_checkpoint(checkpoint_file, {
-                        'data_type': 'play_by_play',
-                        'start_season': season_start,
-                        'end_season': season_end,
-                        'current_season': season + 1,
-                        'games_processed': games_processed,
-                        'last_updated': datetime.now().isoformat()
-                    })
+                    self._save_checkpoint(
+                        checkpoint_file,
+                        {
+                            "data_type": "play_by_play",
+                            "start_season": season_start,
+                            "end_season": season_end,
+                            "current_season": season + 1,
+                            "games_processed": games_processed,
+                            "last_updated": datetime.now().isoformat(),
+                        },
+                    )
 
             except Exception as e:
                 logging.error(f"Failed to process season {season}: {e}")
@@ -581,7 +708,7 @@ class BasketballReferenceCompleteHistoricalScraper:
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Basketball Reference Complete Historical Scraper',
+        description="Basketball Reference Complete Historical Scraper",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -602,29 +729,58 @@ Data types:
   - advanced-totals: Player advanced metrics
   - play-by-play: Play-by-play events (modern era only)
   - standings: Final season standings
-        """
+        """,
     )
 
-    parser.add_argument('--data-type', required=True,
-                       choices=['schedules', 'player-box-scores', 'team-box-scores',
-                               'season-totals', 'advanced-totals', 'play-by-play', 'standings'],
-                       help='Type of data to scrape')
-    parser.add_argument('--start-season', type=int, required=True,
-                       help='Starting season end year (e.g., 1947 for 1946-47 season)')
-    parser.add_argument('--end-season', type=int, required=True,
-                       help='Ending season end year (e.g., 2025 for 2024-25 season)')
-    parser.add_argument('--upload-to-s3', action='store_true',
-                       help='Upload scraped data to S3')
-    parser.add_argument('--s3-bucket', default='nba-sim-raw-data-lake',
-                       help='S3 bucket name (default: nba-sim-raw-data-lake)')
-    parser.add_argument('--output-dir', default='/tmp/basketball_reference_complete',
-                       help='Local output directory (default: /tmp/basketball_reference_complete)')
-    parser.add_argument('--checkpoint-file',
-                       help='Path to checkpoint file for resume capability')
-    parser.add_argument('--rate-limit', type=float, default=12.0,
-                       help='Seconds between requests (default: 12.0, increased to prevent 429 errors)')
-    parser.add_argument('--verbose', action='store_true',
-                       help='Enable verbose logging')
+    parser.add_argument(
+        "--data-type",
+        required=True,
+        choices=[
+            "schedules",
+            "player-box-scores",
+            "team-box-scores",
+            "season-totals",
+            "advanced-totals",
+            "play-by-play",
+            "standings",
+        ],
+        help="Type of data to scrape",
+    )
+    parser.add_argument(
+        "--start-season",
+        type=int,
+        required=True,
+        help="Starting season end year (e.g., 1947 for 1946-47 season)",
+    )
+    parser.add_argument(
+        "--end-season",
+        type=int,
+        required=True,
+        help="Ending season end year (e.g., 2025 for 2024-25 season)",
+    )
+    parser.add_argument(
+        "--upload-to-s3", action="store_true", help="Upload scraped data to S3"
+    )
+    parser.add_argument(
+        "--s3-bucket",
+        default="nba-sim-raw-data-lake",
+        help="S3 bucket name (default: nba-sim-raw-data-lake)",
+    )
+    parser.add_argument(
+        "--output-dir",
+        default="/tmp/basketball_reference_complete",
+        help="Local output directory (default: /tmp/basketball_reference_complete)",
+    )
+    parser.add_argument(
+        "--checkpoint-file", help="Path to checkpoint file for resume capability"
+    )
+    parser.add_argument(
+        "--rate-limit",
+        type=float,
+        default=12.0,
+        help="Seconds between requests (default: 12.0, increased to prevent 429 errors)",
+    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
 
     args = parser.parse_args()
 
@@ -636,7 +792,7 @@ Data types:
     scraper = BasketballReferenceCompleteHistoricalScraper(
         output_dir=args.output_dir,
         s3_bucket=args.s3_bucket if args.upload_to_s3 else None,
-        rate_limit=args.rate_limit
+        rate_limit=args.rate_limit,
     )
 
     # Prepare checkpoint file path
@@ -651,19 +807,27 @@ Data types:
 
     start_time = time.time()
 
-    if args.data_type == 'schedules':
+    if args.data_type == "schedules":
         scraper.scrape_schedules(args.start_season, args.end_season, checkpoint_file)
-    elif args.data_type == 'player-box-scores':
-        scraper.scrape_player_box_scores(args.start_season, args.end_season, checkpoint_file)
-    elif args.data_type == 'team-box-scores':
-        scraper.scrape_team_box_scores(args.start_season, args.end_season, checkpoint_file)
-    elif args.data_type == 'season-totals':
-        scraper.scrape_season_totals(args.start_season, args.end_season, checkpoint_file)
-    elif args.data_type == 'advanced-totals':
-        scraper.scrape_advanced_totals(args.start_season, args.end_season, checkpoint_file)
-    elif args.data_type == 'play-by-play':
+    elif args.data_type == "player-box-scores":
+        scraper.scrape_player_box_scores(
+            args.start_season, args.end_season, checkpoint_file
+        )
+    elif args.data_type == "team-box-scores":
+        scraper.scrape_team_box_scores(
+            args.start_season, args.end_season, checkpoint_file
+        )
+    elif args.data_type == "season-totals":
+        scraper.scrape_season_totals(
+            args.start_season, args.end_season, checkpoint_file
+        )
+    elif args.data_type == "advanced-totals":
+        scraper.scrape_advanced_totals(
+            args.start_season, args.end_season, checkpoint_file
+        )
+    elif args.data_type == "play-by-play":
         scraper.scrape_play_by_play(args.start_season, args.end_season, checkpoint_file)
-    elif args.data_type == 'standings':
+    elif args.data_type == "standings":
         scraper.scrape_standings(args.start_season, args.end_season, checkpoint_file)
 
     elapsed_time = time.time() - start_time

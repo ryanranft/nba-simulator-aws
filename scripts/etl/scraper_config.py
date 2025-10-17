@@ -63,7 +63,7 @@ class StorageConfig:
     """Storage configuration"""
 
     s3_bucket: Optional[str] = None
-    local_output_dir: str = "/tmp/scraper_output"
+    local_output_dir: str = "/tmp/scraper_output"  # nosec B108 - Standard temp directory for scraper output
     upload_to_s3: bool = True
     compression: bool = False
     deduplication: bool = True
@@ -133,14 +133,14 @@ class ScraperConfigManager:
                     },
                     "storage": {
                         "s3_bucket": "nba-sim-raw-data-lake",
-                        "local_output_dir": "/tmp/espn_data",
+                        "local_output_dir": "/tmp/espn_data",  # nosec B108
                         "upload_to_s3": True,
                         "deduplication": True,
                     },
                     "monitoring": {
                         "enable_telemetry": True,
                         "log_level": "INFO",
-                        "log_file": "/tmp/espn_scraper.log",
+                        "log_file": "/tmp/espn_scraper.log",  # nosec B108
                     },
                 },
                 "basketball_reference": {
@@ -160,14 +160,14 @@ class ScraperConfigManager:
                     },
                     "storage": {
                         "s3_bucket": "nba-sim-raw-data-lake",
-                        "local_output_dir": "/tmp/basketball_reference_data",
+                        "local_output_dir": "/tmp/basketball_reference_data",  # nosec B108
                         "upload_to_s3": True,
                         "deduplication": True,
                     },
                     "monitoring": {
                         "enable_telemetry": True,
                         "log_level": "INFO",
-                        "log_file": "/tmp/bref_scraper.log",
+                        "log_file": "/tmp/bref_scraper.log",  # nosec B108
                     },
                     "custom_settings": {
                         "tier": 1,
@@ -191,14 +191,14 @@ class ScraperConfigManager:
                     },
                     "storage": {
                         "s3_bucket": "nba-sim-raw-data-lake",
-                        "local_output_dir": "/tmp/nba_api_data",
+                        "local_output_dir": "/tmp/nba_api_data",  # nosec B108
                         "upload_to_s3": True,
                         "deduplication": True,
                     },
                     "monitoring": {
                         "enable_telemetry": True,
                         "log_level": "INFO",
-                        "log_file": "/tmp/nba_api_scraper.log",
+                        "log_file": "/tmp/nba_api_scraper.log",  # nosec B108
                         "alert_thresholds": {
                             "error_rate": 0.1,
                             "response_time_ms": 5000,
@@ -287,7 +287,7 @@ class ScraperConfigManager:
         storage = StorageConfig(
             s3_bucket=storage_data.get("s3_bucket"),
             local_output_dir=storage_data.get(
-                "local_output_dir", "/tmp/scraper_output"
+                "local_output_dir", "/tmp/scraper_output"  # nosec B108
             ),
             upload_to_s3=storage_data.get("upload_to_s3", True),
             compression=storage_data.get("compression", False),
@@ -520,7 +520,7 @@ def create_config_from_env(scraper_name: str) -> ScraperConfig:
     # Storage from env
     config.storage.s3_bucket = os.getenv(f"{prefix}S3_BUCKET")
     config.storage.local_output_dir = os.getenv(
-        f"{prefix}OUTPUT_DIR", "/tmp/scraper_output"
+        f"{prefix}OUTPUT_DIR", "/tmp/scraper_output"  # nosec B108
     )
     config.storage.upload_to_s3 = (
         os.getenv(f"{prefix}UPLOAD_S3", "true").lower() == "true"

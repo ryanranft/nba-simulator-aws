@@ -57,7 +57,7 @@ class S3YearPartitioner:
         """
         self.bucket = bucket
         self.dry_run = dry_run
-        self.s3_client = boto3.client('s3')
+        self.s3_client = boto3.client("s3")
         self.stats = defaultdict(lambda: defaultdict(int))
 
     def list_files(self, prefix: str) -> List[str]:
@@ -72,20 +72,20 @@ class S3YearPartitioner:
         """
         print(f"Listing files in s3://{self.bucket}/{prefix}...")
 
-        paginator = self.s3_client.get_paginator('list_objects_v2')
+        paginator = self.s3_client.get_paginator("list_objects_v2")
         files = []
 
         for page in paginator.paginate(Bucket=self.bucket, Prefix=prefix):
-            if 'Contents' not in page:
+            if "Contents" not in page:
                 continue
 
-            for obj in page['Contents']:
-                key = obj['Key']
+            for obj in page["Contents"]:
+                key = obj["Key"]
                 # Skip if already partitioned (contains "year=")
-                if 'year=' in key:
+                if "year=" in key:
                     continue
                 # Only include .json files
-                if key.endswith('.json'):
+                if key.endswith(".json"):
                     files.append(key)
 
         print(f"  Found {len(files)} files to partition")
@@ -107,7 +107,7 @@ class S3YearPartitioner:
 
         for key in files:
             # Extract filename from key
-            filename = key.split('/')[-1]
+            filename = key.split("/")[-1]
 
             # Decode year from game ID
             year = extract_year_from_filename(filename)
@@ -138,7 +138,7 @@ class S3YearPartitioner:
         Returns:
             New S3 key (e.g., "schedule/year=1996/19961219.json")
         """
-        filename = source_key.split('/')[-1]
+        filename = source_key.split("/")[-1]
         new_key = f"{data_type}/year={year}/{filename}"
 
         if self.dry_run:
@@ -146,11 +146,9 @@ class S3YearPartitioner:
             print(f"            to:        s3://{self.bucket}/{new_key}")
         else:
             # Copy object within same bucket
-            copy_source = {'Bucket': self.bucket, 'Key': source_key}
+            copy_source = {"Bucket": self.bucket, "Key": source_key}
             self.s3_client.copy_object(
-                CopySource=copy_source,
-                Bucket=self.bucket,
-                Key=new_key
+                CopySource=copy_source, Bucket=self.bucket, Key=new_key
             )
             print(f"  Copied: {source_key} -> {new_key}")
 
@@ -237,25 +235,25 @@ def main():
         description="Partition S3 NBA data by year for Glue Crawler processing"
     )
     parser.add_argument(
-        '--bucket',
-        default='nba-sim-raw-data-lake',
-        help='S3 bucket name (default: nba-sim-raw-data-lake)'
+        "--bucket",
+        default="nba-sim-raw-data-lake",
+        help="S3 bucket name (default: nba-sim-raw-data-lake)",
     )
     parser.add_argument(
-        '--data-types',
-        nargs='+',
-        default=['schedule', 'pbp', 'box_scores', 'team_stats'],
-        help='Data types to partition (default: all)'
+        "--data-types",
+        nargs="+",
+        default=["schedule", "pbp", "box_scores", "team_stats"],
+        help="Data types to partition (default: all)",
     )
     parser.add_argument(
-        '--execute',
-        action='store_true',
-        help='Actually perform S3 operations (default: dry run)'
+        "--execute",
+        action="store_true",
+        help="Actually perform S3 operations (default: dry run)",
     )
     parser.add_argument(
-        '--delete-originals',
-        action='store_true',
-        help='Delete original files after successful copy (use with caution!)'
+        "--delete-originals",
+        action="store_true",
+        help="Delete original files after successful copy (use with caution!)",
     )
 
     args = parser.parse_args()
@@ -266,7 +264,7 @@ def main():
         if args.delete_originals:
             print("⚠️  WARNING: Original files will be DELETED after copying!")
         response = input("Continue? (yes/no): ")
-        if response.lower() != 'yes':
+        if response.lower() != "yes":
             print("Aborted.")
             return
 
@@ -276,7 +274,9 @@ def main():
 
     # Partition each data type
     for data_type in args.data_types:
-        partitioner.partition_data_type(data_type, delete_originals=args.delete_originals)
+        partitioner.partition_data_type(
+            data_type, delete_originals=args.delete_originals
+        )
 
     # Print summary
     partitioner.print_summary()

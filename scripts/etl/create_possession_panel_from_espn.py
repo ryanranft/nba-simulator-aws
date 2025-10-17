@@ -27,22 +27,21 @@ import logging
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 # Load environment
-load_dotenv('/Users/ryanranft/nba-sim-credentials.env')
+load_dotenv("/Users/ryanranft/nba-sim-credentials.env")
 
 # Database config
 DB_CONFIG = {
-    'host': os.getenv('DB_HOST'),
-    'database': os.getenv('DB_NAME'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'port': os.getenv('DB_PORT', 5432),
-    'sslmode': 'require'
+    "host": os.getenv("DB_HOST"),
+    "database": os.getenv("DB_NAME"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "port": os.getenv("DB_PORT", 5432),
+    "sslmode": "require",
 }
 
 
@@ -50,14 +49,18 @@ class PossessionDetector:
     """Detect possession changes from event sequences"""
 
     POSSESSION_ENDING_EVENTS = [
-        'made', 'field goal', 'free throw',
-        'defensive rebound',
-        'turnover',
-        'end of'
+        "made",
+        "field goal",
+        "free throw",
+        "defensive rebound",
+        "turnover",
+        "end of",
     ]
 
     @staticmethod
-    def is_possession_end(event_text: str, prev_score: tuple, curr_score: tuple) -> bool:
+    def is_possession_end(
+        event_text: str, prev_score: tuple, curr_score: tuple
+    ) -> bool:
         """
         Determine if this event ends a possession
 
@@ -79,15 +82,15 @@ class PossessionDetector:
             return True
 
         # Defensive rebound = possession change
-        if 'defensive rebound' in text_lower:
+        if "defensive rebound" in text_lower:
             return True
 
         # Turnover = possession change
-        if 'turnover' in text_lower:
+        if "turnover" in text_lower:
             return True
 
         # End of quarter/period
-        if 'end of' in text_lower:
+        if "end of" in text_lower:
             return True
 
         return False
@@ -100,14 +103,14 @@ class PossessionDetector:
 
         text_lower = event_text.lower()
 
-        if 'three point' in text_lower or '3-pt' in text_lower:
-            if 'made' in text_lower:
+        if "three point" in text_lower or "3-pt" in text_lower:
+            if "made" in text_lower:
                 return 3
-        elif 'two point' in text_lower or 'layup' in text_lower or 'dunk' in text_lower:
-            if 'made' in text_lower:
+        elif "two point" in text_lower or "layup" in text_lower or "dunk" in text_lower:
+            if "made" in text_lower:
                 return 2
-        elif 'free throw' in text_lower:
-            if 'made' in text_lower:
+        elif "free throw" in text_lower:
+            if "made" in text_lower:
                 return 1
 
         return 0
@@ -116,22 +119,22 @@ class PossessionDetector:
     def categorize_result(events: list, points: int) -> str:
         """Categorize possession result"""
         if points > 0:
-            return 'made_fg'
+            return "made_fg"
 
         # Check last event
         if not events:
-            return 'other'
+            return "other"
 
-        last_event = events[-1].get('text', '').lower()
+        last_event = events[-1].get("text", "").lower()
 
-        if 'turnover' in last_event:
-            return 'turnover'
-        elif 'missed' in last_event or 'miss' in last_event:
-            return 'miss'
-        elif 'defensive rebound' in last_event:
-            return 'miss'
+        if "turnover" in last_event:
+            return "turnover"
+        elif "missed" in last_event or "miss" in last_event:
+            return "miss"
+        elif "defensive rebound" in last_event:
+            return "miss"
         else:
-            return 'other'
+            return "other"
 
 
 class PossessionPanelBuilder:
@@ -169,6 +172,7 @@ class PossessionPanelBuilder:
             query += f" LIMIT {limit}"
 
         import time
+
         start = time.time()
 
         # Use cursor for faster execution
@@ -184,18 +188,20 @@ class PossessionPanelBuilder:
         for row in rows:
             # Convert season from "2013-14" to 2013
             season_str = row[2]
-            if season_str and isinstance(season_str, str) and '-' in season_str:
-                season_int = int(season_str.split('-')[0])
+            if season_str and isinstance(season_str, str) and "-" in season_str:
+                season_int = int(season_str.split("-")[0])
             else:
                 season_int = int(season_str) if season_str else None
 
-            games.append({
-                'game_id': row[0],
-                'game_date': row[1],
-                'season': season_int,
-                'home_team_id': row[3],
-                'away_team_id': row[4]
-            })
+            games.append(
+                {
+                    "game_id": row[0],
+                    "game_date": row[1],
+                    "season": season_int,
+                    "home_team_id": row[3],
+                    "away_team_id": row[4],
+                }
+            )
 
         return games
 
@@ -224,10 +230,17 @@ class PossessionPanelBuilder:
         if not rows:
             return pd.DataFrame()
 
-        df = pd.DataFrame(rows, columns=[
-            'game_id', 'team_id', 'quarter', 'game_clock_seconds',
-            'wall_clock_utc', 'event_data'
-        ])
+        df = pd.DataFrame(
+            rows,
+            columns=[
+                "game_id",
+                "team_id",
+                "quarter",
+                "game_clock_seconds",
+                "wall_clock_utc",
+                "event_data",
+            ],
+        )
 
         # Reverse to process chronologically (oldest event first)
         # Events are stored DESC by game_clock, so reverse makes them ASC
@@ -238,7 +251,7 @@ class PossessionPanelBuilder:
     def process_game(self, game: dict) -> list:
         """Process a single game into possessions"""
 
-        game_id = game['game_id']
+        game_id = game["game_id"]
 
         # Load events
         events_df = self.load_game_events(game_id)
@@ -252,23 +265,23 @@ class PossessionPanelBuilder:
         # Track possessions
         possessions = []
         current_possession = {
-            'events': [],
-            'team_id': None,
-            'start_event': None,
-            'start_score': (0, 0)
+            "events": [],
+            "team_id": None,
+            "start_event": None,
+            "start_score": (0, 0),
         }
         possession_number = 0
 
         prev_score = (0, 0)
 
         for idx, row in events_df.iterrows():
-            event_data = row['event_data']
+            event_data = row["event_data"]
             if not isinstance(event_data, dict):
                 continue
 
-            event_text = event_data.get('text', '')
-            home_score = event_data.get('homeScore', 0) or 0
-            away_score = event_data.get('awayScore', 0) or 0
+            event_text = event_data.get("text", "")
+            home_score = event_data.get("homeScore", 0) or 0
+            away_score = event_data.get("awayScore", 0) or 0
             curr_score = (home_score, away_score)
 
             # Detect possession end
@@ -276,15 +289,15 @@ class PossessionPanelBuilder:
                 event_text, prev_score, curr_score
             )
 
-            if is_possession_end and len(current_possession['events']) > 0:
+            if is_possession_end and len(current_possession["events"]) > 0:
                 # Finalize possession
                 # curr_score is the score AFTER this possession ended
                 poss = self.aggregate_possession(
-                    possession_events=current_possession['events'],
+                    possession_events=current_possession["events"],
                     possession_number=possession_number,
                     game=game,
-                    start_score=current_possession['start_score'],
-                    end_score=curr_score  # Score after possession ended
+                    start_score=current_possession["start_score"],
+                    end_score=curr_score,  # Score after possession ended
                 )
 
                 if poss:
@@ -293,41 +306,41 @@ class PossessionPanelBuilder:
 
                 # Start new possession
                 current_possession = {
-                    'events': [],
-                    'team_id': row['team_id'],
-                    'start_event': row,
-                    'start_score': curr_score
+                    "events": [],
+                    "team_id": row["team_id"],
+                    "start_event": row,
+                    "start_score": curr_score,
                 }
 
             # Add event to current possession
             event_dict = {
-                'text': event_text,
-                'team_id': row['team_id'],
-                'quarter': row['quarter'],
-                'game_clock_seconds': row['game_clock_seconds'],
-                'wall_clock_utc': row['wall_clock_utc'],
-                'home_score': home_score,
-                'away_score': away_score,
-                'event_data': event_data
+                "text": event_text,
+                "team_id": row["team_id"],
+                "quarter": row["quarter"],
+                "game_clock_seconds": row["game_clock_seconds"],
+                "wall_clock_utc": row["wall_clock_utc"],
+                "home_score": home_score,
+                "away_score": away_score,
+                "event_data": event_data,
             }
-            current_possession['events'].append(event_dict)
+            current_possession["events"].append(event_dict)
 
-            if current_possession['team_id'] is None:
-                current_possession['team_id'] = row['team_id']
-                current_possession['start_event'] = row
+            if current_possession["team_id"] is None:
+                current_possession["team_id"] = row["team_id"]
+                current_possession["start_event"] = row
 
             prev_score = curr_score
 
         # Handle last possession
         # For the final possession, use the score from the last event as the end score
-        if len(current_possession['events']) > 0:
+        if len(current_possession["events"]) > 0:
             last_event_score = curr_score  # Final score of the game
             poss = self.aggregate_possession(
-                current_possession['events'],
+                current_possession["events"],
                 possession_number,
                 game,
-                current_possession['start_score'],
-                end_score=last_event_score
+                current_possession["start_score"],
+                end_score=last_event_score,
             )
             if poss:
                 possessions.append(poss)
@@ -335,11 +348,14 @@ class PossessionPanelBuilder:
         logger.debug(f"Game {game_id}: extracted {len(possessions)} possessions")
         return possessions
 
-    def aggregate_possession(self, possession_events: list,
-                            possession_number: int,
-                            game: dict,
-                            start_score: tuple,
-                            end_score: tuple) -> dict:
+    def aggregate_possession(
+        self,
+        possession_events: list,
+        possession_number: int,
+        game: dict,
+        start_score: tuple,
+        end_score: tuple,
+    ) -> dict:
         """Aggregate events into a single possession observation
 
         Args:
@@ -364,28 +380,32 @@ class PossessionPanelBuilder:
 
         # DEBUG: Log first 5 possessions
         if possession_number < 5:
-            logger.debug(f"Poss #{possession_number}: start={start_score}, end={end_score}, change={score_change}")
+            logger.debug(
+                f"Poss #{possession_number}: start={start_score}, end={end_score}, change={score_change}"
+            )
 
         # Determine which team scored
-        offensive_team_id = first_event['team_id']
+        offensive_team_id = first_event["team_id"]
 
         # If first event team is None, try to infer from game data
         if offensive_team_id is None:
             # Default to home team
-            offensive_team_id = game['home_team_id']
+            offensive_team_id = game["home_team_id"]
 
-        is_home_offense = (offensive_team_id == game['home_team_id'])
+        is_home_offense = offensive_team_id == game["home_team_id"]
 
         if is_home_offense:
             points_scored = score_change[0]
-            defensive_team_id = game['away_team_id']
+            defensive_team_id = game["away_team_id"]
         else:
             points_scored = score_change[1]
-            defensive_team_id = game['home_team_id']
+            defensive_team_id = game["home_team_id"]
 
         # DEBUG: Log calculated points
         if possession_number < 5:
-            logger.debug(f"Poss #{possession_number}: team={offensive_team_id}, is_home={is_home_offense}, points={points_scored}")
+            logger.debug(
+                f"Poss #{possession_number}: team={offensive_team_id}, is_home={is_home_offense}, points={points_scored}"
+            )
 
         # Ensure non-negative
         points_scored = max(0, points_scored)
@@ -394,9 +414,14 @@ class PossessionPanelBuilder:
         result = self.detector.categorize_result(possession_events, points_scored)
 
         # Calculate duration (end time - start time in game clock)
-        if last_event['game_clock_seconds'] is not None and first_event['game_clock_seconds'] is not None:
+        if (
+            last_event["game_clock_seconds"] is not None
+            and first_event["game_clock_seconds"] is not None
+        ):
             # Game clock counts DOWN, so start has higher value than end
-            duration = first_event['game_clock_seconds'] - last_event['game_clock_seconds']
+            duration = (
+                first_event["game_clock_seconds"] - last_event["game_clock_seconds"]
+            )
             duration = max(0, duration)  # Ensure non-negative
         else:
             duration = None
@@ -410,8 +435,12 @@ class PossessionPanelBuilder:
             score_diff = away_score - home_score
 
         # Calculate time remaining at START of possession
-        quarter = first_event['quarter'] if first_event['quarter'] is not None else 1
-        clock_seconds = first_event['game_clock_seconds'] if first_event['game_clock_seconds'] is not None else 0
+        quarter = first_event["quarter"] if first_event["quarter"] is not None else 1
+        clock_seconds = (
+            first_event["game_clock_seconds"]
+            if first_event["game_clock_seconds"] is not None
+            else 0
+        )
         seconds_remaining = (4 - quarter) * 720 + clock_seconds
 
         # Game seconds elapsed at START of possession (ensure all values are numeric)
@@ -419,49 +448,49 @@ class PossessionPanelBuilder:
         game_seconds_elapsed = max(0, game_seconds_elapsed)  # Ensure non-negative
 
         # Clutch indicator
-        is_clutch = (abs(score_diff) <= 5 and seconds_remaining <= 300 and quarter >= 4)
-        is_close = (abs(score_diff) <= 5)
-        is_blowout = (abs(score_diff) >= 20)
+        is_clutch = abs(score_diff) <= 5 and seconds_remaining <= 300 and quarter >= 4
+        is_close = abs(score_diff) <= 5
+        is_blowout = abs(score_diff) >= 20
 
         # Build possession record
         possession = {
             # Identifiers
-            'game_id': game['game_id'],
-            'possession_number': possession_number,
-
+            "game_id": game["game_id"],
+            "possession_number": possession_number,
             # Time
-            'game_date': game['game_date'],
-            'season': game['season'],
-            'period': quarter,
-            'game_seconds_elapsed': game_seconds_elapsed,
-            'seconds_remaining': max(0, seconds_remaining),
-
+            "game_date": game["game_date"],
+            "season": game["season"],
+            "period": quarter,
+            "game_seconds_elapsed": game_seconds_elapsed,
+            "seconds_remaining": max(0, seconds_remaining),
             # Teams (lineups will be NULL for now)
-            'offensive_team_id': offensive_team_id,
-            'defensive_team_id': defensive_team_id,
-
+            "offensive_team_id": offensive_team_id,
+            "defensive_team_id": defensive_team_id,
             # Outcomes
-            'points_scored': points_scored,
-            'possession_result': result,
-            'possession_duration_seconds': duration,
-            'shot_attempted': any('missed' in e['text'].lower() or 'made' in e['text'].lower()
-                                 for e in possession_events),
-            'shot_made': points_scored > 0,
-            'shot_type': '3PT' if points_scored == 3 else ('2PT' if points_scored == 2 else None),
-            'turnover': any('turnover' in e['text'].lower() for e in possession_events),
-            'foul_drawn': any('foul' in e['text'].lower() for e in possession_events),
-            'offensive_rebound': any('offensive rebound' in e['text'].lower() for e in possession_events),
-
+            "points_scored": points_scored,
+            "possession_result": result,
+            "possession_duration_seconds": duration,
+            "shot_attempted": any(
+                "missed" in e["text"].lower() or "made" in e["text"].lower()
+                for e in possession_events
+            ),
+            "shot_made": points_scored > 0,
+            "shot_type": (
+                "3PT" if points_scored == 3 else ("2PT" if points_scored == 2 else None)
+            ),
+            "turnover": any("turnover" in e["text"].lower() for e in possession_events),
+            "foul_drawn": any("foul" in e["text"].lower() for e in possession_events),
+            "offensive_rebound": any(
+                "offensive rebound" in e["text"].lower() for e in possession_events
+            ),
             # Game state
-            'score_differential': score_diff,
-            'is_clutch': is_clutch,
-            'is_close_game': is_close,
-            'is_blowout': is_blowout,
-
+            "score_differential": score_diff,
+            "is_clutch": is_clutch,
+            "is_close_game": is_close,
+            "is_blowout": is_blowout,
             # Metadata
-            'is_home_offense': is_home_offense,
-            'data_source': 'espn',
-
+            "is_home_offense": is_home_offense,
+            "data_source": "espn",
             # All other fields will be NULL initially (filled during enrichment)
         }
 
@@ -470,9 +499,9 @@ class PossessionPanelBuilder:
     def build_panel(self, limit: int = None):
         """Main ETL pipeline"""
 
-        logger.info("="*60)
+        logger.info("=" * 60)
         logger.info("Building Possession Panel from ESPN Events")
-        logger.info("="*60)
+        logger.info("=" * 60)
         logger.info(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
         # Get games to process
@@ -487,6 +516,7 @@ class PossessionPanelBuilder:
         # Process each game
         all_possessions = []
         import time
+
         total_events_processed = 0
 
         for idx, game in enumerate(games):
@@ -500,18 +530,25 @@ class PossessionPanelBuilder:
 
                 # Log progress every game for small batches, every 10 games for larger batches
                 if limit and limit <= 20:
-                    logger.info(f"  ✓ Game {idx+1}/{len(games)}: {game['game_id']} → {len(possessions)} possessions ({elapsed:.1f}s)")
+                    logger.info(
+                        f"  ✓ Game {idx+1}/{len(games)}: {game['game_id']} → {len(possessions)} possessions ({elapsed:.1f}s)"
+                    )
                 elif (idx + 1) % 10 == 0:
                     logger.info(f"  Progress: {idx+1}/{len(games)} games processed")
 
             except Exception as e:
                 logger.error(f"Error processing game {game['game_id']}: {e}")
                 import traceback
+
                 traceback.print_exc()
                 continue
 
-        logger.info(f"\n✓ Extracted {len(all_possessions)} possessions from {len(games)} games")
-        logger.info(f"  Average: {len(all_possessions)/len(games):.1f} possessions per game")
+        logger.info(
+            f"\n✓ Extracted {len(all_possessions)} possessions from {len(games)} games"
+        )
+        logger.info(
+            f"  Average: {len(all_possessions)/len(games):.1f} possessions per game"
+        )
 
         # Convert to DataFrame
         logger.info("\nConverting to DataFrame...")
@@ -521,9 +558,9 @@ class PossessionPanelBuilder:
         logger.info(f"Writing {len(df)} possessions to database...")
         self.write_to_database(df)
 
-        logger.info("\n" + "="*60)
+        logger.info("\n" + "=" * 60)
         logger.info("✅ Possession panel build complete!")
-        logger.info("="*60)
+        logger.info("=" * 60)
         logger.info(f"Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
         return df
@@ -535,14 +572,30 @@ class PossessionPanelBuilder:
 
         # Select only columns that exist in the table
         table_columns = [
-            'game_id', 'possession_number', 'game_date', 'season',
-            'game_seconds_elapsed', 'period', 'seconds_remaining',
-            'offensive_team_id', 'defensive_team_id',
-            'points_scored', 'possession_result', 'possession_duration_seconds',
-            'shot_attempted', 'shot_made', 'shot_type',
-            'turnover', 'foul_drawn', 'offensive_rebound',
-            'score_differential', 'is_clutch', 'is_close_game', 'is_blowout',
-            'is_home_offense', 'data_source'
+            "game_id",
+            "possession_number",
+            "game_date",
+            "season",
+            "game_seconds_elapsed",
+            "period",
+            "seconds_remaining",
+            "offensive_team_id",
+            "defensive_team_id",
+            "points_scored",
+            "possession_result",
+            "possession_duration_seconds",
+            "shot_attempted",
+            "shot_made",
+            "shot_type",
+            "turnover",
+            "foul_drawn",
+            "offensive_rebound",
+            "score_differential",
+            "is_clutch",
+            "is_close_game",
+            "is_blowout",
+            "is_home_offense",
+            "data_source",
         ]
 
         # Filter to existing columns
@@ -550,9 +603,14 @@ class PossessionPanelBuilder:
 
         # Convert float columns to int (PostgreSQL doesn't accept "0.0" for INTEGER columns)
         int_columns = [
-            'possession_number', 'season', 'game_seconds_elapsed',
-            'period', 'seconds_remaining', 'points_scored',
-            'possession_duration_seconds', 'score_differential'
+            "possession_number",
+            "season",
+            "game_seconds_elapsed",
+            "period",
+            "seconds_remaining",
+            "points_scored",
+            "possession_duration_seconds",
+            "score_differential",
         ]
 
         for col in int_columns:
@@ -564,20 +622,22 @@ class PossessionPanelBuilder:
 
         # Create CSV buffer
         buffer = StringIO()
-        df_write.to_csv(buffer, index=False, header=False, na_rep='\\N')
+        df_write.to_csv(buffer, index=False, header=False, na_rep="\\N")
         buffer.seek(0)
 
         # Build column list
-        columns = ','.join(df_write.columns)
+        columns = ",".join(df_write.columns)
 
         # COPY to table
         try:
             self.cursor.copy_expert(
                 f"COPY possession_panel ({columns}) FROM STDIN WITH CSV NULL '\\N'",
-                buffer
+                buffer,
             )
             self.conn.commit()
-            logger.info(f"✅ Wrote {len(df_write)} possessions to possession_panel table")
+            logger.info(
+                f"✅ Wrote {len(df_write)} possessions to possession_panel table"
+            )
         except Exception as e:
             self.conn.rollback()
             logger.error(f"Error writing to database: {e}")
@@ -593,23 +653,19 @@ def main():
     """CLI entry point"""
 
     parser = argparse.ArgumentParser(
-        description='Build possession panel from ESPN temporal events'
+        description="Build possession panel from ESPN temporal events"
     )
     parser.add_argument(
-        '--limit',
+        "--limit",
         type=int,
         default=None,
-        help='Limit number of games to process (for testing)'
+        help="Limit number of games to process (for testing)",
     )
+    parser.add_argument("--verbose", action="store_true", help="Enable debug logging")
     parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Enable debug logging'
-    )
-    parser.add_argument(
-        '--truncate',
-        action='store_true',
-        help='Truncate possession_panel table before loading'
+        "--truncate",
+        action="store_true",
+        help="Truncate possession_panel table before loading",
     )
 
     args = parser.parse_args()
@@ -618,7 +674,7 @@ def main():
         logger.setLevel(logging.DEBUG)
 
     # Validate credentials
-    if not DB_CONFIG['user'] or not DB_CONFIG['password']:
+    if not DB_CONFIG["user"] or not DB_CONFIG["password"]:
         logger.error("ERROR: Database credentials not found in .env file")
         sys.exit(1)
 
@@ -637,22 +693,24 @@ def main():
 
         # Print summary statistics
         if df is not None and len(df) > 0:
-            print("\n" + "="*60)
+            print("\n" + "=" * 60)
             print("Summary Statistics")
-            print("="*60)
+            print("=" * 60)
             print(f"\nTotal possessions: {len(df):,}")
             print(f"\nGames processed: {df['game_id'].nunique():,}")
             print(f"Possessions per game: {len(df)/df['game_id'].nunique():.1f}")
             print(f"\nSeasons covered: {df['season'].min()} - {df['season'].max()}")
             print(f"\nPoints distribution:")
-            print(df['points_scored'].value_counts().sort_index())
+            print(df["points_scored"].value_counts().sort_index())
             print(f"\nPossession results:")
-            print(df['possession_result'].value_counts())
-            print(f"\nClutch possessions: {df['is_clutch'].sum():,} ({df['is_clutch'].sum()/len(df)*100:.1f}%)")
+            print(df["possession_result"].value_counts())
+            print(
+                f"\nClutch possessions: {df['is_clutch'].sum():,} ({df['is_clutch'].sum()/len(df)*100:.1f}%)"
+            )
 
     finally:
         builder.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

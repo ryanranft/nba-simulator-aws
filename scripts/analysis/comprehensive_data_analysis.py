@@ -21,110 +21,112 @@ from typing import Dict, Tuple
 def check_pbp_data(file_path: Path) -> Tuple[bool, Dict]:
     """Check if PBP file has play-by-play data."""
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             data = json.load(f)
 
-        pkg = data.get('page', {}).get('content', {}).get('gamepackage', {})
+        pkg = data.get("page", {}).get("content", {}).get("gamepackage", {})
 
         # Check play-by-play
-        playGrps = pkg.get('pbp', {}).get('playGrps', [])
+        playGrps = pkg.get("pbp", {}).get("playGrps", [])
         play_count = sum(len(period) for period in playGrps if isinstance(period, list))
 
         # Check shot chart
-        shot_count = len(pkg.get('shtChrt', {}).get('plays', []))
+        shot_count = len(pkg.get("shtChrt", {}).get("plays", []))
 
         return play_count > 0, {
-            'plays': play_count,
-            'shots': shot_count,
-            'has_gmInfo': 'gmInfo' in pkg,
-            'size_kb': file_path.stat().st_size / 1024
+            "plays": play_count,
+            "shots": shot_count,
+            "has_gmInfo": "gmInfo" in pkg,
+            "size_kb": file_path.stat().st_size / 1024,
         }
     except Exception as e:
-        return False, {'error': str(e)}
+        return False, {"error": str(e)}
 
 
 def check_box_score_data(file_path: Path) -> Tuple[bool, Dict]:
     """Check if box score file has player statistics."""
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             data = json.load(f)
 
-        pkg = data.get('page', {}).get('content', {}).get('gamepackage', {})
-        boxscore = pkg.get('boxscore', {})
+        pkg = data.get("page", {}).get("content", {}).get("gamepackage", {})
+        boxscore = pkg.get("boxscore", {})
 
         # Count players with statistics
         player_count = 0
-        if 'players' in boxscore:
-            for team in boxscore['players']:
-                if isinstance(team, dict) and 'statistics' in team:
-                    for stat_group in team['statistics']:
-                        if 'athletes' in stat_group:
-                            player_count += len(stat_group['athletes'])
+        if "players" in boxscore:
+            for team in boxscore["players"]:
+                if isinstance(team, dict) and "statistics" in team:
+                    for stat_group in team["statistics"]:
+                        if "athletes" in stat_group:
+                            player_count += len(stat_group["athletes"])
 
         return player_count > 0, {
-            'players': player_count,
-            'has_boxscore': 'boxscore' in pkg,
-            'size_kb': file_path.stat().st_size / 1024
+            "players": player_count,
+            "has_boxscore": "boxscore" in pkg,
+            "size_kb": file_path.stat().st_size / 1024,
         }
     except Exception as e:
-        return False, {'error': str(e)}
+        return False, {"error": str(e)}
 
 
 def check_team_stats_data(file_path: Path) -> Tuple[bool, Dict]:
     """Check if team stats file has team statistics."""
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             data = json.load(f)
 
-        pkg = data.get('page', {}).get('content', {}).get('gamepackage', {})
-        boxscore = pkg.get('boxscore', {})
+        pkg = data.get("page", {}).get("content", {}).get("gamepackage", {})
+        boxscore = pkg.get("boxscore", {})
 
         # Check for team statistics
         team_count = 0
         team_stats = []
-        if 'teams' in boxscore:
-            teams = boxscore['teams']
+        if "teams" in boxscore:
+            teams = boxscore["teams"]
             team_count = len(teams)
 
             # Check if teams have statistics
             for team in teams:
-                if isinstance(team, dict) and 'statistics' in team:
-                    team_stats.append(len(team['statistics']))
+                if isinstance(team, dict) and "statistics" in team:
+                    team_stats.append(len(team["statistics"]))
 
         return team_count > 0, {
-            'teams': team_count,
-            'has_stats': sum(team_stats) > 0 if team_stats else False,
-            'size_kb': file_path.stat().st_size / 1024
+            "teams": team_count,
+            "has_stats": sum(team_stats) > 0 if team_stats else False,
+            "size_kb": file_path.stat().st_size / 1024,
         }
     except Exception as e:
-        return False, {'error': str(e)}
+        return False, {"error": str(e)}
 
 
 def check_schedule_data(file_path: Path) -> Tuple[bool, Dict]:
     """Check if schedule file has game information."""
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             data = json.load(f)
 
         # Schedule files have different structure
-        content = data.get('page', {}).get('content', {})
+        content = data.get("page", {}).get("content", {})
 
         # Check for schedule/scoreboard data
         game_count = 0
-        if 'sbData' in content:
-            events = content['sbData'].get('events', [])
+        if "sbData" in content:
+            events = content["sbData"].get("events", [])
             game_count = len(events)
 
         return game_count > 0, {
-            'games': game_count,
-            'has_sbData': 'sbData' in content,
-            'size_kb': file_path.stat().st_size / 1024
+            "games": game_count,
+            "has_sbData": "sbData" in content,
+            "size_kb": file_path.stat().st_size / 1024,
         }
     except Exception as e:
-        return False, {'error': str(e)}
+        return False, {"error": str(e)}
 
 
-def analyze_directory(dir_path: Path, check_func, data_type: str, sample_size: int = 300):
+def analyze_directory(
+    dir_path: Path, check_func, data_type: str, sample_size: int = 300
+):
     """Analyze a directory of JSON files."""
     print(f"\n{'='*70}")
     print(f"Analyzing {data_type.upper()}")
@@ -134,7 +136,7 @@ def analyze_directory(dir_path: Path, check_func, data_type: str, sample_size: i
         print(f"❌ Directory not found: {dir_path}")
         return None
 
-    all_files = list(dir_path.glob('*.json'))
+    all_files = list(dir_path.glob("*.json"))
     total_files = len(all_files)
 
     print(f"Total files: {total_files:,}")
@@ -157,7 +159,7 @@ def analyze_directory(dir_path: Path, check_func, data_type: str, sample_size: i
 
         has_data, info = check_func(file_path)
 
-        if 'error' in info:
+        if "error" in info:
             error_files.append((file_path.name, info))
         elif has_data:
             valid_files.append((file_path.name, info))
@@ -174,9 +176,15 @@ def analyze_directory(dir_path: Path, check_func, data_type: str, sample_size: i
 
     # Print results
     print(f"\n📊 Results:")
-    print(f"  ✅ Valid:  {len(valid_files):4d} / {len(sample_files)} ({valid_pct:5.1f}%)")
-    print(f"  ❌ Empty:  {len(empty_files):4d} / {len(sample_files)} ({empty_pct:5.1f}%)")
-    print(f"  ⚠️  Errors: {len(error_files):4d} / {len(sample_files)} ({error_pct:5.1f}%)")
+    print(
+        f"  ✅ Valid:  {len(valid_files):4d} / {len(sample_files)} ({valid_pct:5.1f}%)"
+    )
+    print(
+        f"  ❌ Empty:  {len(empty_files):4d} / {len(sample_files)} ({empty_pct:5.1f}%)"
+    )
+    print(
+        f"  ⚠️  Errors: {len(error_files):4d} / {len(sample_files)} ({error_pct:5.1f}%)"
+    )
 
     print(f"\n📈 Estimated Full Dataset:")
     print(f"  ✅ Valid:  ~{est_valid:,} files ({valid_pct:.1f}%)")
@@ -186,7 +194,7 @@ def analyze_directory(dir_path: Path, check_func, data_type: str, sample_size: i
     if valid_files:
         print(f"\n✅ Sample Valid Files:")
         for fname, info in valid_files[:3]:
-            info_str = ', '.join(f"{k}={v}" for k, v in info.items() if k != 'error')
+            info_str = ", ".join(f"{k}={v}" for k, v in info.items() if k != "error")
             print(f"  {fname}: {info_str}")
 
     if empty_files:
@@ -195,65 +203,73 @@ def analyze_directory(dir_path: Path, check_func, data_type: str, sample_size: i
             print(f"  {fname}: size={info.get('size_kb', 0):.1f} KB")
 
     return {
-        'total_files': total_files,
-        'sample_size': len(sample_files),
-        'valid_count': len(valid_files),
-        'empty_count': len(empty_files),
-        'error_count': len(error_files),
-        'valid_pct': valid_pct,
-        'empty_pct': empty_pct,
-        'est_valid': est_valid,
-        'est_empty': est_empty
+        "total_files": total_files,
+        "sample_size": len(sample_files),
+        "valid_count": len(valid_files),
+        "empty_count": len(empty_files),
+        "error_count": len(error_files),
+        "valid_pct": valid_pct,
+        "empty_pct": empty_pct,
+        "est_valid": est_valid,
+        "est_empty": est_empty,
     }
 
 
 def main():
     """Main analysis function."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("COMPREHENSIVE NBA DATA QUALITY ANALYSIS")
-    print("="*70)
+    print("=" * 70)
 
     project_root = Path(__file__).parent.parent.parent
-    data_dir = project_root / 'data'
+    data_dir = project_root / "data"
 
     results = {}
 
     # 1. Play-by-Play
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("1/4: PLAY-BY-PLAY DATA")
-    print("="*70)
-    pbp_dir = data_dir / 'nba_pbp'
-    results['pbp'] = analyze_directory(pbp_dir, check_pbp_data, 'play-by-play', sample_size=300)
+    print("=" * 70)
+    pbp_dir = data_dir / "nba_pbp"
+    results["pbp"] = analyze_directory(
+        pbp_dir, check_pbp_data, "play-by-play", sample_size=300
+    )
 
     # 2. Box Scores
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("2/4: BOX SCORE DATA")
-    print("="*70)
-    box_dir = data_dir / 'nba_box_score'
-    results['box'] = analyze_directory(box_dir, check_box_score_data, 'box scores', sample_size=300)
+    print("=" * 70)
+    box_dir = data_dir / "nba_box_score"
+    results["box"] = analyze_directory(
+        box_dir, check_box_score_data, "box scores", sample_size=300
+    )
 
     # 3. Team Stats
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("3/4: TEAM STATS DATA")
-    print("="*70)
-    team_dir = data_dir / 'nba_team_stats'
-    results['team'] = analyze_directory(team_dir, check_team_stats_data, 'team stats', sample_size=300)
+    print("=" * 70)
+    team_dir = data_dir / "nba_team_stats"
+    results["team"] = analyze_directory(
+        team_dir, check_team_stats_data, "team stats", sample_size=300
+    )
 
     # 4. Schedule
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("4/4: SCHEDULE DATA")
-    print("="*70)
-    schedule_dir = data_dir / 'nba_schedule_json'
-    results['schedule'] = analyze_directory(schedule_dir, check_schedule_data, 'schedule', sample_size=300)
+    print("=" * 70)
+    schedule_dir = data_dir / "nba_schedule_json"
+    results["schedule"] = analyze_directory(
+        schedule_dir, check_schedule_data, "schedule", sample_size=300
+    )
 
     # Overall Summary
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("OVERALL SUMMARY")
-    print("="*70)
+    print("=" * 70)
 
-    total_files = sum(r['total_files'] for r in results.values() if r)
-    total_valid = sum(r['est_valid'] for r in results.values() if r)
-    total_empty = sum(r['est_empty'] for r in results.values() if r)
+    total_files = sum(r["total_files"] for r in results.values() if r)
+    total_valid = sum(r["est_valid"] for r in results.values() if r)
+    total_empty = sum(r["est_empty"] for r in results.values() if r)
 
     print(f"\n📊 Across All Data Types:")
     print(f"  Total files:      {total_files:,}")
@@ -263,7 +279,9 @@ def main():
     print(f"\n📁 By Data Type:")
     for name, result in results.items():
         if result:
-            print(f"  {name.upper():12s}: {result['est_valid']:6,} / {result['total_files']:6,} valid ({result['valid_pct']:5.1f}%)")
+            print(
+                f"  {name.upper():12s}: {result['est_valid']:6,} / {result['total_files']:6,} valid ({result['valid_pct']:5.1f}%)"
+            )
 
     print(f"\n💾 Storage Impact:")
     # Estimate based on average file sizes
@@ -273,8 +291,12 @@ def main():
     waste_gb = total_gb - valid_gb
 
     print(f"  Total S3 storage: ~{total_gb:.1f} GB")
-    print(f"  Usable data:      ~{valid_gb:.1f} GB ({(total_valid/total_files*100):.1f}%)")
-    print(f"  Waste:            ~{waste_gb:.1f} GB ({(total_empty/total_files*100):.1f}%)")
+    print(
+        f"  Usable data:      ~{valid_gb:.1f} GB ({(total_valid/total_files*100):.1f}%)"
+    )
+    print(
+        f"  Waste:            ~{waste_gb:.1f} GB ({(total_empty/total_files*100):.1f}%)"
+    )
 
     print(f"\n⚡ ETL Impact:")
     compute_waste_pct = (total_empty / total_files) * 100
@@ -286,12 +308,14 @@ def main():
 
     print(f"\n🎯 Recommendations:")
     print(f"  1. Pre-filter ALL file types in Glue ETL before processing")
-    print(f"  2. Expected to reduce processing from {total_files:,} → {total_valid:,} files")
+    print(
+        f"  2. Expected to reduce processing from {total_files:,} → {total_valid:,} files"
+    )
     print(f"  3. Document filter criteria for each data type")
     print(f"  4. Consider creating 'valid file manifest' for future runs")
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

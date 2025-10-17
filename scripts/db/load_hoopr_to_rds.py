@@ -37,16 +37,16 @@ import argparse
 import io
 
 # Load environment variables from external credentials file
-load_dotenv('/Users/ryanranft/nba-sim-credentials.env')
+load_dotenv("/Users/ryanranft/nba-sim-credentials.env")
 
 # Database configuration
 DB_CONFIG = {
-    'host': os.getenv('DB_HOST', 'nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com'),
-    'database': os.getenv('DB_NAME', 'nba_simulator'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'port': os.getenv('DB_PORT', 5432),
-    'sslmode': 'require'
+    "host": os.getenv("DB_HOST", "nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com"),
+    "database": os.getenv("DB_NAME", "nba_simulator"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "port": os.getenv("DB_PORT", 5432),
+    "sslmode": "require",
 }
 
 # Local SQLite database
@@ -75,9 +75,9 @@ def check_prerequisites():
 
 def create_hoopr_tables(pg_cursor):
     """Create hoopR tables in PostgreSQL matching SQLite schema."""
-    print("="*70)
+    print("=" * 70)
     print("CREATING HOOPR TABLES IN RDS")
-    print("="*70)
+    print("=" * 70)
     print()
 
     # Get schema from SQLite
@@ -85,18 +85,20 @@ def create_hoopr_tables(pg_cursor):
     sqlite_cursor = sqlite_conn.cursor()
 
     # Get table schemas
-    tables_to_create = ['play_by_play', 'player_box', 'team_box', 'schedule']
+    tables_to_create = ["play_by_play", "player_box", "team_box", "schedule"]
 
     for table in tables_to_create:
         print(f"Creating hoopr_{table}...")
 
         # Check if table already exists
-        pg_cursor.execute(f"""
+        pg_cursor.execute(
+            f"""
             SELECT EXISTS (
                 SELECT FROM information_schema.tables
                 WHERE table_name = 'hoopr_{table}'
             );
-        """)
+        """
+        )
         exists = pg_cursor.fetchone()[0]
 
         if exists:
@@ -106,7 +108,7 @@ def create_hoopr_tables(pg_cursor):
             print(f"  Current rows: {count:,}")
 
             response = input(f"  Drop and recreate table? (yes/no): ").strip().lower()
-            if response == 'yes':
+            if response == "yes":
                 print(f"  Dropping hoopr_{table}...")
                 pg_cursor.execute(f"DROP TABLE hoopr_{table} CASCADE;")
             else:
@@ -119,12 +121,12 @@ def create_hoopr_tables(pg_cursor):
 
         # Map SQLite types to PostgreSQL types
         type_mapping = {
-            'INTEGER': 'INTEGER',
-            'TEXT': 'TEXT',
-            'REAL': 'DOUBLE PRECISION',
-            'BOOLEAN': 'BOOLEAN',
-            'DATE': 'DATE',
-            'TIMESTAMP': 'TIMESTAMP'
+            "INTEGER": "INTEGER",
+            "TEXT": "TEXT",
+            "REAL": "DOUBLE PRECISION",
+            "BOOLEAN": "BOOLEAN",
+            "DATE": "DATE",
+            "TIMESTAMP": "TIMESTAMP",
         }
 
         # Build CREATE TABLE statement
@@ -132,7 +134,7 @@ def create_hoopr_tables(pg_cursor):
         for col in columns:
             col_name = col[1]
             col_type = col[2]
-            pg_type = type_mapping.get(col_type, 'TEXT')
+            pg_type = type_mapping.get(col_type, "TEXT")
             column_defs.append(f"{col_name} {pg_type}")
 
         create_sql = f"""
@@ -151,9 +153,9 @@ def create_hoopr_tables(pg_cursor):
 
 def load_table(sqlite_conn, pg_conn, pg_cursor, table_name, batch_size=BATCH_SIZE):
     """Load a table from SQLite to PostgreSQL using batched COPY."""
-    print("="*70)
+    print("=" * 70)
     print(f"LOADING: hoopr_{table_name}")
-    print("="*70)
+    print("=" * 70)
 
     sqlite_cursor = sqlite_conn.cursor()
 
@@ -167,13 +169,15 @@ def load_table(sqlite_conn, pg_conn, pg_cursor, table_name, batch_size=BATCH_SIZ
 
     print(f"\nTotal rows to load: {total_rows:,}")
     print(f"Batch size: {batch_size:,}")
-    print(f"Estimated time: {total_rows / batch_size / 10:.1f} minutes (at ~10 batches/min)")
+    print(
+        f"Estimated time: {total_rows / batch_size / 10:.1f} minutes (at ~10 batches/min)"
+    )
     print()
 
     # Get column names
     sqlite_cursor.execute(f"PRAGMA table_info({table_name});")
     columns = [col[1] for col in sqlite_cursor.fetchall()]
-    column_list = ', '.join(columns)
+    column_list = ", ".join(columns)
 
     # Stream data in batches
     start_time = datetime.now()
@@ -197,21 +201,30 @@ def load_table(sqlite_conn, pg_conn, pg_cursor, table_name, batch_size=BATCH_SIZ
             csv_row = []
             for value in row:
                 if value is None:
-                    csv_row.append('')
+                    csv_row.append("")
                 else:
                     # Escape special characters for CSV
-                    value_str = str(value).replace('\\', '\\\\').replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t')
+                    value_str = (
+                        str(value)
+                        .replace("\\", "\\\\")
+                        .replace("\n", "\\n")
+                        .replace("\r", "\\r")
+                        .replace("\t", "\\t")
+                    )
                     csv_row.append(value_str)
-            output.write('\t'.join(csv_row) + '\n')
+            output.write("\t".join(csv_row) + "\n")
 
         output.seek(0)
 
         # Use COPY for bulk insert
         try:
-            pg_cursor.copy_expert(f"""
+            pg_cursor.copy_expert(
+                f"""
                 COPY hoopr_{table_name} ({column_list})
                 FROM STDIN WITH (FORMAT TEXT, NULL '')
-            """, output)
+            """,
+                output,
+            )
 
             loaded_rows += len(batch)
 
@@ -223,8 +236,10 @@ def load_table(sqlite_conn, pg_conn, pg_cursor, table_name, batch_size=BATCH_SIZ
                 pct = loaded_rows / total_rows * 100
                 eta = (total_rows - loaded_rows) / rate if rate > 0 else 0
 
-                print(f"  Progress: {loaded_rows:,}/{total_rows:,} ({pct:.1f}%) "
-                      f"| Rate: {rate:.0f} rows/sec | ETA: {eta/60:.1f} min")
+                print(
+                    f"  Progress: {loaded_rows:,}/{total_rows:,} ({pct:.1f}%) "
+                    f"| Rate: {rate:.0f} rows/sec | ETA: {eta/60:.1f} min"
+                )
 
         except Exception as e:
             print(f"\n  ❌ Error in batch {batch_num}: {e}")
@@ -257,22 +272,19 @@ def load_table(sqlite_conn, pg_conn, pg_cursor, table_name, batch_size=BATCH_SIZ
 
 def create_indexes(pg_cursor):
     """Create indexes on hoopR tables for query performance."""
-    print("="*70)
+    print("=" * 70)
     print("CREATING INDEXES")
-    print("="*70)
+    print("=" * 70)
     print()
 
     indexes = [
         # play_by_play indexes
         ("idx_hoopr_pbp_game_id", "hoopr_play_by_play", "game_id"),
         ("idx_hoopr_pbp_game_date", "hoopr_play_by_play", "game_date"),
-
         # player_box indexes
         ("idx_hoopr_player_box_game_id", "hoopr_player_box", "game_id"),
-
         # team_box indexes
         ("idx_hoopr_team_box_game_id", "hoopr_team_box", "game_id"),
-
         # schedule indexes
         ("idx_hoopr_schedule_game_id", "hoopr_schedule", "game_id"),
         ("idx_hoopr_schedule_game_date", "hoopr_schedule", "game_date"),
@@ -281,10 +293,12 @@ def create_indexes(pg_cursor):
     for idx_name, table, column in indexes:
         try:
             print(f"Creating {idx_name}...")
-            pg_cursor.execute(f"""
+            pg_cursor.execute(
+                f"""
                 CREATE INDEX IF NOT EXISTS {idx_name}
                 ON {table}({column});
-            """)
+            """
+            )
             print(f"  ✓ {idx_name} created")
         except Exception as e:
             print(f"  ⚠️  Skipped {idx_name}: {e}")
@@ -295,13 +309,13 @@ def create_indexes(pg_cursor):
 
 def print_summary(pg_cursor):
     """Print summary of loaded data."""
-    print("="*70)
+    print("=" * 70)
     print("LOAD SUMMARY")
-    print("="*70)
+    print("=" * 70)
     print()
 
     # Table row counts
-    tables = ['play_by_play', 'player_box', 'team_box', 'schedule']
+    tables = ["play_by_play", "player_box", "team_box", "schedule"]
 
     print(f"{'Table':<25} {'Rows':<15}")
     print("-" * 40)
@@ -313,7 +327,8 @@ def print_summary(pg_cursor):
 
     # Table sizes
     print()
-    pg_cursor.execute("""
+    pg_cursor.execute(
+        """
         SELECT
             table_name,
             pg_size_pretty(pg_total_relation_size(table_name::regclass)) AS total_size,
@@ -322,7 +337,8 @@ def print_summary(pg_cursor):
         FROM information_schema.tables
         WHERE table_name LIKE 'hoopr_%'
         ORDER BY pg_total_relation_size(table_name::regclass) DESC;
-    """)
+    """
+    )
 
     print(f"{'Table':<25} {'Total Size':<15} {'Table':<15} {'Indexes':<15}")
     print("-" * 70)
@@ -331,25 +347,29 @@ def print_summary(pg_cursor):
 
     # Date range
     print()
-    pg_cursor.execute("""
+    pg_cursor.execute(
+        """
         SELECT MIN(game_date), MAX(game_date)
         FROM hoopr_schedule
         WHERE game_date IS NOT NULL;
-    """)
+    """
+    )
     min_date, max_date = pg_cursor.fetchone()
     print(f"Date range: {min_date} to {max_date}")
 
     # Seasons
-    pg_cursor.execute("""
+    pg_cursor.execute(
+        """
         SELECT COUNT(DISTINCT substr(game_date::TEXT, 1, 4))
         FROM hoopr_schedule
         WHERE game_date IS NOT NULL;
-    """)
+    """
+    )
     season_count = pg_cursor.fetchone()[0]
     print(f"Seasons: {season_count} years")
 
     print()
-    print("="*70)
+    print("=" * 70)
 
 
 def main():
@@ -369,20 +389,20 @@ Next Steps:
   1. Create unified ESPN + hoopR view
   2. Run cross-source validation in RDS
   3. Update ML feature engineering pipeline
-        """
+        """,
     )
 
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Test connection and show statistics without loading data'
+        "--dry-run",
+        action="store_true",
+        help="Test connection and show statistics without loading data",
     )
 
     args = parser.parse_args()
 
-    print("="*70)
+    print("=" * 70)
     print("LOAD HOOPR DATA TO RDS POSTGRESQL")
-    print("="*70)
+    print("=" * 70)
     print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
 
@@ -394,7 +414,7 @@ Next Steps:
     check_prerequisites()
 
     # Validate credentials
-    if not DB_CONFIG['user'] or not DB_CONFIG['password']:
+    if not DB_CONFIG["user"] or not DB_CONFIG["password"]:
         print("ERROR: Database credentials not found in nba-sim-credentials.env")
         sys.exit(1)
 
@@ -437,10 +457,10 @@ Next Steps:
 
         # Load data
         tables_to_load = [
-            ('schedule', 10000),      # 31K games - smaller batches
-            ('team_box', 50000),      # 60K rows - medium batches
-            ('player_box', 100000),   # 785K rows - large batches
-            ('play_by_play', 100000), # 13M rows - large batches
+            ("schedule", 10000),  # 31K games - smaller batches
+            ("team_box", 50000),  # 60K rows - medium batches
+            ("player_box", 100000),  # 785K rows - large batches
+            ("play_by_play", 100000),  # 13M rows - large batches
         ]
 
         for table, batch_size in tables_to_load:
@@ -456,14 +476,18 @@ Next Steps:
         overall_elapsed = (datetime.now() - overall_start).total_seconds()
 
         # Next steps
-        print("="*70)
+        print("=" * 70)
         print("NEXT STEPS")
-        print("="*70)
-        print("1. Create unified view: python scripts/db/create_unified_espn_hoopr_view.py")
-        print("2. Cross-validate in RDS: python scripts/utils/compare_espn_hoopr_rds.py")
+        print("=" * 70)
+        print(
+            "1. Create unified view: python scripts/db/create_unified_espn_hoopr_view.py"
+        )
+        print(
+            "2. Cross-validate in RDS: python scripts/utils/compare_espn_hoopr_rds.py"
+        )
         print("3. Update ML features: Update feature engineering to use hoopR data")
         print("4. Document results: Update DATA_CATALOG.md with RDS statistics")
-        print("="*70)
+        print("=" * 70)
 
         print(f"\n✓ hoopR data load complete!")
         print(f"Total time: {overall_elapsed/3600:.2f} hours")
@@ -474,6 +498,7 @@ Next Steps:
         pg_conn.rollback()
         print("Transaction rolled back")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
@@ -484,5 +509,5 @@ Next Steps:
         print("\nDatabase connections closed")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

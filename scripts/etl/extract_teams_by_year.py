@@ -28,16 +28,17 @@ import psycopg2
 from psycopg2.extras import execute_values
 
 # Configuration from environment
-S3_BUCKET = os.environ.get('S3_RAW_DATA_BUCKET', 'nba-sim-raw-data-lake')
-DB_HOST = os.environ.get('DB_HOST')
-DB_NAME = os.environ.get('DB_NAME')
-DB_USER = os.environ.get('DB_USER')
-DB_PASSWORD = os.environ.get('DB_PASSWORD')
-DB_PORT = os.environ.get('DB_PORT', '5432')
+S3_BUCKET = os.environ.get("S3_RAW_DATA_BUCKET", "nba-sim-raw-data-lake")
+DB_HOST = os.environ.get("DB_HOST")
+DB_NAME = os.environ.get("DB_NAME")
+DB_USER = os.environ.get("DB_USER")
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
+DB_PORT = os.environ.get("DB_PORT", "5432")
+
 
 def validate_environment():
     """Ensure all required environment variables are set"""
-    required_vars = ['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASSWORD']
+    required_vars = ["DB_HOST", "DB_NAME", "DB_USER", "DB_PASSWORD"]
     missing = [var for var in required_vars if not os.environ.get(var)]
 
     if missing:
@@ -47,47 +48,49 @@ def validate_environment():
         print("\nRun: source /Users/ryanranft/nba-sim-credentials.env")
         sys.exit(1)
 
+
 def get_s3_files_for_year(year: int, limit: int = None) -> List[str]:
     """Get list of schedule JSON files for a specific year"""
-    s3 = boto3.client('s3')
-    prefix = 'schedule/'
+    s3 = boto3.client("s3")
+    prefix = "schedule/"
 
-    paginator = s3.get_paginator('list_objects_v2')
+    paginator = s3.get_paginator("list_objects_v2")
     pages = paginator.paginate(Bucket=S3_BUCKET, Prefix=prefix)
 
     files = []
     year_str = str(year)
 
     for page in pages:
-        if 'Contents' not in page:
+        if "Contents" not in page:
             continue
 
-        for obj in page['Contents']:
-            key = obj['Key']
-            filename = key.split('/')[-1]
-            if filename.startswith(year_str) and filename.endswith('.json'):
+        for obj in page["Contents"]:
+            key = obj["Key"]
+            filename = key.split("/")[-1]
+            if filename.startswith(year_str) and filename.endswith(".json"):
                 files.append(key)
                 if limit and len(files) >= limit:
                     return sorted(files)
 
     return sorted(files)
 
+
 def extract_teams_from_json(json_content: dict) -> List[Dict]:
     """Extract all teams from a schedule JSON file"""
     teams = []
 
     try:
-        if 'page' not in json_content:
+        if "page" not in json_content:
             return teams
 
-        page = json_content['page']
+        page = json_content["page"]
 
         # Try different JSON structures
         events = None
-        if 'content' in page and 'schedule' in page['content']:
-            events = page['content']['schedule']
-        elif 'content' in page and 'events' in page['content']:
-            events = page['content']['events']
+        if "content" in page and "schedule" in page["content"]:
+            events = page["content"]["schedule"]
+        elif "content" in page and "events" in page["content"]:
+            events = page["content"]["events"]
 
         if not events:
             return teams
@@ -104,20 +107,21 @@ def extract_teams_from_json(json_content: dict) -> List[Dict]:
 
         # Extract all games to get all teams
         for game in events:
-            competitors = game.get('competitors', [])
+            competitors = game.get("competitors", [])
 
             for team in competitors:
-                team_id = str(team.get('id', ''))
+                team_id = str(team.get("id", ""))
                 if not team_id:
                     continue
 
                 # Extract team info
                 team_data = {
-                    'team_id': team_id,
-                    'team_name': team.get('displayName', ''),
-                    'team_abbreviation': team.get('abbreviation', '') or team.get('abbrev', ''),
-                    'location': team.get('location', ''),
-                    'name': team.get('name', '')
+                    "team_id": team_id,
+                    "team_name": team.get("displayName", ""),
+                    "team_abbreviation": team.get("abbreviation", "")
+                    or team.get("abbrev", ""),
+                    "location": team.get("location", ""),
+                    "name": team.get("name", ""),
                 }
                 teams.append(team_data)
 
@@ -126,6 +130,7 @@ def extract_teams_from_json(json_content: dict) -> List[Dict]:
         pass
 
     return teams
+
 
 def scan_year_for_teams(year: int) -> Dict[str, Dict]:
     """
@@ -146,21 +151,23 @@ def scan_year_for_teams(year: int) -> Dict[str, Dict]:
 
     print(f"Scanning {len(s3_files)} files to discover teams...")
 
-    s3 = boto3.client('s3')
+    s3 = boto3.client("s3")
     teams_dict = {}
 
     for i, s3_key in enumerate(s3_files, 1):
         try:
             response = s3.get_object(Bucket=S3_BUCKET, Key=s3_key)
-            json_content = json.loads(response['Body'].read())
+            json_content = json.loads(response["Body"].read())
 
             teams = extract_teams_from_json(json_content)
 
             for team in teams:
-                team_id = team['team_id']
+                team_id = team["team_id"]
                 if team_id not in teams_dict:
                     teams_dict[team_id] = team
-                    print(f"  Found: {team['team_name']} ({team['team_abbreviation']}) - ID: {team_id}")
+                    print(
+                        f"  Found: {team['team_name']} ({team['team_abbreviation']}) - ID: {team_id}"
+                    )
 
             # Stop early if we found 30+ teams (all active teams)
             if len(teams_dict) >= 30:
@@ -173,10 +180,19 @@ def scan_year_for_teams(year: int) -> Dict[str, Dict]:
     print(f"\n✅ Discovered {len(teams_dict)} teams for year {year}")
     return teams_dict
 
+
 def main():
-    parser = argparse.ArgumentParser(description='Extract NBA teams by year from S3 schedule files')
-    parser.add_argument('--year-range', type=str, required=True, help='Year range (e.g., 1993-2025)')
-    parser.add_argument('--dry-run', action='store_true', help='Show what would be done without inserting')
+    parser = argparse.ArgumentParser(
+        description="Extract NBA teams by year from S3 schedule files"
+    )
+    parser.add_argument(
+        "--year-range", type=str, required=True, help="Year range (e.g., 1993-2025)"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without inserting",
+    )
 
     args = parser.parse_args()
 
@@ -184,7 +200,7 @@ def main():
     validate_environment()
 
     # Parse year range
-    start_year, end_year = map(int, args.year_range.split('-'))
+    start_year, end_year = map(int, args.year_range.split("-"))
     years = list(range(start_year, end_year + 1))
 
     print(f"NBA Team Discovery: {start_year}-{end_year}")
@@ -199,7 +215,7 @@ def main():
                 database=DB_NAME,
                 user=DB_USER,
                 password=DB_PASSWORD,
-                port=DB_PORT
+                port=DB_PORT,
             )
             cursor = conn.cursor()
             print(f"✅ Connected to database: {DB_HOST}\n")
@@ -225,13 +241,15 @@ def main():
                 all_teams[team_id] = team_info
 
             # Add to team_seasons data
-            team_seasons_data.append({
-                'team_id': team_id,
-                'season': season,
-                'team_name': team_info['team_name'],
-                'team_abbreviation': team_info['team_abbreviation'],
-                'city': team_info.get('location', None)
-            })
+            team_seasons_data.append(
+                {
+                    "team_id": team_id,
+                    "season": season,
+                    "team_name": team_info["team_name"],
+                    "team_abbreviation": team_info["team_abbreviation"],
+                    "city": team_info.get("location", None),
+                }
+            )
 
     print(f"\n{'='*80}")
     print("TEAM DISCOVERY COMPLETE")
@@ -255,7 +273,7 @@ def main():
             """
 
             teams_values = [
-                (team_id, info['team_name'], info['team_abbreviation'])
+                (team_id, info["team_name"], info["team_abbreviation"])
                 for team_id, info in all_teams.items()
             ]
 
@@ -275,7 +293,13 @@ def main():
             """
 
             team_seasons_values = [
-                (ts['team_id'], ts['season'], ts['team_name'], ts['team_abbreviation'], ts['city'])
+                (
+                    ts["team_id"],
+                    ts["season"],
+                    ts["team_name"],
+                    ts["team_abbreviation"],
+                    ts["city"],
+                )
                 for ts in team_seasons_data
             ]
 
@@ -285,9 +309,9 @@ def main():
             conn.commit()
 
             # Show summary
-            print("\n" + "="*80)
+            print("\n" + "=" * 80)
             print("DATABASE SUMMARY")
-            print("="*80)
+            print("=" * 80)
 
             cursor.execute("SELECT COUNT(*) FROM teams")
             print(f"Total teams in database: {cursor.fetchone()[0]}")
@@ -295,13 +319,15 @@ def main():
             cursor.execute("SELECT COUNT(*) FROM team_seasons")
             print(f"Total team-season records: {cursor.fetchone()[0]}")
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT season, COUNT(*) as teams
                 FROM team_seasons
                 GROUP BY season
                 ORDER BY season
                 LIMIT 10
-            """)
+            """
+            )
             print("\nSample team counts by season:")
             for row in cursor.fetchall():
                 print(f"  {row[0]}: {row[1]} teams")
@@ -319,7 +345,10 @@ def main():
         print("🔍 DRY RUN: Would insert data")
         print("\nSample teams:")
         for i, (team_id, info) in enumerate(list(all_teams.items())[:10], 1):
-            print(f"  {i}. {info['team_name']} ({info['team_abbreviation']}) - ID: {team_id}")
+            print(
+                f"  {i}. {info['team_name']} ({info['team_abbreviation']}) - ID: {team_id}"
+            )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

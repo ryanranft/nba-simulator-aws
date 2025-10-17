@@ -43,6 +43,7 @@ import json
 
 try:
     from kaggle.api.kaggle_api_extended import KaggleApi
+
     HAS_KAGGLE = True
 except ImportError:
     HAS_KAGGLE = False
@@ -51,6 +52,7 @@ except ImportError:
 
 try:
     import boto3
+
     HAS_BOTO3 = True
 except ImportError:
     HAS_BOTO3 = False
@@ -66,7 +68,7 @@ class KaggleNBADownloader:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         self.s3_bucket = s3_bucket
-        self.s3_client = boto3.client('s3') if HAS_BOTO3 and s3_bucket else None
+        self.s3_client = boto3.client("s3") if HAS_BOTO3 and s3_bucket else None
 
         # Initialize Kaggle API
         if HAS_KAGGLE:
@@ -88,9 +90,7 @@ class KaggleNBADownloader:
         try:
             # Download and unzip dataset
             self.api.dataset_download_files(
-                self.DATASET_NAME,
-                path=str(self.output_dir),
-                unzip=True
+                self.DATASET_NAME, path=str(self.output_dir), unzip=True
             )
 
             print(f"✅ Download complete!")
@@ -102,7 +102,9 @@ class KaggleNBADownloader:
 
     def list_database_files(self):
         """List all database files in output directory"""
-        db_files = list(self.output_dir.glob("*.db")) + list(self.output_dir.glob("*.sqlite"))
+        db_files = list(self.output_dir.glob("*.db")) + list(
+            self.output_dir.glob("*.sqlite")
+        )
 
         if not db_files:
             print(f"⚠️  No database files found in {self.output_dir}")
@@ -118,7 +120,7 @@ class KaggleNBADownloader:
     def inspect_database(self, db_path):
         """Inspect database schema and contents"""
         print(f"\n🔍 Inspecting database: {db_path.name}")
-        print("="*60)
+        print("=" * 60)
 
         try:
             conn = sqlite3.connect(str(db_path))
@@ -156,7 +158,9 @@ class KaggleNBADownloader:
         except Exception as e:
             print(f"❌ Error inspecting database: {e}")
 
-    def extract_table_to_json(self, db_path, table_name, output_file=None, upload_to_s3=False):
+    def extract_table_to_json(
+        self, db_path, table_name, output_file=None, upload_to_s3=False
+    ):
         """
         Extract table data to JSON
 
@@ -182,7 +186,7 @@ class KaggleNBADownloader:
             data = [dict(row) for row in rows]
 
             # Save to JSON
-            with open(output_file, 'w') as f:
+            with open(output_file, "w") as f:
                 json.dump(data, f, indent=2)
 
             print(f"  ✅ Saved {len(data):,} rows to {output_file}")
@@ -203,7 +207,7 @@ class KaggleNBADownloader:
     def extract_all_tables(self, db_path, upload_to_s3=False):
         """Extract all tables from database to JSON"""
         print(f"\n📦 Extracting all tables from {db_path.name}")
-        print("="*60)
+        print("=" * 60)
 
         try:
             conn = sqlite3.connect(str(db_path))
@@ -220,11 +224,13 @@ class KaggleNBADownloader:
 
             success_count = 0
             for table in tables:
-                if self.extract_table_to_json(db_path, table, upload_to_s3=upload_to_s3):
+                if self.extract_table_to_json(
+                    db_path, table, upload_to_s3=upload_to_s3
+                ):
                     success_count += 1
 
             print()
-            print("="*60)
+            print("=" * 60)
             print(f"✅ Extracted {success_count}/{len(tables)} tables successfully")
 
         except Exception as e:
@@ -232,14 +238,28 @@ class KaggleNBADownloader:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Download and extract Kaggle NBA database")
-    parser.add_argument('--output-dir', default='/tmp/kaggle_nba', help='Local output directory')
-    parser.add_argument('--download', action='store_true', help='Download dataset from Kaggle')
-    parser.add_argument('--inspect', action='store_true', help='Inspect database schema')
-    parser.add_argument('--extract', action='store_true', help='Extract tables to JSON')
-    parser.add_argument('--extract-to-s3', action='store_true', help='Upload extracted JSON to S3')
-    parser.add_argument('--s3-bucket', default='nba-sim-raw-data-lake', help='S3 bucket name')
-    parser.add_argument('--all', action='store_true', help='Download, inspect, and extract')
+    parser = argparse.ArgumentParser(
+        description="Download and extract Kaggle NBA database"
+    )
+    parser.add_argument(
+        "--output-dir", default="/tmp/kaggle_nba", help="Local output directory"
+    )
+    parser.add_argument(
+        "--download", action="store_true", help="Download dataset from Kaggle"
+    )
+    parser.add_argument(
+        "--inspect", action="store_true", help="Inspect database schema"
+    )
+    parser.add_argument("--extract", action="store_true", help="Extract tables to JSON")
+    parser.add_argument(
+        "--extract-to-s3", action="store_true", help="Upload extracted JSON to S3"
+    )
+    parser.add_argument(
+        "--s3-bucket", default="nba-sim-raw-data-lake", help="S3 bucket name"
+    )
+    parser.add_argument(
+        "--all", action="store_true", help="Download, inspect, and extract"
+    )
 
     args = parser.parse_args()
 
@@ -297,5 +317,5 @@ def main():
         print(f"☁️  Files uploaded to s3://{s3_bucket}/kaggle_nba/")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

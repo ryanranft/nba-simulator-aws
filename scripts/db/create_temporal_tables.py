@@ -25,27 +25,27 @@ from dotenv import load_dotenv
 import sys
 
 # Load environment variables from external credentials file
-load_dotenv('/Users/ryanranft/nba-sim-credentials.env')
+load_dotenv("/Users/ryanranft/nba-sim-credentials.env")
 
 # Database configuration
 DB_CONFIG = {
-    'host': os.getenv('DB_HOST', 'nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com'),
-    'database': os.getenv('DB_NAME', 'nba_simulator'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'port': os.getenv('DB_PORT', 5432),
-    'sslmode': 'require'
+    "host": os.getenv("DB_HOST", "nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com"),
+    "database": os.getenv("DB_NAME", "nba_simulator"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "port": os.getenv("DB_PORT", 5432),
+    "sslmode": "require",
 }
 
 # SQL scripts directory
-SQL_DIR = Path(__file__).parent.parent.parent / 'sql' / 'temporal'
+SQL_DIR = Path(__file__).parent.parent.parent / "sql" / "temporal"
 
 # Table creation scripts (in order)
 TABLE_SCRIPTS = [
-    '01_create_temporal_events.sql',
-    '01_create_player_snapshots.sql',
-    '01_create_game_states.sql',
-    '01_create_player_biographical.sql'
+    "01_create_temporal_events.sql",
+    "01_create_player_snapshots.sql",
+    "01_create_game_states.sql",
+    "01_create_player_biographical.sql",
 ]
 
 
@@ -54,28 +54,36 @@ def check_prerequisites(cursor):
     print("Checking prerequisites...")
 
     # Check for players table
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT EXISTS (
             SELECT FROM information_schema.tables
             WHERE table_name = 'players'
         );
-    """)
+    """
+    )
     players_exists = cursor.fetchone()[0]
 
     # Check for games table
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT EXISTS (
             SELECT FROM information_schema.tables
             WHERE table_name = 'games'
         );
-    """)
+    """
+    )
     games_exists = cursor.fetchone()[0]
 
     if not players_exists:
-        raise Exception("ERROR: 'players' table does not exist. Run Phase 3 table creation first.")
+        raise Exception(
+            "ERROR: 'players' table does not exist. Run Phase 3 table creation first."
+        )
 
     if not games_exists:
-        raise Exception("ERROR: 'games' table does not exist. Run Phase 3 table creation first.")
+        raise Exception(
+            "ERROR: 'games' table does not exist. Run Phase 3 table creation first."
+        )
 
     print("✓ Prerequisites check: PASSED")
     print(f"  - players table exists: {players_exists}")
@@ -85,12 +93,12 @@ def check_prerequisites(cursor):
 
 def create_table(cursor, script_path):
     """Execute a table creation script."""
-    table_name = script_path.stem.replace('01_create_', '')
+    table_name = script_path.stem.replace("01_create_", "")
 
     print(f"  Creating {table_name}...")
 
     # Read SQL script
-    with open(script_path, 'r') as f:
+    with open(script_path, "r") as f:
         sql = f.read()
 
     # Execute script
@@ -103,11 +111,13 @@ def validate_tables(cursor):
     """Validate that all temporal tables were created."""
     print("\nValidating table creation...")
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT COUNT(*)
         FROM information_schema.tables
         WHERE table_name IN ('temporal_events', 'player_snapshots', 'game_states', 'player_biographical');
-    """)
+    """
+    )
 
     table_count = cursor.fetchone()[0]
 
@@ -126,14 +136,16 @@ def print_summary(cursor):
     print("=" * 60)
     print()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             table_name,
             pg_size_pretty(pg_total_relation_size(table_name::regclass)) AS size
         FROM information_schema.tables
         WHERE table_name IN ('temporal_events', 'player_snapshots', 'game_states', 'player_biographical')
         ORDER BY table_name;
-    """)
+    """
+    )
 
     print(f"{'Table Name':<30} {'Size':<15}")
     print("-" * 45)
@@ -152,7 +164,7 @@ def main():
     print()
 
     # Validate DB credentials
-    if not DB_CONFIG['user'] or not DB_CONFIG['password']:
+    if not DB_CONFIG["user"] or not DB_CONFIG["password"]:
         print("ERROR: Database credentials not found in .env file")
         print("\nPlease create .env file with:")
         print("  DB_USER=your_username")
@@ -205,10 +217,18 @@ def main():
         print("=" * 60)
         print("Next Steps:")
         print("=" * 60)
-        print("1. Create BRIN indexes:      python scripts/db/create_temporal_indexes.py")
-        print("2. Create stored procedures: python scripts/db/create_stored_procedures.py")
-        print("3. Collect birth dates:      python scripts/etl/collect_player_birth_dates.py")
-        print("4. Extract timestamps:       python scripts/etl/extract_wall_clock_timestamps.py")
+        print(
+            "1. Create BRIN indexes:      python scripts/db/create_temporal_indexes.py"
+        )
+        print(
+            "2. Create stored procedures: python scripts/db/create_stored_procedures.py"
+        )
+        print(
+            "3. Collect birth dates:      python scripts/etl/collect_player_birth_dates.py"
+        )
+        print(
+            "4. Extract timestamps:       python scripts/etl/extract_wall_clock_timestamps.py"
+        )
         print("=" * 60)
         print()
 
@@ -226,5 +246,5 @@ def main():
         print("\nDatabase connection closed")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -20,8 +20,7 @@ load_dotenv()
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -39,18 +38,18 @@ class NBADataAssessor:
             "seasons": {},
             "eras": {},
             "summary": {},
-            "issues": []
+            "issues": [],
         }
 
     def connect(self) -> bool:
         """Connect to PostgreSQL database"""
         try:
             self.conn = psycopg2.connect(
-                host=os.getenv('RDS_HOST'),
-                port=os.getenv('RDS_PORT', 5432),
-                database=os.getenv('RDS_DATABASE'),
-                user=os.getenv('RDS_USERNAME'),
-                password=os.getenv('RDS_PASSWORD')
+                host=os.getenv("RDS_HOST"),
+                port=os.getenv("RDS_PORT", 5432),
+                database=os.getenv("RDS_DATABASE"),
+                user=os.getenv("RDS_USERNAME"),
+                password=os.getenv("RDS_PASSWORD"),
             )
             logger.info("Connected to database successfully")
             return True
@@ -64,17 +63,20 @@ class NBADataAssessor:
         try:
             with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
                 # Get database size
-                cur.execute("""
+                cur.execute(
+                    """
                     SELECT pg_database.datname as database_name,
                            pg_size_pretty(pg_database_size(pg_database.datname)) as size
                     FROM pg_database
                     WHERE datname = %s
-                """, (os.getenv('RDS_DATABASE'),))
+                """,
+                    (os.getenv("RDS_DATABASE"),),
+                )
                 db_info = cur.fetchone()
 
                 self.results["database_info"] = {
-                    "name": db_info['database_name'],
-                    "size": db_info['size']
+                    "name": db_info["database_name"],
+                    "size": db_info["size"],
                 }
 
                 logger.info(f"Database: {db_info['database_name']} ({db_info['size']})")
@@ -87,13 +89,15 @@ class NBADataAssessor:
         """Get list of all tables in database"""
         try:
             with self.conn.cursor() as cur:
-                cur.execute("""
+                cur.execute(
+                    """
                     SELECT table_name
                     FROM information_schema.tables
                     WHERE table_schema = 'public'
                     AND table_type = 'BASE TABLE'
                     ORDER BY table_name
-                """)
+                """
+                )
                 tables = [row[0] for row in cur.fetchall()]
                 logger.info(f"Found {len(tables)} tables")
                 return tables
@@ -111,58 +115,75 @@ class NBADataAssessor:
             "columns": [],
             "has_season_column": False,
             "season_coverage": {},
-            "issues": []
+            "issues": [],
         }
 
         try:
             with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
                 # Get row count
                 cur.execute(f"SELECT COUNT(*) as count FROM {table_name}")
-                assessment["row_count"] = cur.fetchone()['count']
+                assessment["row_count"] = cur.fetchone()["count"]
 
                 # Get table size
-                cur.execute("""
+                cur.execute(
+                    """
                     SELECT pg_size_pretty(pg_total_relation_size(%s)) as size
-                """, (table_name,))
-                assessment["size"] = cur.fetchone()['size']
+                """,
+                    (table_name,),
+                )
+                assessment["size"] = cur.fetchone()["size"]
 
                 # Get columns
-                cur.execute("""
+                cur.execute(
+                    """
                     SELECT column_name, data_type
                     FROM information_schema.columns
                     WHERE table_name = %s
                     ORDER BY ordinal_position
-                """, (table_name,))
+                """,
+                    (table_name,),
+                )
                 columns = cur.fetchall()
                 assessment["columns"] = [
-                    {"name": col['column_name'], "type": col['data_type']}
+                    {"name": col["column_name"], "type": col["data_type"]}
                     for col in columns
                 ]
 
                 # Check for season column
-                column_names = [col['column_name'] for col in columns]
-                assessment["has_season_column"] = 'season' in column_names
+                column_names = [col["column_name"] for col in columns]
+                assessment["has_season_column"] = "season" in column_names
 
                 # If has season, analyze coverage
                 if assessment["has_season_column"]:
-                    cur.execute(f"""
+                    cur.execute(
+                        f"""
                         SELECT season, COUNT(*) as count
                         FROM {table_name}
                         GROUP BY season
                         ORDER BY season
-                    """)
+                    """
+                    )
                     seasons = cur.fetchall()
                     assessment["season_coverage"] = {
-                        row['season']: row['count']
-                        for row in seasons
+                        row["season"]: row["count"] for row in seasons
                     }
                     assessment["season_range"] = {
-                        "min": min(seasons, key=lambda x: x['season'])['season'] if seasons else None,
-                        "max": max(seasons, key=lambda x: x['season'])['season'] if seasons else None,
-                        "total_seasons": len(seasons)
+                        "min": (
+                            min(seasons, key=lambda x: x["season"])["season"]
+                            if seasons
+                            else None
+                        ),
+                        "max": (
+                            max(seasons, key=lambda x: x["season"])["season"]
+                            if seasons
+                            else None
+                        ),
+                        "total_seasons": len(seasons),
                     }
 
-                logger.info(f"✓ {table_name}: {assessment['row_count']:,} rows ({assessment['size']})")
+                logger.info(
+                    f"✓ {table_name}: {assessment['row_count']:,} rows ({assessment['size']})"
+                )
 
         except Exception as e:
             logger.error(f"Failed to assess table {table_name}: {e}")
@@ -172,54 +193,64 @@ class NBADataAssessor:
 
     def analyze_season_completeness(self):
         """Analyze data completeness by season across all tables"""
-        season_data = defaultdict(lambda: {
-            "games": 0,
-            "players": 0,
-            "box_scores": 0,
-            "play_by_play": 0,
-            "advanced_stats": 0
-        })
+        season_data = defaultdict(
+            lambda: {
+                "games": 0,
+                "players": 0,
+                "box_scores": 0,
+                "play_by_play": 0,
+                "advanced_stats": 0,
+            }
+        )
 
         try:
             # Games by season
             with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute("""
+                cur.execute(
+                    """
                     SELECT season, COUNT(*) as count
                     FROM games
                     GROUP BY season
                     ORDER BY season
-                """)
+                """
+                )
                 for row in cur.fetchall():
-                    season_data[row['season']]["games"] = row['count']
+                    season_data[row["season"]]["games"] = row["count"]
 
                 # Box score players by season
-                cur.execute("""
+                cur.execute(
+                    """
                     SELECT season, COUNT(*) as count
                     FROM box_score_players
                     GROUP BY season
                     ORDER BY season
-                """)
+                """
+                )
                 for row in cur.fetchall():
-                    season_data[row['season']]["box_scores"] = row['count']
+                    season_data[row["season"]]["box_scores"] = row["count"]
 
                 # Check for play_by_play table
-                cur.execute("""
+                cur.execute(
+                    """
                     SELECT EXISTS (
                         SELECT FROM information_schema.tables
                         WHERE table_name = 'play_by_play'
                     )
-                """)
+                """
+                )
                 has_pbp = cur.fetchone()[0]
 
                 if has_pbp:
-                    cur.execute("""
+                    cur.execute(
+                        """
                         SELECT season, COUNT(*) as count
                         FROM play_by_play
                         GROUP BY season
                         ORDER BY season
-                    """)
+                    """
+                    )
                     for row in cur.fetchall():
-                        season_data[row['season']]["play_by_play"] = row['count']
+                        season_data[row["season"]]["play_by_play"] = row["count"]
 
             self.results["seasons"] = dict(season_data)
             logger.info(f"Analyzed {len(season_data)} seasons")
@@ -232,14 +263,18 @@ class NBADataAssessor:
         """Analyze data availability by era"""
         eras = {
             "early_era": {"years": "1946-1960", "seasons": [], "quality": "minimal"},
-            "box_score_era": {"years": "1960-1990", "seasons": [], "quality": "enhanced"},
-            "pbp_era": {"years": "1990-2025", "seasons": [], "quality": "detailed"}
+            "box_score_era": {
+                "years": "1960-1990",
+                "seasons": [],
+                "quality": "enhanced",
+            },
+            "pbp_era": {"years": "1990-2025", "seasons": [], "quality": "detailed"},
         }
 
         for season, data in self.results.get("seasons", {}).items():
             # Parse season (e.g., "2023-24" -> 2023)
             try:
-                year = int(season.split('-')[0])
+                year = int(season.split("-")[0])
 
                 if 1946 <= year < 1960:
                     eras["early_era"]["seasons"].append(season)
@@ -268,22 +303,28 @@ class NBADataAssessor:
 
                 era_data["total_games"] = total_games
                 era_data["total_pbp_events"] = total_pbp
-                era_data["pbp_coverage"] = (total_pbp / total_games) if total_games > 0 else 0
+                era_data["pbp_coverage"] = (
+                    (total_pbp / total_games) if total_games > 0 else 0
+                )
 
         self.results["eras"] = eras
 
         for era_name, era_data in eras.items():
-            logger.info(f"{era_name}: {era_data['season_count']} seasons, "
-                       f"{era_data.get('total_games', 0):,} games")
+            logger.info(
+                f"{era_name}: {era_data['season_count']} seasons, "
+                f"{era_data.get('total_games', 0):,} games"
+            )
 
     def generate_summary(self):
         """Generate overall summary statistics"""
         summary = {
             "total_tables": len(self.results["tables"]),
-            "total_rows": sum(t.get("row_count", 0) for t in self.results["tables"].values()),
+            "total_rows": sum(
+                t.get("row_count", 0) for t in self.results["tables"].values()
+            ),
             "total_seasons": len(self.results.get("seasons", {})),
             "season_range": {},
-            "data_quality": {}
+            "data_quality": {},
         }
 
         # Season range
@@ -292,32 +333,46 @@ class NBADataAssessor:
             summary["season_range"] = {
                 "earliest": min(seasons),
                 "latest": max(seasons),
-                "total": len(seasons)
+                "total": len(seasons),
             }
 
         # Data quality metrics
         total_games = sum(s.get("games", 0) for s in self.results["seasons"].values())
-        total_box_scores = sum(s.get("box_scores", 0) for s in self.results["seasons"].values())
-        total_pbp = sum(s.get("play_by_play", 0) for s in self.results["seasons"].values())
+        total_box_scores = sum(
+            s.get("box_scores", 0) for s in self.results["seasons"].values()
+        )
+        total_pbp = sum(
+            s.get("play_by_play", 0) for s in self.results["seasons"].values()
+        )
 
         summary["data_quality"] = {
             "total_games": total_games,
             "total_box_scores": total_box_scores,
             "total_pbp_events": total_pbp,
-            "box_score_coverage": (total_box_scores / total_games) if total_games > 0 else 0,
-            "pbp_coverage": (total_pbp / total_games) if total_games > 0 else 0
+            "box_score_coverage": (
+                (total_box_scores / total_games) if total_games > 0 else 0
+            ),
+            "pbp_coverage": (total_pbp / total_games) if total_games > 0 else 0,
         }
 
         # Identify missing data
         expected_tables = [
-            "games", "players", "teams", "box_score_players", "box_score_teams",
-            "play_by_play", "player_game_stats", "team_game_stats"
+            "games",
+            "players",
+            "teams",
+            "box_score_players",
+            "box_score_teams",
+            "play_by_play",
+            "player_game_stats",
+            "team_game_stats",
         ]
 
         missing_tables = [t for t in expected_tables if t not in self.results["tables"]]
         if missing_tables:
             summary["missing_tables"] = missing_tables
-            self.results["issues"].append(f"Missing tables: {', '.join(missing_tables)}")
+            self.results["issues"].append(
+                f"Missing tables: {', '.join(missing_tables)}"
+            )
 
         self.results["summary"] = summary
 
@@ -326,7 +381,9 @@ class NBADataAssessor:
         logger.info(f"  Total Rows: {summary['total_rows']:,}")
         logger.info(f"  Total Seasons: {summary['total_seasons']}")
         logger.info(f"  Total Games: {summary['data_quality']['total_games']:,}")
-        logger.info(f"  Box Score Coverage: {summary['data_quality']['box_score_coverage']:.1%}")
+        logger.info(
+            f"  Box Score Coverage: {summary['data_quality']['box_score_coverage']:.1%}"
+        )
         logger.info(f"  PBP Coverage: {summary['data_quality']['pbp_coverage']:.1%}")
 
     def run_assessment(self) -> Dict[str, Any]:
@@ -386,7 +443,7 @@ class NBADataAssessor:
     def save_results(self, output_file: str):
         """Save assessment results to JSON file"""
         try:
-            with open(output_file, 'w') as f:
+            with open(output_file, "w") as f:
                 json.dump(self.results, f, indent=2, default=str)
             logger.info(f"\nResults saved to: {output_file}")
         except Exception as e:
@@ -399,9 +456,9 @@ def main():
 
     parser = argparse.ArgumentParser(description="NBA Database Data Assessment")
     parser.add_argument(
-        '--output',
-        default='data_assessment.json',
-        help='Output file for assessment results (default: data_assessment.json)'
+        "--output",
+        default="data_assessment.json",
+        help="Output file for assessment results (default: data_assessment.json)",
     )
 
     args = parser.parse_args()
@@ -425,11 +482,13 @@ def main():
     print(f"Total Rows: {summary.get('total_rows', 0):,}")
     print(f"Total Seasons: {summary.get('total_seasons', 0)}")
 
-    if summary.get('season_range'):
-        print(f"Season Range: {summary['season_range'].get('earliest')} to {summary['season_range'].get('latest')}")
+    if summary.get("season_range"):
+        print(
+            f"Season Range: {summary['season_range'].get('earliest')} to {summary['season_range'].get('latest')}"
+        )
 
-    if summary.get('data_quality'):
-        dq = summary['data_quality']
+    if summary.get("data_quality"):
+        dq = summary["data_quality"]
         print(f"\nData Quality:")
         print(f"  Games: {dq.get('total_games', 0):,}")
         print(f"  Box Scores: {dq.get('total_box_scores', 0):,}")

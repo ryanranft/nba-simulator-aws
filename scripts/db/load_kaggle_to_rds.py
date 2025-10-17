@@ -27,16 +27,16 @@ from datetime import datetime
 import csv
 
 # Load environment variables from external credentials file
-load_dotenv('/Users/ryanranft/nba-sim-credentials.env')
+load_dotenv("/Users/ryanranft/nba-sim-credentials.env")
 
 # Database configuration
 DB_CONFIG = {
-    'host': os.getenv('DB_HOST', 'nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com'),
-    'database': os.getenv('DB_NAME', 'nba_simulator'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'port': os.getenv('DB_PORT', 5432),
-    'sslmode': 'require'
+    "host": os.getenv("DB_HOST", "nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com"),
+    "database": os.getenv("DB_NAME", "nba_simulator"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "port": os.getenv("DB_PORT", 5432),
+    "sslmode": "require",
 }
 
 # Data files
@@ -49,19 +49,23 @@ def check_prerequisites(cursor):
     """Check that temporal tables exist."""
     print("Checking prerequisites...")
 
-    tables_to_check = ['temporal_events', 'player_biographical']
+    tables_to_check = ["temporal_events", "player_biographical"]
 
     for table in tables_to_check:
-        cursor.execute(f"""
+        cursor.execute(
+            f"""
             SELECT EXISTS (
                 SELECT FROM information_schema.tables
                 WHERE table_name = '{table}'
             );
-        """)
+        """
+        )
         exists = cursor.fetchone()[0]
 
         if not exists:
-            raise Exception(f"ERROR: Table '{table}' does not exist. Run create_temporal_tables.py first.")
+            raise Exception(
+                f"ERROR: Table '{table}' does not exist. Run create_temporal_tables.py first."
+            )
 
     print("✓ All temporal tables exist")
 
@@ -79,9 +83,9 @@ def check_prerequisites(cursor):
 
 def load_player_biographical(cursor):
     """Load player biographical data using COPY command."""
-    print("="*60)
+    print("=" * 60)
     print("Loading Player Biographical Data")
-    print("="*60)
+    print("=" * 60)
 
     # Check if already loaded
     cursor.execute("SELECT COUNT(*) FROM player_biographical;")
@@ -99,7 +103,7 @@ def load_player_biographical(cursor):
     print(f"  - Existing players: {player_count:,}")
 
     # Count rows in CSV
-    with open(PLAYER_FILE, 'r') as f:
+    with open(PLAYER_FILE, "r") as f:
         row_count = sum(1 for line in f) - 1  # Exclude header
 
     print(f"\nLoading {row_count:,} players...")
@@ -112,7 +116,7 @@ def load_player_biographical(cursor):
     import csv
     import io
 
-    with open(PLAYER_FILE, 'r') as f:
+    with open(PLAYER_FILE, "r") as f:
         csv_reader = csv.DictReader(f)
         output = io.StringIO()
         csv_writer = csv.writer(output)
@@ -120,7 +124,7 @@ def load_player_biographical(cursor):
         for row in csv_reader:
             # Helper function to convert float strings to int (or None)
             def to_int(val):
-                if not val or val == '':
+                if not val or val == "":
                     return None
                 try:
                     return int(float(val))
@@ -128,28 +132,33 @@ def load_player_biographical(cursor):
                     return None
 
             # Map CSV columns to table columns
-            csv_writer.writerow([
-                row['player_id'] or None,                           # player_id
-                row['birth_date'] or None,                          # birth_date
-                row['birth_date_precision'] or None,                # birth_date_precision
-                to_int(row['height_inches']),                       # height_inches
-                to_int(row['weight']),                              # weight_pounds
-                to_int(row['draft_year']),                          # draft_year
-                to_int(row['draft_round']),                         # draft_round
-                to_int(row['draft_number']),                        # draft_pick
-                row['college'] or None,                             # college
-                row['data_source'] or None                          # data_source
-            ])
+            csv_writer.writerow(
+                [
+                    row["player_id"] or None,  # player_id
+                    row["birth_date"] or None,  # birth_date
+                    row["birth_date_precision"] or None,  # birth_date_precision
+                    to_int(row["height_inches"]),  # height_inches
+                    to_int(row["weight"]),  # weight_pounds
+                    to_int(row["draft_year"]),  # draft_year
+                    to_int(row["draft_round"]),  # draft_round
+                    to_int(row["draft_number"]),  # draft_pick
+                    row["college"] or None,  # college
+                    row["data_source"] or None,  # data_source
+                ]
+            )
 
         output.seek(0)
-        cursor.copy_expert("""
+        cursor.copy_expert(
+            """
             COPY player_biographical (
                 player_id, birth_date, birth_date_precision,
                 height_inches, weight_pounds, draft_year, draft_round, draft_pick,
                 college, data_source
             )
             FROM STDIN WITH (FORMAT CSV, NULL '')
-        """, output)
+        """,
+            output,
+        )
 
     # Verify load
     cursor.execute("SELECT COUNT(*) FROM player_biographical;")
@@ -158,33 +167,39 @@ def load_player_biographical(cursor):
     print(f"✓ Loaded {loaded_count:,} players")
 
     # Show sample
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT player_id, birth_date, height_inches, college
         FROM player_biographical
         ORDER BY birth_date
         LIMIT 5;
-    """)
+    """
+    )
 
     print("\nSample (oldest players):")
     print(f"{'Player ID':<12} {'Birth Date':<12} {'Height':<10} {'College':<20}")
     print("-" * 60)
     for row in cursor.fetchall():
-        print(f"{row[0]:<12} {str(row[1]):<12} {row[2] or 'N/A':<10} {row[3] or 'N/A':<20}")
+        print(
+            f"{row[0]:<12} {str(row[1]):<12} {row[2] or 'N/A':<10} {row[3] or 'N/A':<20}"
+        )
 
 
 def load_temporal_events(cursor, batch_size=100000):
     """Load temporal events using COPY command in batches."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Loading Temporal Events (Play-by-Play)")
-    print("="*60)
+    print("=" * 60)
 
     # Count rows in CSV
-    with open(EVENTS_FILE, 'r') as f:
+    with open(EVENTS_FILE, "r") as f:
         row_count = sum(1 for line in f) - 1  # Exclude header
 
     print(f"\nTotal events to load: {row_count:,}")
     print(f"Batch size: {batch_size:,}")
-    print(f"Estimated time: {row_count / batch_size / 2:.1f} minutes (at ~2 batches/min)")
+    print(
+        f"Estimated time: {row_count / batch_size / 2:.1f} minutes (at ~2 batches/min)"
+    )
     print()
 
     # Load in single COPY command (PostgreSQL handles large files efficiently)
@@ -196,23 +211,24 @@ def load_temporal_events(cursor, batch_size=100000):
     import io
     import re
 
-    with open(EVENTS_FILE, 'r') as f:
+    with open(EVENTS_FILE, "r") as f:
         csv_reader = csv.DictReader(f)
         output = io.StringIO()
         csv_writer = csv.writer(output)
 
         for row in csv_reader:
             # Fix JSON: Replace Python None with JSON null and escape quotes
-            event_data = row['event_data']
+            event_data = row["event_data"]
             if event_data:
                 # Replace Python None with JSON null
-                event_data = event_data.replace(': None', ': null')
-                event_data = event_data.replace(':None', ':null')
+                event_data = event_data.replace(": None", ": null")
+                event_data = event_data.replace(":None", ":null")
 
                 # The CSV already has escaped quotes as \" inside the JSON strings
                 # But csv.DictReader unescapes them, so they need to be re-escaped
                 # This is a complex fix - better to use json.loads/dumps
                 import json
+
                 try:
                     # Try to parse as Python dict literal
                     event_dict = eval(event_data)
@@ -222,28 +238,33 @@ def load_temporal_events(cursor, batch_size=100000):
                     # If eval fails, leave as-is (will likely error on COPY)
                     pass
 
-            csv_writer.writerow([
-                row['game_id'],
-                row['player_id'] or None,
-                row['team_id'] or None,
-                row['wall_clock_utc'],
-                row['game_clock_seconds'] or None,
-                row['quarter'],
-                row['precision_level'],
-                row['event_type'],
-                event_data,
-                row['data_source']
-            ])
+            csv_writer.writerow(
+                [
+                    row["game_id"],
+                    row["player_id"] or None,
+                    row["team_id"] or None,
+                    row["wall_clock_utc"],
+                    row["game_clock_seconds"] or None,
+                    row["quarter"],
+                    row["precision_level"],
+                    row["event_type"],
+                    event_data,
+                    row["data_source"],
+                ]
+            )
 
         output.seek(0)
-        cursor.copy_expert("""
+        cursor.copy_expert(
+            """
             COPY temporal_events (
                 game_id, player_id, team_id, wall_clock_utc,
                 game_clock_seconds, quarter, precision_level,
                 event_type, event_data, data_source
             )
             FROM STDIN WITH (FORMAT CSV, NULL '')
-        """, output)
+        """,
+            output,
+        )
 
     elapsed = (datetime.now() - start_time).total_seconds()
 
@@ -255,12 +276,14 @@ def load_temporal_events(cursor, batch_size=100000):
     print(f"  Rate: {loaded_count/elapsed:.0f} rows/second")
 
     # Show sample
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT game_id, quarter, wall_clock_utc, event_type
         FROM temporal_events
         ORDER BY wall_clock_utc
         LIMIT 5;
-    """)
+    """
+    )
 
     print("\nSample (earliest events):")
     print(f"{'Game ID':<15} {'Quarter':<8} {'Timestamp':<20} {'Event Type':<15}")
@@ -270,12 +293,14 @@ def load_temporal_events(cursor, batch_size=100000):
 
     # Check precision distribution
     print("\nPrecision level distribution:")
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT precision_level, COUNT(*) AS count,
                ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) AS pct
         FROM temporal_events
         GROUP BY precision_level;
-    """)
+    """
+    )
 
     print(f"{'Precision':<15} {'Count':<15} {'Percentage':<10}")
     print("-" * 40)
@@ -285,9 +310,9 @@ def load_temporal_events(cursor, batch_size=100000):
 
 def create_initial_indexes(cursor):
     """Create initial indexes for faster queries (BRIN indexes created later)."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Creating Initial Indexes")
-    print("="*60)
+    print("=" * 60)
 
     print("\nNOTE: BRIN indexes will be created separately for optimal performance.")
     print("Creating essential B-tree indexes now for immediate querying...")
@@ -301,10 +326,12 @@ def create_initial_indexes(cursor):
 
     for idx_name, table, column in indexes:
         print(f"\n  Creating {idx_name}...")
-        cursor.execute(f"""
+        cursor.execute(
+            f"""
             CREATE INDEX IF NOT EXISTS {idx_name}
             ON {table}({column});
-        """)
+        """
+        )
         print(f"  ✓ {idx_name} created")
 
     print("\n✓ Initial indexes created")
@@ -313,12 +340,13 @@ def create_initial_indexes(cursor):
 
 def print_summary(cursor):
     """Print summary of loaded data."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Load Summary")
-    print("="*60)
+    print("=" * 60)
 
     # Table sizes
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             table_name,
             pg_size_pretty(pg_total_relation_size(table_name::regclass)) AS total_size,
@@ -327,7 +355,8 @@ def print_summary(cursor):
         FROM information_schema.tables
         WHERE table_name IN ('temporal_events', 'player_biographical')
         ORDER BY table_name;
-    """)
+    """
+    )
 
     print(f"\n{'Table':<30} {'Total Size':<15} {'Table':<15} {'Indexes':<15}")
     print("-" * 75)
@@ -335,7 +364,7 @@ def print_summary(cursor):
         print(f"{row[0]:<30} {row[1]:<15} {row[2]:<15} {row[3]:<15}")
 
     # Row counts
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     cursor.execute("SELECT COUNT(*) FROM player_biographical;")
     player_count = cursor.fetchone()[0]
 
@@ -344,19 +373,19 @@ def print_summary(cursor):
 
     print(f"Total players loaded: {player_count:,}")
     print(f"Total events loaded:  {event_count:,}")
-    print("="*60)
+    print("=" * 60)
 
 
 def main():
     """Main execution function."""
-    print("="*60)
+    print("=" * 60)
     print("Load Kaggle Data to RDS Temporal Tables")
-    print("="*60)
+    print("=" * 60)
     print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
 
     # Validate credentials
-    if not DB_CONFIG['user'] or not DB_CONFIG['password']:
+    if not DB_CONFIG["user"] or not DB_CONFIG["password"]:
         print("ERROR: Database credentials not found in .env file")
         sys.exit(1)
 
@@ -399,14 +428,20 @@ def main():
         print_summary(cursor)
 
         # Next steps
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("Next Steps:")
-        print("="*60)
-        print("1. Create BRIN indexes:      python scripts/db/create_temporal_indexes.py")
-        print("2. Create stored procedures: python scripts/db/create_stored_procedures.py")
+        print("=" * 60)
+        print(
+            "1. Create BRIN indexes:      python scripts/db/create_temporal_indexes.py"
+        )
+        print(
+            "2. Create stored procedures: python scripts/db/create_stored_procedures.py"
+        )
         print("3. Run validation tests:     pytest tests/test_temporal_queries.py")
-        print("4. Try a temporal query:     python scripts/queries/test_temporal_query.py")
-        print("="*60)
+        print(
+            "4. Try a temporal query:     python scripts/queries/test_temporal_query.py"
+        )
+        print("=" * 60)
 
         print(f"\n✓ Data load complete!")
         print(f"Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -423,5 +458,5 @@ def main():
         print("\nDatabase connection closed")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

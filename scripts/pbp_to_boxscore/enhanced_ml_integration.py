@@ -595,7 +595,7 @@ class EnhancedMLIntegrationSystem:
             cache_file = self.model_cache_dir / "ml_models.pkl"
             if cache_file.exists():
                 with open(cache_file, "rb") as f:
-                    data = pickle.load(f)
+                    data = pickle.load(f)  # nosec B301 - Loading from trusted local cache only
                     self.models = data.get("models", {})
                     self.feature_columns = data.get("feature_columns", [])
                     self.feature_importance = data.get("feature_importance", {})

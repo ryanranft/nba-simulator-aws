@@ -60,7 +60,7 @@ class DataCatalogUpdater:
         if not os.path.exists(DATA_CATALOG_PATH):
             raise FileNotFoundError(f"DATA_CATALOG.md not found at {DATA_CATALOG_PATH}")
 
-        with open(DATA_CATALOG_PATH, 'r') as f:
+        with open(DATA_CATALOG_PATH, "r") as f:
             self.catalog_content = f.read()
 
         return self.catalog_content
@@ -74,7 +74,7 @@ class DataCatalogUpdater:
             print("\nNot writing to file (dry run mode)")
             return
 
-        with open(DATA_CATALOG_PATH, 'w') as f:
+        with open(DATA_CATALOG_PATH, "w") as f:
             f.write(self.catalog_content)
 
         print(f"\n✅ Updated {DATA_CATALOG_PATH}")
@@ -95,8 +95,8 @@ class DataCatalogUpdater:
     def update_last_updated(self) -> None:
         """Update the 'Last Updated' timestamp in the Quick Reference section."""
         now = datetime.now().strftime("%B %d, %Y %I:%M %p CT")
-        pattern = r'(\*\*Last Full Update:\*\*\s+)[^|\n]+'
-        replacement = f'\\1{now}'
+        pattern = r"(\*\*Last Full Update:\*\*\s+)[^|\n]+"
+        replacement = f"\\1{now}"
         self.update_field(pattern, replacement, f"Last Full Update → {now}")
 
     def get_espn_statistics(self) -> Dict[str, any]:
@@ -124,7 +124,8 @@ class DataCatalogUpdater:
         min_date, max_date = cursor.fetchone()
 
         # Get coverage by era
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT
                 CASE
                     WHEN season < 2002 THEN 'Early Digital'
@@ -139,19 +140,22 @@ class DataCatalogUpdater:
             WHERE season IS NOT NULL
             GROUP BY era
             ORDER BY MIN(season)
-        """)
+        """
+        )
         era_stats = cursor.fetchall()
 
         conn.close()
 
         return {
-            'total_games': total_games,
-            'games_with_pbp': games_with_pbp,
-            'total_events': total_events,
-            'min_date': min_date,
-            'max_date': max_date,
-            'pbp_coverage_pct': round(100.0 * games_with_pbp / total_games, 1) if total_games > 0 else 0,
-            'era_stats': era_stats
+            "total_games": total_games,
+            "games_with_pbp": games_with_pbp,
+            "total_events": total_events,
+            "min_date": min_date,
+            "max_date": max_date,
+            "pbp_coverage_pct": (
+                round(100.0 * games_with_pbp / total_games, 1) if total_games > 0 else 0
+            ),
+            "era_stats": era_stats,
         }
 
     def update_espn_statistics(self) -> None:
@@ -162,50 +166,54 @@ class DataCatalogUpdater:
             stats = self.get_espn_statistics()
 
             # Update Quick Reference table - ESPN row
-            pattern = r'(\| ESPN API \|[^\|]+\|[^\|]+\| )(\d+|[\d,]+)( \| )([\d,]+)( \|)'
-            replacement = f'\\g<1>{stats["total_games"]:,}\\g<3>{stats["total_events"]:,}\\g<5>'
+            pattern = (
+                r"(\| ESPN API \|[^\|]+\|[^\|]+\| )(\d+|[\d,]+)( \| )([\d,]+)( \|)"
+            )
+            replacement = (
+                f'\\g<1>{stats["total_games"]:,}\\g<3>{stats["total_events"]:,}\\g<5>'
+            )
             self.update_field(
                 pattern,
                 replacement,
-                f"ESPN Quick Reference: {stats['total_games']:,} games, {stats['total_events']:,} events"
+                f"ESPN Quick Reference: {stats['total_games']:,} games, {stats['total_events']:,} events",
             )
 
             # Update Source 1 statistics table - Total Games
-            pattern = r'(\| \*\*Total Games\*\* \| )([\d,]+)( \|)'
+            pattern = r"(\| \*\*Total Games\*\* \| )([\d,]+)( \|)"
             replacement = f'\\g<1>{stats["total_games"]:,}\\g<3>'
             self.update_field(
-                pattern,
-                replacement,
-                f"ESPN Total Games → {stats['total_games']:,}"
+                pattern, replacement, f"ESPN Total Games → {stats['total_games']:,}"
             )
 
             # Update Source 1 statistics table - Games with PBP
-            pattern = r'(\| \*\*Games with PBP\*\* \| )([\d,]+)( \| [\d.]+% coverage \|)'
+            pattern = (
+                r"(\| \*\*Games with PBP\*\* \| )([\d,]+)( \| [\d.]+% coverage \|)"
+            )
             replacement = f'\\g<1>{stats["games_with_pbp"]:,}\\g<3>'
             self.update_field(
                 pattern,
                 replacement,
-                f"ESPN Games with PBP → {stats['games_with_pbp']:,} ({stats['pbp_coverage_pct']}%)"
+                f"ESPN Games with PBP → {stats['games_with_pbp']:,} ({stats['pbp_coverage_pct']}%)",
             )
 
             # Update Source 1 statistics table - Total PBP Events
-            pattern = r'(\| \*\*Total PBP Events\*\* \| )([\d,]+)( \|)'
+            pattern = r"(\| \*\*Total PBP Events\*\* \| )([\d,]+)( \|)"
             replacement = f'\\g<1>{stats["total_events"]:,}\\g<3>'
             self.update_field(
                 pattern,
                 replacement,
-                f"ESPN Total PBP Events → {stats['total_events']:,}"
+                f"ESPN Total PBP Events → {stats['total_events']:,}",
             )
 
             # Update coverage by era table
-            for era_name, total_games, pbp_games, pct, avg_events in stats['era_stats']:
+            for era_name, total_games, pbp_games, pct, avg_events in stats["era_stats"]:
                 # Update era row in coverage table
-                pattern = rf'(\| \*\*{era_name}\*\* \|[^\|]+\| )([\d,]+)( \| [\d.]+% \([\d,]+ games\) \| ~)([\d,]+)( events \|)'
-                replacement = f'\\g<1>{total_games:,}\\g<3>{int(avg_events)}\\g<5>'
+                pattern = rf"(\| \*\*{era_name}\*\* \|[^\|]+\| )([\d,]+)( \| [\d.]+% \([\d,]+ games\) \| ~)([\d,]+)( events \|)"
+                replacement = f"\\g<1>{total_games:,}\\g<3>{int(avg_events)}\\g<5>"
                 self.update_field(
                     pattern,
                     replacement,
-                    f"ESPN {era_name} era → {total_games:,} games, {pct}% PBP, ~{int(avg_events)} events/game"
+                    f"ESPN {era_name} era → {total_games:,} games, {pct}% PBP, ~{int(avg_events)} events/game",
                 )
 
             # Update Last Updated timestamp
@@ -213,7 +221,9 @@ class DataCatalogUpdater:
 
             print(f"✅ ESPN statistics updated successfully")
             print(f"   Games: {stats['total_games']:,}")
-            print(f"   Games with PBP: {stats['games_with_pbp']:,} ({stats['pbp_coverage_pct']}%)")
+            print(
+                f"   Games with PBP: {stats['games_with_pbp']:,} ({stats['pbp_coverage_pct']}%)"
+            )
             print(f"   Total Events: {stats['total_events']:,}")
             print(f"   Date Range: {stats['min_date']} to {stats['max_date']}")
 
@@ -225,10 +235,17 @@ class DataCatalogUpdater:
         """Get file count and size from S3 bucket prefix."""
         try:
             result = subprocess.run(
-                ["aws", "s3", "ls", f"{S3_BUCKET}/{prefix}/", "--recursive", "--summarize"],
+                [
+                    "aws",
+                    "s3",
+                    "ls",
+                    f"{S3_BUCKET}/{prefix}/",
+                    "--recursive",
+                    "--summarize",
+                ],
                 capture_output=True,
                 text=True,
-                timeout=60
+                timeout=60,
             )
 
             if result.returncode != 0:
@@ -239,11 +256,11 @@ class DataCatalogUpdater:
             file_count = None
             total_size = None
 
-            for line in result.stdout.split('\n'):
-                if 'Total Objects:' in line:
-                    file_count = int(line.split(':')[1].strip())
-                elif 'Total Size:' in line:
-                    size_str = line.split(':')[1].strip()
+            for line in result.stdout.split("\n"):
+                if "Total Objects:" in line:
+                    file_count = int(line.split(":")[1].strip())
+                elif "Total Size:" in line:
+                    size_str = line.split(":")[1].strip()
                     total_size = self._parse_size(size_str)
 
             return file_count, total_size
@@ -257,12 +274,12 @@ class DataCatalogUpdater:
         size_bytes = int(size_str)
 
         # Convert to GB
-        size_gb = size_bytes / (1024 ** 3)
+        size_gb = size_bytes / (1024**3)
 
         if size_gb >= 1:
             return f"{size_gb:.1f} GB"
         else:
-            size_mb = size_bytes / (1024 ** 2)
+            size_mb = size_bytes / (1024**2)
             return f"{size_mb:.1f} MB"
 
     def verify_catalog_consistency(self) -> bool:
@@ -275,19 +292,31 @@ class DataCatalogUpdater:
         self.load_catalog()
 
         # Extract ESPN statistics from different sections
-        quick_ref_games = self._extract_value(r'\| ESPN API \|[^\|]+\|[^\|]+\| (\d+|[\d,]+) \|')
-        quick_ref_events = self._extract_value(r'\| ESPN API \|[^\|]+\|[^\|]+\| [\d,]+ \| ([\d,]+) \|')
+        quick_ref_games = self._extract_value(
+            r"\| ESPN API \|[^\|]+\|[^\|]+\| (\d+|[\d,]+) \|"
+        )
+        quick_ref_events = self._extract_value(
+            r"\| ESPN API \|[^\|]+\|[^\|]+\| [\d,]+ \| ([\d,]+) \|"
+        )
 
-        source1_games = self._extract_value(r'\| \*\*Total Games\*\* \| ([\d,]+) \|')
-        source1_pbp_games = self._extract_value(r'\| \*\*Games with PBP\*\* \| ([\d,]+) \|')
-        source1_events = self._extract_value(r'\| \*\*Total PBP Events\*\* \| ([\d,]+) \|')
+        source1_games = self._extract_value(r"\| \*\*Total Games\*\* \| ([\d,]+) \|")
+        source1_pbp_games = self._extract_value(
+            r"\| \*\*Games with PBP\*\* \| ([\d,]+) \|"
+        )
+        source1_events = self._extract_value(
+            r"\| \*\*Total PBP Events\*\* \| ([\d,]+) \|"
+        )
 
         # Compare values
         if quick_ref_games != source1_games:
-            issues.append(f"Total games mismatch: Quick Ref ({quick_ref_games}) vs Source 1 ({source1_games})")
+            issues.append(
+                f"Total games mismatch: Quick Ref ({quick_ref_games}) vs Source 1 ({source1_games})"
+            )
 
         if quick_ref_events != source1_events:
-            issues.append(f"Total events mismatch: Quick Ref ({quick_ref_events}) vs Source 1 ({source1_events})")
+            issues.append(
+                f"Total events mismatch: Quick Ref ({quick_ref_events}) vs Source 1 ({source1_events})"
+            )
 
         # Check if actual database matches catalog
         try:
@@ -296,10 +325,14 @@ class DataCatalogUpdater:
             db_events_str = f"{db_stats['total_events']:,}"
 
             if source1_games != db_games_str:
-                issues.append(f"Database mismatch: Catalog shows {source1_games} games, DB has {db_games_str}")
+                issues.append(
+                    f"Database mismatch: Catalog shows {source1_games} games, DB has {db_games_str}"
+                )
 
             if source1_events != db_events_str:
-                issues.append(f"Database mismatch: Catalog shows {source1_events} events, DB has {db_events_str}")
+                issues.append(
+                    f"Database mismatch: Catalog shows {source1_events} events, DB has {db_events_str}"
+                )
 
         except Exception as e:
             issues.append(f"Could not verify against database: {e}")
@@ -318,12 +351,16 @@ class DataCatalogUpdater:
         """Extract a value from catalog using regex pattern."""
         match = re.search(pattern, self.catalog_content)
         if match:
-            return match.group(1).replace(',', '')
+            return match.group(1).replace(",", "")
         return None
 
-    def update_hoopr_progress(self, seasons_complete: int, total_seasons: int = 24) -> None:
+    def update_hoopr_progress(
+        self, seasons_complete: int, total_seasons: int = 24
+    ) -> None:
         """Update hoopR progress statistics."""
-        print(f"\n📊 Updating hoopR progress: {seasons_complete}/{total_seasons} seasons complete...")
+        print(
+            f"\n📊 Updating hoopR progress: {seasons_complete}/{total_seasons} seasons complete..."
+        )
 
         try:
             self.load_catalog()
@@ -331,21 +368,21 @@ class DataCatalogUpdater:
             pct_complete = round(100.0 * seasons_complete / total_seasons)
 
             # Update Quick Reference table - hoopR row
-            pattern = r'(\| hoopR \|[^\|]+\| 🔄 )\d+%( COMPLETE \|)'
-            replacement = f'\\g<1>{pct_complete}%\\2'
+            pattern = r"(\| hoopR \|[^\|]+\| 🔄 )\d+%( COMPLETE \|)"
+            replacement = f"\\g<1>{pct_complete}%\\2"
             self.update_field(
-                pattern,
-                replacement,
-                f"hoopR Progress → {pct_complete}% complete"
+                pattern, replacement, f"hoopR Progress → {pct_complete}% complete"
             )
 
             # Update Source 2 statistics table
-            pattern = r'(\| \*\*Seasons Complete\*\* \| )\d+( seasons \| )\d+%( complete \|)'
-            replacement = f'\\g<1>{seasons_complete}\\2{pct_complete}%\\3'
+            pattern = (
+                r"(\| \*\*Seasons Complete\*\* \| )\d+( seasons \| )\d+%( complete \|)"
+            )
+            replacement = f"\\g<1>{seasons_complete}\\2{pct_complete}%\\3"
             self.update_field(
                 pattern,
                 replacement,
-                f"hoopR Seasons Complete → {seasons_complete} ({pct_complete}%)"
+                f"hoopR Seasons Complete → {seasons_complete} ({pct_complete}%)",
             )
 
             # Update Last Updated timestamp
@@ -402,44 +439,40 @@ Examples:
 
   # Dry run (show changes without applying)
   %(prog)s --source espn --dry-run
-        """
+        """,
     )
 
     parser.add_argument(
-        '--source',
-        choices=['espn', 'hoopr', 'nba_api', 'basketball_ref'],
-        help='Data source to update'
+        "--source",
+        choices=["espn", "hoopr", "nba_api", "basketball_ref"],
+        help="Data source to update",
     )
 
     parser.add_argument(
-        '--action',
-        choices=['update', 'verify'],
-        default='update',
-        help='Action to perform (default: update)'
+        "--action",
+        choices=["update", "verify"],
+        default="update",
+        help="Action to perform (default: update)",
     )
 
     parser.add_argument(
-        '--seasons-complete',
+        "--seasons-complete",
         type=int,
-        help='Number of hoopR seasons complete (for hoopR updates)'
+        help="Number of hoopR seasons complete (for hoopR updates)",
     )
 
     parser.add_argument(
-        '--verify',
-        action='store_true',
-        help='Verify catalog consistency across sections'
+        "--verify",
+        action="store_true",
+        help="Verify catalog consistency across sections",
     )
 
     parser.add_argument(
-        '--refresh-all',
-        action='store_true',
-        help='Refresh all data sources'
+        "--refresh-all", action="store_true", help="Refresh all data sources"
     )
 
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Show changes without applying them'
+        "--dry-run", action="store_true", help="Show changes without applying them"
     )
 
     args = parser.parse_args()
@@ -459,12 +492,12 @@ Examples:
             return
 
         # Handle source-specific updates
-        if args.source == 'espn':
+        if args.source == "espn":
             updater.load_catalog()
             updater.update_espn_statistics()
             updater.save_catalog()
 
-        elif args.source == 'hoopr':
+        elif args.source == "hoopr":
             if not args.seasons_complete:
                 print("❌ Error: --seasons-complete required for hoopR updates")
                 sys.exit(1)

@@ -45,6 +45,7 @@ from urllib.parse import urljoin
 try:
     import requests
     from bs4 import BeautifulSoup
+
     HAS_BS4 = True
 except ImportError:
     HAS_BS4 = False
@@ -54,6 +55,7 @@ except ImportError:
 
 try:
     import boto3
+
     HAS_BOTO3 = True
 except ImportError:
     HAS_BOTO3 = False
@@ -62,31 +64,37 @@ except ImportError:
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s: %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    format="%(asctime)s - %(levelname)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
+
 
 class BasketballReferenceHTMLScraper:
     """HTML scraper for Basketball Reference BAA/early NBA data"""
 
     BASE_URL = "https://www.basketball-reference.com"
 
-    def __init__(self, output_dir: str, s3_bucket: Optional[str] = None,
-                 rate_limit: float = 12.0, dry_run: bool = False):
+    def __init__(
+        self,
+        output_dir: str,
+        s3_bucket: Optional[str] = None,
+        rate_limit: float = 12.0,
+        dry_run: bool = False,
+    ):
         self.output_dir = Path(output_dir)
         self.s3_bucket = s3_bucket
-        self.s3_client = boto3.client('s3') if HAS_BOTO3 and s3_bucket else None
+        self.s3_client = boto3.client("s3") if HAS_BOTO3 and s3_bucket else None
         self.rate_limit = rate_limit
         self.last_request_time = 0
         self.dry_run = dry_run
 
         # Statistics
         self.stats = {
-            'requests': 0,
-            'successes': 0,
-            'errors': 0,
-            'retries': 0,
-            'players_scraped': 0,
+            "requests": 0,
+            "successes": 0,
+            "errors": 0,
+            "retries": 0,
+            "players_scraped": 0,
         }
 
         # Create output directory
@@ -94,9 +102,11 @@ class BasketballReferenceHTMLScraper:
 
         # Session for connection pooling
         self.session = requests.Session()
-        self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-        })
+        self.session.headers.update(
+            {
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+            }
+        )
 
     def _rate_limit_wait(self):
         """Enforce rate limiting"""
@@ -111,9 +121,9 @@ class BasketballReferenceHTMLScraper:
         """Exponential backoff on errors"""
         if is_rate_limit:
             # For 429 errors, wait much longer (30s, 60s, 120s)
-            wait_time = min(120, 30 * (2 ** attempt))
+            wait_time = min(120, 30 * (2**attempt))
         else:
-            wait_time = min(60, (2 ** attempt))
+            wait_time = min(60, (2**attempt))
         logging.warning(f"  Backing off for {wait_time}s (attempt {attempt})")
         time.sleep(wait_time)
 
@@ -122,41 +132,47 @@ class BasketballReferenceHTMLScraper:
         for attempt in range(max_retries):
             try:
                 self._rate_limit_wait()
-                self.stats['requests'] += 1
+                self.stats["requests"] += 1
 
                 response = self.session.get(url, timeout=30)
 
                 if response.status_code == 200:
-                    self.stats['successes'] += 1
+                    self.stats["successes"] += 1
                     return response.text
                 elif response.status_code == 429:
-                    self.stats['errors'] += 1
+                    self.stats["errors"] += 1
                     if attempt < max_retries - 1:
-                        self.stats['retries'] += 1
+                        self.stats["retries"] += 1
                         logging.warning(f"  HTTP 429 (Too Many Requests) for {url}")
                         self._exponential_backoff(attempt, is_rate_limit=True)
                     else:
-                        logging.error(f"  Failed after {max_retries} attempts: HTTP 429")
+                        logging.error(
+                            f"  Failed after {max_retries} attempts: HTTP 429"
+                        )
                         return None
                 elif response.status_code == 404:
                     logging.error(f"  HTTP 404 (Not Found): {url}")
-                    self.stats['errors'] += 1
+                    self.stats["errors"] += 1
                     return None
                 else:
-                    self.stats['errors'] += 1
+                    self.stats["errors"] += 1
                     if attempt < max_retries - 1:
-                        self.stats['retries'] += 1
+                        self.stats["retries"] += 1
                         logging.warning(f"  HTTP {response.status_code} for {url}")
                         self._exponential_backoff(attempt)
                     else:
-                        logging.error(f"  Failed after {max_retries} attempts: HTTP {response.status_code}")
+                        logging.error(
+                            f"  Failed after {max_retries} attempts: HTTP {response.status_code}"
+                        )
                         return None
 
             except requests.exceptions.RequestException as e:
-                self.stats['errors'] += 1
+                self.stats["errors"] += 1
                 if attempt < max_retries - 1:
-                    self.stats['retries'] += 1
-                    logging.warning(f"  Request error (attempt {attempt + 1}/{max_retries}): {e}")
+                    self.stats["retries"] += 1
+                    logging.warning(
+                        f"  Request error (attempt {attempt + 1}/{max_retries}): {e}"
+                    )
                     self._exponential_backoff(attempt)
                 else:
                     logging.error(f"  Request failed after {max_retries} attempts: {e}")
@@ -166,27 +182,27 @@ class BasketballReferenceHTMLScraper:
 
     def _parse_player_totals_table(self, html: str, season: int) -> List[Dict]:
         """Parse player totals table from HTML"""
-        soup = BeautifulSoup(html, 'lxml')
+        soup = BeautifulSoup(html, "lxml")
 
         # Find the totals_stats table
-        table = soup.find('table', {'id': 'totals_stats'})
+        table = soup.find("table", {"id": "totals_stats"})
         if not table:
             logging.error("  Could not find totals_stats table")
             return []
 
         players = []
-        tbody = table.find('tbody')
+        tbody = table.find("tbody")
         if not tbody:
             logging.error("  Could not find table tbody")
             return []
 
-        for row in tbody.find_all('tr'):
+        for row in tbody.find_all("tr"):
             # Skip header rows that appear mid-table
-            if row.get('class') and 'thead' in row.get('class'):
+            if row.get("class") and "thead" in row.get("class"):
                 continue
 
             # Get all cells
-            cells = row.find_all(['th', 'td'])
+            cells = row.find_all(["th", "td"])
             if len(cells) < 2:
                 continue
 
@@ -200,13 +216,13 @@ class BasketballReferenceHTMLScraper:
                     continue
 
                 # Get player ID from href (if available)
-                player_link = player_cell.find('a')
+                player_link = player_cell.find("a")
                 player_id = None
-                if player_link and 'href' in player_link.attrs:
-                    href = player_link['href']
+                if player_link and "href" in player_link.attrs:
+                    href = player_link["href"]
                     # Extract player ID from URL like /players/a/abdelal01.html
-                    if '/players/' in href:
-                        player_id = href.split('/')[-1].replace('.html', '')
+                    if "/players/" in href:
+                        player_id = href.split("/")[-1].replace(".html", "")
 
                 # Skip rows without player IDs (e.g., "League Average" rows)
                 if not player_id:
@@ -223,58 +239,74 @@ class BasketballReferenceHTMLScraper:
                 # For BAA/early NBA (1947-1952), use simpler column structure
                 if season <= 1952:
                     player_data = {
-                        'slug': player_id,
-                        'name': player_name,
-                        'team': self._get_cell_text(cells, 3),  # Team
-                        'positions': [self._get_cell_text(cells, 4)] if self._get_cell_text(cells, 4) else [],  # Position
-                        'age': self._get_cell_int(cells, 2),  # Age
-                        'games_played': self._get_cell_int(cells, 5),  # G
-                        'games_started': 0,  # Not tracked in BAA/early NBA
-                        'minutes_played': 0,  # Not tracked in BAA/early NBA
-                        'made_field_goals': self._get_cell_int(cells, 6),  # FG
-                        'attempted_field_goals': self._get_cell_int(cells, 7),  # FGA
-                        'made_three_point_field_goals': 0,  # Didn't exist in BAA/early NBA
-                        'attempted_three_point_field_goals': 0,  # Didn't exist in BAA/early NBA
-                        'made_free_throws': self._get_cell_int(cells, 9),  # FT
-                        'attempted_free_throws': self._get_cell_int(cells, 10),  # FTA
-                        'offensive_rebounds': 0,  # Not tracked in BAA/early NBA
-                        'defensive_rebounds': 0,  # Not tracked in BAA/early NBA
-                        'assists': self._get_cell_int(cells, 12),  # AST
-                        'steals': 0,  # Not tracked in BAA/early NBA
-                        'blocks': 0,  # Not tracked in BAA/early NBA
-                        'turnovers': 0,  # Not tracked in BAA/early NBA
-                        'personal_fouls': self._get_cell_int(cells, 13),  # PF
-                        'points': self._get_cell_int(cells, 14),  # PTS
+                        "slug": player_id,
+                        "name": player_name,
+                        "team": self._get_cell_text(cells, 3),  # Team
+                        "positions": (
+                            [self._get_cell_text(cells, 4)]
+                            if self._get_cell_text(cells, 4)
+                            else []
+                        ),  # Position
+                        "age": self._get_cell_int(cells, 2),  # Age
+                        "games_played": self._get_cell_int(cells, 5),  # G
+                        "games_started": 0,  # Not tracked in BAA/early NBA
+                        "minutes_played": 0,  # Not tracked in BAA/early NBA
+                        "made_field_goals": self._get_cell_int(cells, 6),  # FG
+                        "attempted_field_goals": self._get_cell_int(cells, 7),  # FGA
+                        "made_three_point_field_goals": 0,  # Didn't exist in BAA/early NBA
+                        "attempted_three_point_field_goals": 0,  # Didn't exist in BAA/early NBA
+                        "made_free_throws": self._get_cell_int(cells, 9),  # FT
+                        "attempted_free_throws": self._get_cell_int(cells, 10),  # FTA
+                        "offensive_rebounds": 0,  # Not tracked in BAA/early NBA
+                        "defensive_rebounds": 0,  # Not tracked in BAA/early NBA
+                        "assists": self._get_cell_int(cells, 12),  # AST
+                        "steals": 0,  # Not tracked in BAA/early NBA
+                        "blocks": 0,  # Not tracked in BAA/early NBA
+                        "turnovers": 0,  # Not tracked in BAA/early NBA
+                        "personal_fouls": self._get_cell_int(cells, 13),  # PF
+                        "points": self._get_cell_int(cells, 14),  # PTS
                     }
                 else:
                     # Modern NBA column structure
                     player_data = {
-                        'slug': player_id,
-                        'name': player_name,
-                        'team': self._get_cell_text(cells, 4),  # Team
-                        'positions': [self._get_cell_text(cells, 2)] if self._get_cell_text(cells, 2) else [],  # Position
-                        'age': self._get_cell_int(cells, 3),  # Age
-                        'games_played': self._get_cell_int(cells, 5),  # G
-                        'games_started': self._get_cell_int(cells, 6, default=0),  # GS
-                        'minutes_played': self._get_cell_int(cells, 7, default=0),  # MP
-                        'made_field_goals': self._get_cell_int(cells, 8),  # FG
-                        'attempted_field_goals': self._get_cell_int(cells, 9),  # FGA
-                        'made_three_point_field_goals': self._get_cell_int(cells, 11, default=0),  # 3P
-                        'attempted_three_point_field_goals': self._get_cell_int(cells, 12, default=0),  # 3PA
-                        'made_free_throws': self._get_cell_int(cells, 18),  # FT
-                        'attempted_free_throws': self._get_cell_int(cells, 19),  # FTA
-                        'offensive_rebounds': self._get_cell_int(cells, 21, default=0),  # ORB
-                        'defensive_rebounds': self._get_cell_int(cells, 22, default=0),  # DRB
-                        'assists': self._get_cell_int(cells, 24),  # AST
-                        'steals': self._get_cell_int(cells, 25, default=0),  # STL
-                        'blocks': self._get_cell_int(cells, 26, default=0),  # BLK
-                        'turnovers': self._get_cell_int(cells, 27, default=0),  # TOV
-                        'personal_fouls': self._get_cell_int(cells, 28),  # PF
-                        'points': self._get_cell_int(cells, 29),  # PTS
+                        "slug": player_id,
+                        "name": player_name,
+                        "team": self._get_cell_text(cells, 4),  # Team
+                        "positions": (
+                            [self._get_cell_text(cells, 2)]
+                            if self._get_cell_text(cells, 2)
+                            else []
+                        ),  # Position
+                        "age": self._get_cell_int(cells, 3),  # Age
+                        "games_played": self._get_cell_int(cells, 5),  # G
+                        "games_started": self._get_cell_int(cells, 6, default=0),  # GS
+                        "minutes_played": self._get_cell_int(cells, 7, default=0),  # MP
+                        "made_field_goals": self._get_cell_int(cells, 8),  # FG
+                        "attempted_field_goals": self._get_cell_int(cells, 9),  # FGA
+                        "made_three_point_field_goals": self._get_cell_int(
+                            cells, 11, default=0
+                        ),  # 3P
+                        "attempted_three_point_field_goals": self._get_cell_int(
+                            cells, 12, default=0
+                        ),  # 3PA
+                        "made_free_throws": self._get_cell_int(cells, 18),  # FT
+                        "attempted_free_throws": self._get_cell_int(cells, 19),  # FTA
+                        "offensive_rebounds": self._get_cell_int(
+                            cells, 21, default=0
+                        ),  # ORB
+                        "defensive_rebounds": self._get_cell_int(
+                            cells, 22, default=0
+                        ),  # DRB
+                        "assists": self._get_cell_int(cells, 24),  # AST
+                        "steals": self._get_cell_int(cells, 25, default=0),  # STL
+                        "blocks": self._get_cell_int(cells, 26, default=0),  # BLK
+                        "turnovers": self._get_cell_int(cells, 27, default=0),  # TOV
+                        "personal_fouls": self._get_cell_int(cells, 28),  # PF
+                        "points": self._get_cell_int(cells, 29),  # PTS
                     }
 
                 # Add season
-                player_data['season'] = season
+                player_data["season"] = season
 
                 players.append(player_data)
 
@@ -284,7 +316,7 @@ class BasketballReferenceHTMLScraper:
 
         return players
 
-    def _get_cell_text(self, cells: List, index: int, default: str = '') -> str:
+    def _get_cell_text(self, cells: List, index: int, default: str = "") -> str:
         """Safely get cell text"""
         try:
             if index < len(cells):
@@ -298,7 +330,7 @@ class BasketballReferenceHTMLScraper:
         try:
             if index < len(cells):
                 text = cells[index].get_text(strip=True)
-                if text and text != '':
+                if text and text != "":
                     return int(text)
         except:
             pass
@@ -312,7 +344,7 @@ class BasketballReferenceHTMLScraper:
 
         filepath = Path(filepath)
         filepath.parent.mkdir(parents=True, exist_ok=True)
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(data, f, indent=2, default=str)
         logging.debug(f"  Saved: {filepath}")
 
@@ -360,15 +392,22 @@ class BasketballReferenceHTMLScraper:
             return False
 
         logging.info(f"  ✓ Parsed {len(players)} players")
-        self.stats['players_scraped'] += len(players)
+        self.stats["players_scraped"] += len(players)
 
         # Save locally
-        local_path = self.output_dir / 'season_totals' / str(season) / 'player_season_totals.json'
+        local_path = (
+            self.output_dir
+            / "season_totals"
+            / str(season)
+            / "player_season_totals.json"
+        )
         self._save_json(players, local_path)
 
         # Upload to S3
         if self.s3_client:
-            s3_key = f'basketball_reference/season_totals/{season}/player_season_totals.json'
+            s3_key = (
+                f"basketball_reference/season_totals/{season}/player_season_totals.json"
+            )
             self._upload_to_s3(local_path, s3_key)
 
         return True
@@ -456,56 +495,52 @@ Coverage:
   - Total: 1947-1952 (6 years)
 
 Note: 1946 data exists but is incomplete (first partial season)
-        """
+        """,
     )
 
     parser.add_argument(
-        '--season',
+        "--season",
         type=int,
-        help='Single season to scrape (e.g., 1947 for 1946-1947 season)'
+        help="Single season to scrape (e.g., 1947 for 1946-1947 season)",
     )
 
     parser.add_argument(
-        '--start-season',
+        "--start-season",
         type=int,
-        help='Start season (e.g., 1947 for 1946-1947 season)'
+        help="Start season (e.g., 1947 for 1946-1947 season)",
     )
 
     parser.add_argument(
-        '--end-season',
-        type=int,
-        help='End season (e.g., 1952 for 1951-1952 season)'
+        "--end-season", type=int, help="End season (e.g., 1952 for 1951-1952 season)"
     )
 
     parser.add_argument(
-        '--output-dir',
-        default='/tmp/basketball_reference_html',
-        help='Output directory for scraped data (default: /tmp/basketball_reference_html)'
+        "--output-dir",
+        default="/tmp/basketball_reference_html",
+        help="Output directory for scraped data (default: /tmp/basketball_reference_html)",
     )
 
     parser.add_argument(
-        '--upload-to-s3',
-        action='store_true',
-        help='Upload scraped data to S3'
+        "--upload-to-s3", action="store_true", help="Upload scraped data to S3"
     )
 
     parser.add_argument(
-        '--s3-bucket',
-        default='nba-sim-raw-data-lake',
-        help='S3 bucket name (default: nba-sim-raw-data-lake)'
+        "--s3-bucket",
+        default="nba-sim-raw-data-lake",
+        help="S3 bucket name (default: nba-sim-raw-data-lake)",
     )
 
     parser.add_argument(
-        '--rate-limit',
+        "--rate-limit",
         type=float,
         default=12.0,
-        help='Seconds between requests (default: 12.0)'
+        help="Seconds between requests (default: 12.0)",
     )
 
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Dry run mode - don\'t save files or upload to S3'
+        "--dry-run",
+        action="store_true",
+        help="Dry run mode - don't save files or upload to S3",
     )
 
     args = parser.parse_args()
@@ -518,7 +553,9 @@ Note: 1946 data exists but is incomplete (first partial season)
         start_season = args.start_season
         end_season = args.end_season
     else:
-        parser.error("Must specify either --season or both --start-season and --end-season")
+        parser.error(
+            "Must specify either --season or both --start-season and --end-season"
+        )
 
     print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
@@ -528,7 +565,7 @@ Note: 1946 data exists but is incomplete (first partial season)
         output_dir=args.output_dir,
         s3_bucket=args.s3_bucket if args.upload_to_s3 else None,
         rate_limit=args.rate_limit,
-        dry_run=args.dry_run
+        dry_run=args.dry_run,
     )
 
     scraper.scrape_range(start_season, end_season)
@@ -537,5 +574,5 @@ Note: 1946 data exists but is incomplete (first partial season)
     print(f"✓ Complete: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -27,19 +27,19 @@ from pathlib import Path
 
 # Database configuration
 DB_CONFIG = {
-    'host': 'localhost',
-    'database': 'nba_simulator',
-    'user': 'ryanranft',
-    'port': 5432
+    "host": "localhost",
+    "database": "nba_simulator",
+    "user": "ryanranft",
+    "port": 5432,
 }
 
 # Data directory
-TEMPORAL_DATA_DIR = Path('/tmp/temporal_data_espn')
-EVENTS_CSV = TEMPORAL_DATA_DIR / 'temporal_events_espn.csv'
-PLAYERS_CSV = TEMPORAL_DATA_DIR / 'players_espn.csv'
+TEMPORAL_DATA_DIR = Path("/tmp/temporal_data_espn")
+EVENTS_CSV = TEMPORAL_DATA_DIR / "temporal_events_espn.csv"
+PLAYERS_CSV = TEMPORAL_DATA_DIR / "players_espn.csv"
 
 # Test mode flag
-TEST_MODE = '--test' in sys.argv
+TEST_MODE = "--test" in sys.argv
 BATCH_SIZE = 5000
 
 
@@ -57,11 +57,11 @@ def parse_game_clock(clock_str):
         "0:45" -> 45 seconds
         "12:00" -> 720 seconds
     """
-    if not clock_str or clock_str == '':
+    if not clock_str or clock_str == "":
         return None
 
     try:
-        parts = clock_str.split(':')
+        parts = clock_str.split(":")
         if len(parts) == 2:
             minutes = int(parts[0])
             seconds = int(parts[1])
@@ -95,7 +95,7 @@ def reconstruct_wall_clock(game_date, period, clock_seconds):
     try:
         # Parse game_date if it's a string
         if isinstance(game_date, str):
-            game_date = datetime.fromisoformat(game_date.replace('Z', '+00:00'))
+            game_date = datetime.fromisoformat(game_date.replace("Z", "+00:00"))
 
         # Calculate elapsed real-time minutes before this period
         if period == 1:
@@ -138,12 +138,14 @@ def create_tables(conn):
 
     # Table already exists with quarter column (not period)
     # Just verify it exists
-    cur.execute("""
+    cur.execute(
+        """
         SELECT EXISTS (
             SELECT FROM information_schema.tables
             WHERE table_name = 'temporal_events'
         );
-    """)
+    """
+    )
 
     exists = cur.fetchone()[0]
 
@@ -167,7 +169,7 @@ def load_players(conn):
     try:
         # Read CSV
         players = []
-        with open(PLAYERS_CSV, 'r') as f:
+        with open(PLAYERS_CSV, "r") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 players.append(row)
@@ -181,7 +183,8 @@ def load_players(conn):
         # Insert into players table (create if needed)
         cur = conn.cursor()
 
-        cur.execute("""
+        cur.execute(
+            """
             CREATE TABLE IF NOT EXISTS espn_players (
                 player_id VARCHAR(20) PRIMARY KEY,
                 name VARCHAR(200),
@@ -192,7 +195,8 @@ def load_players(conn):
                 team_name VARCHAR(200),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-        """)
+        """
+        )
 
         # Batch insert
         insert_query = """
@@ -209,13 +213,13 @@ def load_players(conn):
 
         values = [
             (
-                p.get('player_id'),
-                p.get('name'),
-                p.get('short_name'),
-                p.get('jersey'),
-                p.get('position'),
-                p.get('team_id'),
-                p.get('team_name')
+                p.get("player_id"),
+                p.get("name"),
+                p.get("short_name"),
+                p.get("jersey"),
+                p.get("position"),
+                p.get("team_id"),
+                p.get("team_name"),
             )
             for p in players
         ]
@@ -249,7 +253,7 @@ def load_events(conn):
     total_processed = 0
     errors = 0
 
-    with open(EVENTS_CSV, 'r') as f:
+    with open(EVENTS_CSV, "r") as f:
         reader = csv.DictReader(f)
 
         for row in reader:
@@ -261,17 +265,19 @@ def load_events(conn):
 
             try:
                 # Parse event_data JSON
-                event_data = json.loads(row['event_data']) if row.get('event_data') else {}
+                event_data = (
+                    json.loads(row["event_data"]) if row.get("event_data") else {}
+                )
 
                 # Parse game clock
-                clock_display = event_data.get('clock', {}).get('displayValue')
+                clock_display = event_data.get("clock", {}).get("displayValue")
                 clock_seconds = parse_game_clock(clock_display)
 
                 # Reconstruct wall clock
                 wall_clock = reconstruct_wall_clock(
-                    row.get('wall_clock_utc'),
-                    int(row['period']) if row.get('period') else None,
-                    clock_seconds
+                    row.get("wall_clock_utc"),
+                    int(row["period"]) if row.get("period") else None,
+                    clock_seconds,
                 )
 
                 # Extract player and team from event_data if available
@@ -279,25 +285,27 @@ def load_events(conn):
                 team_id = None
 
                 # Try to extract from participantIds
-                if 'participantIds' in event_data and event_data['participantIds']:
-                    player_id = str(event_data['participantIds'][0])
+                if "participantIds" in event_data and event_data["participantIds"]:
+                    player_id = str(event_data["participantIds"][0])
 
                 # Try to extract team from teamId
-                if 'teamId' in event_data:
-                    team_id = str(event_data['teamId'])
+                if "teamId" in event_data:
+                    team_id = str(event_data["teamId"])
 
                 # Prepare row for insertion (using existing schema with 'quarter' column)
                 event_row = (
-                    row['game_id'],
+                    row["game_id"],
                     wall_clock,
                     clock_seconds,
-                    int(row['period']) if row.get('period') else None,  # quarter = period
+                    (
+                        int(row["period"]) if row.get("period") else None
+                    ),  # quarter = period
                     player_id,
                     team_id,
-                    row.get('precision_level', 'minute'),
-                    row.get('event_type', 'play'),
-                    row.get('data_source', 'espn'),
-                    json.dumps(event_data)
+                    row.get("precision_level", "minute"),
+                    row.get("event_type", "play"),
+                    row.get("data_source", "espn"),
+                    json.dumps(event_data),
                 )
 
                 batch.append(event_row)
@@ -394,5 +402,5 @@ def main():
     conn.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

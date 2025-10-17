@@ -29,6 +29,7 @@ import traceback
 
 try:
     from nba_api.stats.endpoints import LeagueGameFinder, PlayByPlayV2
+
     HAS_NBA_API = True
 except ImportError:
     HAS_NBA_API = False
@@ -38,6 +39,7 @@ except ImportError:
 
 try:
     import boto3
+
     HAS_BOTO3 = True
 except ImportError:
     HAS_BOTO3 = False
@@ -46,14 +48,16 @@ except ImportError:
 class PlayByPlayScraper:
     """Scrape NBA API play-by-play data for possession panel generation"""
 
-    def __init__(self, output_dir="/tmp/nba_api_playbyplay", s3_bucket=None, rate_limit=0.6):
+    def __init__(
+        self, output_dir="/tmp/nba_api_playbyplay", s3_bucket=None, rate_limit=0.6
+    ):
         self.output_dir = Path(output_dir)
         self.s3_bucket = s3_bucket
-        self.s3_client = boto3.client('s3') if HAS_BOTO3 and s3_bucket else None
+        self.s3_client = boto3.client("s3") if HAS_BOTO3 and s3_bucket else None
         self.rate_limit = rate_limit  # seconds between requests
 
         # Create output directory
-        self.pbp_dir = self.output_dir / 'play_by_play'
+        self.pbp_dir = self.output_dir / "play_by_play"
         self.pbp_dir.mkdir(parents=True, exist_ok=True)
 
         print(f"📁 Output directory: {self.output_dir}")
@@ -76,14 +80,14 @@ class PlayByPlayScraper:
             time.sleep(self.rate_limit)
             finder = LeagueGameFinder(
                 season_nullable=season_str,
-                season_type_nullable='Regular Season',
-                league_id_nullable='00'
+                season_type_nullable="Regular Season",
+                league_id_nullable="00",
             )
 
             games_df = finder.get_data_frames()[0]
 
             # Get unique game IDs
-            game_ids = games_df['GAME_ID'].unique().tolist()
+            game_ids = games_df["GAME_ID"].unique().tolist()
 
             print(f"✅ Found {len(game_ids)} games for {season_str}")
             return game_ids
@@ -120,7 +124,7 @@ class PlayByPlayScraper:
         """Save play-by-play data to JSON file"""
         output_file = self.pbp_dir / f"play_by_play_{game_id}.json"
 
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(data, f, indent=2)
 
         return output_file
@@ -131,11 +135,7 @@ class PlayByPlayScraper:
             return False
 
         try:
-            self.s3_client.upload_file(
-                str(local_file),
-                self.s3_bucket,
-                s3_key
-            )
+            self.s3_client.upload_file(str(local_file), self.s3_bucket, s3_key)
             return True
         except Exception as e:
             print(f"  ⚠️  S3 upload failed: {e}")
@@ -161,26 +161,21 @@ class PlayByPlayScraper:
 
         if not game_ids:
             print(f"⚠️  No games found for season {season}")
-            return {
-                'season': season,
-                'games_found': 0,
-                'games_scraped': 0,
-                'errors': 0
-            }
+            return {"season": season, "games_found": 0, "games_scraped": 0, "errors": 0}
 
         # Scrape each game
         stats = {
-            'season': season,
-            'games_found': len(game_ids),
-            'games_scraped': 0,
-            'errors': 0,
-            'uploaded': 0
+            "season": season,
+            "games_found": len(game_ids),
+            "games_scraped": 0,
+            "errors": 0,
+            "uploaded": 0,
         }
 
         print(f"\n📥 Scraping {len(game_ids)} games...")
 
         for i, game_id in enumerate(game_ids, 1):
-            print(f"  [{i}/{len(game_ids)}] {game_id}...", end=' ')
+            print(f"  [{i}/{len(game_ids)}] {game_id}...", end=" ")
 
             # Scrape play-by-play
             pbp_data = self.scrape_play_by_play(game_id)
@@ -188,24 +183,26 @@ class PlayByPlayScraper:
             if pbp_data:
                 # Save locally
                 local_file = self.save_play_by_play(game_id, pbp_data)
-                stats['games_scraped'] += 1
-                print("✅", end='')
+                stats["games_scraped"] += 1
+                print("✅", end="")
 
                 # Upload to S3
                 if upload_to_s3 and self.s3_client:
                     s3_key = f"nba_api_playbyplay/season_{season}/play_by_play_{game_id}.json"
                     if self.upload_to_s3(local_file, s3_key):
-                        stats['uploaded'] += 1
-                        print(" 📤", end='')
+                        stats["uploaded"] += 1
+                        print(" 📤", end="")
 
                 print()
             else:
-                stats['errors'] += 1
+                stats["errors"] += 1
                 print("❌")
 
             # Progress update every 50 games
             if i % 50 == 0:
-                print(f"\n  Progress: {i}/{len(game_ids)} games ({100*i/len(game_ids):.1f}%)")
+                print(
+                    f"\n  Progress: {i}/{len(game_ids)} games ({100*i/len(game_ids):.1f}%)"
+                )
 
         # Summary
         print(f"\n{'='*60}")
@@ -222,18 +219,28 @@ class PlayByPlayScraper:
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Scrape NBA API play-by-play data')
-    parser.add_argument('--season', type=int, help='Single season to scrape (e.g., 2024)')
-    parser.add_argument('--start-season', type=int, help='Start season for range (e.g., 1996)')
-    parser.add_argument('--end-season', type=int, help='End season for range (e.g., 2024)')
-    parser.add_argument('--output-dir', default='/tmp/nba_api_playbyplay',
-                       help='Output directory')
-    parser.add_argument('--upload-to-s3', action='store_true',
-                       help='Upload files to S3')
-    parser.add_argument('--s3-bucket', default='nba-sim-raw-data-lake',
-                       help='S3 bucket name')
-    parser.add_argument('--rate-limit', type=float, default=0.6,
-                       help='Seconds between API requests')
+    parser = argparse.ArgumentParser(description="Scrape NBA API play-by-play data")
+    parser.add_argument(
+        "--season", type=int, help="Single season to scrape (e.g., 2024)"
+    )
+    parser.add_argument(
+        "--start-season", type=int, help="Start season for range (e.g., 1996)"
+    )
+    parser.add_argument(
+        "--end-season", type=int, help="End season for range (e.g., 2024)"
+    )
+    parser.add_argument(
+        "--output-dir", default="/tmp/nba_api_playbyplay", help="Output directory"
+    )
+    parser.add_argument(
+        "--upload-to-s3", action="store_true", help="Upload files to S3"
+    )
+    parser.add_argument(
+        "--s3-bucket", default="nba-sim-raw-data-lake", help="S3 bucket name"
+    )
+    parser.add_argument(
+        "--rate-limit", type=float, default=0.6, help="Seconds between API requests"
+    )
     args = parser.parse_args()
 
     # Determine seasons to scrape
@@ -260,7 +267,7 @@ def main():
     scraper = PlayByPlayScraper(
         output_dir=args.output_dir,
         s3_bucket=args.s3_bucket if args.upload_to_s3 else None,
-        rate_limit=args.rate_limit
+        rate_limit=args.rate_limit,
     )
 
     # Scrape each season
@@ -276,9 +283,9 @@ def main():
     print(f"Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
 
-    total_games = sum(s['games_found'] for s in all_stats)
-    total_scraped = sum(s['games_scraped'] for s in all_stats)
-    total_errors = sum(s['errors'] for s in all_stats)
+    total_games = sum(s["games_found"] for s in all_stats)
+    total_scraped = sum(s["games_scraped"] for s in all_stats)
+    total_errors = sum(s["errors"] for s in all_stats)
 
     print(f"📊 Summary:")
     print(f"  Seasons processed: {len(seasons)}")
@@ -288,9 +295,9 @@ def main():
     print(f"  Success rate: {100*total_scraped/total_games:.1f}%")
 
     if args.upload_to_s3:
-        total_uploaded = sum(s.get('uploaded', 0) for s in all_stats)
+        total_uploaded = sum(s.get("uploaded", 0) for s in all_stats)
         print(f"  Uploaded to S3: {total_uploaded:,}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

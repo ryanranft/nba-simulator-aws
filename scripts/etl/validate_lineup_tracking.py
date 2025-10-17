@@ -28,43 +28,42 @@ sys.path.insert(0, str(project_root))
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 # Database connection
 DB_CONFIG = {
-    'host': 'localhost',
-    'database': 'nba_simulator',
-    'user': 'ryanranft',
-    'password': ''
+    "host": "localhost",
+    "database": "nba_simulator",
+    "user": "ryanranft",
+    "password": "",
 }
 
-NBA_API_DIR = Path('/tmp/nba_api_comprehensive/play_by_play')
+NBA_API_DIR = Path("/tmp/nba_api_comprehensive/play_by_play")
 
 
 def load_play_by_play_events(game_id):
     """Load play-by-play events for a game from NBA API JSON file."""
-    pbp_file = NBA_API_DIR / f'play_by_play_{game_id}.json'
+    pbp_file = NBA_API_DIR / f"play_by_play_{game_id}.json"
 
     if not pbp_file.exists():
         logger.warning(f"PBP file not found for game {game_id}: {pbp_file}")
         return []
 
     try:
-        with open(pbp_file, 'r') as f:
+        with open(pbp_file, "r") as f:
             data = json.load(f)
 
         # Extract events from resultSets
-        result_sets = data.get('resultSets', [])
+        result_sets = data.get("resultSets", [])
         if not result_sets:
             return []
 
         # Get the PlayByPlay result set
         play_by_play = result_sets[0]
-        headers = play_by_play['headers']
-        rows = play_by_play['rowSet']
+        headers = play_by_play["headers"]
+        rows = play_by_play["rowSet"]
 
         # Convert to list of dicts
         events = []
@@ -83,7 +82,7 @@ def get_event_participants(event):
     """Extract all player IDs that participated in an event."""
     participants = set()
 
-    for field in ['PLAYER1_ID', 'PLAYER2_ID', 'PLAYER3_ID']:
+    for field in ["PLAYER1_ID", "PLAYER2_ID", "PLAYER3_ID"]:
         player_id = event.get(field)
         if player_id and player_id != 0:
             participants.add(player_id)
@@ -102,7 +101,8 @@ def validate_possession_lineups(conn):
 
     # Get all possessions with complete lineups
     logger.info("Loading possessions to validate...")
-    cur.execute("""
+    cur.execute(
+        """
         SELECT
             game_id,
             possession_number,
@@ -112,18 +112,19 @@ def validate_possession_lineups(conn):
         FROM possession_panel_with_lineups
         WHERE lineup_complete = TRUE
         ORDER BY game_id, possession_number
-    """)
+    """
+    )
 
     possessions = cur.fetchall()
     logger.info(f"Loaded {len(possessions)} complete possessions to validate")
 
     # Track validation results
     validation_results = {
-        'total_possessions': 0,
-        'total_events': 0,
-        'mismatches': 0,
-        'possessions_with_mismatches': 0,
-        'examples': []
+        "total_possessions": 0,
+        "total_events": 0,
+        "mismatches": 0,
+        "possessions_with_mismatches": 0,
+        "examples": [],
     }
 
     # Process by game (to avoid reloading PBP files)
@@ -137,7 +138,7 @@ def validate_possession_lineups(conn):
         off_lineup = set(filter(None, row[2:7]))  # off_player_1 through off_player_5
         def_lineup = set(filter(None, row[7:12]))  # def_player_1 through def_player_5
 
-        validation_results['total_possessions'] += 1
+        validation_results["total_possessions"] += 1
 
         # Load events if new game
         if game_id != current_game_id:
@@ -149,13 +150,15 @@ def validate_possession_lineups(conn):
             continue
 
         # Get events for this possession
-        poss_events = [e for e in current_events if e.get('possession_number') == poss_num]
+        poss_events = [
+            e for e in current_events if e.get("possession_number") == poss_num
+        ]
 
         if not poss_events:
             # No possession_number in NBA API events - skip
             continue
 
-        validation_results['total_events'] += len(poss_events)
+        validation_results["total_events"] += len(poss_events)
 
         # Check all participants in this possession
         all_participants = set()
@@ -168,18 +171,20 @@ def validate_possession_lineups(conn):
         missing_players = all_participants - tracked_players
 
         if missing_players:
-            validation_results['mismatches'] += len(missing_players)
-            validation_results['possessions_with_mismatches'] += 1
+            validation_results["mismatches"] += len(missing_players)
+            validation_results["possessions_with_mismatches"] += 1
 
             # Save example for logging
-            if len(validation_results['examples']) < 10:
-                validation_results['examples'].append({
-                    'game_id': game_id,
-                    'possession_number': poss_num,
-                    'missing_players': list(missing_players),
-                    'tracked_offense': list(off_lineup),
-                    'tracked_defense': list(def_lineup)
-                })
+            if len(validation_results["examples"]) < 10:
+                validation_results["examples"].append(
+                    {
+                        "game_id": game_id,
+                        "possession_number": poss_num,
+                        "missing_players": list(missing_players),
+                        "tracked_offense": list(off_lineup),
+                        "tracked_defense": list(def_lineup),
+                    }
+                )
 
             # Mark for database update
             possessions_to_update.append((game_id, poss_num))
@@ -195,7 +200,9 @@ def update_database_with_results(conn, possessions_to_update):
         logger.info("No mismatches found - all lineups are accurate!")
         return
 
-    logger.info(f"Updating {len(possessions_to_update)} possessions with mismatch flags...")
+    logger.info(
+        f"Updating {len(possessions_to_update)} possessions with mismatch flags..."
+    )
 
     # Update lineup_participant_mismatch flag
     update_query = """
@@ -215,9 +222,9 @@ def update_database_with_results(conn, possessions_to_update):
 
 def main():
     """Main validation function."""
-    logger.info("="*60)
+    logger.info("=" * 60)
     logger.info("LINEUP TRACKING VALIDATION")
-    logger.info("="*60)
+    logger.info("=" * 60)
     logger.info("")
 
     # Connect to database
@@ -232,34 +239,41 @@ def main():
 
         # Print results
         logger.info("")
-        logger.info("="*60)
+        logger.info("=" * 60)
         logger.info("VALIDATION RESULTS")
-        logger.info("="*60)
+        logger.info("=" * 60)
         logger.info(f"Total possessions validated: {results['total_possessions']:,}")
         logger.info(f"Total events checked: {results['total_events']:,}")
-        logger.info(f"Possessions with mismatches: {results['possessions_with_mismatches']:,}")
+        logger.info(
+            f"Possessions with mismatches: {results['possessions_with_mismatches']:,}"
+        )
         logger.info(f"Total missing players: {results['mismatches']:,}")
 
-        if results['possessions_with_mismatches'] > 0:
-            accuracy = 100 * (1 - results['possessions_with_mismatches'] / results['total_possessions'])
+        if results["possessions_with_mismatches"] > 0:
+            accuracy = 100 * (
+                1
+                - results["possessions_with_mismatches"] / results["total_possessions"]
+            )
             logger.info(f"Lineup accuracy: {accuracy:.2f}%")
 
             logger.info("")
             logger.info("Example mismatches:")
-            for ex in results['examples']:
+            for ex in results["examples"]:
                 logger.info(f"  Game {ex['game_id']}, Poss {ex['possession_number']}:")
                 logger.info(f"    Missing players: {ex['missing_players']}")
                 logger.info(f"    Tracked offense: {ex['tracked_offense']}")
                 logger.info(f"    Tracked defense: {ex['tracked_defense']}")
         else:
-            logger.info("✨ Perfect accuracy - all event participants are in tracked lineups!")
+            logger.info(
+                "✨ Perfect accuracy - all event participants are in tracked lineups!"
+            )
 
         logger.info("")
-        logger.info("="*60)
+        logger.info("=" * 60)
 
     finally:
         conn.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

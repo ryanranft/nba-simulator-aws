@@ -54,6 +54,7 @@ from urllib.parse import urljoin
 try:
     import requests
     from bs4 import BeautifulSoup
+
     HAS_BS4 = True
 except ImportError:
     HAS_BS4 = False
@@ -63,6 +64,7 @@ except ImportError:
 
 try:
     import boto3
+
     HAS_BOTO3 = True
 except ImportError:
     HAS_BOTO3 = False
@@ -71,31 +73,37 @@ except ImportError:
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s: %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    format="%(asctime)s - %(levelname)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
+
 
 class BasketballReferenceTransactionsScraper:
     """Scraper for Basketball Reference transactions data"""
 
     BASE_URL = "https://www.basketball-reference.com"
 
-    def __init__(self, output_dir: str, s3_bucket: Optional[str] = None,
-                 rate_limit: float = 12.0, dry_run: bool = False):
+    def __init__(
+        self,
+        output_dir: str,
+        s3_bucket: Optional[str] = None,
+        rate_limit: float = 12.0,
+        dry_run: bool = False,
+    ):
         self.output_dir = Path(output_dir)
         self.s3_bucket = s3_bucket
-        self.s3_client = boto3.client('s3') if HAS_BOTO3 and s3_bucket else None
+        self.s3_client = boto3.client("s3") if HAS_BOTO3 and s3_bucket else None
         self.rate_limit = rate_limit
         self.last_request_time = 0
         self.dry_run = dry_run
 
         # Statistics
         self.stats = {
-            'requests': 0,
-            'successes': 0,
-            'errors': 0,
-            'retries': 0,
-            'transactions_scraped': 0,
+            "requests": 0,
+            "successes": 0,
+            "errors": 0,
+            "retries": 0,
+            "transactions_scraped": 0,
         }
 
         # Create output directory
@@ -103,9 +111,11 @@ class BasketballReferenceTransactionsScraper:
 
         # Session for connection pooling
         self.session = requests.Session()
-        self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-        })
+        self.session.headers.update(
+            {
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+            }
+        )
 
     def _rate_limit_wait(self):
         """Enforce rate limiting"""
@@ -120,9 +130,9 @@ class BasketballReferenceTransactionsScraper:
         """Exponential backoff on errors"""
         if is_rate_limit:
             # For 429 errors, wait much longer (30s, 60s, 120s)
-            wait_time = min(120, 30 * (2 ** attempt))
+            wait_time = min(120, 30 * (2**attempt))
         else:
-            wait_time = min(60, (2 ** attempt))
+            wait_time = min(60, (2**attempt))
         logging.warning(f"  Backing off for {wait_time}s (attempt {attempt})")
         time.sleep(wait_time)
 
@@ -131,41 +141,47 @@ class BasketballReferenceTransactionsScraper:
         for attempt in range(max_retries):
             try:
                 self._rate_limit_wait()
-                self.stats['requests'] += 1
+                self.stats["requests"] += 1
 
                 response = self.session.get(url, timeout=30)
 
                 if response.status_code == 200:
-                    self.stats['successes'] += 1
+                    self.stats["successes"] += 1
                     return response.text
                 elif response.status_code == 429:
-                    self.stats['errors'] += 1
+                    self.stats["errors"] += 1
                     if attempt < max_retries - 1:
-                        self.stats['retries'] += 1
+                        self.stats["retries"] += 1
                         logging.warning(f"  HTTP 429 (Too Many Requests) for {url}")
                         self._exponential_backoff(attempt, is_rate_limit=True)
                     else:
-                        logging.error(f"  Failed after {max_retries} attempts: HTTP 429")
+                        logging.error(
+                            f"  Failed after {max_retries} attempts: HTTP 429"
+                        )
                         return None
                 elif response.status_code == 404:
                     logging.error(f"  HTTP 404 (Not Found): {url}")
-                    self.stats['errors'] += 1
+                    self.stats["errors"] += 1
                     return None
                 else:
-                    self.stats['errors'] += 1
+                    self.stats["errors"] += 1
                     if attempt < max_retries - 1:
-                        self.stats['retries'] += 1
+                        self.stats["retries"] += 1
                         logging.warning(f"  HTTP {response.status_code} for {url}")
                         self._exponential_backoff(attempt)
                     else:
-                        logging.error(f"  Failed after {max_retries} attempts: HTTP {response.status_code}")
+                        logging.error(
+                            f"  Failed after {max_retries} attempts: HTTP {response.status_code}"
+                        )
                         return None
 
             except requests.exceptions.RequestException as e:
-                self.stats['errors'] += 1
+                self.stats["errors"] += 1
                 if attempt < max_retries - 1:
-                    self.stats['retries'] += 1
-                    logging.warning(f"  Request error (attempt {attempt + 1}/{max_retries}): {e}")
+                    self.stats["retries"] += 1
+                    logging.warning(
+                        f"  Request error (attempt {attempt + 1}/{max_retries}): {e}"
+                    )
                     self._exponential_backoff(attempt)
                 else:
                     logging.error(f"  Request failed after {max_retries} attempts: {e}")
@@ -178,87 +194,81 @@ class BasketballReferenceTransactionsScraper:
         if not element:
             return None
 
-        player_link = element.find('a')
+        player_link = element.find("a")
         if not player_link:
             return None
 
-        href = player_link.get('href', '')
+        href = player_link.get("href", "")
         player_id = None
-        if '/players/' in href:
-            player_id = href.split('/')[-1].replace('.html', '')
+        if "/players/" in href:
+            player_id = href.split("/")[-1].replace(".html", "")
 
-        return {
-            'name': player_link.get_text(strip=True),
-            'slug': player_id
-        }
+        return {"name": player_link.get_text(strip=True), "slug": player_id}
 
     def _extract_players_from_text(self, text: str, soup_element) -> List[Dict]:
         """Extract all player links from a transaction description"""
         players = []
-        for link in soup_element.find_all('a', href=True):
-            href = link.get('href', '')
-            if '/players/' in href:
-                player_id = href.split('/')[-1].replace('.html', '')
-                players.append({
-                    'name': link.get_text(strip=True),
-                    'slug': player_id
-                })
+        for link in soup_element.find_all("a", href=True):
+            href = link.get("href", "")
+            if "/players/" in href:
+                player_id = href.split("/")[-1].replace(".html", "")
+                players.append({"name": link.get_text(strip=True), "slug": player_id})
         return players
 
     def _classify_transaction(self, text: str) -> str:
         """Classify transaction type from description"""
         text_lower = text.lower()
 
-        if 'signed' in text_lower:
-            if 'two-way' in text_lower:
-                return 'signed_two_way'
-            elif 'contract extension' in text_lower or 'extension' in text_lower:
-                return 'contract_extension'
+        if "signed" in text_lower:
+            if "two-way" in text_lower:
+                return "signed_two_way"
+            elif "contract extension" in text_lower or "extension" in text_lower:
+                return "contract_extension"
             else:
-                return 'signed'
-        elif 'waived' in text_lower or 'released' in text_lower:
-            return 'waived'
-        elif 'traded' in text_lower or 'trade' in text_lower:
-            return 'trade'
-        elif 'recalled' in text_lower:
-            return 'g_league_recalled'
-        elif 'assigned' in text_lower:
-            return 'g_league_assigned'
-        elif 'suspended' in text_lower:
-            return 'suspended'
-        elif 'injured list' in text_lower or 'injury' in text_lower:
-            return 'injury_designation'
-        elif 'activated' in text_lower:
-            return 'activated'
-        elif 'claimed' in text_lower:
-            return 'claimed'
-        elif 'retired' in text_lower:
-            return 'retired'
+                return "signed"
+        elif "waived" in text_lower or "released" in text_lower:
+            return "waived"
+        elif "traded" in text_lower or "trade" in text_lower:
+            return "trade"
+        elif "recalled" in text_lower:
+            return "g_league_recalled"
+        elif "assigned" in text_lower:
+            return "g_league_assigned"
+        elif "suspended" in text_lower:
+            return "suspended"
+        elif "injured list" in text_lower or "injury" in text_lower:
+            return "injury_designation"
+        elif "activated" in text_lower:
+            return "activated"
+        elif "claimed" in text_lower:
+            return "claimed"
+        elif "retired" in text_lower:
+            return "retired"
         else:
-            return 'other'
+            return "other"
 
     def _parse_transactions_page(self, html: str, season: int) -> List[Dict]:
         """Parse transactions from HTML"""
-        soup = BeautifulSoup(html, 'lxml')
+        soup = BeautifulSoup(html, "lxml")
 
         # Find all list items (grouped by date)
         transactions = []
 
         # Look for <li> elements containing transaction dates
-        for li in soup.find_all('li'):
+        for li in soup.find_all("li"):
             # Check if this li contains a date span
-            date_span = li.find('span')
+            date_span = li.find("span")
             if not date_span:
                 continue
 
             date_text = date_span.get_text(strip=True)
 
             # Skip if not a date (e.g., navigation elements)
-            if not re.match(r'[A-Za-z]+ \d+, \d{4}', date_text):
+            if not re.match(r"[A-Za-z]+ \d+, \d{4}", date_text):
                 continue
 
             # Parse all transaction paragraphs in this date group
-            for p in li.find_all('p'):
+            for p in li.find_all("p"):
                 transaction_text = p.get_text(strip=True)
 
                 # Skip empty paragraphs
@@ -269,17 +279,21 @@ class BasketballReferenceTransactionsScraper:
                 teams_from = []
                 teams_to = []
 
-                for team_link in p.find_all('a', attrs={'data-attr-from': True}):
-                    teams_from.append({
-                        'abbr': team_link.get('data-attr-from'),
-                        'name': team_link.get_text(strip=True)
-                    })
+                for team_link in p.find_all("a", attrs={"data-attr-from": True}):
+                    teams_from.append(
+                        {
+                            "abbr": team_link.get("data-attr-from"),
+                            "name": team_link.get_text(strip=True),
+                        }
+                    )
 
-                for team_link in p.find_all('a', attrs={'data-attr-to': True}):
-                    teams_to.append({
-                        'abbr': team_link.get('data-attr-to'),
-                        'name': team_link.get_text(strip=True)
-                    })
+                for team_link in p.find_all("a", attrs={"data-attr-to": True}):
+                    teams_to.append(
+                        {
+                            "abbr": team_link.get("data-attr-to"),
+                            "name": team_link.get_text(strip=True),
+                        }
+                    )
 
                 # Extract players
                 players = self._extract_players_from_text(transaction_text, p)
@@ -289,13 +303,13 @@ class BasketballReferenceTransactionsScraper:
 
                 # Create transaction record
                 transaction = {
-                    'date': date_text,
-                    'season': season,
-                    'type': transaction_type,
-                    'description': transaction_text,
-                    'teams_from': teams_from,
-                    'teams_to': teams_to,
-                    'players': players
+                    "date": date_text,
+                    "season": season,
+                    "type": transaction_type,
+                    "description": transaction_text,
+                    "teams_from": teams_from,
+                    "teams_to": teams_to,
+                    "players": players,
                 }
 
                 transactions.append(transaction)
@@ -310,7 +324,7 @@ class BasketballReferenceTransactionsScraper:
 
         filepath = Path(filepath)
         filepath.parent.mkdir(parents=True, exist_ok=True)
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(data, f, indent=2, default=str)
         logging.debug(f"  Saved: {filepath}")
 
@@ -358,15 +372,17 @@ class BasketballReferenceTransactionsScraper:
             return True
 
         logging.info(f"  ✓ Parsed {len(transactions)} transactions")
-        self.stats['transactions_scraped'] += len(transactions)
+        self.stats["transactions_scraped"] += len(transactions)
 
         # Save locally
-        local_path = self.output_dir / 'transactions' / str(season) / 'transactions.json'
+        local_path = (
+            self.output_dir / "transactions" / str(season) / "transactions.json"
+        )
         self._save_json(transactions, local_path)
 
         # Upload to S3
         if self.s3_client:
-            s3_key = f'basketball_reference/transactions/{season}/transactions.json'
+            s3_key = f"basketball_reference/transactions/{season}/transactions.json"
             self._upload_to_s3(local_path, s3_key)
 
         return True
@@ -467,56 +483,52 @@ Value:
   - Identifies two-way players (may have data inconsistencies)
   - Validates roster composition
   - Provides context for trade deadline activity
-        """
+        """,
     )
 
     parser.add_argument(
-        '--season',
+        "--season",
         type=int,
-        help='Single season to scrape (e.g., 2024 for 2023-2024 season)'
+        help="Single season to scrape (e.g., 2024 for 2023-2024 season)",
     )
 
     parser.add_argument(
-        '--start-season',
+        "--start-season",
         type=int,
-        help='Start season (e.g., 2020 for 2019-2020 season)'
+        help="Start season (e.g., 2020 for 2019-2020 season)",
     )
 
     parser.add_argument(
-        '--end-season',
-        type=int,
-        help='End season (e.g., 2024 for 2023-2024 season)'
+        "--end-season", type=int, help="End season (e.g., 2024 for 2023-2024 season)"
     )
 
     parser.add_argument(
-        '--output-dir',
-        default='/tmp/basketball_reference_transactions',
-        help='Output directory for scraped data (default: /tmp/basketball_reference_transactions)'
+        "--output-dir",
+        default="/tmp/basketball_reference_transactions",
+        help="Output directory for scraped data (default: /tmp/basketball_reference_transactions)",
     )
 
     parser.add_argument(
-        '--upload-to-s3',
-        action='store_true',
-        help='Upload scraped data to S3'
+        "--upload-to-s3", action="store_true", help="Upload scraped data to S3"
     )
 
     parser.add_argument(
-        '--s3-bucket',
-        default='nba-sim-raw-data-lake',
-        help='S3 bucket name (default: nba-sim-raw-data-lake)'
+        "--s3-bucket",
+        default="nba-sim-raw-data-lake",
+        help="S3 bucket name (default: nba-sim-raw-data-lake)",
     )
 
     parser.add_argument(
-        '--rate-limit',
+        "--rate-limit",
         type=float,
         default=12.0,
-        help='Seconds between requests (default: 12.0)'
+        help="Seconds between requests (default: 12.0)",
     )
 
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Dry run mode - don\'t save files or upload to S3'
+        "--dry-run",
+        action="store_true",
+        help="Dry run mode - don't save files or upload to S3",
     )
 
     args = parser.parse_args()
@@ -529,7 +541,9 @@ Value:
         start_season = args.start_season
         end_season = args.end_season
     else:
-        parser.error("Must specify either --season or both --start-season and --end-season")
+        parser.error(
+            "Must specify either --season or both --start-season and --end-season"
+        )
 
     print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
@@ -539,7 +553,7 @@ Value:
         output_dir=args.output_dir,
         s3_bucket=args.s3_bucket if args.upload_to_s3 else None,
         rate_limit=args.rate_limit,
-        dry_run=args.dry_run
+        dry_run=args.dry_run,
     )
 
     scraper.scrape_range(start_season, end_season)
@@ -548,5 +562,5 @@ Value:
     print(f"✓ Complete: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

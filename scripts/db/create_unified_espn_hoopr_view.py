@@ -29,35 +29,37 @@ from datetime import datetime
 import argparse
 
 # Load environment variables
-load_dotenv('/Users/ryanranft/nba-sim-credentials.env')
+load_dotenv("/Users/ryanranft/nba-sim-credentials.env")
 
 # Database configuration
 DB_CONFIG = {
-    'host': os.getenv('DB_HOST'),
-    'database': os.getenv('DB_NAME'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'port': os.getenv('DB_PORT', 5432),
-    'sslmode': 'require'
+    "host": os.getenv("DB_HOST"),
+    "database": os.getenv("DB_NAME"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "port": os.getenv("DB_PORT", 5432),
+    "sslmode": "require",
 }
 
 
 def create_unified_play_by_play_view(cursor, drop_existing=False):
     """Create unified play-by-play view combining ESPN + hoopR."""
-    print("="*70)
+    print("=" * 70)
     print("CREATING UNIFIED PLAY-BY-PLAY VIEW")
-    print("="*70)
+    print("=" * 70)
     print()
 
     view_name = "unified_play_by_play"
 
     # Check if view exists
-    cursor.execute(f"""
+    cursor.execute(
+        f"""
         SELECT EXISTS (
             SELECT FROM information_schema.views
             WHERE table_name = '{view_name}'
         );
-    """)
+    """
+    )
     exists = cursor.fetchone()[0]
 
     if exists:
@@ -66,7 +68,9 @@ def create_unified_play_by_play_view(cursor, drop_existing=False):
             cursor.execute(f"DROP VIEW IF EXISTS {view_name} CASCADE;")
             print("  ✓ View dropped")
         else:
-            print(f"⚠️  View {view_name} already exists. Use --drop-existing to recreate.")
+            print(
+                f"⚠️  View {view_name} already exists. Use --drop-existing to recreate."
+            )
             return
 
     print(f"Creating view: {view_name}...")
@@ -75,7 +79,8 @@ def create_unified_play_by_play_view(cursor, drop_existing=False):
     # ESPN columns: game_id, period_number, clock_display_value, scoring_play, etc.
     # hoopR columns: game_id, period_number, clock_display_value, scoring_play, etc.
 
-    cursor.execute(f"""
+    cursor.execute(
+        f"""
         CREATE VIEW {view_name} AS
 
         -- ESPN data: Pre-2002 historical coverage (1993-2001)
@@ -112,7 +117,8 @@ def create_unified_play_by_play_view(cursor, drop_existing=False):
         WHERE game_date >= '2002-01-01'
 
         ORDER BY game_date, game_id, period_number DESC, clock_display_value DESC;
-    """)
+    """
+    )
 
     print(f"  ✓ Created view: {view_name}")
     print()
@@ -136,20 +142,22 @@ def create_unified_play_by_play_view(cursor, drop_existing=False):
 
 def create_unified_schedule_view(cursor, drop_existing=False):
     """Create unified schedule view combining ESPN + hoopR."""
-    print("="*70)
+    print("=" * 70)
     print("CREATING UNIFIED SCHEDULE VIEW")
-    print("="*70)
+    print("=" * 70)
     print()
 
     view_name = "unified_schedule"
 
     # Check if view exists
-    cursor.execute(f"""
+    cursor.execute(
+        f"""
         SELECT EXISTS (
             SELECT FROM information_schema.views
             WHERE table_name = '{view_name}'
         );
-    """)
+    """
+    )
     exists = cursor.fetchone()[0]
 
     if exists:
@@ -158,12 +166,15 @@ def create_unified_schedule_view(cursor, drop_existing=False):
             cursor.execute(f"DROP VIEW IF EXISTS {view_name} CASCADE;")
             print("  ✓ View dropped")
         else:
-            print(f"⚠️  View {view_name} already exists. Use --drop-existing to recreate.")
+            print(
+                f"⚠️  View {view_name} already exists. Use --drop-existing to recreate."
+            )
             return
 
     print(f"Creating view: {view_name}...")
 
-    cursor.execute(f"""
+    cursor.execute(
+        f"""
         CREATE VIEW {view_name} AS
 
         -- ESPN schedule: Pre-2002 games
@@ -197,7 +208,8 @@ def create_unified_schedule_view(cursor, drop_existing=False):
         WHERE game_date >= '2002-01-01'
 
         ORDER BY game_date, game_id;
-    """)
+    """
+    )
 
     print(f"  ✓ Created view: {view_name}")
     print()
@@ -220,20 +232,23 @@ def create_unified_schedule_view(cursor, drop_existing=False):
     print(f"  ESPN (pre-2002): {espn_count:,} ({espn_count/total*100:.1f}%)")
     print(f"  hoopR (2002+):   {hoopr_count:,} ({hoopr_count/total*100:.1f}%)")
     print(f"  Date range:      {min_date} to {max_date}")
-    print(f"  Coverage:        {(max_date.year - min_date.year) if min_date and max_date else 0} years")
+    print(
+        f"  Coverage:        {(max_date.year - min_date.year) if min_date and max_date else 0} years"
+    )
     print()
 
 
 def create_documentation_view(cursor):
     """Create a view documenting the unified data strategy."""
-    print("="*70)
+    print("=" * 70)
     print("CREATING DATA SOURCE DOCUMENTATION VIEW")
-    print("="*70)
+    print("=" * 70)
     print()
 
     view_name = "data_source_coverage"
 
-    cursor.execute(f"""
+    cursor.execute(
+        f"""
         CREATE OR REPLACE VIEW {view_name} AS
         SELECT
             EXTRACT(YEAR FROM game_date) as season_year,
@@ -244,19 +259,22 @@ def create_documentation_view(cursor):
         WHERE game_date IS NOT NULL
         GROUP BY season_year, data_source
         ORDER BY season_year, data_source;
-    """)
+    """
+    )
 
     print(f"  ✓ Created view: {view_name}")
     print()
 
     # Show sample
     print("Coverage by Year and Source:")
-    cursor.execute(f"""
+    cursor.execute(
+        f"""
         SELECT season_year, data_source, game_count
         FROM {view_name}
         ORDER BY season_year
         LIMIT 10;
-    """)
+    """
+    )
 
     print(f"  {'Year':<8} {'Source':<10} {'Games':<10}")
     print("  " + "-" * 30)
@@ -268,18 +286,20 @@ def create_documentation_view(cursor):
 
 def print_summary(cursor):
     """Print summary of unified views."""
-    print("="*70)
+    print("=" * 70)
     print("UNIFIED VIEW SUMMARY")
-    print("="*70)
+    print("=" * 70)
     print()
 
     # List all unified views
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT table_name, view_definition
         FROM information_schema.views
         WHERE table_name LIKE 'unified_%' OR table_name LIKE 'data_source_%'
         ORDER BY table_name;
-    """)
+    """
+    )
 
     views = cursor.fetchall()
     print(f"Created {len(views)} unified views:")
@@ -287,10 +307,11 @@ def print_summary(cursor):
         print(f"  ✓ {view_name}")
 
     print()
-    print("="*70)
+    print("=" * 70)
     print("USAGE EXAMPLES")
-    print("="*70)
-    print("""
+    print("=" * 70)
+    print(
+        """
 -- Query all play-by-play events (1993-2025)
 SELECT * FROM unified_play_by_play
 WHERE game_date >= '2010-01-01'
@@ -312,8 +333,9 @@ SELECT
 FROM data_source_coverage
 GROUP BY season_year
 ORDER BY season_year;
-    """)
-    print("="*70)
+    """
+    )
+    print("=" * 70)
 
 
 def main():
@@ -334,25 +356,23 @@ Strategy:
   hoopR: 2002-2025 modern data (better coverage, richer schema)
 
   Result: Seamless 33-year dataset (1993-2025)
-        """
+        """,
     )
 
     parser.add_argument(
-        '--drop-existing',
-        action='store_true',
-        help='Drop and recreate existing views'
+        "--drop-existing", action="store_true", help="Drop and recreate existing views"
     )
 
     args = parser.parse_args()
 
-    print("="*70)
+    print("=" * 70)
     print("CREATE UNIFIED ESPN + HOOPR VIEWS")
-    print("="*70)
+    print("=" * 70)
     print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
 
     # Validate credentials
-    if not DB_CONFIG['user'] or not DB_CONFIG['password']:
+    if not DB_CONFIG["user"] or not DB_CONFIG["password"]:
         print("ERROR: Database credentials not found")
         sys.exit(1)
 
@@ -390,6 +410,7 @@ Strategy:
         conn.rollback()
         print("Transaction rolled back")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
@@ -399,5 +420,5 @@ Strategy:
         print("\nDatabase connection closed")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

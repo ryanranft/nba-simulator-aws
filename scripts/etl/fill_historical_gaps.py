@@ -42,6 +42,7 @@ import pandas as pd
 # Import sportsdataverse
 try:
     from sportsdataverse.nba import load_nba_pbp, load_nba_schedule
+
     HAS_SPORTSDATAVERSE = True
 except ImportError:
     HAS_SPORTSDATAVERSE = False
@@ -54,6 +55,7 @@ HOOPR_DB = "/tmp/hoopr_local.db"
 GAP_LIST = "/tmp/missing_from_hoopr.csv"
 UNAVAILABLE_GAMES_FILE = "/tmp/hoopr_permanently_unavailable.csv"
 
+
 class HistoricalGapFiller:
     """Fill historical hoopR gaps from hoopR API"""
 
@@ -62,12 +64,12 @@ class HistoricalGapFiller:
         self.dry_run = dry_run
 
         self.stats = {
-            'gaps_total': 0,
-            'gaps_attempted': 0,
-            'gaps_filled': 0,
-            'gaps_unavailable': 0,
-            'events_loaded': 0,
-            'errors': 0
+            "gaps_total": 0,
+            "gaps_attempted": 0,
+            "gaps_filled": 0,
+            "gaps_unavailable": 0,
+            "events_loaded": 0,
+            "errors": 0,
         }
 
         self.unavailable_games = []
@@ -89,12 +91,12 @@ class HistoricalGapFiller:
         print(f"Reading: {GAP_LIST}")
 
         gaps = []
-        with open(GAP_LIST, 'r') as f:
+        with open(GAP_LIST, "r") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 # Filter by season if specified
                 if season_filter:
-                    game_year = int(row['game_date'].split('-')[0])
+                    game_year = int(row["game_date"].split("-")[0])
                     if game_year != season_filter:
                         continue
 
@@ -103,7 +105,7 @@ class HistoricalGapFiller:
                 if limit and len(gaps) >= limit:
                     break
 
-        self.stats['gaps_total'] = len(gaps)
+        self.stats["gaps_total"] = len(gaps)
 
         print(f"✓ Loaded {len(gaps):,} missing games")
         print()
@@ -111,9 +113,9 @@ class HistoricalGapFiller:
         # Group by season
         by_season = defaultdict(list)
         for gap in gaps:
-            game_year = int(gap['game_date'].split('-')[0])
+            game_year = int(gap["game_date"].split("-")[0])
             # NBA season logic: Oct-June spans two years
-            month = int(gap['game_date'].split('-')[1])
+            month = int(gap["game_date"].split("-")[1])
             season = game_year if month >= 10 else game_year - 1
             by_season[season].append(gap)
 
@@ -155,7 +157,7 @@ class HistoricalGapFiller:
                 return None, reason
 
             # Convert to pandas if it's a Polars DataFrame
-            if hasattr(schedule_df, 'to_pandas'):
+            if hasattr(schedule_df, "to_pandas"):
                 schedule_df = schedule_df.to_pandas()
 
             print(f"  ✓ Loaded {len(schedule_df):,} games in schedule")
@@ -170,13 +172,13 @@ class HistoricalGapFiller:
                 return None, reason
 
             # Convert to pandas if it's a Polars DataFrame
-            if hasattr(pbp_df, 'to_pandas'):
+            if hasattr(pbp_df, "to_pandas"):
                 pbp_df = pbp_df.to_pandas()
 
             print(f"  ✓ Loaded {len(pbp_df):,} PBP events")
             print()
 
-            return {'schedule': schedule_df, 'pbp': pbp_df}, None
+            return {"schedule": schedule_df, "pbp": pbp_df}, None
 
         except Exception as e:
             reason = f"Error loading from hoopR API: {e}"
@@ -190,7 +192,7 @@ class HistoricalGapFiller:
             return
 
         # Filter to only games we want
-        schedule_df = schedule_df[schedule_df['game_id'].isin(game_ids)]
+        schedule_df = schedule_df[schedule_df["game_id"].isin(game_ids)]
 
         if len(schedule_df) == 0:
             return
@@ -200,33 +202,36 @@ class HistoricalGapFiller:
 
         try:
             for _, row in schedule_df.iterrows():
-                cursor.execute("""
+                cursor.execute(
+                    """
                     INSERT OR REPLACE INTO schedule (
                         game_id, game_date, season, season_type,
                         home_team_id, home_display_name, home_score,
                         away_team_id, away_display_name, away_score,
                         status, uid, created_at, updated_at
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-                """, (
-                    str(row.get('game_id')),
-                    row.get('game_date'),
-                    row.get('season'),
-                    row.get('season_type'),
-                    row.get('home_team_id'),
-                    row.get('home_display_name'),
-                    row.get('home_score'),
-                    row.get('away_team_id'),
-                    row.get('away_display_name'),
-                    row.get('away_score'),
-                    row.get('status'),
-                    row.get('uid')
-                ))
+                """,
+                    (
+                        str(row.get("game_id")),
+                        row.get("game_date"),
+                        row.get("season"),
+                        row.get("season_type"),
+                        row.get("home_team_id"),
+                        row.get("home_display_name"),
+                        row.get("home_score"),
+                        row.get("away_team_id"),
+                        row.get("away_display_name"),
+                        row.get("away_score"),
+                        row.get("status"),
+                        row.get("uid"),
+                    ),
+                )
 
             conn.commit()
 
         except Exception as e:
             print(f"    ❌ Error loading schedule: {e}")
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
             conn.rollback()
         finally:
             cursor.close()
@@ -236,7 +241,7 @@ class HistoricalGapFiller:
         """Load play-by-play data for a specific game to database."""
 
         if self.dry_run:
-            self.stats['events_loaded'] += len(pbp_df)
+            self.stats["events_loaded"] += len(pbp_df)
             return len(pbp_df)
 
         conn = sqlite3.connect(self.db_path)
@@ -244,12 +249,15 @@ class HistoricalGapFiller:
 
         try:
             # Clear existing PBP for this game
-            cursor.execute("DELETE FROM play_by_play WHERE game_id = ?", (str(game_id),))
+            cursor.execute(
+                "DELETE FROM play_by_play WHERE game_id = ?", (str(game_id),)
+            )
 
             # Insert new PBP
             events_loaded = 0
             for _, row in pbp_df.iterrows():
-                cursor.execute("""
+                cursor.execute(
+                    """
                     INSERT INTO play_by_play (
                         id, game_id, sequence_number, type_id, type_text,
                         period_number, clock_display_value, clock_value,
@@ -260,41 +268,47 @@ class HistoricalGapFiller:
                         coordinate_x, coordinate_y, season, season_type,
                         game_date, created_at, updated_at
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-                """, (
-                    row.get('id'),
-                    str(row.get('game_id')),
-                    row.get('sequence_number'),
-                    row.get('type_id'),
-                    row.get('type_text'),
-                    row.get('period_number'),
-                    row.get('clock_display_value'),
-                    row.get('clock_value'),
-                    row.get('home_score'),
-                    row.get('away_score'),
-                    row.get('scoring_play'),
-                    row.get('score_value'),
-                    row.get('team_id'),
-                    str(row.get('participants_json')) if row.get('participants_json') else None,
-                    row.get('wallclock'),
-                    row.get('shooting_play'),
-                    row.get('text'),
-                    row.get('away_score_before'),
-                    row.get('home_score_before'),
-                    row.get('coordinate_x'),
-                    row.get('coordinate_y'),
-                    row.get('season'),
-                    row.get('season_type'),
-                    row.get('game_date')
-                ))
+                """,
+                    (
+                        row.get("id"),
+                        str(row.get("game_id")),
+                        row.get("sequence_number"),
+                        row.get("type_id"),
+                        row.get("type_text"),
+                        row.get("period_number"),
+                        row.get("clock_display_value"),
+                        row.get("clock_value"),
+                        row.get("home_score"),
+                        row.get("away_score"),
+                        row.get("scoring_play"),
+                        row.get("score_value"),
+                        row.get("team_id"),
+                        (
+                            str(row.get("participants_json"))
+                            if row.get("participants_json")
+                            else None
+                        ),
+                        row.get("wallclock"),
+                        row.get("shooting_play"),
+                        row.get("text"),
+                        row.get("away_score_before"),
+                        row.get("home_score_before"),
+                        row.get("coordinate_x"),
+                        row.get("coordinate_y"),
+                        row.get("season"),
+                        row.get("season_type"),
+                        row.get("game_date"),
+                    ),
+                )
                 events_loaded += 1
 
             conn.commit()
-            self.stats['events_loaded'] += events_loaded
+            self.stats["events_loaded"] += events_loaded
             return events_loaded
 
         except Exception as e:
             print(f"    ❌ Error loading PBP: {e}")
-            self.stats['errors'] += 1
+            self.stats["errors"] += 1
             conn.rollback()
             return 0
         finally:
@@ -316,59 +330,67 @@ class HistoricalGapFiller:
             # Season unavailable - mark all games as unavailable
             print(f"⚠️  Season {season} unavailable from hoopR API")
             print(f"   Reason: {unavailable_reason}")
-            print(f"   Marking {len(gaps_in_season):,} games as permanently unavailable")
+            print(
+                f"   Marking {len(gaps_in_season):,} games as permanently unavailable"
+            )
             print()
 
             for gap in gaps_in_season:
-                self.unavailable_games.append({
-                    'game_id': gap['hoopr_game_id'],
-                    'game_date': gap['game_date'],
-                    'matchup': f"{gap['away_team']} @ {gap['home_team']}",
-                    'reason': unavailable_reason
-                })
-                self.stats['gaps_unavailable'] += 1
+                self.unavailable_games.append(
+                    {
+                        "game_id": gap["hoopr_game_id"],
+                        "game_date": gap["game_date"],
+                        "matchup": f"{gap['away_team']} @ {gap['home_team']}",
+                        "reason": unavailable_reason,
+                    }
+                )
+                self.stats["gaps_unavailable"] += 1
 
             return
 
         # Extract schedule and PBP data
-        schedule_df = season_data['schedule']
-        pbp_df = season_data['pbp']
+        schedule_df = season_data["schedule"]
+        pbp_df = season_data["pbp"]
 
         # Process each gap
         game_ids_to_load = []
         for i, gap in enumerate(gaps_in_season, 1):
-            hoopr_game_id = gap['hoopr_game_id']
-            game_date = gap['game_date']
+            hoopr_game_id = gap["hoopr_game_id"]
+            game_date = gap["game_date"]
             matchup = f"{gap['away_team']} @ {gap['home_team']}"
 
             print(f"[{i}/{len(gaps_in_season)}] {matchup} ({game_date})")
 
             # Skip games without hoopR mapping
-            if not hoopr_game_id or hoopr_game_id.strip() == '':
+            if not hoopr_game_id or hoopr_game_id.strip() == "":
                 print(f"  ⚠️  No hoopR game ID (no mapping exists)")
-                self.unavailable_games.append({
-                    'game_id': gap['espn_game_id'],
-                    'game_date': game_date,
-                    'matchup': matchup,
-                    'reason': 'No ESPN-hoopR game ID mapping exists'
-                })
-                self.stats['gaps_unavailable'] += 1
+                self.unavailable_games.append(
+                    {
+                        "game_id": gap["espn_game_id"],
+                        "game_date": game_date,
+                        "matchup": matchup,
+                        "reason": "No ESPN-hoopR game ID mapping exists",
+                    }
+                )
+                self.stats["gaps_unavailable"] += 1
                 continue
 
-            self.stats['gaps_attempted'] += 1
+            self.stats["gaps_attempted"] += 1
 
             # Check if game exists in hoopR data
-            game_pbp = pbp_df[pbp_df['game_id'] == int(hoopr_game_id)]
+            game_pbp = pbp_df[pbp_df["game_id"] == int(hoopr_game_id)]
 
             if len(game_pbp) == 0:
                 print(f"  ⚠️  Not available in hoopR API")
-                self.unavailable_games.append({
-                    'game_id': hoopr_game_id,
-                    'game_date': game_date,
-                    'matchup': matchup,
-                    'reason': f'Not in hoopR API data for season {season}'
-                })
-                self.stats['gaps_unavailable'] += 1
+                self.unavailable_games.append(
+                    {
+                        "game_id": hoopr_game_id,
+                        "game_date": game_date,
+                        "matchup": matchup,
+                        "reason": f"Not in hoopR API data for season {season}",
+                    }
+                )
+                self.stats["gaps_unavailable"] += 1
                 continue
 
             # Game found!
@@ -376,14 +398,14 @@ class HistoricalGapFiller:
 
             if self.dry_run:
                 print(f"  [DRY RUN] Would load to database")
-                self.stats['gaps_filled'] += 1
-                self.stats['events_loaded'] += len(game_pbp)
+                self.stats["gaps_filled"] += 1
+                self.stats["events_loaded"] += len(game_pbp)
             else:
                 # Load to database
                 events_loaded = self.load_pbp_to_db(game_pbp, hoopr_game_id)
                 if events_loaded > 0:
                     game_ids_to_load.append(int(hoopr_game_id))
-                    self.stats['gaps_filled'] += 1
+                    self.stats["gaps_filled"] += 1
                     print(f"  ✓ Loaded to database")
 
         # Load schedule for all successfully loaded games
@@ -403,8 +425,10 @@ class HistoricalGapFiller:
 
         print(f"Exporting {len(self.unavailable_games):,} unavailable games...")
 
-        with open(UNAVAILABLE_GAMES_FILE, 'w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=['game_id', 'game_date', 'matchup', 'reason'])
+        with open(UNAVAILABLE_GAMES_FILE, "w", newline="") as f:
+            writer = csv.DictWriter(
+                f, fieldnames=["game_id", "game_date", "matchup", "reason"]
+            )
             writer.writeheader()
             writer.writerows(self.unavailable_games)
 
@@ -445,9 +469,9 @@ class HistoricalGapFiller:
         print(f"Errors:                 {self.stats['errors']:,}")
         print("=" * 70)
 
-        if self.stats['gaps_filled'] > 0:
+        if self.stats["gaps_filled"] > 0:
             coverage_before = 28779
-            coverage_after = coverage_before + self.stats['gaps_filled']
+            coverage_after = coverage_before + self.stats["gaps_filled"]
             total_games = 31243
             pct_before = coverage_before / total_games * 100
             pct_after = coverage_after / total_games * 100
@@ -456,7 +480,9 @@ class HistoricalGapFiller:
             print(f"hoopR Coverage:")
             print(f"  Before: {coverage_before:,}/{total_games:,} ({pct_before:.1f}%)")
             print(f"  After:  {coverage_after:,}/{total_games:,} ({pct_after:.1f}%)")
-            print(f"  Gain:   {self.stats['gaps_filled']:,} games (+{pct_after - pct_before:.1f}%)")
+            print(
+                f"  Gain:   {self.stats['gaps_filled']:,} games (+{pct_after - pct_before:.1f}%)"
+            )
 
 
 def main():
@@ -485,31 +511,21 @@ Note:
   Some gaps cannot be filled due to hoopR API limitations:
   - Pre-2002 seasons not supported
   - Some games simply unavailable in hoopR's data
-        """
+        """,
     )
 
     parser.add_argument(
-        '--limit',
-        type=int,
-        help='Limit number of gaps to attempt (for testing)'
+        "--limit", type=int, help="Limit number of gaps to attempt (for testing)"
+    )
+
+    parser.add_argument("--season", type=int, help="Fill gaps for specific season only")
+
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Dry run mode - don't modify database"
     )
 
     parser.add_argument(
-        '--season',
-        type=int,
-        help='Fill gaps for specific season only'
-    )
-
-    parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Dry run mode - don\'t modify database'
-    )
-
-    parser.add_argument(
-        '--db-path',
-        default=HOOPR_DB,
-        help=f'hoopR database path (default: {HOOPR_DB})'
+        "--db-path", default=HOOPR_DB, help=f"hoopR database path (default: {HOOPR_DB})"
     )
 
     args = parser.parse_args()
@@ -534,5 +550,5 @@ Note:
     print(f"✓ Complete: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

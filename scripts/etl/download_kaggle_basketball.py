@@ -45,16 +45,16 @@ def check_kaggle_credentials():
     print("Checking Kaggle API credentials...")
 
     if not KAGGLE_CONFIG.exists():
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("ERROR: Kaggle API credentials not found")
-        print("="*60)
+        print("=" * 60)
         print("\nPlease set up Kaggle API credentials:")
         print("1. Go to https://www.kaggle.com/[your-username]/account")
         print("2. Click 'Create New API Token'")
         print("3. Save kaggle.json to ~/.kaggle/")
         print("4. Run: chmod 600 ~/.kaggle/kaggle.json")
         print("\nSee docs/KAGGLE_API_SETUP.md for detailed instructions")
-        print("="*60)
+        print("=" * 60)
         return False
 
     # Check permissions
@@ -78,10 +78,14 @@ def download_dataset():
 
     # Download using kaggle CLI
     cmd = [
-        "kaggle", "datasets", "download",
-        "-d", KAGGLE_DATASET,
-        "-p", str(DOWNLOAD_DIR),
-        "--unzip"
+        "kaggle",
+        "datasets",
+        "download",
+        "-d",
+        KAGGLE_DATASET,
+        "-p",
+        str(DOWNLOAD_DIR),
+        "--unzip",
     ]
 
     print(f"\nExecuting: {' '.join(cmd)}")
@@ -139,7 +143,7 @@ def extract_player_biographical(db_path):
     # Find player table
     player_table = None
     for table in tables:
-        if 'player' in table.lower():
+        if "player" in table.lower():
             player_table = table
             break
 
@@ -189,7 +193,7 @@ def extract_game_data(db_path):
 
     game_table = None
     for table in tables:
-        if 'game' in table.lower() and 'player' not in table.lower():
+        if "game" in table.lower() and "player" not in table.lower():
             game_table = table
             break
 
@@ -220,9 +224,9 @@ def extract_game_data(db_path):
 
 def print_summary(db_path):
     """Print summary of Kaggle database contents."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Kaggle Database Summary")
-    print("="*60)
+    print("=" * 60)
 
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -241,14 +245,14 @@ def print_summary(db_path):
         print(f"{table:<35} {count:>10,}")
 
     conn.close()
-    print("="*60)
+    print("=" * 60)
 
 
 def main():
     """Main execution function."""
-    print("="*60)
+    print("=" * 60)
     print("Kaggle Basketball Database Download")
-    print("="*60)
+    print("=" * 60)
     print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
 
@@ -273,26 +277,28 @@ def main():
     game_file = extract_game_data(db_path)
 
     # Summary
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Extraction Complete")
-    print("="*60)
+    print("=" * 60)
     print(f"\nOutput directory: {OUTPUT_DIR}")
     print("\nExtracted files:")
     if player_file:
-        print(f"  - {player_file.name} ({player_file.stat().st_size / 1024 / 1024:.1f} MB)")
+        print(
+            f"  - {player_file.name} ({player_file.stat().st_size / 1024 / 1024:.1f} MB)"
+        )
     if game_file:
         print(f"  - {game_file.name} ({game_file.stat().st_size / 1024 / 1024:.1f} MB)")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Next Steps:")
-    print("="*60)
+    print("=" * 60)
     print("1. Inspect extracted CSV files")
     print("2. Map Kaggle columns to temporal table schemas")
     print("3. Run: python scripts/etl/load_kaggle_to_temporal.py")
-    print("="*60)
+    print("=" * 60)
 
     print(f"\nCompleted: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

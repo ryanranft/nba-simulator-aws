@@ -14,18 +14,17 @@ from collections import defaultdict
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
 
 def get_db_connection():
     """Connect to local PostgreSQL database."""
     return psycopg2.connect(
-        host="localhost",
-        database="nba_simulator",
-        user="ryanranft"
+        host="localhost", database="nba_simulator", user="ryanranft"
     )
+
 
 def create_mapping_table(conn):
     """Create team_id_mapping table if it doesn't exist."""
@@ -35,7 +34,8 @@ def create_mapping_table(conn):
     cursor.execute("DROP TABLE IF EXISTS team_id_mapping CASCADE;")
 
     # Create table
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE team_id_mapping (
             espn_team_id VARCHAR(10) PRIMARY KEY,
             nba_api_team_id VARCHAR(20) NOT NULL,
@@ -44,11 +44,13 @@ def create_mapping_table(conn):
             is_active BOOLEAN DEFAULT true,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-    """)
+    """
+    )
 
     conn.commit()
     cursor.close()
     logger.info("✓ Created team_id_mapping table")
+
 
 def build_mapping(conn):
     """
@@ -131,66 +133,77 @@ def build_mapping(conn):
 
     return espn_to_nba
 
+
 def insert_mappings(conn, mapping):
     """Insert team mappings into database."""
     cursor = conn.cursor()
 
     # Get team names from hoopr_player_box (sample one game per team)
     for espn_id, nba_id in mapping.items():
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT player_name
             FROM hoopr_player_box
             WHERE team_id = %s
             LIMIT 1
-        """, (espn_id,))
+        """,
+            (espn_id,),
+        )
 
         result = cursor.fetchone()
         team_name = None  # We'll populate this later if needed
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO team_id_mapping (espn_team_id, nba_api_team_id, team_name)
             VALUES (%s, %s, %s)
             ON CONFLICT (espn_team_id) DO UPDATE
             SET nba_api_team_id = EXCLUDED.nba_api_team_id
-        """, (espn_id, nba_id, team_name))
+        """,
+            (espn_id, nba_id, team_name),
+        )
 
     conn.commit()
     cursor.close()
     logger.info(f"✓ Inserted {len(mapping)} team mappings")
 
+
 def verify_mapping(conn):
     """Verify the mapping table and show results."""
     cursor = conn.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT espn_team_id, nba_api_team_id, team_name
         FROM team_id_mapping
         ORDER BY espn_team_id::integer
-    """)
+    """
+    )
 
     mappings = cursor.fetchall()
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEAM ID MAPPING TABLE")
-    print("="*60)
+    print("=" * 60)
     print(f"{'ESPN ID':<12} {'NBA API ID':<15} {'Team Name':<30}")
-    print("-"*60)
+    print("-" * 60)
 
     for espn_id, nba_id, team_name in mappings:
         team_name_str = team_name if team_name else "N/A"
         print(f"{espn_id:<12} {nba_id:<15} {team_name_str:<30}")
 
-    print("-"*60)
+    print("-" * 60)
     print(f"Total teams mapped: {len(mappings)}")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     cursor.close()
 
+
 def main():
     """Main execution."""
-    logger.info("="*60)
+    logger.info("=" * 60)
     logger.info("Creating Team ID Mapping Table")
-    logger.info("="*60)
+    logger.info("=" * 60)
 
     conn = get_db_connection()
 
@@ -220,6 +233,7 @@ def main():
 
     finally:
         conn.close()
+
 
 if __name__ == "__main__":
     main()
