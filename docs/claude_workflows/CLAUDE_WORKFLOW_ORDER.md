@@ -98,6 +98,10 @@ All detailed workflow descriptions are located in: `/docs/claude_workflows/workf
 ### Testing & Deployment (Pre-Production)
 
 35. **Pre-Deployment Testing** → `35_pre_deployment_testing.md` (before deploying AWS resources)
+
+### Async Infrastructure Deployment (Production Ready)
+
+53. **Async Scraper Deployment** → `53_async_scraper_deployment.md` (deploy new infrastructure)
 36. **Pre-Push Repository Cleanup** → `36_pre_push_repo_cleanup.md` (before pushing to GitHub)
 
 ### AWS Operations & Troubleshooting

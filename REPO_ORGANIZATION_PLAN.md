@@ -10,7 +10,7 @@
 ### Root Directory Clutter (89 items)
 1. **Old log files** (14 files) - Need archival
    - `extract_*.log`, `partition_overnight.log`, `crawler_overnight.log`, etc.
-   
+
 2. **Old PID files** (6 files) - Can be deleted
    - `crawler.pid`, `extract.pid`, `partition.pid`, etc.
 

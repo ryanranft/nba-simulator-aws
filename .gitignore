@@ -107,3 +107,19 @@ tier1_progress.json
 
 # Backups (local only)
 backups/
+
+# Security scanning
+.secrets.baseline
+.git-secrets-patterns
+security_audit_report.md
+s3_security_audit_report.md
+
+# Hierarchical secrets (tracked separately)
+~/.cursor/secrets/
+
+# Environment files (comprehensive)
+.env
+.env.*
+!.env.example
+!.env.template
+!.env.sample

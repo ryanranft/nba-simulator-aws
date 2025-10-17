@@ -164,7 +164,7 @@ from pandas import DataFrame, Series
 """
 ETL script for extracting NBA game data from S3 and loading into RDS.
 
-This script processes 146,115 JSON files from S3, extracts ~10% of fields,
+This script processes 70,522 JSON files from S3, extracts ~10% of fields,
 and loads the data into PostgreSQL. See ADR-002 for extraction strategy.
 
 Usage:

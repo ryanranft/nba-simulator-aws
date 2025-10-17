@@ -386,7 +386,7 @@ aws s3 ls s3://nba-sim-raw-data-lake/
 #   PRE schedule/
 #   PRE team_stats/
 
-# Count objects (should be 146,115)
+# Count objects (should be 70,522)
 aws s3 ls s3://nba-sim-raw-data-lake/ --recursive --summarize | grep "Total Objects"
 ```
 
@@ -427,7 +427,7 @@ log_cmd git status
 
 ### AWS Resources
 
-- **S3 Bucket:** `s3://nba-sim-raw-data-lake` (146,115 files, 119 GB)
+- **S3 Bucket:** `s3://nba-sim-raw-data-lake` (70,522 files, 55 GB)
 - **Region:** us-east-1
 - **Account ID:** `<your-aws-account-id>`
 - **IAM User:** iam (AdministratorAccess)
@@ -499,7 +499,7 @@ See `docs/SECURITY_PROTOCOLS.md` for credential rotation schedules and emergency
 ### S3 Bucket
 
 - **Name:** `nba-sim-raw-data-lake`
-- **Purpose:** Raw JSON data storage (146,115 files, 119 GB)
+- **Purpose:** Raw JSON data storage (70,522 files, 55 GB)
 - **Structure:**
   ```
   s3://nba-sim-raw-data-lake/

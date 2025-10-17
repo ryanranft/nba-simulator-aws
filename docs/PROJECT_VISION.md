@@ -212,7 +212,7 @@ Offset: 27ms (within acceptable tolerance)
 **Coverage:** 1993-2025 (27 seasons)
 **Data:** Box scores, play-by-play, schedules, team stats, player stats
 **Precision:** Second-level (game clock), estimated wall clock times
-**Status:** ✅ Collected (146,115 files, 119 GB in S3)
+**Status:** ✅ Collected (70,522 files S3, 147,382 files local, 119 GB total)
 **Collection Date:** October 2025
 **Records:** 46,595 games, 6.78M play-by-play rows, 408K player stats
 
@@ -501,7 +501,7 @@ CREATE TABLE player_id_mapping (
 ## Success Metrics
 
 ### Phase 1: Data Acquisition (October-December 2025)
-- [x] ESPN API complete (146,115 files, 119 GB) ✅
+- [x] ESPN API complete (70,522 files S3, 147,382 files local, 119 GB total) ✅
 - [x] hoopR Phase 1A complete (96 files, 2.5 GB) ✅
 - [ ] hoopR Phase 1B complete (21% done, ~48 hours remaining) 🔄
 - [ ] NBA Stats API Modern Era (2015-2025): 100-150 hours
@@ -561,7 +561,7 @@ CREATE TABLE player_id_mapping (
 ### October 2025 (Foundation Complete)
 - ✅ Week 1: Optimize NBA API scraper for temporal data
 - ✅ Week 1: Document temporal panel data vision
-- ✅ Week 2: ESPN API collection complete (146,115 files, 119 GB)
+- ✅ Week 2: ESPN API collection complete (70,522 files S3, 147,382 files local, 119 GB total)
 - ✅ Week 2: hoopR Phase 1A complete (96 files, 2.5 GB)
 - ✅ Week 2: Create comprehensive data acquisition plan (2,600 lines)
 - 🔄 Week 2: hoopR Phase 1B scraper running (21% complete, ~48 hours remaining)

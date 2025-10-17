@@ -379,7 +379,7 @@ aws s3 ls s3://nba-sim-raw-data-lake/
 **Check object count:**
 ```bash
 aws s3 ls s3://nba-sim-raw-data-lake/ --recursive --summarize | grep "Total Objects"
-# Should show: Total Objects: 146115
+# Should show: Total Objects: 70522
 ```
 
 **If empty:** Data needs to be uploaded (see PROGRESS.md Phase 0)

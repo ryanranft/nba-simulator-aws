@@ -27,11 +27,11 @@ CREATE TABLE IF NOT EXISTS master_players (
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
+
     -- Source tracking
     source_player_ids JSONB, -- {"espn": "123", "nba_stats": "456", "hoopr": "789"}
     data_sources TEXT[] DEFAULT '{}',
-    
+
     -- Constraints
     CONSTRAINT valid_height CHECK (height_inches BETWEEN 60 AND 90),
     CONSTRAINT valid_weight CHECK (weight_lbs BETWEEN 150 AND 350),
@@ -52,11 +52,11 @@ CREATE TABLE IF NOT EXISTS master_teams (
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
+
     -- Source tracking
     source_team_ids JSONB, -- {"espn": "123", "nba_stats": "456", "hoopr": "789"}
     data_sources TEXT[] DEFAULT '{}',
-    
+
     -- Constraints
     CONSTRAINT valid_founded_year CHECK (founded_year BETWEEN 1946 AND 2030)
 );
@@ -85,15 +85,15 @@ CREATE TABLE IF NOT EXISTS master_games (
     is_completed BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
+
     -- Source tracking
     source_game_ids JSONB, -- {"espn": "123", "nba_stats": "456", "hoopr": "789"}
     data_sources TEXT[] DEFAULT '{}',
-    
+
     -- Foreign keys
     CONSTRAINT fk_master_games_home_team FOREIGN KEY (home_team_id) REFERENCES master_teams(team_id),
     CONSTRAINT fk_master_games_away_team FOREIGN KEY (away_team_id) REFERENCES master_teams(team_id),
-    
+
     -- Constraints
     CONSTRAINT valid_scores CHECK (home_score >= 0 AND away_score >= 0),
     CONSTRAINT valid_periods CHECK (periods BETWEEN 1 AND 10),
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS master_player_game_stats (
     game_id VARCHAR(50) NOT NULL,
     player_id VARCHAR(50) NOT NULL,
     team_id VARCHAR(50) NOT NULL,
-    
+
     -- Basic stats
     minutes_played DECIMAL(4,1),
     field_goals_made INTEGER DEFAULT 0,
@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS master_player_game_stats (
     free_throws_made INTEGER DEFAULT 0,
     free_throws_attempted INTEGER DEFAULT 0,
     free_throw_percentage DECIMAL(5,3),
-    
+
     -- Advanced stats
     points INTEGER DEFAULT 0,
     rebounds INTEGER DEFAULT 0,
@@ -127,36 +127,36 @@ CREATE TABLE IF NOT EXISTS master_player_game_stats (
     blocks INTEGER DEFAULT 0,
     turnovers INTEGER DEFAULT 0,
     personal_fouls INTEGER DEFAULT 0,
-    
+
     -- Advanced metrics (calculated)
     true_shooting_percentage DECIMAL(5,3),
     effective_field_goal_percentage DECIMAL(5,3),
     player_efficiency_rating DECIMAL(5,2),
     plus_minus INTEGER,
-    
+
     -- Tracking stats (NBA.com Stats)
     touches INTEGER,
     passes INTEGER,
     speed_mph DECIMAL(4,1),
     distance_miles DECIMAL(5,2),
-    
+
     -- Hustle stats (NBA.com Stats)
     deflections INTEGER,
     loose_balls_recovered INTEGER,
     charges_drawn INTEGER,
     screen_assists INTEGER,
-    
+
     -- Source tracking
     source_stats JSONB, -- Raw stats from each source
     data_sources TEXT[] DEFAULT '{}',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
+
     -- Foreign keys
     CONSTRAINT fk_master_player_stats_game FOREIGN KEY (game_id) REFERENCES master_games(game_id),
     CONSTRAINT fk_master_player_stats_player FOREIGN KEY (player_id) REFERENCES master_players(player_id),
     CONSTRAINT fk_master_player_stats_team FOREIGN KEY (team_id) REFERENCES master_teams(team_id),
-    
+
     -- Constraints
     CONSTRAINT valid_field_goals CHECK (field_goals_made <= field_goals_attempted),
     CONSTRAINT valid_three_pointers CHECK (three_pointers_made <= three_pointers_attempted),
@@ -174,7 +174,7 @@ CREATE TABLE IF NOT EXISTS master_team_game_stats (
     game_id VARCHAR(50) NOT NULL,
     team_id VARCHAR(50) NOT NULL,
     is_home BOOLEAN NOT NULL,
-    
+
     -- Basic team stats
     points INTEGER DEFAULT 0,
     field_goals_made INTEGER DEFAULT 0,
@@ -186,7 +186,7 @@ CREATE TABLE IF NOT EXISTS master_team_game_stats (
     free_throws_made INTEGER DEFAULT 0,
     free_throws_attempted INTEGER DEFAULT 0,
     free_throw_percentage DECIMAL(5,3),
-    
+
     -- Advanced team stats
     rebounds INTEGER DEFAULT 0,
     assists INTEGER DEFAULT 0,
@@ -194,28 +194,28 @@ CREATE TABLE IF NOT EXISTS master_team_game_stats (
     blocks INTEGER DEFAULT 0,
     turnovers INTEGER DEFAULT 0,
     personal_fouls INTEGER DEFAULT 0,
-    
+
     -- Team advanced metrics
     offensive_rating DECIMAL(5,2),
     defensive_rating DECIMAL(5,2),
     pace DECIMAL(5,2),
-    
+
     -- Four Factors
     effective_field_goal_percentage DECIMAL(5,3),
     turnover_percentage DECIMAL(5,3),
     offensive_rebound_percentage DECIMAL(5,3),
     free_throw_rate DECIMAL(5,3),
-    
+
     -- Source tracking
     source_stats JSONB, -- Raw stats from each source
     data_sources TEXT[] DEFAULT '{}',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
+
     -- Foreign keys
     CONSTRAINT fk_master_team_stats_game FOREIGN KEY (game_id) REFERENCES master_games(game_id),
     CONSTRAINT fk_master_team_stats_team FOREIGN KEY (team_id) REFERENCES master_teams(team_id),
-    
+
     -- Constraints
     CONSTRAINT valid_team_field_goals CHECK (field_goals_made <= field_goals_attempted),
     CONSTRAINT valid_team_three_pointers CHECK (three_pointers_made <= three_pointers_attempted),
@@ -232,30 +232,30 @@ CREATE TABLE IF NOT EXISTS master_play_by_play (
     game_clock_seconds DECIMAL(8,2), -- Total seconds from start of game
     home_score INTEGER DEFAULT 0,
     away_score INTEGER DEFAULT 0,
-    
+
     -- Event details
     event_type VARCHAR(50), -- "shot", "rebound", "turnover", etc.
     event_description TEXT,
     player_id VARCHAR(50),
     team_id VARCHAR(50),
-    
+
     -- Shot details (if applicable)
     shot_type VARCHAR(20), -- "2PT", "3PT", "FT"
     shot_made BOOLEAN,
     shot_distance INTEGER, -- feet
     shot_location_x DECIMAL(6,2),
     shot_location_y DECIMAL(6,2),
-    
+
     -- Source tracking
     source_event_ids JSONB, -- {"espn": "123", "nba_stats": "456", "hoopr": "789"}
     data_sources TEXT[] DEFAULT '{}',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
+
     -- Foreign keys
     CONSTRAINT fk_master_pbp_game FOREIGN KEY (game_id) REFERENCES master_games(game_id),
     CONSTRAINT fk_master_pbp_player FOREIGN KEY (player_id) REFERENCES master_players(player_id),
     CONSTRAINT fk_master_pbp_team FOREIGN KEY (team_id) REFERENCES master_teams(team_id),
-    
+
     -- Constraints
     CONSTRAINT valid_quarter CHECK (quarter BETWEEN 1 AND 10),
     CONSTRAINT valid_game_clock CHECK (game_clock_seconds >= 0),
@@ -276,7 +276,7 @@ CREATE TABLE IF NOT EXISTS data_source_mapping (
     source_url TEXT,
     data_quality_score DECIMAL(3,2) DEFAULT 1.0, -- 0.0 to 1.0
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
+
     -- Constraints
     CONSTRAINT valid_quality_score CHECK (data_quality_score BETWEEN 0.0 AND 1.0)
 );
@@ -330,7 +330,7 @@ CREATE INDEX IF NOT EXISTS idx_data_source_record ON data_source_mapping(record_
 
 -- View for player season averages
 CREATE OR REPLACE VIEW player_season_averages AS
-SELECT 
+SELECT
     p.player_id,
     p.player_name,
     p.team_id,
@@ -353,7 +353,7 @@ GROUP BY p.player_id, p.player_name, p.team_id, t.team_name, g.season;
 
 -- View for team season stats
 CREATE OR REPLACE VIEW team_season_stats AS
-SELECT 
+SELECT
     t.team_id,
     t.team_name,
     g.season,
@@ -373,7 +373,7 @@ GROUP BY t.team_id, t.team_name, g.season;
 
 -- View for game summaries
 CREATE OR REPLACE VIEW game_summaries AS
-SELECT 
+SELECT
     g.game_id,
     g.game_date,
     g.season,
@@ -381,7 +381,7 @@ SELECT
     at.team_name as away_team,
     g.home_score,
     g.away_score,
-    CASE 
+    CASE
         WHEN g.home_score > g.away_score THEN ht.team_name
         WHEN g.away_score > g.home_score THEN at.team_name
         ELSE 'Tie'
@@ -394,7 +394,7 @@ FROM master_games g
 JOIN master_teams ht ON g.home_team_id = ht.team_id
 JOIN master_teams at ON g.away_team_id = at.team_id
 LEFT JOIN master_play_by_play pbp ON g.game_id = pbp.game_id
-GROUP BY g.game_id, g.game_date, g.season, ht.team_name, at.team_name, 
+GROUP BY g.game_id, g.game_date, g.season, ht.team_name, at.team_name,
          g.home_score, g.away_score, g.periods, g.is_overtime;
 
 -- ============================================================================
@@ -418,7 +418,7 @@ BEGIN
             RETURN stat_value;
         END IF;
     END LOOP;
-    
+
     RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
@@ -433,7 +433,7 @@ BEGIN
     IF fga + (0.44 * fta) = 0 THEN
         RETURN NULL;
     END IF;
-    
+
     RETURN points / (2 * (fga + 0.44 * fta));
 END;
 $$ LANGUAGE plpgsql;
@@ -461,3 +461,4 @@ COMMENT ON COLUMN master_play_by_play.source_event_ids IS 'JSON object mapping s
 -- Grant permissions to application user (adjust as needed)
 -- GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO nba_app_user;
 -- GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO nba_app_user;
+

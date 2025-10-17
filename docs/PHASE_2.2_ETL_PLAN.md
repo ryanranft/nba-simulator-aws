@@ -29,7 +29,7 @@ From comprehensive data analysis (Session 8):
 | **Box Scores** | 44,828 | ~40,494 | 90% | `bxscr` has 2 teams |
 | **Team Stats** | 44,828 | ~38,103 | 85% | `tmStats` has keys |
 | **Schedule** | 11,633 | ~11,633 | 100% | No filter needed |
-| **TOTAL** | **146,115** | **~121,608** | **83%** | Pre-filter saves 17% compute |
+| **TOTAL** | **70,522** | **~60,000** | **85%** | Pre-filter saves 15% compute |
 
 **Storage Impact:**
 - Total: ~119 GB
@@ -222,7 +222,7 @@ Processes:
 - Play-by-play files: ~31,378 valid files (70% of 44,826)
 - Team stats files: ~38,103 valid files (85% of 44,828)
 
-Total: ~121,608 files to process
+Total: ~58,533 files to process
 """
 
 import sys
@@ -447,7 +447,7 @@ if __name__ == "__main__":
 ### Step 4: Full Production Run (3 hours runtime)
 
 1. **Remove test limits from script**
-2. **Run full ETL job on all 121,608 files**
+2. **Run full ETL job on all 58,533 files**
 3. **Monitor progress via CloudWatch**
 4. **Verify final row counts**
 
@@ -580,7 +580,7 @@ ORDER BY year;
 ## Success Criteria
 
 - ✅ ETL job completes without errors
-- ✅ All 121,608 valid files processed
+- ✅ All 58,533 valid files processed
 - ✅ Row counts match expected values (±5%)
 - ✅ No NULL values in required fields
 - ✅ Foreign key relationships valid

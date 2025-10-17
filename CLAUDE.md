@@ -284,7 +284,7 @@ cd /Users/ryanranft/nba-simulator-aws
 ## Critical Paths
 
 - **Project:** `/Users/ryanranft/nba-simulator-aws`
-- **S3 Bucket:** `s3://nba-sim-raw-data-lake` (146,115 files)
+- **S3 Bucket:** `s3://nba-sim-raw-data-lake` (70,522 files)
 - **Archives:** `~/sports-simulator-archives/nba/`
 
 See `docs/SETUP.md` for complete paths.

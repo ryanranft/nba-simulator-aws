@@ -32,7 +32,7 @@
 
 | Source | Date Range | Status | Games | PBP Events | Files | Size | Location |
 |--------|-----------|--------|-------|-----------|-------|------|----------|
-| ESPN API | 1993-2025 | ✅ COMPLETE | 44,826 | 14,114,618 | 146,115 | 119 GB | S3 + Local + RDS |
+| ESPN API | 1993-2025 | ✅ COMPLETE | 44,826 | 14,114,618 | 70,522 (S3) / 147,382 (local) | 55 GB (S3) / 119 GB (local) | S3 + Local + RDS |
 | hoopR | 2002-2025 | ✅ COMPLETE | 30,758 | 13,074,829 | 410 | 8.2 GB | S3 + Local + RDS |
 | NBA.com API | 1996-2025 | ⏸️ PAUSED | 0 | 0 | 0 | 0 GB | Not started |
 | Basketball Ref | 1950-2025 | ✅ COMPLETE | N/A | N/A | 42 | 156 MB | S3 |
@@ -100,7 +100,7 @@
 | **Total Games** | 44,826 | All regular season + playoffs |
 | **Games with PBP** | 31,241 | 69.7% coverage |
 | **Total PBP Events** | 14,114,618 | In RDS `temporal_events` table |
-| **S3 Files** | 146,115 | JSON format |
+| **S3 Files** | 70,522 | JSON format |
 | **S3 Size** | 119 GB | `s3://nba-sim-raw-data-lake/espn/` |
 | **Local Database** | 1.7 GB | `/tmp/espn_local.db` (SQLite) |
 

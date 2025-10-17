@@ -418,7 +418,7 @@ bash scripts/shell/session_manager.sh start
    - Production-ready 10-week execution plan for all 6 data sources
    - Massive scope: 500+ GB raw data, 700K-900K files, 48-62M records, 500-800 hours scraping
    - **6 data sources detailed:**
-     - SOURCE 1: ESPN API ✅ COMPLETE (146,115 files, 119 GB)
+     - SOURCE 1: ESPN API ✅ COMPLETE (70,522 files S3, 147,382 files local, 119 GB total)
      - SOURCE 2: hoopR 🔄 IN PROGRESS (21% complete, ~48 hrs remaining)
      - SOURCE 3: NBA.com Stats API (430-505 hours planned, 269-289 features)
      - SOURCE 4: Basketball Reference (67-114 hours, 1946-1999 historical)
@@ -967,7 +967,7 @@ bash scripts/shell/session_manager.sh start
 
 **Phase 1: S3 Data Lake**
 - S3 bucket created: `nba-sim-raw-data-lake`
-- 146,115 JSON files uploaded (119 GB)
+- 147,382 JSON files collected (70,522 uploaded to S3, 119 GB total)
 - Cost: $2.74/month
 
 **Phase 2: ETL Pipeline**

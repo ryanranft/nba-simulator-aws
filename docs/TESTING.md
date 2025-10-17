@@ -53,7 +53,7 @@
 
 ### Phase 2: ETL Development (Upcoming)
 
-**When:** Before running full ETL on 146,115 files
+**When:** Before running full ETL on 70,522 files
 
 **Critical tests:**
 1. Field extraction from sample JSON files

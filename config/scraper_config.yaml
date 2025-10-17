@@ -1,0 +1,163 @@
+# NBA Scraper Configuration
+# Centralized configuration for all NBA data scrapers
+
+scrapers:
+  espn:
+    base_url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba"
+    rate_limit:
+      requests_per_second: 1.0
+      burst_size: 10
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 3
+      base_delay: 1.0
+      max_delay: 60.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 30
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 10
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      local_output_dir: "/tmp/scraper_output"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8000
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings: {}
+
+  basketball_reference:
+    base_url: "https://www.basketball-reference.com"
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 5
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      local_output_dir: "/tmp/scraper_output"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8001
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings: {}
+
+  nba_api:
+    base_url: "https://stats.nba.com"
+    rate_limit:
+      requests_per_second: 2.0
+      burst_size: 20
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 3
+      base_delay: 0.5
+      max_delay: 30.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 20
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 15
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      local_output_dir: "/tmp/scraper_output"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8002
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings: {}
+
+  nba_api_reverse:
+    base_url: "https://stats.nba.com"
+    start_year: 2024 # Current season
+    end_year: 1996
+    test_mode: true # Test endpoints before full scrape
+    rate_limit:
+      requests_per_second: 0.67 # 1.5s between requests
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 3
+      base_delay: 1.0
+      max_delay: 60.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 30
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 5
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      local_output_dir: "/tmp/nba_api_reverse"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8003
+      health_check_interval: 60
+      alert_thresholds: {}
+    endpoints:
+      - play_by_play
+      - box_score
+      - player_stats
+      - team_stats
+    custom_settings: {}
+
+# Global settings
+global:
+  aws:
+    region: "us-east-1"
+    access_key_id: null # Set via environment variable
+    secret_access_key: null # Set via environment variable
+  logging:
+    level: "INFO"
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    file: "logs/scraper.log"
+  alerts:
+    slack_webhook: null # Set via environment variable
+    email_alerts: false
+    alert_thresholds:
+      error_rate: 0.05
+      response_time: 30.0
+      consecutive_failures: 5
+  data_quality:
+    validation_enabled: true
+    schema_validation: true
+    completeness_check: true
+    cross_source_validation: true
+  performance:
+    enable_caching: true
+    cache_ttl: 3600
+    enable_compression: true
+    batch_size: 100

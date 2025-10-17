@@ -221,8 +221,8 @@ bash scripts/etl/auto_update_espn_data.sh
 - `team_stats/` - Team statistics by game ID
 - `pbp/` - Play-by-play events (not yet uploaded from local)
 
-**Files:** 146,115 total
-**Size:** 119 GB
+**Files:** 70,522 total (S3) / 147,382 total (local)
+**Size:** 55 GB (S3) / 119 GB (local)
 **Purpose:** Persistent cloud storage, AWS Glue input
 
 ### 4. Local SQLite Database (Fast Queries)

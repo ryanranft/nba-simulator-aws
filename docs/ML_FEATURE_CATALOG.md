@@ -40,7 +40,7 @@ This catalog documents ALL available features across all 5 data sources for maxi
 
 ## ESPN Features (58)
 
-**Source:** Already in S3 (146,115 files)
+**Source:** Already in S3 (70,522 files)
 **Coverage:** 1999-present
 **Quality:** 89.9% complete
 

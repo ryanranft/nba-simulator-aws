@@ -1,0 +1,215 @@
+version: "3.8"
+
+services:
+  # ESPN Async Scraper
+  espn-scraper:
+    build:
+      context: ..
+      dockerfile: docker/scrapers/Dockerfile
+    container_name: nba-espn-scraper
+    command: ["python", "scripts/etl/espn_async_scraper.py"]
+    environment:
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - S3_BUCKET=${S3_BUCKET:-nba-sim-raw-data-lake}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - SCRAPER_MODE=${SCRAPER_MODE:-incremental}
+    volumes:
+      - ../logs:/app/logs
+      - ../data:/app/data
+      - ../config:/app/config:ro
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import requests; requests.get('http://localhost:8080/health', timeout=5)",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - nba-scrapers
+    depends_on:
+      - health-monitor
+
+  # Basketball Reference Async Scraper
+  basketball-reference-scraper:
+    build:
+      context: ..
+      dockerfile: docker/scrapers/Dockerfile
+    container_name: nba-basketball-reference-scraper
+    command: ["python", "scripts/etl/basketball_reference_async_scraper.py"]
+    environment:
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - S3_BUCKET=${S3_BUCKET:-nba-sim-raw-data-lake}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - SCRAPER_MODE=${SCRAPER_MODE:-tier1}
+    volumes:
+      - ../logs:/app/logs
+      - ../data:/app/data
+      - ../config:/app/config:ro
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import requests; requests.get('http://localhost:8080/health', timeout=5)",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - nba-scrapers
+    depends_on:
+      - health-monitor
+
+  # NBA API Async Scraper
+  nba-api-scraper:
+    build:
+      context: ..
+      dockerfile: docker/scrapers/Dockerfile
+    container_name: nba-api-scraper
+    command: ["python", "scripts/etl/nba_api_async_scraper.py"]
+    environment:
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - S3_BUCKET=${S3_BUCKET:-nba-sim-raw-data-lake}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - SCRAPER_MODE=${SCRAPER_MODE:-comprehensive}
+    volumes:
+      - ../logs:/app/logs
+      - ../data:/app/data
+      - ../config:/app/config:ro
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import requests; requests.get('http://localhost:8080/health', timeout=5)",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - nba-scrapers
+    depends_on:
+      - health-monitor
+
+  # ESPN Missing PBP Scraper
+  espn-missing-pbp-scraper:
+    build:
+      context: ..
+      dockerfile: docker/scrapers/Dockerfile
+    container_name: nba-espn-missing-pbp-scraper
+    command: ["python", "scripts/etl/espn_missing_pbp_scraper.py"]
+    environment:
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - S3_BUCKET=${S3_BUCKET:-nba-sim-raw-data-lake}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - SCRAPER_MODE=${SCRAPER_MODE:-missing_pbp}
+    volumes:
+      - ../logs:/app/logs
+      - ../data:/app/data
+      - ../config:/app/config:ro
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import requests; requests.get('http://localhost:8080/health', timeout=5)",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - nba-scrapers
+    depends_on:
+      - health-monitor
+
+  # Health Monitor
+  health-monitor:
+    build:
+      context: ..
+      dockerfile: docker/scrapers/Dockerfile
+    container_name: nba-health-monitor
+    command: ["python", "scripts/monitoring/scraper_health_monitor.py"]
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - MONITORING_INTERVAL=${MONITORING_INTERVAL:-60}
+      - DASHBOARD_PORT=${DASHBOARD_PORT:-8080}
+    ports:
+      - "8080:8080" # Health dashboard
+    volumes:
+      - ../logs:/app/logs
+      - ../config:/app/config:ro
+    restart: unless-stopped
+    networks:
+      - nba-scrapers
+
+  # Alert Manager
+  alert-manager:
+    build:
+      context: ..
+      dockerfile: docker/scrapers/Dockerfile
+    container_name: nba-alert-manager
+    command: ["python", "scripts/monitoring/alert_manager.py"]
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - SES_REGION=${SES_REGION:-us-east-1}
+      - FROM_EMAIL=${FROM_EMAIL:-alerts@nba-simulator.com}
+      - TO_EMAILS=${TO_EMAILS:-admin@nba-simulator.com}
+    volumes:
+      - ../logs:/app/logs
+      - ../config:/app/config:ro
+    restart: unless-stopped
+    networks:
+      - nba-scrapers
+    depends_on:
+      - health-monitor
+
+  # Data Validator Service
+  data-validator:
+    build:
+      context: ..
+      dockerfile: docker/scrapers/Dockerfile
+    container_name: nba-data-validator
+    command:
+      [
+        "python",
+        "-c",
+        "from scripts.etl.data_validators import ValidationManager; import asyncio; asyncio.run(ValidationManager().validate_data({}, 'test', 'test'))",
+      ]
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ../logs:/app/logs
+      - ../data:/app/data
+      - ../config:/app/config:ro
+    restart: "no"
+    networks:
+      - nba-scrapers
+
+networks:
+  nba-scrapers:
+    driver: bridge
+
+volumes:
+  logs:
+    driver: local
+  data:
+    driver: local
+  config:
+    driver: local
+

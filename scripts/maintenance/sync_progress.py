@@ -29,11 +29,7 @@ class ProgressSync:
         """Run shell command and return output"""
         try:
             result = subprocess.run(
-                cmd,
-                shell=True,
-                capture_output=True,
-                text=True,
-                timeout=30
+                cmd, shell=True, capture_output=True, text=True, timeout=30
             )
             return result.stdout.strip(), result.returncode
         except Exception as e:
@@ -45,10 +41,10 @@ class ProgressSync:
         output, code = self.run_command(cmd)
 
         if code == 0 and output:
-            # Count objects
+            # Count objects (checking for S3 count: 70,522 files)
             cmd = "aws s3 ls s3://nba-sim-raw-data-lake/ --recursive --summarize 2>/dev/null | grep 'Total Objects'"
             output, _ = self.run_command(cmd)
-            if "146115" in output or "146,115" in output:
+            if "70522" in output or "70,522" in output:
                 return "complete"
         return "pending"
 
@@ -114,11 +110,7 @@ class ProgressSync:
         # Example: ### ✅ COMPLETED | ⏸️ PENDING | ⏳ IN PROGRESS
         pattern = rf"(### .* {re.escape(phase_name)}.*?)([✅⏸️⏳])"
 
-        status_emoji = {
-            "complete": "✅",
-            "pending": "⏸️",
-            "in_progress": "⏳"
-        }
+        status_emoji = {"complete": "✅", "pending": "⏸️", "in_progress": "⏳"}
 
         new_emoji = status_emoji.get(new_status, "⏸️")
 
@@ -153,7 +145,11 @@ class ProgressSync:
         print(f"Python files: {py_count}")
 
         # Test files
-        test_count = len(list((self.project_root / "tests").rglob("test_*.py"))) if (self.project_root / "tests").exists() else 0
+        test_count = (
+            len(list((self.project_root / "tests").rglob("test_*.py")))
+            if (self.project_root / "tests").exists()
+            else 0
+        )
         print(f"Test files: {test_count}")
 
         print("=" * 60)

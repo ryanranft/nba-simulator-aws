@@ -22,7 +22,7 @@
 
 ## Overview
 
-**Total Dataset:** 146,115 JSON files (119 GB in S3)
+**Total Dataset:** 70,522 JSON files (55 GB in S3)
 
 **Folder Structure:**
 ```
@@ -47,7 +47,7 @@ s3://nba-sim-raw-data-lake/
 | **nba_box_score** | 44,828 | ~40,494 | 90.3% | 9.7% | ~40,494 |
 | **nba_team_stats** | 44,828 | ~38,103 | 85.0% | 15.0% | ~38,103 |
 | **nba_schedule_json** | 11,633 | ~11,633 | 100.0% | 0.0% | ~11,633 |
-| **TOTAL** | **146,115** | **~121,608** | **83.2%** | **16.8%** | **~121,608** |
+| **TOTAL** | **70,522** | **~60,000** | **85.2%** | **14.8%** | **~60,000** |
 
 **Storage Impact:**
 - Total S3 storage: ~119 GB (all files)

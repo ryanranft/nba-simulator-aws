@@ -1,7 +1,7 @@
 # Data Gaps Analysis Report
 
-**Generated:** October 13, 2025  
-**Analysis Period:** 2015-2025 seasons  
+**Generated:** October 13, 2025
+**Analysis Period:** 2015-2025 seasons
 **Data Sources:** ESPN, NBA.com Stats, hoopR, Basketball Reference, Kaggle
 
 ---
@@ -65,8 +65,8 @@
 
 | Source | Files | Storage | Coverage | Status |
 |--------|-------|---------|----------|--------|
-| **ESPN** | 147,380 | ~114GB | 2015-2025 | ✅ Complete |
-| **NBA.com Stats** | 24,419 | ~2.4GB | 2013-2025 | ✅ Complete |
+| **ESPN** | 70,522 (S3) / 147,382 (local) | ~55GB (S3) / ~114GB (local) | 2015-2025 | ✅ Complete |
+| **NBA.com Stats** | 22,256 | ~2.2GB | 2020-2025 | ⚠️ Partial |
 | **hoopR** | 314 | ~5.5GB | 2002-2025 | ✅ Complete |
 | **Basketball Reference** | 444 | ~99MB | 1946-2025 | ✅ Complete |
 | **Kaggle** | Historical | ~2.2GB | 1946-2020 | ✅ Complete |
@@ -119,14 +119,14 @@
 
 ### Phase 1: Critical Data Collection (IMMEDIATE)
 
-**Estimated Time:** 10-15 hours  
+**Estimated Time:** 10-15 hours
 **Cost:** $0 (using existing scrapers)
 
 1. **Collect Missing Play-by-Play Data**
    ```bash
    # For 2022-2025 seasons
    python3 scripts/etl/scrape_espn_missing_pbp.py --seasons 2022,2023,2024
-   
+
    # For 2021-22 gaps
    python3 scripts/etl/scrape_espn_missing_pbp.py --season 2021 --fill-gaps
    ```
@@ -202,5 +202,5 @@
 
 ---
 
-**Analysis completed:** October 13, 2025  
+**Analysis completed:** October 13, 2025
 **Next review:** After critical gaps are filled

@@ -1,0 +1,42 @@
+repos:
+  # Secret Detection
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+        exclude: |
+          (?x)^(
+            \.env\.example|
+            docs/.*\.md$|
+            .*_COMPLETE\.md$|
+            .*_REPORT\.md$|
+            tests/.*|
+            \.secrets\.baseline
+          )$
+
+  # Python Code Quality (existing Bandit integration)
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.6
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml"]
+        additional_dependencies: ["bandit[toml]"]
+
+  # Python formatting with Black
+  - repo: https://github.com/psf/black
+    rev: 25.9.0
+    hooks:
+      - id: black
+        language_version: python3.11
+        exclude: ^(venv/|\.venv/)
+
+  # Custom pre-commit checks (from existing template)
+  - repo: local
+    hooks:
+      - id: file-size-check
+        name: Check file sizes and conventions
+        entry: scripts/pre-commit.template
+        language: script
+        pass_filenames: false
+        always_run: true

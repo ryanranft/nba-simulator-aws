@@ -403,7 +403,7 @@ Based on data availability research:
 ## Cost Implications
 
 **S3 Storage:**
-- Current: 146,115 files (~$2.74/month)
+- Current: 70,522 files (~$2.74/month)
 - After Priority 1: +167,064 files (~$1.50/month increase)
 - After all scraping: +366,486 files (~$3.50/month increase)
 - **Total: ~$6-7/month**

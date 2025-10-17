@@ -423,7 +423,7 @@ psql -h $ENDPOINT -U postgres -d <sport>_simulator -c "\dt"
 ## Sport-Specific Considerations
 
 ### NBA (This Project)
-- **Data Volume:** 146,115 files, 119 GB
+- **Data Volume:** 70,522 files (S3), 119 GB
 - **Seasons:** 1993-2025
 - **Key Stats:** Points, rebounds, assists, steals, blocks, turnovers, shooting percentages
 - **Special Considerations:** 48-minute games (4x 12-min quarters), 3-point line
