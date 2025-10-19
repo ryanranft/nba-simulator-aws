@@ -1,8 +1,8 @@
 # CLAUDE.md
 
-**Version:** 3.1 (Phase Index System)
-**Last Updated:** October 11, 2025
-**System Status:** 8 phases (2 with enhancement plans), 40 workflows, 97+ workflow references
+**Version:** 3.3 (Background Agent Operations)
+**Last Updated:** October 19, 2025
+**System Status:** 8 phases (2 with enhancement plans), 54 workflows, 97+ workflow references
 
 This file provides core guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -25,7 +25,7 @@ This file provides core guidance to Claude Code (claude.ai/code) when working wi
 
 **All detailed workflows:** `docs/claude_workflows/workflow_descriptions/`
 
-**System contains 40 modular workflows** covering session operations, git/security, testing, cost management, backup/recovery, data validation, troubleshooting, AWS resource setup, scraper monitoring, and overnight handoffs.
+**System contains 54 modular workflows** covering session operations, git/security, testing, cost management, backup/recovery, data validation, troubleshooting, AWS resource setup, scraper monitoring, overnight handoffs, and autonomous recommendation implementation.
 
 **Navigation pattern:**
 ```
@@ -64,11 +64,141 @@ PROGRESS.md → PHASE_N_INDEX.md → phase_N/N.M_name.md → workflows → execu
 - PHASE_0_INDEX.md (initial complete, expansion ready - 4 sub-phases)
 - PHASE_1_INDEX.md through PHASE_7_INDEX.md (1-2 sub-phases each)
 
-**Sub-phase naming:** `N.M_name.md` (e.g., `0.0_initial_data_collection.md`, `1.1_multi_source_integration.md`)
+**Sub-phase naming:** `N.M_name.md` OR `N.M_name/` (e.g., `0.0_initial_data_collection.md`, `1.1_multi_source_integration.md`)
 
-**Special structure:** Basketball Reference expansion at `phase_0/0.1_basketball_reference/` (13-tier structure, 234 data types)
+**Power directory structure:** Complex sub-phases use directory format `N.M_name/` with:
+- **README.md** - Main entry point (overview, quick start, usage examples, navigation)
+- **Implementation files** - Core code (`implement_*.py`, etc.)
+- **Test files** - Test suites (`test_*.py`)
+- **Supporting docs** - STATUS.md, RECOMMENDATIONS_FROM_BOOKS.md, etc.
+
+**Examples:**
+- `phase_0/0.1_basketball_reference/` (13-tier structure, 234 data types)
+- `phase_5/5.1_feature_engineering/` (rec_11 - advanced ML features)
+- `phase_5/5.20_panel_data/` (rec_22 - temporal panel data system)
 
 **Benefits:** 64% reduction in PROGRESS.md size, 78% reduction in phase navigation context, 96% context available for work
+
+---
+
+## ML Framework Navigation
+
+**✅ Implemented October 2025** - Phase 5 enhanced with 13 specialized ML frameworks (Block 2, Recommendations #14-25)
+
+**Phase 5 Structure:**
+- **PHASE_5_INDEX.md** - Phase overview with 14 sub-phases (5.0 + 5.1-5.13)
+- **phase_5/5.0_machine_learning_models.md** - Initial ML pipeline
+- **phase_5/5.{1-13}_*/README.md** - 13 ML framework subdirectories with comprehensive guides
+
+**Framework Categories:**
+1. **Optimization & Tuning:** Hyperparameter Optimization (5.1), Learning Curves (5.7), Performance Profiling (5.13)
+2. **Interpretability:** Model Interpretation (5.2), Model Explainability (5.12)
+3. **Data Management:** Feature Store (5.3), Feature Selection (5.5)
+4. **MLOps:** Automated Retraining (5.4), Model Comparison (5.10)
+5. **Model Enhancement:** Ensemble Learning (5.6), Model Calibration (5.8)
+6. **Validation:** Cross-Validation Strategies (5.9), Error Analysis (5.11)
+
+**When to use ML frameworks:**
+- **5.1 (Hyperparameter Optimization)** - Before production deployment, when model plateaus
+- **5.2 (Model Interpretation)** - Debugging predictions, validating features
+- **5.3 (Feature Store)** - Multiple models share features, production deployment
+- **5.4 (Automated Retraining)** - Production models, drift detection needed
+- **5.5 (Feature Selection)** - High-dimensional data (>100 features), overfitting issues
+- **5.6 (Ensemble Learning)** - Multiple strong models available, need stability
+- **5.7 (Learning Curves)** - Diagnosing overfitting/underfitting, planning data collection
+- **5.8 (Model Calibration)** - Need probability estimates, betting applications
+- **5.9 (Cross-Validation)** - **ALWAYS use time series CV for NBA temporal data**
+- **5.10 (Model Comparison)** - Selecting best model, A/B testing, validation
+- **5.11 (Error Analysis)** - Model underperforming, systematic errors detected
+- **5.12 (Model Explainability)** - Stakeholder communication, regulatory compliance
+- **5.13 (Performance Profiling)** - Production deployment, latency/memory optimization
+
+**Navigation pattern:**
+```
+PROGRESS.md → PHASE_5_INDEX.md → phase_5/5.X_name/README.md → Execute framework
+```
+
+**Each framework README includes:**
+- Overview & capabilities
+- When to use / When NOT to use
+- How to use (quick start + advanced examples)
+- Integration with NBA temporal panel data
+- Common patterns for NBA use cases
+- Workflow references
+- Troubleshooting guide
+
+**Total:** ~7,700 lines of production code + ~5,500 lines of documentation
+
+---
+
+## Background Agent Operations
+
+**✅ Implemented October 2025** - Autonomous recommendation implementation system
+
+**Mission:** Implement 218 technical book recommendations to enhance prediction accuracy and system architecture
+
+### Quick Start
+
+**Check current status:**
+```bash
+python scripts/automation/check_recommendation_status.py
+```
+
+**Implement single recommendation:**
+```bash
+bash scripts/automation/implement_recommendation.sh rec_001
+```
+
+**Implement batch (overnight mode):**
+```bash
+bash scripts/automation/batch_implement_recommendations.sh --count 15
+```
+
+**Implement by tier:**
+```bash
+bash scripts/automation/implement_tier_1.sh  # 23 recs, 0 dependencies
+bash scripts/automation/implement_tier_2.sh  # Medium dependencies
+bash scripts/automation/implement_tier_3.sh  # High dependencies
+```
+
+### Implementation Strategy
+
+**Recommended: Option B (Parallel)**
+- Implement Tier 1 recommendations in parallel (0 dependencies)
+- Merge and test together before moving to Tier 2
+- Expected completion: 2-3 weeks (8 hours/day)
+
+### Safety Protocols
+
+1. **Always follow dependency order** - Check PRIORITY_ACTION_LIST.md
+2. **Always run tests** - 100% pass rate required before marking complete
+3. **Always commit individually** - One recommendation = one commit
+4. **Always update STATUS.md** - Mark completion timestamp
+5. **Never skip validation** - Follow IMPLEMENTATION_GUIDE.md steps
+
+### Escalation Criteria
+
+**Stop and alert user if:**
+- Tests fail after 3 debugging attempts
+- Implementation requires architecture changes
+- Dependencies are incorrect (circular or missing)
+- Resource constraints hit (disk, memory, API limits)
+- Security concerns detected
+
+### Progress Tracking
+
+**View progress:**
+```bash
+cat BOOK_RECOMMENDATIONS_PROGRESS.md
+```
+
+**Expected velocity:**
+- Week 1: 30-40 recommendations (all Tier 1)
+- Week 2: 70-90 total (remaining Tier 2)
+- Week 3: 150-180 total (most Tier 3)
+- Week 4: 218 complete ✅
+
+**See Workflow #54 for complete autonomous implementation protocol:** `docs/claude_workflows/workflow_descriptions/54_autonomous_recommendation_implementation.md`
 
 ---
 

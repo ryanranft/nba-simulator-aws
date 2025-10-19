@@ -102,6 +102,7 @@ All detailed workflow descriptions are located in: `/docs/claude_workflows/workf
 ### Async Infrastructure Deployment (Production Ready)
 
 53. **Async Scraper Deployment** → `53_async_scraper_deployment.md` (deploy new infrastructure)
+54. **Autonomous Recommendation Implementation** → `54_autonomous_recommendation_implementation.md` (implement 218 book recommendations overnight)
 36. **Pre-Push Repository Cleanup** → `36_pre_push_repo_cleanup.md` (before pushing to GitHub)
 
 ### AWS Operations & Troubleshooting
@@ -207,6 +208,7 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
 - **Consolidate/move documentation files?** → `43` (prevent broken links)
 - **Validate file references after moves?** → `44` (automatic reference path validation)
 - **Inventory local data?** → `45` (comprehensive data inventory system - local disk, project data, archives)
+- **Implement book recommendations?** → `54` (autonomous implementation of 218 recommendations)
 - **Analyze data gaps?** → `46` (identify and remediate missing data - local/S3/DB comparison)
 - **Inventory AWS data?** → `47` (AWS services inventory - S3, RDS, Glue, Athena, costs)
 - **🚀 Integrated data pipeline?** → `48` (unified workflow: inventory → gaps → plan → collect → validate)
