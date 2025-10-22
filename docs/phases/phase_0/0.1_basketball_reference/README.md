@@ -214,5 +214,21 @@ s3://nba-sim-raw-data-lake/basketball_reference/
 ---
 
 **Tier Index Owner:** Data Collection Team
-**Last Updated:** October 11, 2025
+**Last Updated:** October 21, 2025 (Added documentation/ subdirectory)
 **Next Review:** When first tier file is created
+
+---
+
+## Additional Documentation
+
+**Location:** [documentation/](documentation/)
+
+Comprehensive technical documentation for Basketball Reference systems:
+
+1. **[BOX_SCORE_SYSTEM.md](documentation/BOX_SCORE_SYSTEM.md)** - Box score data structure and extraction
+2. **[COMPARISON.md](documentation/COMPARISON.md)** - Comparison with other data sources (ESPN, NBA API)
+3. **[PBP_DISCOVERY.md](documentation/PBP_DISCOVERY.md)** - Play-by-play data discovery process
+4. **[PBP_SYSTEM.md](documentation/PBP_SYSTEM.md)** - Play-by-play extraction system
+5. **[SCRAPING_NOTES.md](documentation/SCRAPING_NOTES.md)** - Technical scraping notes and best practices
+6. **[TEST_PLAN.md](documentation/TEST_PLAN.md)** - Testing strategy and validation
+7. **[OVERNIGHT_WORKFLOW_INTEGRATION.md](documentation/OVERNIGHT_WORKFLOW_INTEGRATION.md)** - Autonomous scraping workflows

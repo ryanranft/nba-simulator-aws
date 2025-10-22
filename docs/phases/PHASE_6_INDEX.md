@@ -36,6 +36,8 @@ Quality-of-life improvements and optional system enhancements. This phase adds n
 | Sub-Phase | Name | Status | Time | File |
 |-----------|------|--------|------|------|
 | **6.0** | System Enhancements | ✅ COMPLETE | 6-8h | [6.0_optional_enhancements.md](phase_6/6.0_optional_enhancements.md) |
+| **6.1** | Performance Monitoring & Dashboards | ✅ COMPLETE | ~4h | [6.1_performance_monitoring/](phase_6/6.1_performance_monitoring/) |
+| **6.2** | Business Metrics & User Feedback | ✅ COMPLETE | ~3h | [6.2_business_metrics/](phase_6/6.2_business_metrics/) |
 
 ---
 
@@ -219,10 +221,10 @@ This phase is **100% sport-agnostic** - all enhancements are reusable:
 
 ---
 
-**Last Updated:** October 11, 2025
+**Last Updated:** October 18, 2025
 **Phase Owner:** DevOps Team
-**Total Sub-Phases:** 1
-**Status:** 100% complete (1 of 1 sub-phases done)
+**Total Sub-Phases:** 3
+**Status:** 100% complete (3 of 3 sub-phases done)
 
 
 ## Enhancement: Add automated performance benchmarking
