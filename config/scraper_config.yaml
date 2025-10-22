@@ -482,6 +482,171 @@ scrapers:
       default_games_per_year: 10  # Default number of sample games to test per year
       report_output_dir: "reports"  # Directory for JSON reports
 
+  nba_api_game_advanced:
+    base_url: "https://stats.nba.com"
+    rate_limit:
+      requests_per_second: 0.67  # 1.5s between requests (current scraper behavior)
+      burst_size: 3
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5  # More retries for game-level data
+      base_delay: 1.5
+      max_delay: 90.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 30
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    max_concurrent: 1  # Sequential requests for nba_api library
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "nba_api/game_advanced"
+      local_output_dir: "/tmp/nba_api_game_advanced"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8013
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings:
+      use_mlflow: true
+      mlflow_experiment: "nba_api_game_advanced_scraper"
+      endpoints:
+        - rotation
+      default_start_season: "2020-21"
+      default_end_season: "2024-25"
+
+  nba_api_player_dashboards:
+    base_url: "https://stats.nba.com"
+    rate_limit:
+      requests_per_second: 0.67  # 1.5s between requests (current scraper behavior)
+      burst_size: 3
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5  # More retries for player data
+      base_delay: 1.5
+      max_delay: 90.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 30
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    max_concurrent: 1  # Sequential requests for nba_api library
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "nba_api/player_dashboards"
+      local_output_dir: "/tmp/nba_api_player_dashboards"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8014
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings:
+      use_mlflow: true
+      mlflow_experiment: "nba_api_player_dashboards_scraper"
+      endpoints:
+        - clutch
+        - general_splits
+        - shooting_splits
+        - last_n_games
+        - team_performance
+        - year_over_year
+      default_start_season: "2020-21"
+      default_end_season: "2024-25"
+
+  nba_api_player_tracking:
+    base_url: "https://stats.nba.com"
+    rate_limit:
+      requests_per_second: 0.67  # 1.5s between requests (current scraper behavior)
+      burst_size: 3
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5  # More retries for SportVU tracking data
+      base_delay: 1.5
+      max_delay: 90.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 30
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    max_concurrent: 1  # Sequential requests for nba_api library
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "nba_api/player_tracking"
+      local_output_dir: "/tmp/nba_api_player_tracking"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8015
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings:
+      use_mlflow: true
+      mlflow_experiment: "nba_api_player_tracking_scraper"
+      endpoints:
+        - pt_pass
+        - pt_reb
+        - pt_shot_defend
+        - pt_shots
+      default_start_season: "2014-15"  # SportVU era starts here
+      default_end_season: "2024-25"
+
+  nba_api_team_dashboards:
+    base_url: "https://stats.nba.com"
+    rate_limit:
+      requests_per_second: 0.67  # 1.5s between requests (current scraper behavior)
+      burst_size: 3
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5  # More retries for team dashboard data
+      base_delay: 1.5
+      max_delay: 90.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 30
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    max_concurrent: 1  # Sequential requests for nba_api library
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "nba_api/team_dashboards"
+      local_output_dir: "/tmp/nba_api_team_dashboards"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8016
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings:
+      use_mlflow: true
+      mlflow_experiment: "nba_api_team_dashboards_scraper"
+      endpoints:
+        - general_splits
+        - shooting_splits
+        - lineups
+        - pt_pass
+        - pt_reb
+        - pt_shots
+      default_start_season: "2020-21"
+      default_end_season: "2024-25"
+
 # Global settings
 global:
   aws:

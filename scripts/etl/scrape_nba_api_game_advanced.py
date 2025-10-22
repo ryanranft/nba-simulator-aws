@@ -13,11 +13,13 @@ Panel Data Output Format:
 - Multi-indexed by (game_id, event_timestamp)
 - Includes game context (rotation, win probability, similarity)
 - Ready for temporal queries and panel analysis
+
+Version: 2.0 (Migrated to AsyncBaseScraper framework)
+Migration Date: October 22, 2025
 """
 
-import requests
+import asyncio
 import json
-import time
 import logging
 from pathlib import Path
 from datetime import datetime
@@ -27,9 +29,17 @@ from nba_api.stats.endpoints import (
     LeagueGameFinder,
 )
 
+# AsyncBaseScraper imports
+import sys
+
+sys.path.append(str(Path(__file__).parent.parent.parent))
+from scripts.etl.async_scraper_base import AsyncBaseScraper
+from scripts.etl.scraper_config import ScraperConfigManager
+
 try:
     import mlflow
     import mlflow.tracking
+
     MLFLOW_AVAILABLE = True
 except ImportError:
     MLFLOW_AVAILABLE = False
@@ -43,20 +53,34 @@ if not MLFLOW_AVAILABLE:
     logger.warning("MLflow not available - tracking disabled")
 
 
-class NBAAPIGameAdvancedScraper:
-    def __init__(self, output_dir="/tmp/nba_api_game_advanced", use_mlflow=True):
-        self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(parents=True, exist_ok=True)
+class NBAAPIGameAdvancedScraper(AsyncBaseScraper):
+    def __init__(
+        self,
+        config=None,
+        output_dir=None,
+        use_mlflow=None,
+        scraper_name="nba_api_game_advanced",
+    ):
+        # Load configuration from scraper_config.yaml if not provided
+        if config is None:
+            config_path = (
+                Path(__file__).parent.parent.parent / "config" / "scraper_config.yaml"
+            )
+            config_manager = ScraperConfigManager(str(config_path))
+            config = config_manager.get_scraper_config(scraper_name)
 
-        self.session = requests.Session()
-        self.session.headers.update(
-            {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                "Accept": "application/json, text/plain, */*",
-                "x-nba-stats-origin": "stats",
-                "x-nba-stats-token": "true",
-            }
-        )
+        # Store config before calling super().__init__
+        self._raw_config = config
+
+        # Initialize parent AsyncBaseScraper
+        super().__init__(config)
+
+        # Override output_dir if provided
+        if output_dir:
+            self.output_dir = Path(output_dir)
+        else:
+            self.output_dir = Path(self._raw_config.storage.local_output_dir)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
 
         self.game_endpoints = [
             ("rotation", GameRotation),
@@ -65,9 +89,19 @@ class NBAAPIGameAdvancedScraper:
         ]
 
         # MLflow tracking setup (ml_systems_1)
-        self.use_mlflow = use_mlflow and MLFLOW_AVAILABLE
+        if use_mlflow is not None:
+            self.use_mlflow = use_mlflow and MLFLOW_AVAILABLE
+        else:
+            self.use_mlflow = (
+                self._raw_config.custom_settings.get("use_mlflow", True)
+                and MLFLOW_AVAILABLE
+            )
+
         if self.use_mlflow:
-            mlflow.set_experiment("nba_api_game_advanced_scraper")
+            experiment_name = self._raw_config.custom_settings.get(
+                "mlflow_experiment", "nba_api_game_advanced_scraper"
+            )
+            mlflow.set_experiment(experiment_name)
             logger.info("✅ MLflow tracking enabled")
 
         # Data quality metrics (ml_systems_2)
@@ -80,22 +114,34 @@ class NBAAPIGameAdvancedScraper:
             "empty_responses": 0,
         }
 
-        logger.info("NBA API Game Advanced Scraper initialized")
+        logger.info(
+            "NBA API Game Advanced Scraper initialized (AsyncBaseScraper framework)"
+        )
 
-    def get_games_for_season(self, season="2023-24"):
-        """Get all games for a season"""
+    async def scrape(self):
+        """Required by AsyncBaseScraper - delegates to run()"""
+        # This method is required by the base class but we use run() for this scraper
+        pass
+
+    async def get_games_for_season(self, season="2023-24"):
+        """Get all games for a season (async wrapper for nba_api)"""
         try:
-            game_finder = LeagueGameFinder(
-                season_nullable=season, league_id_nullable="00"
-            )
-            games_df = game_finder.get_data_frames()[0]
-            return games_df["GAME_ID"].tolist()
+            # Wrap synchronous nba_api call in asyncio.to_thread
+            def _get_games_sync():
+                game_finder = LeagueGameFinder(
+                    season_nullable=season, league_id_nullable="00"
+                )
+                games_df = game_finder.get_data_frames()[0]
+                return games_df["GAME_ID"].tolist()
+
+            games = await asyncio.to_thread(_get_games_sync)
+            return games
         except Exception as e:
             logger.error(f"Error getting games for {season}: {e}")
             return []
 
-    def scrape_game_advanced(self, game_id, season="2023-24"):
-        """Scrape all advanced endpoints for a game with panel data structure"""
+    async def scrape_game_advanced(self, game_id, season="2023-24"):
+        """Scrape all advanced endpoints for a game with panel data structure (async)"""
         game_data = {}
 
         for endpoint_name, endpoint_class in self.game_endpoints:
@@ -103,23 +149,30 @@ class NBAAPIGameAdvancedScraper:
                 logger.info(f"Scraping {endpoint_name} for game {game_id}")
                 self.metrics["api_calls"] += 1
 
-                endpoint = endpoint_class(game_id=game_id)
+                # Rate limiting via AsyncBaseScraper
+                await self.rate_limiter.acquire()
+
+                # Wrap synchronous nba_api call in asyncio.to_thread
+                def _scrape_endpoint_sync():
+                    endpoint = endpoint_class(game_id=game_id)
+                    return endpoint.get_data_frames()
 
                 # Handle potential JSON parsing errors (common for some game endpoints)
                 try:
-                    data_frames = endpoint.get_data_frames()
+                    data_frames = await asyncio.to_thread(_scrape_endpoint_sync)
                 except Exception as api_err:
                     # Check if it's a JSON-related error (common when no data available)
                     error_msg = str(api_err).lower()
-                    if 'json' in error_msg or 'expecting value' in error_msg:
+                    if "json" in error_msg or "expecting value" in error_msg:
                         logger.warning(
                             f"⚠️ {endpoint_name}: Invalid JSON response for game {game_id} - "
                             f"likely no data available. Treating as empty response."
                         )
                         game_data[endpoint_name] = []
-                        self.metrics["api_successes"] += 1  # API responded, just with no data
+                        self.metrics[
+                            "api_successes"
+                        ] += 1  # API responded, just with no data
                         self.metrics["empty_responses"] += 1
-                        time.sleep(1.5)
                         continue
                     else:
                         # Re-raise if not a JSON error
@@ -146,8 +199,6 @@ class NBAAPIGameAdvancedScraper:
                     game_data[endpoint_name] = []
                     self.metrics["empty_responses"] += 1
 
-                time.sleep(1.5)  # Rate limiting
-
             except Exception as e:
                 logger.error(
                     f"❌ Error scraping {endpoint_name} for game {game_id}: {e}"
@@ -158,8 +209,18 @@ class NBAAPIGameAdvancedScraper:
         self.metrics["games_processed"] += 1
         return game_data
 
-    def run(self, start_season="2020-21", end_season="2024-25"):
-        """Run the scraper for multiple seasons with MLflow tracking"""
+    async def run(self, start_season=None, end_season=None):
+        """Run the scraper for multiple seasons with MLflow tracking (async)"""
+        # Use config defaults if not provided
+        if start_season is None:
+            start_season = self._raw_config.custom_settings.get(
+                "default_start_season", "2020-21"
+            )
+        if end_season is None:
+            end_season = self._raw_config.custom_settings.get(
+                "default_end_season", "2024-25"
+            )
+
         start_time = datetime.now()
 
         # Start MLflow run (ml_systems_1)
@@ -180,39 +241,44 @@ class NBAAPIGameAdvancedScraper:
                 season_dir = self.output_dir / season
                 season_dir.mkdir(exist_ok=True)
 
-                games = self.get_games_for_season(season)
+                games = await self.get_games_for_season(season)
                 logger.info(f"Found {len(games)} games for {season}")
 
                 for i, game_id in enumerate(games):
                     logger.info(f"Processing game {i+1}/{len(games)}: {game_id}")
 
-                    game_data = self.scrape_game_advanced(game_id, season)
+                    game_data = await self.scrape_game_advanced(game_id, season)
 
-                    # Save game data with panel structure
+                    # Prepare game data with panel structure
+                    full_game_data = {
+                        "game_id": game_id,
+                        "season": season,
+                        "scraped_at": datetime.now().isoformat(),
+                        "data": game_data,
+                        # Panel data metadata (rec_22)
+                        "panel_structure": {
+                            "multi_index": ["game_id", "event_timestamp"],
+                            "temporal_features_ready": True,
+                        },
+                        # Feature engineering metadata (rec_11)
+                        "features": {
+                            "generated": False,
+                            "version": "1.0",
+                        },
+                    }
+
+                    # Save game data locally
                     game_file = season_dir / f"game_{game_id}.json"
                     with open(game_file, "w") as f:
-                        json.dump(
-                            {
-                                "game_id": game_id,
-                                "season": season,
-                                "scraped_at": datetime.now().isoformat(),
-                                "data": game_data,
-                                # Panel data metadata (rec_22)
-                                "panel_structure": {
-                                    "multi_index": ["game_id", "event_timestamp"],
-                                    "temporal_features_ready": True,
-                                },
-                                # Feature engineering metadata (rec_11)
-                                "features": {
-                                    "generated": False,
-                                    "version": "1.0",
-                                },
-                            },
-                            f,
-                            indent=2,
-                        )
+                        json.dump(full_game_data, f, indent=2)
 
                     logger.info(f"Saved game {game_id} data to {game_file}")
+
+                    # Optional: Upload to S3 via AsyncBaseScraper
+                    if self._raw_config.storage.upload_to_s3:
+                        s3_key = f"{season}/game_{game_id}.json"
+                        await self.store_data(full_game_data, s3_key)
+                        logger.info(f"Uploaded game {game_id} to S3: {s3_key}")
 
                     # Progress checkpoint
                     if (i + 1) % 100 == 0:
@@ -254,6 +320,11 @@ class NBAAPIGameAdvancedScraper:
             raise
 
 
-if __name__ == "__main__":
+async def main():
+    """Main entry point for the scraper"""
     scraper = NBAAPIGameAdvancedScraper()
-    scraper.run()
+    await scraper.run()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
