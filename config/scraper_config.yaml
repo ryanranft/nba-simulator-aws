@@ -647,6 +647,115 @@ scrapers:
       default_start_season: "2020-21"
       default_end_season: "2024-25"
 
+  hoopr_incremental_simple:
+    base_url: "https://raw.githubusercontent.com/sportsdataverse/hoopR-data"
+    rate_limit:
+      requests_per_second: 0.5  # 2s between requests (matches original RATE_LIMIT_SECONDS)
+      burst_size: 3
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 3
+      base_delay: 2.0
+      max_delay: 60.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 2  # Conservative for incremental updates
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "hoopr_incremental"
+      local_output_dir: "/tmp/hoopr_incremental_simple"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8017
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings:
+      default_days_back: 3  # For overnight 3-source cross-validation
+      data_types:
+        - play_by_play
+        - schedule
+
+  hoopr_complete_endpoints:
+    base_url: "https://raw.githubusercontent.com/sportsdataverse/hoopR-data"
+    rate_limit:
+      requests_per_second: 1.67  # 0.6s between requests (matches original)
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 3
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 120  # Longer timeout for comprehensive endpoints
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 3
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "hoopr_complete"
+      local_output_dir: "/tmp/hoopr_complete"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8018
+      health_check_interval: 120
+      alert_thresholds: {}
+    custom_settings:
+      include_game_detail: false  # Control per-game endpoint scraping
+      endpoint_categories:
+        - bulk_loaders
+        - league_dashboards
+        - static_endpoints
+
+  hoopr_missing_games:
+    base_url: "https://raw.githubusercontent.com/sportsdataverse/hoopR-data"
+    rate_limit:
+      requests_per_second: 1.67  # 0.6s between requests (matches DELAY_BETWEEN_GAMES)
+      burst_size: 3
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5  # More retries for gap filling
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 60
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 2  # Conservative for gap filling
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "hoopr/missing_games"
+      local_output_dir: "/tmp/hoopr_missing_games"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8019
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings:
+      gap_list_path: "/tmp/missing_from_hoopr.csv"
+      database_path: "/tmp/hoopr_local.db"
+      load_to_database: true
+      sync_to_rds: false
+
 # Global settings
 global:
   aws:
