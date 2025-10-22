@@ -1,1066 +1,628 @@
-# NBA Temporal Panel Data System - Progress Index
-
-**System Version:** 3.0 (Phase Index System)
-**Date Started:** September 29, 2025
-**Current Phase:** Core Project Complete - Production Ready
-**Last Updated:** October 19, 2025
-**Project Status:** ✅ COMPLETE (Core phases) / 🔄 IN PROGRESS (Data expansion)
-
-> 💡 **For Claude Code Users:** See `CLAUDE.md` for detailed instructions on how to navigate this file, read phase files efficiently, and execute workflows. Start every session by reading CLAUDE.md first.
-
----
-
-## Quick Start for New Sessions
-
-**If you're Claude Code starting a new session:**
-1. Read `CLAUDE.md` completely (understand navigation patterns)
-2. Read this file (PROGRESS.md) to identify current phase
-3. Check "Current Session Context" section below
-4. Read the specific PHASE_N_INDEX.md file for the current task
-5. Read the specific sub-phase file (e.g., phase_N/N.M_name.md)
-6. Follow workflow references in the sub-phase file
-
-**If you're a human developer:**
-- Check "Current Session Context" section below for what's in progress
-- See phase index files in `docs/phases/PHASE_N_INDEX.md` for phase overview
-- See sub-phase files in `docs/phases/phase_N/` for detailed implementation
-- All workflows are in `docs/claude_workflows/workflow_descriptions/`
-
----
-
-## Current Session Context
-
-**Current Session:** October 19, 2025 - Plus/Minus System + 214 Book Recommendations COMPLETE ✅
-
-### 🎊 214 BOOK RECOMMENDATIONS COMPLETED (October 19, 2025, 04:30-04:42 AM CDT)
-
-**Status:** **100% COMPLETE** - All 214 technical book recommendations implemented autonomously ✅
-
-**Autonomous Deployment:**
-- **Duration:** 12 minutes (04:30 AM - 04:42 AM CDT)
-- **Recommendations:** 214/214 (100%)
-- **Test Pass Rate:** 1,284/1,284 (100%)
-- **Git Commits:** 212 individual commits
-- **Failures:** 0 (perfect success rate)
-
-**What Was Implemented:**
-- 4 Data Collection enhancements (Phase 0)
-- 7 Data Integration improvements (Phase 1)
-- 2 Feature Engineering frameworks (Phase 2)
-- 4 Model Training methodologies (Phase 3)
-- 1 Model Evaluation system (Phase 4)
-- 187 ML/AI capabilities (Phase 5 - largest phase)
-- 2 Deployment frameworks (Phase 6)
-- 1 Betting integration (Phase 7)
-- 6 Monitoring systems (Phase 8)
-
-**Key Capabilities Added:**
-- Enterprise MLOps (CI/CD, containerization, model versioning)
-- Advanced ML (BERT, LoRA, QLoRA, GANs, attention mechanisms)
-- Cross-validation frameworks (k-fold, time-series CV)
-- Hyperparameter optimization (distributed, automated)
-- Model interpretation & explainability
-- Vector search & RAG pipelines
-- AWS SageMaker integration
-- Comprehensive monitoring & drift detection
-
-**Files Created:** 1,284 files (214 × 6 files each)
-**Lines of Code:** ~150,000+ lines
-**Documentation:** Auto-generated for all implementations
-
-**Time Savings:** 99.996% (12 minutes vs 4,967 hours estimated manual implementation)
-
-**See:** `BOOK_RECOMMENDATIONS_PROGRESS.md` for complete details
-
----
-
-### 🎉 PLUS/MINUS SYSTEM DEPLOYED & VALIDATED ON RDS POSTGRESQL (October 19, 2025)
-
-**Status:** Phase 9 Enhancement - Plus/Minus System **PRODUCTION-READY (100% Complete)** ✅
-
-**Implementation:**
-- **Total Code:** 4,566 lines (SQL + Python + Docs)
-- **3 Database Tables:** (1,260 lines SQL) - OPTIMIZED ✅
-  - ✅ lineup_snapshots (347 lines) - 5-player tracking, removed AUTOINCREMENT (+5-10% faster)
-  - ✅ player_plus_minus_snapshots (462 lines) - On/off status, stint tracking, optimized
-  - ✅ possession_metadata (451 lines) - Possession boundaries, optimized
-- **2 SQL Views:** (633 lines) - OPTIMIZED 100x FASTER ✅
-  - ✅ vw_lineup_plus_minus (430 lines) - **100x faster** (CTE-based JOINs, correct NULL handling)
-  - ✅ vw_on_off_analysis (288 lines) - **Fixed data loss**, includes full-game players
-- **1 Python Calculator:** (477 lines)
-  - ✅ plus_minus_calculator.py - 11 core methods for analysis
-  - ✅ Lineup analysis (hash, stats, top lineups)
-  - ✅ Individual analysis (player +/-, on/off differential, stints)
-  - ✅ Possession intervals (10, 25, 50, 100 possession partitions)
-  - ✅ Integration with existing interval system
-- **2 Population Scripts:** (1,196 lines) - NEW ✅
-  - ✅ populate_plus_minus_tables.py (836 lines) - Production-ready data pipeline
-  - ✅ demo_plus_minus_population.py (360 lines) - Testing & validation suite
-- **2 Documentation Files:** (1,000+ lines) - NEW ✅
-  - ✅ docs/phases/phase_9/9.0_plus_minus/IMPLEMENTATION_SUMMARY.md - Complete implementation guide
-  - ✅ docs/phases/phase_9/9.0_plus_minus/OPTIMIZATION_SUMMARY.md - Performance review & recommendations
-
-**Key Capabilities Unlocked:**
-- 100+ ML features for modeling
-- Possession-based partitions (pace-invariant analysis)
-- Lineup optimization (best 5-player combinations)
-- Player impact assessment (replacement value)
-- Stint fatigue modeling
-- On/off differential analysis
-- Integration with existing box score intervals
-
-**Possession-Based Partitions (As Requested):**
-- 10 possessions (~2-3 min) - Momentum detection
-- 25 possessions (~5-7 min) - Quarter-segment analysis
-- 50 possessions (~10-14 min) - Half-quarter analysis
-- 100 possessions (~full game) - Game-level predictions
-
-**ML Applications Enabled:**
-1. Lineup optimization - Find best 5-player combinations
-2. Player impact prediction - On/off differential modeling
-3. Momentum detection - Rolling possession +/-
-4. Substitution recommendations - Stint fatigue + lineup performance
-5. Trade analysis - Replacement value comparison
-6. Contract valuation - Impact-based player value
-7. Injury/load management - Performance degradation prediction
-8. Draft evaluation - Rookie +/- projection
-
-**Optimizations Completed:**
-- ✅ **100x view performance improvement** (2-5 min → 2-5 sec for 1,000 games)
-- ✅ **Fixed ML training data** (correct NULL handling for biographical averages)
-- ✅ **No data loss** (includes players who played full game)
-- ✅ **5-10% faster inserts** (removed AUTOINCREMENT overhead)
-
-**RDS POSTGRESQL DEPLOYMENT (October 19, 2025):** ✅ **COMPLETE**
-- ✅ **All PostgreSQL compatibility issues resolved** (6 fixes)
-  - BIGSERIAL primary keys (auto-increment)
-  - BOOLEAN TRUE/FALSE (not 0/1)
-  - CREATE OR REPLACE VIEW syntax
-  - Transaction rollback handling
-  - Table reference corrections
-- ✅ **Phase 9 source tables created** (game_state_snapshots, player_snapshot_stats)
-- ✅ **Test data populated** (1 game, 2,779 rows)
-- ✅ **Core tables working** (lineup_snapshots: 400, player_plus_minus: 2,159, possessions: 20)
-- ✅ **Simplified views created** (without biographical dependencies)
-- ✅ **Sample queries validated** (< 1 second query time)
-- ✅ **8 ML use cases confirmed** working
-
-**RDS Test Results:**
-```
-Database: nba_simulator @ nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com
-Test Game: 0021500001 (200 snapshots)
-  - lineup_snapshots: 400 rows ✅
-  - player_plus_minus_snapshots: 2,159 rows ✅
-  - possession_metadata: 20 rows ✅
-
-Query Performance:
-  - Best lineups by net rating: < 1 second ✅
-  - Player on/off differential: < 1 second ✅
-```
-
-**Files Created (RDS Deployment):**
-- sql/plus_minus/vw_lineup_plus_minus_working.sql (PostgreSQL-compatible view)
-- sql/plus_minus/vw_on_off_analysis_working.sql (PostgreSQL-compatible view)
-- scripts/pbp_to_boxscore/populate_test_snapshots.py (test data generator)
-- scripts/pbp_to_boxscore/test_plus_minus_minimal.py (RDS validation test)
-- docs/PLUS_MINUS_RDS_DEPLOYMENT_SUCCESS.md (complete deployment summary)
-
-**Previous Files:**
-- sql/plus_minus/ (5 SQL files - all updated for PostgreSQL)
-- scripts/pbp_to_boxscore/plus_minus_calculator.py (477 lines)
-- scripts/pbp_to_boxscore/populate_plus_minus_tables.py (836 lines, PostgreSQL-compatible)
-- scripts/pbp_to_boxscore/demo_plus_minus_population.py (360 lines)
-- docs/PLUS_MINUS_IMPLEMENTATION_SUMMARY.md (509 lines)
-- docs/PLUS_MINUS_OPTIMIZATION_SUMMARY.md (490 lines)
-
-**Performance Metrics:**
-- Query time: 100x faster (2-5 sec vs 2-5 min) ✅ VALIDATED ON RDS
-- Insert speed: +5-10% faster ✅
-- Accuracy: ML training data now correct ✅
-- Coverage: 100% (no player data loss) ✅
-
-**ML INTEGRATION (October 19, 2025):** ✅ **COMPLETE**
-- ✅ **PlusMinusFeatureExtractor created** (600+ lines)
-- ✅ **26 ML features extracted** from RDS PostgreSQL
-- ✅ **4 feature categories** (lineup, player, possession, stint)
-- ✅ **< 1 second extraction time** per game
-- ✅ **Tested and validated** with real RDS data
-- ✅ **Ready for ML pipeline integration**
-
-**REC_11 PLUS/MINUS INTEGRATION (October 19, 2025):** ✅ **COMPLETE**
-- ✅ **Enhanced rec_11 pipeline created** (600+ lines)
-- ✅ **171 total features** (110 temporal + 21 cumulative + 26 plus/minus + 14 base)
-- ✅ **161 new features added** (from 10 base features)
-- ✅ **100% extraction success** (30/30 games in test)
-- ✅ **20.94 seconds total execution** (~0.70s per game for plus/minus)
-- ✅ **Tested with demo data** and validated with RDS PostgreSQL
-- ✅ **Production-ready** for ML model training
-
-**ML Features Available:**
-- 9 lineup efficiency features (net rating, off/def rating, consistency)
-- 7 player impact features (on/off differential, replacement value)
-- 6 possession-based features (10, 25, 50, 100 possession intervals)
-- 4 stint pattern features (duration, rest, substitution frequency)
-
-**Files Created (ML Integration):**
-- scripts/ml/plus_minus_feature_extractor.py (600+ lines, production-ready)
-- scripts/ml/rec_11_with_plus_minus.py (600+ lines, enhanced rec_11)
-- docs/PLUS_MINUS_ML_INTEGRATION.md (complete integration guide)
-- docs/REC_11_PLUS_MINUS_INTEGRATION.md (comprehensive rec_11 guide)
-
-**OPTION 1: COMPLETE ML INTEGRATION (October 19, 2025):** ✅ **100% COMPLETE**
-- ✅ **rec_11 Plus/Minus Integration** (171 total features)
-  - 110 temporal + 21 cumulative + 26 plus/minus features
-  - 100% extraction success (30/30 games)
-  - 20.94s execution time
-- ✅ **Lineup Optimization Model** (XGBoost)
-  - 9 lineup features → net rating predictions
-  - MAE: 8.5, R²: 0.85
-  - Model saved (74 KB)
-- ✅ **Player Impact Prediction Model** (XGBoost)
-  - 7 player features → on/off differential predictions
-  - MAE: 5.2, R²: 0.78
-  - Model saved (74 KB)
-
-**Deliverables Created:**
-- 3 Python modules (1,800+ lines): rec_11_with_plus_minus.py, lineup_optimization_model.py, player_impact_prediction_model.py
-- 2 Trained models (150 KB total): lineup + player impact models
-- 3 Documentation files (2,000+ lines): REC_11_PLUS_MINUS_INTEGRATION.md, REC_11_PLUS_MINUS_COMPLETION_SUMMARY.md, OPTION_1_ML_INTEGRATION_COMPLETE.md
-
-**Expected Impact:** +9-12% model accuracy (63% → 72-75%)
-
-**Session Started:** October 19, 2025
-**Session Status:** ✅ OPTION 1 COMPLETE - 100% PRODUCTION-READY
-**Implementation Time:** 1 session (~3 hours for Option 1)
-**Deployment Status:** 🚀 PRODUCTION-READY
-**ML Integration Status:** ✅ COMPLETE - All sub-tasks finished
-
-### 🔄 OPTION 2A: SNAPSHOT GENERATION PIPELINE (October 19, 2025)
-
-**Status:** Phase 9 - Play-by-Play to Snapshot Generation **IN PROGRESS (60% Complete)** 🔄
-
-**Implementation:**
-- **Total Code:** 1,900 lines (Python) + 1,350 lines (Documentation)
-- **3 Core Components:** (All functional, 1 needs fix)
-  - ✅ Play Text Parser (800 lines) - NLP regex parser, 56.7% success rate
-  - ⚠️ Game State Tracker (600 lines) - Stats tracking works, lineup tracking broken
-  - ✅ RDS PBP Processor (500 lines) - End-to-end pipeline working
-
-**Performance Metrics:**
-- Processing speed: 1,247 events/second
-- Test game (241231002): 436 events in 0.35 seconds
-- Projected time for 14,798 games: ~1.5 hours
-- Parse success rate: 56.7% (target: 85%+)
-
-**What's Working:**
-- ✅ Complete end-to-end pipeline functional
-- ✅ Player name extraction from play-by-play text
-- ✅ Cumulative stat tracking (points, FGM/FGA, rebounds, assists, etc.)
-- ✅ Plus/minus calculation accurate
-- ✅ Snapshot creation (436 snapshots per game)
-- ✅ Database integration with RDS PostgreSQL
-- ✅ 15+ play types supported (field goals, free throws, rebounds, assists, fouls, etc.)
-
-**Known Issues:**
-- ❌ **Substitution handling broken** (HIGH PRIORITY)
-  - Lineups grow to 19 players instead of staying at 5
-  - Root cause: Inferred starting lineup doesn't match actual starters
-  - Proposed fix: Trust substitution events to build lineup (2-3 hours)
-- ⚠️ **Parser coverage only 56.7%** (MEDIUM PRIORITY)
-  - 189 out of 436 events failed to parse
-  - Missing play types: team rebounds, violations, reviews, period events
-  - Need to add 10-15 more regex patterns (2-3 hours)
-- ⚠️ **Team names extracted as players** (LOW PRIORITY)
-  - Example: "Washington" appears in lineup
-  - Fix: Filter team names from player extraction (30 minutes)
-
-**Files Created:**
-- scripts/pbp_to_boxscore/play_text_parser.py (800 lines)
-- scripts/pbp_to_boxscore/game_state_tracker.py (600 lines)
-- scripts/pbp_to_boxscore/rds_pbp_processor.py (500 lines)
-- docs/OPTION_2A_SNAPSHOT_GENERATION_PLAN.md (350 lines)
-- docs/OPTION_2A_PROGRESS_SUMMARY.md (400 lines)
-- docs/OPTION_2A_SESSION_SUMMARY.md (600 lines)
-- docs/OPTION_2A_STATUS.md (494 lines) - **NEW**
-
-**Next Steps (4-6 hours remaining):**
-1. ⏸️ Fix substitution handling (2-3 hours) - HIGH PRIORITY
-2. ⏸️ Improve parser coverage to 85%+ (2-3 hours) - MEDIUM PRIORITY
-3. ⏸️ Test on 10 games (1 hour)
-4. ⏸️ Implement database save functionality (1-2 hours)
-5. ⏸️ Scale to full dataset (14,798 games, ~1.5 hours)
-
-**See:** [docs/OPTION_2A_STATUS.md](docs/OPTION_2A_STATUS.md) for complete status details and reproduction steps.
-
-**Time Invested:** 3 hours
-**Estimated Remaining:** 4-6 hours
-**Total Estimated:** 7-9 hours (vs. original 12-18 hour estimate)
-
----
-
-**Previous Session:** October 18, 2025 - Phase 5 Complete ✅ (18 ML Frameworks 5.1-5.18 + Documentation Integration)
-
-### 🎉 PHASE 5 COMPLETE - 18 ML FRAMEWORKS IMPLEMENTED & DOCUMENTED (October 18, 2025)
-
-**Status:** Phase 5, Recommendations 5.1-5.18 - **ALL 18 FRAMEWORKS IMPLEMENTED & INTEGRATED**
-
-**Progress:**
-- **Total Recommendations:** 270
-- **Completed:** 24/270 (8.9%) ⬆️ +18 this session
-  - ✅ rec_22: Panel Data Processing System (621 lines, 33 tests)
-  - ✅ rec_11: Advanced Feature Engineering (877 lines, 41 tests, 80+ features)
-  - ✅ ml_systems_1: Model Versioning with MLflow
-  - ✅ ml_systems_2: Data Drift Detection
-  - ✅ **5.1: Feature Engineering** - Temporal feature extraction and engineering **NEW**
-  - ✅ **5.2: Model Management** - Model lifecycle management **NEW**
-  - ✅ **5.3: Model Operations** - MLOps infrastructure **NEW**
-  - ✅ **5.4: Model Analysis** - Performance analysis tools **NEW**
-  - ✅ **5.5: Experimentation** - A/B testing framework **NEW**
-  - ✅ **5.6: Hyperparameter Optimization** (623 lines) - Grid/Random/Bayesian **NEW**
-  - ✅ **5.7: Model Interpretation** (619 lines) - SHAP, feature importance, decision paths **NEW**
-  - ✅ **5.8: Feature Store** (588 lines) - Centralized feature management **NEW**
-  - ✅ **5.9: Automated Retraining** (640 lines) - Drift-triggered retraining **NEW**
-  - ✅ **5.10: Feature Selection** (668 lines) - 8 methods (variance, correlation, MI, Lasso, tree, RFE, stability, consensus) **NEW**
-  - ✅ **5.11: Ensemble Learning** (619 lines) - Voting, averaging, stacking, bagging, boosting **NEW**
-  - ✅ **5.12: Learning Curves** (580 lines) - Bias/variance diagnosis, sample size estimation **NEW**
-  - ✅ **5.13: Model Calibration** (607 lines) - Platt, isotonic, temperature scaling **NEW**
-  - ✅ **5.14: Cross-Validation Strategies** (557 lines) - Time series, blocked, group K-fold, stratified, LOGO **NEW**
-  - ✅ **5.15: Model Comparison** (646 lines) - Paired t-test, Wilcoxon, McNemar, benchmarking **NEW**
-  - ✅ **5.16: Error Analysis** (700 lines) - Pattern detection, segmentation, recommendations **NEW**
-  - ✅ **5.17: Model Explainability** (541 lines) - Permutation importance, LIME, interactions, PD **NEW**
-  - ✅ **5.18: Performance Profiling** (589 lines) - Memory, time, throughput, bottleneck ID **NEW**
-- **In Progress:** 0/270
-- **Next:** Continue with additional recommendations OR enhance existing implementations with panel data
-
-**PHASE 5 COMPLETED (October 18, 2025):**
-- **IDs:** Recommendations 5.1-5.18 (18 ML frameworks)
-- **Priority:** CRITICAL (ML/MLOps enhancements)
-- **Phase:** 5 (Machine Learning)
-- **Time Estimate:** 40 hours (Actual: ~15-20 hours)
-- **Source:** 20+ ML/MLOps technical books
-- **Implementation:** 18 Python scripts + documentation (~14,000 lines code, ~10,000 lines docs)
-
-**Documentation Integration:**
-- ✅ 18 comprehensive README.md files created (400-600 lines each)
-- ✅ Phase 5 index updated with all 19 sub-phases (5.0 + 5.1-5.18)
-- ✅ PROGRESS.md updated with Phase 5 completion
-- ✅ Complete "When to use" / "How to use" / "Common patterns" sections
-- ✅ Integration points between frameworks documented
-- ✅ NBA temporal panel data examples included
-- ✅ Workflow references added to all frameworks
-
-**Framework Locations:**
-- **Implementations:** `/scripts/ml/` (various framework scripts)
-- **Documentation:** `/docs/phases/phase_5/5.{1-18}_*/README.md`
-- **Tests:** All frameworks include demo functions and test cases
-
-**Phase 5 Enhanced:**
-- **Before:** 1 sub-phase (5.0 ML Models)
-- **After:** 19 sub-phases (5.0 + 5.1-5.18 frameworks)
-- **Documentation:** 18 new subdirectories with comprehensive guides
-- **Total Lines:** ~14,000 lines of production code + ~10,000 lines of documentation
-
-**What Phase 5 Unlocks:**
-- ✅ Production-ready ML pipeline with advanced capabilities
-- ✅ Complete feature engineering pipeline
-- ✅ Model lifecycle management
-- ✅ Hyperparameter optimization for all models
-- ✅ Model explainability for stakeholder communication
-- ✅ Automated model retraining with drift detection
-- ✅ Comprehensive model comparison and benchmarking
-- ✅ Feature selection to reduce dimensionality
-- ✅ Ensemble learning for improved accuracy
-- ✅ Performance profiling for production optimization
-- ✅ Complete MLOps infrastructure
-
-**Session Started:** October 18, 2025
-**Session Completed:** October 18, 2025
-**Implementation Time:** ~15-20 hours (including full documentation integration)
-
----
-
-**rec_22 COMPLETED (October 16, 2025):**
-- **ID:** `consolidated_rec_22`
-- **Priority:** CRITICAL (Block 1, Foundation)
-- **Phase:** 0 (Data Collection)
-- **Time Estimate:** 1 week (Actual: ~4-5 hours)
-- **Source:** Econometric Analysis (Wooldridge)
-- **Test Results:** ✅ 33/33 tests passed (100% success rate)
-
-**Implementation Files Created:**
-- ✅ `/docs/phases/phase_0/implement_rec_22.py` (621 lines - full implementation)
-- ✅ `/docs/phases/phase_0/test_rec_22.py` (33 tests, 9 test classes)
-- ✅ `/docs/phases/phase_0/rec_22_USAGE_GUIDE.md` (500+ lines with 7 examples)
-
-**Capabilities Implemented:**
-- ✅ Multi-index DataFrames (player_id, game_id, timestamp)
-- ✅ Lag variable generation (previous game stats: lag1, lag2, lag3, etc.)
-- ✅ Rolling window statistics (last N games: mean, std, min, max)
-- ✅ Cumulative statistics (career totals at any timestamp)
-- ✅ Panel transformations (within, between, first-difference)
-- ✅ Temporal query function (stats at exact timestamp with millisecond precision)
-- ✅ Convenience functions for feature engineering integration
-- ✅ Comprehensive error handling and logging
-
-**Test Coverage:**
-- ✅ Panel data structure (4 tests)
-- ✅ Lag generation (4 tests - single/multiple players, single/multiple variables)
-- ✅ Rolling windows (5 tests - constant/variable values, multiple windows)
-- ✅ Cumulative statistics (3 tests - sums, games counter, per-player)
-- ✅ Temporal queries (5 tests - exact time, before/after games, edge cases)
-- ✅ Panel transformations (4 tests - within, between, first-difference)
-- ✅ Convenience functions (2 tests)
-- ✅ Edge cases (4 tests - empty data, missing columns, errors)
-- ✅ System execution (2 tests - full workflow)
-
-**What rec_22 Unlocks:**
-- ✅ Recommendation #2: Advanced Feature Engineering (50-100+ features)
-- ✅ Recommendation #3: Data Quality Monitoring
-- ✅ Recommendation #4: Statistical Model Validation
-- ✅ Recommendation #5: Statistical Testing Framework
-- ✅ Recommendation #6: Bayesian Analysis Pipeline
-- ✅ Recommendation #9: Causal Inference Pipeline
-- ✅ Recommendation #51: Time Series Analysis Framework
-- ✅ 50+ additional downstream recommendations
-
-**MLOps Enhancement Strategy:**
-1. ✅ Complete rec_22 (Panel Data) - **COMPLETE** ✅
-2. ⏸️ Complete rec_11 (Feature Engineering 50-100+ features) - **NEXT**
-3. ⏸️ Redeploy ml_systems_1 & ml_systems_2 on panel data
-4. ⏸️ Expected improvement: 63% → 68-71% accuracy (+5-8%)
-
-**Session Started:** October 16, 2025
-**Session Completed:** October 16, 2025 (1st implementation)
-**Implementation Time:** ~4-5 hours (under 1-week estimate)
-
-**rec_11 COMPLETED (October 16, 2025):**
-- **ID:** `consolidated_consolidated_rec_11`
-- **Priority:** CRITICAL (Block 1, #2 in sequence)
-- **Phase:** 8 (Data Audit)
-- **Time Estimate:** 1 week (Actual: ~5-6 hours)
-- **Source:** 5 books (ML Systems, Hands-On ML, Econometrics, Stats 601, Elements of Stats)
-- **Test Results:** ✅ 41/41 tests passed (100% success rate)
-
-**Implementation Files Created:**
-- ✅ `/docs/phases/phase_0/implement_rec_11.py` (877 lines - comprehensive feature engineering)
-- ✅ `/docs/phases/phase_0/test_rec_11.py` (746 lines - 41 tests, 10 test classes)
-
-**Features Generated (80+ total across 6 categories):**
-- ✅ **Temporal Features:** Lag variables (1, 2, 3, 5, 10 games), rolling windows (3, 5, 10, 20 games), trend indicators
-- ✅ **Cumulative Features:** Career totals, per-game averages, season-to-date stats
-- ✅ **Interaction Features:** Home/away splits, rest day interactions, season quarter fatigue
-- ✅ **Contextual Features:** Schedule strength, travel burden, back-to-back streaks, altitude adjustments
-- ✅ **Derived Features:** True Shooting %, Usage Rate, Assist Ratio, Rebound Rate, PER, Per-36 stats, Pace-adjusted stats
-- ✅ **Engineered Features:** Form indicators (hot/cold), consistency metrics, improvement trajectories, clutch performance, matchup advantages
-
-**Feature Engineering Capabilities:**
-- Expands from 16 baseline features → 80-100+ engineered features
-- Feature selection with variance thresholds and correlation filtering
-- MLflow integration ready
-- Expected model accuracy improvement: **63% → 68-71% (+5-8%)**
-
-**Dependencies:**
-- ✅ rec_22 (Panel Data Processing) - Complete
-- Ready to enhance ml_systems_1 & ml_systems_2 with panel data
-
-**Session Completed:** October 16, 2025 (2nd implementation)
-**Implementation Time:** ~5-6 hours (under 1-week estimate)
-
----
-
-### 📚 Book Recommendations Implementation - PHASE 7 COMPLETE ✅ (October 16, 2025 - Previous Session)
-
-**Status:** Phase 7 - Master implementation sequence created (1-270 recommendations)
-
-**Progress:**
-- **Total Recommendations:** 270 (updated from 200 after consolidation)
-- **Completed:** 2/270 (0.7%)
-  - ✅ ml_systems_1: Model Versioning with MLflow (18/18 tests passed)
-  - ✅ ml_systems_2: Data Drift Detection (29/29 tests passed)
-- **In Progress:** 0/270
-- **Next:** rec_22 - Panel Data Processing System (1 week)
-
-**Phase 7 Completed (October 16, 2025):**
-- ✅ Master Implementation Sequence created (1-270)
-- ✅ Optimized for panel data construction
-- ✅ Dependencies mapped
-- ✅ Milestones defined (10, 25, 50, 100, 150, 200, 250, 270)
-- ✅ Time estimates calculated (~250-300 weeks total)
-- ✅ Cost impact analyzed (+$60/month at 50 recommendations)
-- ✅ Parallel implementation opportunities identified
-
-**Priority Breakdown:**
-- **Critical:** 50 recommendations (18.5%)
-- **Important:** 5 recommendations (1.9%)
-- **Nice-to-Have:** 14 recommendations (5.2%)
-- **Not Prioritized:** 201 recommendations (74.4%)
-
-**Source Books Analyzed:** 22 technical books
-- Designing Machine Learning Systems
-- Hands-On Machine Learning with Scikit-Learn and TensorFlow
-- The Elements of Statistical Learning
-- STATISTICS 601 Advanced Statistical Methods
-- Introductory Econometrics: A Modern Approach
-- Plus 17 additional technical books
-
-**Implementation Documents Created:**
-- ✅ MASTER_IMPLEMENTATION_SEQUENCE.md (1-270 numerical sequence)
-- ✅ PANEL_DATA_RECOMMENDATIONS.md (12 key panel data recommendations)
-- ✅ BOOK_RECOMMENDATIONS_TRACKER.md (progress tracking)
-- ✅ DEPLOYMENT_SUMMARY_ML_SYSTEMS.md (MLOps deployment)
-- ✅ QUICK_START_MLOPS.md (usage guide)
-- ✅ 24 implementation templates in phase_0 (implement_*.py, test_*.py)
-
-**Next Recommendations to Implement (Block 1 - Panel Data Foundation):**
-1. **rec_22** - Panel Data Processing System (1 week) ⭐ NEXT
-2. **consolidated_rec_11** - Advanced Feature Engineering (1 week)
-3. **rec_29** - Data Quality Monitoring (1 week)
-4. **rec_19** - Statistical Model Validation (1 week)
-5. **consolidated_rec_17** - Statistical Testing Framework (1 week)
-
-**Implementation Strategy:**
-- **Focus:** Panel data infrastructure first (improves dataset quality)
-- **Then:** Redeploy MLOps 1 & 2 on improved panel dataset
-- **Expected Impact:** +5-8% model accuracy improvement (from 63% to 68-71%)
-
-**Quick Links:**
-- [Master Implementation Sequence](docs/MASTER_IMPLEMENTATION_SEQUENCE.md) - Complete 1-270 sequence
-- [Panel Data Recommendations](docs/PANEL_DATA_RECOMMENDATIONS.md) - Focused panel data plan
-- [Book Recommendations Tracker](docs/BOOK_RECOMMENDATIONS_TRACKER.md) - Progress tracking
-- [Master Recommendations JSON](/Users/ryanranft/nba-mcp-synthesis/analysis_results/master_recommendations.json) - Source data
-
----
-
-**Session completed:** October 13, 2025 - Web Scraping Improvements & Async Infrastructure Deployment
-
-### Web Scraping Improvements - COMPLETED (October 13, 2025)
-
-- ✅ **Implemented all 14 recommendations from Crawl4AI MCP analysis**
-  - AsyncBaseScraper with aiohttp, rate limiting, and retry logic
-  - Centralized error handler with custom exception hierarchy
-  - Telemetry system with structured logging and metrics
-  - YAML-based configuration system for all scrapers
-  - Intelligent content extraction strategies for ESPN and Basketball Reference
-  - Modular tool components (fetch, parse, store, checkpoint)
-  - Basketball Reference Tier 1 scraper upgraded with async architecture
-  - NBA API scraper fixed with robust error handling
-  - ESPN missing PBP scraper for 2022-2025 gap (3,230 games)
-  - Comprehensive test suite for new scraper components
-  - Health monitoring & alerts with automated checks
-  - Containerization & deployment with Docker
-  - Data validation & quality checks with schema validators
-  - Incremental updates & deduplication with content hashing
-  - Smart retry strategies with error-specific handling
-  - Adaptive rate limiting with 429 detection
-  - Data provenance tracking with metadata embedding
-  - Comprehensive documentation with auto-docs
-
-- ✅ **Created 20+ new files for async infrastructure**
-  - Core infrastructure: AsyncBaseScraper, ScraperErrorHandler, ScraperTelemetry
-  - Configuration: ScraperConfig, scraper_config.yaml
-  - Async scrapers: ESPNAsyncScraper, BasketballReferenceAsyncScraper, NBAApiAsyncScraper
-  - Specialized scrapers: ESPNMissingPbpScraper
-  - Tools: IntelligentExtraction, ModularTools, DataValidators, DeduplicationManager
-  - Monitoring: ScraperHealthMonitor, AlertManager
-  - Deployment: Dockerfile, docker-compose.yml, docker_deploy.sh
-  - Testing: Comprehensive test suites for all components
-  - Documentation: README_ASYNC_INFRASTRUCTURE.md, ASYNC_DEPLOYMENT_CHECKLIST.md
-
-- ✅ **Achieved 3-5x performance improvement**
-  - ESPN scraper: < 30 seconds for 1 day of data (vs 2+ minutes)
-  - Basketball Reference: < 60 seconds for current season stats (vs 3+ minutes)
-  - NBA API: < 45 seconds for player stats (vs 2+ minutes)
-  - Concurrent processing with async/await patterns
-  - Smart rate limiting prevents IP blocking
-  - Circuit breaker pattern for failing endpoints
-
-- ✅ **Reduced overnight failures by 80%+**
-  - Robust error handling with custom exception hierarchy
-  - Smart retry strategies based on error type
-  - Circuit breaker pattern prevents cascade failures
-  - Real-time health monitoring and alerts
-  - Comprehensive logging for debugging
-
-- ✅ **All success criteria met**
-  - Performance benchmarks exceeded
-  - Error rates reduced to < 1%
-  - Comprehensive test coverage
-  - Production-ready deployment infrastructure
-  - Complete documentation and runbooks
-
-- ✅ **Ready for production deployment (see Workflow #53)**
-  - Docker containerization complete
-  - Health monitoring dashboard functional
-  - Alert system configured
-  - Rollback procedures documented
-  - Deployment checklist created
-
-**Session completed:** October 13, 2025 - Complete Data Collection, Audit & Master Database Integration
-  - ✅ **Comprehensive data audit completed**
-    - S3: 172,600 files (~122GB)
-    - Local: 147,382 files (~116GB)
-    - RDS: 48.4M rows across 20 tables
-    - All sources synchronized ✅
-  - ✅ **Data gaps analysis completed**
-    - Critical gaps identified: 2022-2025 PBP data (3,230 games)
-    - Gap analysis report: `docs/DATA_GAPS_ANALYSIS.md`
-    - Data quality baseline: `docs/DATA_QUALITY_BASELINE.md`
-  - ✅ **Basketball Reference overnight scraper validated**
-    - 444 files collected successfully
-    - 9 minimal errors across all data types
-    - Complete coverage: 1946-2025 (79+ years)
-  - ✅ **Critical PBP data collection deployed**
-    - ESPN missing data scraper running (PID: 97149)
-    - Collecting 2022-2025 seasons (3,230 games)
-    - Estimated completion: 8-12 hours
-  - ✅ **Master database schema designed**
-    - Unified schema: `sql/master_schema.sql`
-    - 6 master tables + views + functions
-    - Conflict resolution strategy implemented
-  - ✅ **ETL pipeline created**
-    - Multi-source merger: `scripts/etl/merge_all_sources.py`
-    - Handles ESPN, NBA Stats, hoopR, Basketball Reference, Kaggle
-    - Batch processing with error handling
-  - ✅ **Phase 0 marked complete**
-    - All sub-phases completed
-    - Documentation updated
-    - Ready for Phase 1.1 Multi-Source Integration
-    - All recommendations mapped to existing phases
-  - 📊 **Status:** Ready for implementation
-    - Priority 1: Phase 5 (MLOps foundation)
-    - Priority 2: Phase 8 (Advanced analytics)
-    - Implementation tracking: `/Users/ryanranft/nba-mcp-synthesis/scripts/implementation_tracker.py`
-
-**Last session ended:** October 11, 2025
-**Last completed:** Phase 9.0 + 9.1 Implementation Complete ✅
-**Next planned task:** Test ESPN processor with real game OR Phase 9.2 (hoopR Processor)
-
-**Session completed:** October 11, 2025 - Phase 9 Implementation (9.0 System Architecture + 9.1 ESPN Processor)
-  - ✅ **Phase 9.0: System Architecture - COMPLETE**
-    - Database schema: `sql/phase9_box_score_snapshots.sql` (510 lines)
-      - 4 tables: game_state_snapshots, player_snapshot_stats, quarter_box_scores, box_score_verification
-      - 2 views: latest_snapshots, verification_summary
-      - Comprehensive indexing for temporal queries
-    - Data structures: `scripts/pbp_to_boxscore/box_score_snapshot.py` (360 lines)
-      - PlayerStats: Immutable player stats (23 fields)
-      - TeamStats: Immutable team aggregations
-      - BoxScoreSnapshot: Complete game state snapshot
-      - VerificationResult: Quality grading system (A-F)
-      - Full validation methods
-    - Base processor: `scripts/pbp_to_boxscore/base_processor.py` (514 lines)
-      - Abstract class for all PBP processors
-      - Shared logic: process_game(), verify_final_box_score()
-      - Event-by-event box score updates
-      - Substitution and on-court player tracking
-    - Test framework: `tests/test_pbp_to_boxscore/test_espn_processor.py`
-      - All tests passing ✅
-  - ✅ **Phase 9.1: ESPN Processor - COMPLETE**
-    - ESPN processor: `scripts/pbp_to_boxscore/espn_processor.py` (610 lines)
-      - Inherits from BasePlayByPlayProcessor
-      - S3 integration (s3://nba-sim-raw-data-lake/pbp/*.json) with local caching
-      - Flattens nested playGrps structure (list of lists by period)
-      - Parses 15+ event types: made/missed shots (2PT, 3PT, FT), rebounds (offensive/defensive), assists, steals, blocks, turnovers, fouls, substitutions
-      - Calculates game clock seconds from quarter + time remaining
-      - Tracks on-court players
-      - Generates immutable snapshots per event
-      - Batch processing functions: process_games_batch(), process_season()
-  - 📊 **Summary:**
-    - Total code: 1,994 lines across 5 files
-    - Test coverage: 100% of core functionality
-    - Ready to process: 44,826 ESPN games
-    - All tests passing ✅
-  - 🔄 **Next session:** Test ESPN processor with real game OR implement Phase 9.2 (hoopR Processor)
-
-**Session completed:** October 11, 2025 - Basketball Reference Tier 1-13 Planning + Infrastructure
-  - ✅ **Verified hoopR data fills critical gaps** (Phase 8 second execution)
-    - Player box scores 2006-2025: FOUND (24 parquet + 24 CSV files, 2002-2025 coverage)
-    - Lineup data 2007-2024: FOUND (18 CSV files)
-    - Complete coverage achieved: Player box (1995-2025), Lineups (1996-2024)
-    - MASTER_DATA_INVENTORY.md: Marked critical gaps as RESOLVED
-    - Phase 8 documentation updated with resolution status
-  - ✅ **Created Basketball Reference Complete Expansion Plan**
-    - 234 data types cataloged across 13 tiers
-    - Master config: BASKETBALL_REFERENCE_MASTER_CONFIG.json
-    - Implementation summary: IMPLEMENTATION_SUMMARY.md
-    - Time estimate: 140-197 hours total
-    - Tier 1 (IMMEDIATE): 5 data types, 15-20 hours, 150K records
-  - ✅ **Built incremental scraper infrastructure**
-    - scrape_bref_tier1_incremental.py: Checkpoint-based scraper
-    - Saves data immediately after each item (no data loss on failure)
-    - Resume capability from any checkpoint
-    - Ready for Tier 1 execution (requires HTML parsing refinement)
-  - 📊 **Status:** Ready to execute Tier 1 OR pivot to Multi-Source Integration
-  - 🔄 **Next session:** User choice - continue scraping OR organize repo
-
-**Session completed:** October 11, 2025 - Phase Index Reorganization (✅ COMPLETE)
-  - ✅ **Created 8 PHASE_N_INDEX.md files** (150 lines each)
-    - Master index for each phase (0-7) with sub-phase table
-    - Links to sub-phase files in phase_N/ subdirectories
-    - Consistent navigation pattern across all phases
-  - ✅ **Created phase_{0..7} subdirectories** with organized structure
-    - phase_0/: Initial data collection + Basketball Reference expansion
-    - phase_1/: Data quality checks + Multi-source integration
-    - phase_2/ through phase_7/: Single sub-phase per phase
-  - ✅ **Moved all phase files to new structure**
-    - Renamed with sub-phase numbering (N.M_name.md pattern)
-    - Moved basketball_reference/ directory to phase_0/0.1_basketball_reference/
-    - Archived 4 duplicate files to superseded_documentation/
-  - ✅ **Reduced PROGRESS.md** - 1,094 → 391 lines (-64% reduction, exceeded -45% target)
-  - ✅ **Reduced CLAUDE.md** - 546 → 395 lines (-28% reduction)
-  - ✅ **Updated cross-references** in workflow files (#43, #45) and docs/README.md
-  - ✅ **Updated docs/archive/README.md** with reorganization details and metrics
-  - ✅ **Created Workflow #52: Phase Index Management** - Complete guide for maintaining new structure
-  - ✅ **Validated navigation flow** - All 8 indexes, all 8 subdirectories, all sub-phase files in place, no broken links
-  - 📊 **Context efficiency improvements achieved:**
-    - Phase navigation: ~3,362 → ~750 lines (-78% context reduction)
-    - Session start: 1,085 → 885 lines (-18% reduction)
-    - PROGRESS.md: 1,094 → 391 lines (-64% reduction)
-    - CLAUDE.md: 546 → 395 lines (-28% reduction)
-    - **Net result: 96% context available for actual work (vs 95% before)**
-
-**For complete session history:** See `docs/archive/session_handoffs/` directory
-
----
-
-## For Returning Users
-
-**If you're coming back after a break:**
-
-1. **Read "Current Session Context" above** - see what was last worked on
-2. **Check phase status** - see which phases are complete (✅), in progress (🔄), or pending (⏸️)
-3. **Review recent commits** - `git log --oneline -10` to see what changed
-4. **Check COMMAND_LOG.md** - see what commands were run recently
-5. **Pick up where you left off** - or choose a new task from pending phases
-
-**Common return scenarios:**
-- "Continue where we left off" → Work on first 🔄 or ⏸️ sub-phase
-- "Start Phase X" → Read PHASE_X_INDEX.md, then specific sub-phase file
-- "Review what's done" → Check ✅ phases, read phase index summaries
-
----
-
-## 📍 Quick Navigation
-
-### Phase Details
-
-- ✅ [Phase 0: Data Collection](docs/phases/PHASE_0_INDEX.md) - **COMPLETE** (All Sub-Phases)
-  - ✅ [0.0 Initial Collection](docs/phases/phase_0/0.0_initial_data_collection.md) - ESPN data (146K files, 119GB)
-  - ✅ [0.1 Basketball Reference](docs/phases/phase_0/0.1_basketball_reference/README.md) - 13 tiers, 234 data types, 140-197h
-  - ✅ [0.2 ESPN Additional](docs/phases/PHASE_0_INDEX.md) - Missing PBP data (3,230 games)
-  - ✅ [0.3 NBA API Enhanced](docs/phases/PHASE_0_INDEX.md) - Comprehensive stats (22,256 files)
-- ⏸️ [Phase 1: Data Quality](docs/phases/PHASE_1_INDEX.md) - **READY** (📚 2 enhancement recommendations available)
-  - ⏸️ [1.0 Data Quality Checks](docs/phases/phase_1/1.0_data_quality_checks.md) - Gap analysis, validation
-  - ⏸️ [1.1 Multi-Source Integration](docs/phases/phase_1/1.1_multi_source_integration.md) - 209 features, 28h
-- ✅ [Phase 2: AWS Glue ETL](docs/phases/PHASE_2_INDEX.md) - **COMPLETE** (📚 5 enhancement recommendations available)
-  - ✅ [2.0 AWS Glue ETL Pipeline](docs/phases/phase_2/2.0_aws_glue_etl.md)
-- ✅ [Phase 3: Database Infrastructure](docs/phases/PHASE_3_INDEX.md) - **COMPLETE** (📚 1 enhancement recommendation available)
-  - ✅ [3.0 Database Infrastructure](docs/phases/phase_3/3.0_database_infrastructure.md)
-- ✅ [Phase 4: Simulation Engine](docs/phases/PHASE_4_INDEX.md) - **COMPLETE** (Basic) / **READY** (📚 1 enhancement recommendation available)
-  - ✅ [4.0 Simulation Engine](docs/phases/phase_4/4.0_simulation_engine.md)
-  - 🚀 [Advanced Simulation Framework](docs/ADVANCED_SIMULATION_FRAMEWORK.md) - Econometric models planned
-- ✅ [Phase 5: Machine Learning](docs/phases/PHASE_5_INDEX.md) - **COMPLETE** (📚 13 enhancement recommendations available)
-  - ✅ [5.0 ML Models](docs/phases/phase_5/5.0_machine_learning_models.md) - 75% accuracy achieved
-- ✅ [Phase 6: Optional Enhancements](docs/phases/PHASE_6_INDEX.md) - **COMPLETE** (📚 3 enhancement recommendations available)
-  - ✅ [6.0 System Enhancements](docs/phases/phase_6/6.0_optional_enhancements.md)
-- ⏸️ [Phase 7: Betting Odds](docs/phases/PHASE_7_INDEX.md) - **PENDING** (Optional)
-  - ⏸️ [7.0 Betting Odds Integration](docs/phases/phase_7/7.0_betting_odds_integration.md)
-
-### Operational Phases (Maintenance & Auditing)
-
-- ✅ [Phase 8: Data Audit & Inventory](docs/phases/PHASE_8_INDEX.md) - **COMPLETE** (📚 16 enhancement recommendations available)
-  - ✅ [8.0 Recursive Data Discovery](docs/phases/phase_8/8.0_recursive_data_discovery.md) - All storage locations
-  - ✅ [8.1 Deep Content Analysis](docs/phases/phase_8/8.1_deep_content_analysis.md) - Quality sampling & gap detection
-  - **Automation:** `scripts/audit/run_data_audit.sh` - See [Workflow #49](docs/claude_workflows/workflow_descriptions/49_automated_data_audit.md)
-- ✅ [Phase 9: Play-by-Play to Box Score Generation](docs/phases/PHASE_9_INDEX.md) - **COMPLETE** (📚 2 enhancement recommendations available)
-  - ✅ [9.0 System Architecture](docs/phases/phase_9/9.0_system_architecture.md) - Database schemas, interfaces, performance targets ✅ COMPLETE
-  - ✅ [9.1 ESPN Processor (2023-2025)](docs/phases/phase_9/9.1_espn_processor.md) - ~2,952 games, highest priority ✅ COMPLETE
-  - ✅ [9.2 hoopR Processor](docs/phases/phase_9/9.2_hoopr_processor.md) - Cross-validation with ESPN ✅ COMPLETE
-  - ✅ [9.3 NBA API Processor (1995-2006)](docs/phases/phase_9/9.3_nba_api_processor.md) - Historical data ✅ COMPLETE
-  - ✅ [9.4 Kaggle Processor](docs/phases/phase_9/9.4_kaggle_processor.md) - Legacy data (1946-2020) ✅ COMPLETE
-  - ✅ [9.5 Storage System](docs/phases/phase_9/9.5_storage_system.md) - RDS + S3 Parquet + local cache ✅ COMPLETE
-  - ✅ [9.6 Advanced Metrics Layer](docs/phases/phase_9/9.6_advanced_metrics.md) - TS%, PER, ORtg, DRtg, Win Probability ✅ COMPLETE
-  - ✅ [9.7 ML Integration](docs/phases/phase_9/9.7_ml_integration.md) - Temporal features, quarter predictions ✅ COMPLETE
-  - ✅ [9.8 Betting Integration](docs/phases/phase_9/9.8_betting_integration.md) - Quarter-by-quarter predictions, ROI tracking ✅ COMPLETE
-
-### Reference Documentation
-
-- **Workflows:** [docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md](docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md) (49 workflows)
-- **Architecture decisions:** [docs/adr/README.md](docs/adr/README.md) (7 ADRs)
-- **Setup instructions:** [docs/SETUP.md](docs/SETUP.md)
-- **Quick commands:** [QUICKSTART.md](QUICKSTART.md)
-- **Troubleshooting:** [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
-- **Testing:** [docs/TESTING.md](docs/TESTING.md)
-- **LLM guidelines:** [CLAUDE.md](CLAUDE.md)
-
----
-
-## 📊 Executive Summary
-
-**Status:** ✅ CORE PROJECT COMPLETE - Enhanced with Temporal Data Architecture
-**Completed Date:** October 3, 2025 (Core phases) / October 7, 2025 (Temporal enhancement)
-**Current Cost:** $41.53/month (S3 + RDS + EC2 + Monitoring + API)
-**Budget Status:** 72% under $150/month target
-
-### Project Vision
-
-**Temporal Panel Data System:** Create snapshots of NBA history at exact timestamps with millisecond precision.
-
-**Example capability:** Query "What were Kobe Bryant's career statistics at exactly 7:02:34.56 PM CT on June 19, 2016?" and receive accurate cumulative stats up to that exact moment, including his age down to the second.
-
-**Future integration:** Video feed synchronization with ball/player coordinates for computer vision analysis at 30fps (~33ms per frame).
-
-### What's Accomplished
-
-- ✅ **Phase 0:** Multi-Source Data Collection - Oct 1
-  - S3 data lake with 147,382 local files (70,522 in S3) from ESPN
-  - Basketball Reference 13-tier expansion planned (234 data types, 140-197 hours)
-  - 🔄 Ready to collect: Basketball Reference Tier 1-2 (IMMEDIATE priority, 35-45 hours)
-- ⏸️ **Phase 1:** Data Quality - Multi-source integration planned (209 features, 28 hours)
-- ✅ **Phase 2:** ETL Pipeline (bypassed AWS Glue) - Oct 2
-- ✅ **Phase 3:** RDS PostgreSQL operational - Oct 1
-- ✅ **Phase 4:** EC2 simulation engine deployed - Oct 3
-- ✅ **Phase 5:** ML models operational - Oct 3 (75% accuracy with XGBoost)
-- ✅ **Phase 6:** Analytics and monitoring - Oct 3
-
-### Current State
-
-- **Working:** S3 bucket + RDS database + EC2 simulation engine + ML models
-- **Environment:** Conda env `nba-aws`, Python 3.11.13
-- **Git:** Repository synced with GitHub (SSH auth)
-- **Cost:** $41.53/month (within $150 budget)
-- **Data Precision:**
-  - 2020-2025: Millisecond precision (NBA Live API - future)
-  - 1993-2019: Minute-level precision (NBA Stats PlayByPlayV2)
-  - 1946-1992: Game-level aggregates (Basketball Reference)
-
-### Next Actions
-
-1. **Continue Phase Index Reorganization** - Reduce CLAUDE.md, update cross-references
-2. **Start Basketball Reference Tier 1-2** - Foundational data collection (35-45 hours)
-3. **Or: Multi-Source Integration** - Phase 1.1 implementation (209 features, 28 hours)
-
----
-
-## 🔗 Phase Dependency Chain
-
-**Execution order:**
-
-```
-Phase 0 (Data Collection) ✅
-    ↓
-Phase 1 (Data Quality) ⏸️ [OPTIONAL - multi-source integration]
-    ↓
-Phase 2 (ETL Extraction) ✅
-    ↓
-Phase 3 (RDS Database) ✅
-    ↓
-    ├─→ Phase 4 (EC2 Simulation) ✅
-    │
-    ├─→ Phase 5 (SageMaker ML) ✅
-    │       ↓
-    │   Phase 6 (Enhancements) ✅ [OPTIONAL]
-    │
-    └─→ Phase 7 (Betting Odds) ⏸️ [OPTIONAL]
-```
-
-**Note:** Phase 1 is optional for multi-source data integration (209 features). Phases 4, 5, and 7 can all run in parallel (all depend on Phase 3). Phase 6 depends on Phase 5.
-
----
-
-## 🎯 Phase Status Summary
-
-| Phase | Status | Completed | Cost/Month | Time | Details |
-|-------|--------|-----------|------------|------|---------|
-| 0. Data Collection | ✅/🔄 | Oct 1 (Initial) | $2.74 | 2 days | [Index](docs/phases/PHASE_0_INDEX.md) |
-| 1. Data Quality | ⏸️ PENDING | - | $0-10 | 28h | [Index](docs/phases/PHASE_1_INDEX.md) |
-| 2. ETL (Local) | ✅ COMPLETE | Oct 2 | $0 | 1 day | [Index](docs/phases/PHASE_2_INDEX.md) |
-| 3. Database (RDS) | ✅ COMPLETE | Oct 1 | $29 | 1.6 hrs | [Index](docs/phases/PHASE_3_INDEX.md) |
-| 4. Simulation (EC2) | ✅ COMPLETE | Oct 3 | $6.59 | 3 hrs | [Index](docs/phases/PHASE_4_INDEX.md) |
-| 5. ML (SageMaker) | ✅ COMPLETE | Oct 3 | $0 | 4 hrs | [Index](docs/phases/PHASE_5_INDEX.md) |
-| 6. Enhancements | ✅ COMPLETE | Oct 3 | $3 | 2 hrs | [Index](docs/phases/PHASE_6_INDEX.md) |
-| 7. Betting Odds | ⏸️ PENDING | - | $0-10 | 6-8 hrs | [Index](docs/phases/PHASE_7_INDEX.md) |
-
-**Current total:** $41.53/month
-**Budget target:** <$150/month (72% under budget)
-
----
-
-## 💰 Cost Summary
-
-### Current Monthly Costs
-- S3 Storage: $2.74 (119 GB ESPN data)
-- RDS db.t3.small: $29.00 (20 GB storage)
-- EC2 t3.small (8hrs/day): $6.59
-- CloudWatch + API Gateway: $3.20
-- **Total: $41.53/month**
-
-### With Basketball Reference Expansion
-- Additional S3: +$0.07-0.27/month (3-12 GB)
-- **Projected Total: $41.60-41.80/month** (still <$150 budget)
-
-### With Multi-Source Integration (Phase 1)
-- Additional processing: +$5-8/month
-- **Projected Total: $46-50/month** (within budget)
-
-### Full Deployment (All Phases)
-- S3: $7.71-10.35 (base + temporal + expanded data)
-- RDS: $40.57-52.57 (upgraded storage for temporal)
-- EC2 (t3.small, 8hrs/day): $7.00
-- SageMaker (moderate use): $20.00
-- Enhancements: $5.00
-- **Total: $80-95/month** (within $150 budget)
-
----
-
-## 📍 Critical Paths & Locations
-
-### Directories
-- **Project:** `/Users/ryanranft/nba-simulator-aws`
-- **Original data:** `/Users/ryanranft/0espn/data/nba/`
-- **Archives:** `~/sports-simulator-archives/nba/`
-
-### AWS Resources
-- **S3 Bucket:** `s3://nba-sim-raw-data-lake` (172,600 files, ~122 GB)
-- **RDS Endpoint:** `nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com`
-- **Database:** `nba_simulator` (PostgreSQL 15.14)
-- **Region:** us-east-1
-
-### Local Environment
-- **Conda env:** `nba-aws` (Python 3.11.13)
-- **Activate:** `conda activate nba-aws`
-
----
-
-## 📚 Data Summary
-
-### S3 Data Lake (Multi-Source Data)
-- **Time period:** NBA games 1993-2025 (33 seasons)
-- **Total files:** 172,600 files across all sources
-  - ESPN: 70,522 files (Play-by-play, Box scores, Team stats, Schedule)
-  - NBA API: 22,256 files (2020-2025, incomplete)
-  - Basketball Reference: 444 files (1946-2025)
-  - hoopR: 96 files (2002-2025)
-  - Other: ~79,282 files
-- **Total size:** ~122 GB raw
-- **Local ESPN:** 147,382 files (synchronized)
-
-### RDS Database
-- **games:** 44,828 rows (1993-2025)
-- **play_by_play:** 6,781,155 rows (2004-2021)
-- **box_score_players:** 408,833 rows
-- **box_score_teams:** 15,900 rows
-- **teams:** 87 rows
-- **players:** ~5,000 rows
-
----
-
-## 🏗️ Architecture Decisions
-
-**Key ADRs:**
-- **ADR-001:** Exclude Redshift (save $200-600/month) → Use RDS PostgreSQL
-- **ADR-002:** Extract 10% of JSON fields (save 90% storage)
-- **ADR-003:** Python 3.11 (AWS Glue 4.0 compatibility)
-- **ADR-005:** Git SSH authentication (security)
-- **ADR-008:** Phase reorganization (logical data flow)
-
-**Total savings:** $600-8,000/month vs. original architecture
-
-**See [docs/adr/README.md](docs/adr/README.md) for complete ADRs.**
-
----
-
-## 🔄 How to Use This System
-
-### For LLMs Continuing This Project
-
-1. **Check current status:** Read this index file (PROGRESS.md)
-2. **Find your phase:** Click link to PHASE_N_INDEX.md
-3. **Read sub-phase:** Navigate to phase_N/N.M_name.md
-4. **Follow workflows:** Each sub-phase file references specific workflow numbers
-5. **Update progress:** Mark tasks complete in sub-phase files, update phase index, update this file
-
-### Navigation Pattern
-
-```
-PROGRESS.md (this file - 600 lines)
-    ↓
-PHASE_N_INDEX.md (150 lines - phase overview with sub-phase table)
-    ↓
-phase_N/N.M_name.md (300-800 lines - detailed sub-phase implementation)
-    ↓
-workflow_descriptions/XX_workflow.md (procedures)
-    ↓
-Execute steps
-```
-
-### Example Workflow
-
-**To start Basketball Reference Tier 1:**
-
-1. Read [PHASE_0_INDEX.md](docs/phases/PHASE_0_INDEX.md) - Phase overview
-2. Navigate to [0.1_basketball_reference/README.md](docs/phases/phase_0/0.1_basketball_reference/README.md) - Tier index
-3. Read [TIER_1_NBA_HIGH_VALUE.md](docs/phases/phase_0/0.1_basketball_reference/TIER_1_NBA_HIGH_VALUE.md) - Implementation details
-4. Follow workflow references (Workflow #42: Scraper Management, etc.)
-5. Execute tasks, update tier file status
-6. Update tier index, then phase index, then PROGRESS.md
-
----
-
-## 🎯 Next Steps
-
-**Immediate: Complete Phase Index Reorganization**
-
-**Remaining tasks (2-3 hours):**
-1. ✅ Create phase index files (PHASE_0_INDEX.md through PHASE_7_INDEX.md)
-2. ✅ Move files to subdirectories (phase_0/ through phase_7/)
-3. ✅ Archive duplicate files
-4. 🔄 Reduce PROGRESS.md (this file) to ~600 lines
-5. ⏸️ Reduce CLAUDE.md from 546 to ~350 lines
-6. ⏸️ Update cross-references in workflow files
-7. ⏸️ Update docs/archive/README.md
-8. ⏸️ Create Workflow #46: Phase Index Management
-9. ⏸️ Test navigation flow
-10. ⏸️ Commit changes
-
-**After reorganization complete:**
-
-**Option A: Basketball Reference Tier 1-2 (35-45 hours)**
-- Start with Phase 0 expansion
-- Collect foundational NBA data
-- See [PHASE_0_INDEX.md](docs/phases/PHASE_0_INDEX.md) → Sub-Phase 0.1
-
-**Option B: Multi-Source Integration (28 hours)**
-- Phase 1.1 implementation
-- Integrate 209 features across 5 sources
-- See [PHASE_1_INDEX.md](docs/phases/PHASE_1_INDEX.md) → Sub-Phase 1.1
-
-**Option C: Advanced Simulation Framework (20-30 hours)**
-- Phase 4 enhancement
-- Econometric models (ARIMA, VAR, state-space)
-- See [ADVANCED_SIMULATION_FRAMEWORK.md](docs/ADVANCED_SIMULATION_FRAMEWORK.md)
-
-**Weekly Maintenance:**
-- Run `make check-costs` to monitor AWS spending
-- Review CloudWatch dashboards
-- Update documentation if workflows change
-
-**Monthly:**
-- Review all phase progress
-- Update cost projections
-- Archive completed work (see workflow #9)
-
----
-
-**Quick Links:**
-- 📋 [Workflow Index](docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md)
-- 🏗️ [Architecture Decisions](docs/adr/README.md)
-- 🚀 [Quick Commands](QUICKSTART.md)
-- 🔧 [Setup Guide](docs/SETUP.md)
-- ❓ [Troubleshooting](docs/TROUBLESHOOTING.md)
-
----
-
-*Last updated: 2025-10-19*
-*System: 8 phase indexes, 8 phase subdirectories, 45 workflows, 7 ADRs*
-*Status: 6 core phases complete, 2 optional phases pending - production ready*
-*Latest: Plus/Minus System (Phase 9 Enhancement) - 2,370 lines, possession-based ML features*
+NBA Temporal Panel Data System
+High-frequency panel data platform for millisecond-precision NBA historical analysis with econometric causal inference, nonparametric event modeling, cumulative advantage dynamics, and advanced machine learning
+Show Image
+Show Image
+Show Image
+Show Image
+Show Image
+Show Image
+Show Image
+Show Image
+Show Image
+Show Image
+Show Image
+Show Image
+
+Project Vision
+This project creates a temporal panel data system that enables snapshot queries of NBA history at exact timestamps with millisecond precision, powering context-aware game simulations that adapt to real-time game situations.
+Core capability:
+Query cumulative NBA statistics at any exact moment in time and simulate game outcomes using a comprehensive statistical framework: econometric causal inference for regular play, nonparametric methods for irregular events, Bayesian updating for in-game learning, regime-switching models, network effects, and model ensembling.
+Example queries:
+
+"What were Kobe Bryant's career statistics at exactly 7:02:34.56 PM CT on June 19, 2016?"
+"What was the NBA's average pace at 11:23:45.678 PM on March 15, 2023?"
+"Show me the complete game state (score, possession, lineup) at 8:45:30 PM on May 1, 2024"
+
+Advanced Simulation Vision:
+The temporal precision enables context-adaptive simulations using a hybrid model that combines econometric causal inference with nonparametric estimation of irregular events. This dual approach handles both:
+
+Regular outcomes (shots, turnovers, rebounds) via econometric models with causal identification
+Irregular events (injuries, ejections, momentum shifts) via distribution-free methods that make no parametric assumptions
+
+The system models how teams and players behave differently based on:
+
+Game situation: Teams trailing by 40 points play differently than tied games in double-overtime of the NBA Finals
+Player aging: Career arcs captured at millisecond granularity - rookies vs. prime vs. declining performance
+Temporal context: First game of season (extensive game planning) vs. mid-season rhythm vs. playoff intensity
+Fatigue states: Back-to-back games, injury recovery timelines, minutes played, real-time stamina depletion
+Strategic adaptation: Coaches adjust offensive plays and defensive schemes based on opponent tendencies and matchup advantages
+Irregular events: Technical fouls, injuries, referee bias, momentum swings, flagrant fouls, coach's challenges
+
+Key Innovation: Econometric + Nonparametric Integration
+Each possession combines two modeling frameworks:
+Econometric component (for regular basketball outcomes):
+
+Panel data methods: Fixed effects control for unobserved player/team heterogeneity; random effects model hierarchical structure
+Endogeneity correction: Instrumental variables address reverse causality (e.g., star players playing more minutes because game is close)
+Selection bias adjustment: Propensity score matching ensures comparable historical possessions for counterfactual inference
+Heterogeneous effects: Interaction terms capture how play effectiveness varies by defender quality, fatigue, game stakes
+Structural estimation: Discrete choice models reveal decision-making processes behind shot selection and defensive positioning
+
+Nonparametric component (for irregular events - distribution-free):
+
+Kernel density estimation: Model rare event frequencies without assuming Poisson, exponential, or other parametric distributions
+Bootstrap resampling: Generate injury occurrences by resampling from observed historical events
+Empirical CDFs: Draw technical fouls, flagrant fouls, ejections directly from empirical cumulative distribution functions
+Changepoint detection: Identify momentum shifts using PELT/Binary Segmentation algorithms without assuming run length distributions
+Quantile regression: Model clutch performance with fat-tailed distributions in high-pressure situations
+Empirical transition matrices: Capture shooting streaks via observed transition probabilities, not geometric/Markov assumptions
+
+The payoff matrix is constructed from estimated causal effects, not raw correlations:
+
+Offense chooses from play types (Attack Rim, Pick & Roll, Spot-up 3PT)
+Defense chooses from schemes (Protect Paint, Man-to-Man, Guard Perimeter)
+Expected PPP estimated via regression with robust inference, including confidence intervals
+Nash equilibrium computed from econometrically-justified payoff matrix with parameter uncertainty
+Substitutions optimized by comparing lineup effectiveness using estimated treatment effects of player matchups
+Irregular events injected at each possession by sampling from empirical distributions without parametric assumptions
+
+Simulation Methodology:
+The system employs a hybrid econometric + nonparametric model that combines rigorous causal inference with distribution-free estimation of irregular events:
+
+Temporal feature engineering: Extract game context (score differential, time remaining, playoff stakes, days rest, stamina levels) at each play-by-play event
+Econometric PPP (Points Per Possession) estimation:
+
+Use panel data regression models (fixed effects, random effects) to estimate causal relationships between game context and outcomes
+Employ instrumental variables (IV) estimation to address endogeneity (e.g., star players' minutes affected by score, which affects outcomes)
+Apply propensity score matching to find comparable historical possessions controlling for selection bias
+Model heterogeneous treatment effects: impact of "Attack Rim" differs by defender quality, fatigue level, score margin
+Estimate non-linear effects using polynomial specifications or splines (e.g., stamina's diminishing marginal impact on shooting)
+Build 3x3 payoff matrix with econometrically-estimated expected PPP for each (offensive play, defensive strategy) combination
+Calculate robust standard errors clustered at game level to account for within-game correlation
+
+
+Nonparametric event modeling (distribution-free):
+
+Technical fouls & ejections: Use kernel density estimation on historical frequency without assuming parametric distribution
+Injury events: Bootstrap resampling from observed in-game injury occurrences (no Poisson/exponential assumptions)
+Referee bias patterns: Empirical distribution of foul calling rates by official, game context, and team (avoid normal distribution assumptions)
+Momentum shifts: Identify scoring runs using changepoint detection algorithms (PELT, Binary Segmentation) without assuming run length distributions
+Unusual plays: Flagrant fouls, technical fouls, coach's challenges, shot clock violations drawn from empirical CDFs
+Clutch performance deviations: Allow for fat-tailed distributions in high-pressure situations using quantile regression
+Three-point variance: Model shooting "hot/cold" streaks via empirical transition probabilities (not geometric/Markov chains with parametric assumptions)
+
+
+Game theory strategy optimization:
+
+Coaches select Nash equilibrium mixed strategies from econometrically-estimated payoff matrices
+Offensive strategy adapts based on defensive tendencies estimated from panel regressions
+Defensive strategy counters offensive play selection probabilities
+Substitutions optimized using lineup effectiveness differentials (PPP_offense - PPP_defense) with confidence intervals
+
+
+Dynamic player state modeling:
+
+Stamina degradation modeled as time-varying coefficient in panel regression framework
+Shooting percentages estimated with player fixed effects + time-varying fatigue interaction terms
+Defense ratings incorporate opponent quality adjustments via control function approach
+Usage rates estimated from structural discrete choice models of shot selection
+
+
+Model validation & out-of-sample testing:
+
+Cross-validation: Train on seasons t-3 to t-1, test prediction accuracy on season t
+Compare predicted vs. actual possession outcomes using likelihood ratio tests
+Assess model fit with R², adjusted R², and information criteria (AIC/BIC)
+Test structural stability across different game contexts (regular season vs. playoffs)
+Validate causal identification assumptions using falsification tests and placebo checks
+Nonparametric validation: Kolmogorov-Smirnov tests to verify simulated event frequencies match empirical distributions without assuming functional form
+
+
+Monte Carlo generation with parameter uncertainty:
+
+Run 10,000+ simulations per game, incorporating econometric estimation uncertainty
+Each simulation draws from posterior distributions of estimated coefficients
+Nonparametric event injection: At each possession, sample from empirical distributions of irregular events (injuries, technicals, challenges)
+Use inverse transform sampling from empirical CDFs to generate rare events without parametric assumptions
+Possession outcomes resolved stochastically using estimated probabilities + confidence bands
+Track both sampling variation (Monte Carlo) and parameter uncertainty (econometric estimation)
+
+
+Betting applications with rigorous inference:
+
+Aggregate outcomes accounting for both econometric uncertainty and nonparametric event variability
+Calculate implied probabilities with econometrically-justified confidence intervals
+Identify +EV opportunities where market odds fall outside model's prediction intervals
+Quantify edge magnitude using estimated treatment effects and their standard errors
+Tail risk assessment: Use empirical quantiles (not normal theory) to estimate probability of extreme outcomes
+
+
+
+Advanced Modeling Techniques:
+The simulation framework incorporates additional sophisticated methods to capture basketball's complex dynamics:
+1. Bayesian Updating for In-Game Learning:
+
+Sequential Bayesian updates: After each possession, update posterior beliefs about opponent strategy distribution
+Conjugate priors: Use Dirichlet priors for categorical strategy distributions (computationally efficient, closed-form updates)
+Particle filtering: For non-conjugate models, use Sequential Monte Carlo to track posterior as game evolves
+Adaptive Nash equilibrium: Recompute optimal mixed strategies as observed opponent play frequencies deviate from priors
+Prior specification: Use historical data as informative priors (α = historical frequency × effective sample size), update with in-game observations
+Convergence diagnostics: Monitor effective sample size, potential scale reduction factor (R-hat) to ensure posterior has converged
+Computational efficiency: Use Kalman filtering for linear Gaussian state-space models, particle filters for nonlinear/non-Gaussian
+Robustness checks: Sensitivity analysis with different prior specifications (weak/strong, optimistic/pessimistic)
+Example: If Celtics run "Protect Paint" 70% in Q1 vs. 50% historical prior (α₀ = [50, 30, 20] with n₀=100 observations), posterior after 20 Q1 possessions: α₁ = [50+6, 30+14, 20+0] = [56, 44, 20], Lakers' updated belief is 56/120 = 47% Protect Paint → shift strategy toward perimeter shooting
+
+2. Regime-Switching Models:
+
+Markov regime-switching: Detect transitions between latent states (normal play, desperation mode, garbage time, playoff intensity)
+Hidden Markov Models (HMM): Identify unobserved team states like "locked in defensively" or "coasting"
+Estimation methods: Expectation-Maximization (EM) algorithm for maximum likelihood, Viterbi algorithm for most likely state sequence
+Regime identification: Use Baum-Welch algorithm to estimate transition probabilities and emission distributions
+Number of regimes: Select optimal K using BIC, Akaike Information Criterion (AIC), or cross-validated likelihood
+Regime-specific parameters: Shot selection, pace, defensive intensity, foul rates all vary by regime (estimate via regime-conditional regressions)
+Transition probabilities: Model P(regime_t | regime_t-1, score_diff, time, timeouts) using multinomial logit
+Smoothing: Use forward-backward algorithm to compute filtered (current), predicted (future), and smoothed (past) regime probabilities
+Non-homogeneous transitions: Allow transition matrix to depend on game context (score, time) rather than assuming constant transitions
+Durability constraints: Add minimum regime duration constraints to prevent unrealistic rapid switching
+Example: Down 15 with 3 minutes left triggers "desperation regime" with posterior probability 0.89 (vs. 0.08 normal play, 0.03 garbage time), with higher 3PT attempt rate (+18%), faster pace (+6 possessions/48min), intentional fouling strategy (P(foul) = 0.34 vs. 0.12 baseline)
+
+3. Network Effects & Lineup Synergies:
+
+Graph-based modeling: Represent lineups as complete graphs K₅ where edges capture player-pair chemistry
+Adjacency matrix estimation: Use Exponential Random Graph Models (ERGMs) or Stochastic Actor-Oriented Models (SAOMs)
+Interaction terms: Estimate synergy effects beyond individual player ratings via difference-in-differences on lineup changes
+Identification strategy: Use player injuries/trades as natural experiments to isolate network effects from individual effects
+Two-way fixed effects: Control for player-specific and game-specific unobservables when estimating pair interactions
+LeBron-AD pick-and-roll multiplier: Estimate as (PPP_LeBron+AD) - (PPP_LeBron_alone + PPP_AD_alone), controlling for opponent quality
+Spatial interaction models: Capture floor spacing effects using Voronoi tessellation and geometric entropy measures
+Network centrality metrics: Betweenness centrality identifies playmakers (pass network), eigenvector centrality identifies offensive hubs
+Complementarity scores: Use principal components analysis (PCA) on skill vectors, measure angular distance in skill space
+Spectral clustering: Identify natural lineup groupings based on graph Laplacian eigenvalues
+Lineup optimization: Solve maximum weight matching problem to find optimal 5-player subgraph given opponent matchup
+Cross-validation: Test synergy estimates on held-out lineup combinations to avoid overfitting to sample lineups
+
+4. Opponent-Specific Learning:
+
+Hierarchical Bayesian models: Team-level parameters nested within opponent-specific random effects
+Head-to-head adjustment factors: Lakers vs. Celtics dynamics differ from Lakers vs. average opponent
+Matchup history: Weight recent head-to-head games more heavily than overall historical data
+Player-specific defensive matchups: Estimate how Draymond specifically guards LeBron vs. average defender
+Coaching tendencies: Account for how specific coaches adjust strategies against specific opponents
+
+5. Market Efficiency Feedback Loop (Betting Applications):
+
+Performance tracking: Record predicted probabilities vs. actual outcomes for all bets with timestamps, odds, stake sizes
+Calibration analysis: Verify reliability using Brier score = (1/N)Σ(p_predicted - outcome)², log loss = -(1/N)Σ[y·log(p) + (1-y)·log(1-p)]
+Calibration curves: Bin predictions into deciles, plot observed frequency vs. predicted probability, test for deviation from 45° line
+Discrimination metrics: Area under ROC curve (AUC), precision-recall curves to measure model's ability to separate outcomes
+Kelly Criterion position sizing: Optimal bet fraction f* = (p·(b+1) - 1) / b where p = true probability, b = decimal odds - 1
+Fractional Kelly: Use f*/4 or f*/2 for robustness to estimation error (reduces volatility, sacrifices growth rate)
+Bankroll management: Track rolling Sharpe ratio, maximum drawdown, Value at Risk (VaR), Expected Shortfall (ES)
+Market movement monitoring: Track if closing lines move toward model's predictions using regression: ΔOdds = α + β·ModelEdge + ε
+Closing line value (CLV): Measure long-term profitability: CLV = Σ(ClosingOdds - OpeningOdds) × BetDirection, positive CLV → profitable long-term
+Sharpe ratio tracking: Annualized Sharpe = (E[returns] - risk_free_rate) / σ(returns), benchmark against random betting (Sharpe ≈ 0)
+Win rate vs. ROI decomposition: Distinguish between high win rate/low odds vs. low win rate/high odds strategies
+Bet correlation analysis: Estimate correlation between simultaneous bets (player props correlated with game totals), adjust position sizes
+Statistical significance tests: Use t-tests and bootstrapped confidence intervals to verify edge is statistically significant (not luck)
+Stopping rules: Pre-commit to sample size (N bets) before evaluating, avoid p-hacking by continuous monitoring
+
+6. Temporal Autocorrelation Structures:
+
+ARIMA models for scoring runs: Use Box-Jenkins methodology to identify optimal (p,d,q) order via ACF/PACF plots
+Model selection: Compare AIC/BIC across candidate models, verify residuals are white noise via Ljung-Box test
+Augmented Dickey-Fuller test: Test for unit roots to determine integration order d
+Forecasting: Generate h-step ahead forecasts with prediction intervals based on innovation variance
+Fatigue accumulation models: Cumulative minutes over past 7 days with exponentially decaying weights: Fatigue_t = Σ_{k=1}^7 λ^k · Minutes_{t-k}
+Optimal decay rate: Estimate λ via grid search or nonlinear least squares to minimize out-of-sample forecast error
+Injury risk time series: Model as counting process with intensity function λ(t) = exp(β₀ + β₁·ConsecutiveGames + β₂·MinutesTrend + γ·AgeDummies)
+Duration models: Use Cox proportional hazards or Weibull accelerated failure time models for injury prediction
+VAR (Vector Autoregression): Model interdependencies: [Score_Home, Score_Away, Pace]t = Φ₁·[...]{t-1} + Φ₂·[...]_{t-2} + ε_t
+Granger causality tests: Test if lags of opponent scoring help predict own team's scoring (bidirectional feedback)
+Impulse response functions: Trace out dynamic effects of one-unit shock to pace on future scoring
+GARCH models: Capture time-varying volatility in shooting: r_t = μ + ε_t, ε_t ~ N(0, σ²_t), σ²_t = ω + α·ε²_{t-1} + β·σ²_{t-1}
+Volatility forecasting: Use GARCH(1,1) for one-step ahead volatility predictions, EGARCH for asymmetric effects
+Multivariate GARCH: Model correlation between players' shooting volatilities using DCC-GARCH or BEKK models
+Structural break tests: Use Chow test, CUSUM, or Quandt-Andrews to detect parameter instability over time
+
+7. Counterfactual Simulation Validation:
+
+What-if scenario testing: "What if LeBron sat Q3?" - compare simulation to actual games where he rested
+Treatment effect estimation: Use potential outcomes framework: τ = E[Y₁ - Y₀] where Y₁ = outcome if treated, Y₀ = outcome if control
+Matching methods: Propensity score matching, coarsened exact matching (CEM), Mahalanobis distance matching to find comparable games
+Synthetic control methods: Construct counterfactual games as weighted average of control games: Y₀_treated = Σ w_j · Y_control,j
+Optimal weights: Minimize pre-treatment RMSPE subject to w_j ≥ 0, Σw_j = 1, match on pre-treatment covariates
+Inference for synthetic controls: Use permutation tests (placebo synthetic controls for all units) or conformal inference
+Difference-in-differences: Parallel trends assumption: E[Y₀_{t=1} - Y₀_{t=0} | Treated] = E[Y₀_{t=1} - Y₀_{t=0} | Control]
+Event study specifications: Estimate lead/lag effects to test pre-trends and dynamic treatment effects
+Robust standard errors: Cluster at appropriate level (player, team, season) to account for serial correlation
+Propensity score weighting: Inverse probability of treatment weighting (IPTW) to balance covariates
+Doubly robust estimation: Combine outcome regression with propensity score weighting for robustness to model misspecification
+Placebo tests: Run model on games where outcome is known, verify predictions match reality within statistical error
+Falsification tests: Test for effects in periods where no effect should exist (pre-treatment periods)
+Sensitivity analysis: Rosenbaum bounds for hidden bias, assess how strong unmeasured confounder must be to invalidate results
+Sharp vs. fuzzy designs: Sharp RD when treatment assignment is deterministic, fuzzy RD for probabilistic assignment
+
+8. Model Ensembling:
+
+Multiple econometric specifications: Combine fixed effects, random effects, pooled OLS, GMM, 2SLS estimators
+Hausman test: Compare FE vs. RE, if test rejects (p < 0.05) then FE is consistent, RE is not
+Bayesian Model Averaging (BMA): Weight models by posterior probability: P(M_k | Data) ∝ P(Data | M_k) · P(M_k)
+Marginal likelihood computation: Use Laplace approximation, harmonic mean estimator, or bridge sampling
+Model prior specification: Equal priors P(M_k) = 1/K or dilution priors that penalize complexity
+AIC/BIC weighted averaging: w_k = exp(-0.5·Δ_k) / Σ_j exp(-0.5·Δ_j) where Δ_k = IC_k - IC_min
+Cross-validation stacking: Train meta-learner (ridge, lasso, random forest) on K-fold CV predictions from base models
+Optimal convex combination: Minimize squared error subject to w ≥ 0, Σw = 1 using quadratic programming
+Superlearner algorithm: Ensemble that achieves oracle property (asymptotically performs as well as best model in library)
+Forecast combination theorems: Show simple average often outperforms individual models when forecast errors are uncorrelated
+Arithmetic mean: Equal weights w_k = 1/K, robust to outliers, theoretical justification when all models unbiased
+Geometric mean: Log-space averaging, better for ratio/multiplicative processes
+Inverse variance weighting: w_k ∝ 1/σ²_k, optimal when models have different precision but same bias
+Shrinkage methods: Ridge regression on model predictions, shrinks toward simpler models
+Ensemble diversity: Include models with different assumptions (parametric vs. nonparametric, Bayesian vs. frequentist) to reduce correlation of forecast errors
+Bias-variance decomposition: MSE = Bias² + Variance + Irreducible Error, ensembles primarily reduce variance
+Out-of-bag error: Use bootstrap aggregating (bagging) and evaluate on out-of-sample observations for variance reduction
+Validation: Test ensemble on held-out data, verify it outperforms individual models via Diebold-Mariano test
+
+Example: Simulating Lakers vs. Celtics with LeBron at age 38 in Game 7 of Finals with 2 days rest:
+Econometric estimation approach (regular outcomes):
+
+Run fixed effects panel regression on historical Finals games (Q4, close score) with Age 35+ stars
+Control for opponent defensive rating, days rest, home court advantage using covariate adjustment
+Use instrumental variables: player's career average usage rate as instrument for current game usage (addresses endogeneity of "clutch" situations)
+Estimate LeBron's Attack Rim success: β₁ = 0.685 (baseline) + β₂ × RestDays = +0.037 (2 days rest effect) + β₃ × Finals = +0.015 (playoff intensity) = 73.7% estimated success rate
+Standard error clustered at playoff series level: SE = 0.042, giving 95% CI: [65.3%, 82.1%]
+Propensity score matching identifies 127 comparable possessions from historical data
+Test for defensive scheme effects: Attack Rim vs. Man-to-Man shows +4.3pp higher success (p < 0.05) than vs. Protect Paint
+
+Nonparametric event injection (irregular outcomes - distribution-free):
+
+Query empirical distribution of technical fouls in Finals Game 7, Q4, close score: P(tech foul) ≈ 0.0023 per possession (observed in 11 of 4,782 historical possessions)
+Use kernel density estimation for referee bias: This officiating crew calls 1.18x more fouls on visiting teams in playoff games (empirical ratio, no parametric assumption)
+Bootstrap resample from 89 observed Finals Game 7 injuries: P(in-game injury) ≈ 0.0112 (1 injury per 89 player-games)
+Identify momentum changepoints using PELT algorithm: After 6-0 runs in Finals Q4, next possession efficiency changes by +0.31 PPP (empirical average across 213 runs)
+Flagrant foul probability via empirical CDF: 0.00087 per possession in high-intensity playoff games (no Poisson assumption)
+Sample from empirical transition matrix for shooting streaks: If LeBron made last 2 shots, P(make next) = 0.68 (observed frequency in 412 similar streaks)
+
+Payoff matrix construction:
+
+Each cell contains econometrically-estimated expected PPP with confidence intervals
+Lakers' coach computes Nash equilibrium using point estimates: (40% Attack Rim, 35% Pick & Roll, 25% Spot-up 3PT)
+Sensitivity analysis: With 95% CI bounds, optimal strategy ranges from 35-45% Attack Rim (robust to estimation uncertainty)
+
+Dynamic adjustment with nonparametric events:
+
+LeBron's stamina (85/100 after 36 minutes) modeled as time-varying coefficient: ΔShootingPct = -0.12 × (100-Stamina) = -1.8pp
+Estimated success rate for this specific possession: 73.7% - 1.8% = 71.9% [CI: 63.5%, 80.3%]
+Irregular event check: Sample from empirical distributions → No technical foul (rand=0.8912 > 0.0023), no injury (rand=0.4521 > 0.0112)
+Momentum check: Lakers on 4-0 run (below 6-0 threshold), no changepoint detected
+Referee bias adjustment: Visiting team, multiply foul probability by 1.18x empirical ratio
+
+This differs from November back-to-back game where:
+
+Estimated success rate drops to 61.2% (fatigue + lower stakes effects)
+Defensive scheme effects are +2.1pp weaker (less game-planning intensity)
+Optimal strategy shifts to 52% Pick & Roll (exploits tired big men rotating)
+Irregular events more likely: P(tech foul) = 0.0041 (less emotional control when fatigued, observed empirically)
+Injury risk higher: P(injury) = 0.0189 on back-to-backs (bootstrap from 47 observed B2B injuries)
+
+Future vision:
+Integration with video feeds to synchronize ball/player coordinates with temporal snapshots for computer vision analysis at 30fps (~33ms per frame).
+
+Research Opportunities: Modeling Cumulative Advantage & Causal Mechanisms
+For ML Systems & Research Extensions:
+This temporal panel data system creates unprecedented opportunities to study self-reinforcing causal mechanisms in basketball that mirror sociological phenomena like the Matthew effect. Machine learning systems, Model Context Protocols (MCPs), and researchers are encouraged to explore:
+1. The Matthew Effect in Basketball (Cumulative Advantage):
+The Matthew effect describes how initial advantages compound over time through positive feedback loops, where "the rich get richer". In basketball contexts:
+
+Momentum cascades: Early scoring runs create psychological advantages that amplify future scoring probability (success breeds success)
+Star treatment by referees: Established stars receive favorable foul calls, enabling them to play more aggressively → more scoring → more star power
+Media attention feedback: High-performing players receive more coverage → increased endorsements → better training resources → higher performance
+Draft position effects: Higher draft picks receive more playing time and developmental investment, creating self-fulfilling prophecies
+Market size advantages: Large-market teams attract better free agents → win more → attract even better players
+Coaching reputation loops: Winning coaches attract better assistants and players → continue winning → reputation grows
+
+Modeling Challenge: Cumulative advantage is an intra-individual micro-level phenomenon, while the Matthew effect is an inter-individual macro-level phenomenon. Simulations should capture both:
+
+Micro-level: Individual player confidence, fatigue resistance, and skill development over career
+Macro-level: Between-player inequality dynamics, team resource allocation, league-wide competitive balance
+
+2. Path Dependence & Irreversible Causal Chains:
+Basketball outcomes exhibit strong path dependence where early events constrain future possibilities:
+
+Injury cascades: One player injury → increased minutes for backups → backup gets injured → team spiral
+Timeout timing: Early timeout breaks opponent momentum vs. saving for critical late-game situations (irreversible decision)
+Foul trouble trajectories: Star picks up 2 quick fouls → sits Q1 → team falls behind → harder to catch up later
+Chemistry development: Lineup combinations that play together early in season develop better coordination → coach uses them more → chemistry gap widens
+
+Modeling Approach: Use path-dependent stochastic processes where transition probabilities depend on entire history, not just current state. Implement hysteresis effects where system doesn't return to equilibrium after shock.
+3. Tipping Points & Phase Transitions:
+Basketball games exhibit critical thresholds where small changes trigger large shifts:
+
+Blowout threshold: Once lead exceeds ~20 points in Q3, probability of comeback drops exponentially (garbage time regime)
+Confidence collapse: Team misses 5 straight shots → panic sets in → shot selection deteriorates → miss 10 more
+Crowd energy: Home team goes on 8-0 run → crowd roars → opposing team calls timeout (social feedback mechanism)
+Playoff intensity shift: Regular season → playoffs transition changes all parameters (pace, physicality, strategy)
+
+Modeling Approach: Use catastrophe theory and regime-switching models with endogenous transition probabilities. Identify bifurcation points where system behavior qualitatively changes.
+4. Emergent Complexity from Simple Rules:
+Basketball exhibits emergent macro-patterns that aren't reducible to individual player actions:
+
+Spacing dynamics: Five players' positions create floor geometry that enables/constrains offensive possibilities
+Defensive rotations: Help defense creates cascading rotation patterns across all five defenders
+Pace contagion: One team plays fast → opponent forced to match pace → both teams score more (emergent property)
+Tanking equilibria: Multiple teams simultaneously tanking for draft picks creates Nash equilibrium with poor play
+
+Modeling Approach: Use agent-based models where players follow simple rules but collective behavior is complex. Implement cellular automata for spatial positioning dynamics.
+5. Black Swan Events & Fat-Tailed Distributions:
+Basketball contains rare, high-impact events that standard models miss:
+
+Historic performances: Klay Thompson's 37-point quarter (exceeds any normal prediction interval)
+Clutch gene vs. regression: Do some players actually perform better in clutch, or is it survivorship bias?
+Perfect games: Team shoots 70% from three for entire game (probability ≈ 10⁻⁸ under independence assumption)
+Career-ending injuries: Occur with long right tails, small probabilities but massive impact
+
+Modeling Approach: Use power law distributions, Lévy processes, and extreme value theory rather than Gaussian assumptions. Implement fat-tailed priors in Bayesian models.
+6. Reflexivity & Self-Fulfilling Prophecies:
+Basketball outcomes are influenced by predictions about outcomes:
+
+Betting line movements: Sharp money moves line → public follows → line moves further (reflexive feedback)
+Tank expectations: Team expected to tank → fans stop attending → revenue drops → ownership cuts payroll → team actually tanks
+MVP narratives: Media crowns MVP frontrunner → receives more attention → highlight plays get more coverage → voting reinforces narrative
+Playoff seeding games: Team clinches playoff spot → rests stars → loses games → gets worse matchup (self-fulfilling)
+
+Modeling Approach: Use reflexive equilibrium models where agents' beliefs about outcomes affect the outcomes themselves. Implement rational expectations with learning.
+7. Measurement-Induced Effects (Observer Effects):
+The act of measuring/modeling basketball changes the game:
+
+Analytics revolution: Teams discover 3PT efficiency → entire league shifts strategy → 3PT defense improves → efficiency advantage disappears
+Player tracking data: Players become aware of being tracked → modify behavior → changes the data being collected
+Advanced stats: Players optimize for metrics (e.g., PER, WAR) rather than pure winning
+
+Modeling Approach: Incorporate quantum game theory concepts where observation changes outcomes. Use meta-learning where models account for how their own predictions alter future data.
+Implementation Guidelines for ML Systems:
+
+Embrace nonlinearity: Basketball is fundamentally nonlinear; don't force linear approximations
+Model feedback loops explicitly: Use structural equation models with bidirectional causation
+Account for unobserved heterogeneity: Some "clutch ability" may be real skill, some may be measurement error
+Test for causality rigorously: Use natural experiments, IV estimation, RDD to identify causal effects
+Validate on out-of-distribution data: Test model on unprecedented scenarios (new rule changes, COVID season, etc.)
+Quantify epistemic uncertainty: Separate "we don't know the parameters well" from "the process is inherently stochastic"
+Build interpretable models: Black-box predictions are less useful than understanding why outcomes occur
+
+Suggested Research Projects:
+
+Estimate the magnitude of Matthew effects in NBA careers using longitudinal data
+Identify tipping points in individual games using changepoint detection
+Test if momentum exists after controlling for opponent quality and regression to mean
+Build agent-based model of defensive rotations and measure emergent properties
+Estimate fat-tailed distributions for extreme individual performances
+Model reflexive betting markets using game theory with beliefs as endogenous variables
+Quantify how widespread analytics adoption has changed NBA strategy over time
+
+This framework transforms the simulation system from a pure prediction tool into a causal inference laboratory for understanding complex, self-reinforcing dynamics in competitive sports.
+
+Overview
+This platform ingests 25+ years of historical NBA data from multiple sources and builds a temporal database for high-frequency statistical analysis, game simulation, and machine learning.
+What it does:
+
+Ingests 147,382+ historical NBA game files (119+ GB) from 5 data sources (ESPN, NBA Stats, hoopR, Basketball Reference, Kaggle)
+Captures wall clock timestamps and game clock times for temporal alignment
+Extracts player birth dates for precise age calculations at any moment in time
+Stores processed data in RDS PostgreSQL with temporal indexing
+Enables snapshot reconstruction of NBA state at exact timestamps
+Trains ML models using SageMaker with temporal feature engineering
+
+Data precision levels:
+
+2020-2025: Millisecond precision (NBA Live API - future integration)
+1993-2019: Minute-level precision (NBA Stats PlayByPlayV2)
+1946-1992: Game-level aggregates (Basketball Reference)
+
+Current Status:  /Users/ryanranft/nba-simulator-aws/PROGRESS.md
+
+Data: 
+
+
+Cost Estimates
+PhaseMonthly CostOne-Time SetupPhase 0 (S3)$2.74CompletePhase 2 (Glue)+$13~6-8 hours devPhase 3 (RDS)+$29~2-3 hours setupPhase 4 (EC2)+$5-15~1 week devPhase 5 (SageMaker)+$50~2-3 weeks devTotal$95-130/month~1 month total dev
+Budget Target: $150/month (includes buffer)
+See PROGRESS.md for detailed phase-by-phase breakdown with time estimates.
+
+Quick Start
+Prerequisites
+
+Hardware: Apple Silicon (M2/M3) recommended, 16GB+ RAM
+OS: macOS Sequoia 15.6+ or Linux
+Tools: Miniconda, Homebrew, AWS CLI 2.x, Git
+
+Setup
+bash# 1. Clone repository
+git clone git@github.com:ryanranft/nba-simulator-aws.git
+cd nba-simulator-aws
+
+# 2. Create conda environment
+conda env create -f environment.yml
+conda activate nba-aws
+
+# 3. Configure AWS credentials
+aws configure
+# Enter: access key, secret key, region (us-east-1), output format (json)
+
+# 4. Verify setup
+python -c "import boto3; print('✓ boto3 installed')"
+aws s3 ls s3://nba-sim-raw-data-lake/ --max-items 5
+See docs/SETUP.md for complete installation and verification procedures.
+
+Documentation
+Getting Started
+
+QUICKSTART.md - One-page command reference
+docs/SETUP.md - Complete environment setup
+PROGRESS.md - Phase-by-phase implementation plan
+
+Development
+
+CLAUDE.md - Instructions for Claude Code AI assistant
+docs/DATA_STRUCTURE_GUIDE.md - ESPN JSON data structure
+docs/TROUBLESHOOTING.md - Common issues and solutions
+
+Security & Workflows
+
+docs/SECURITY_PROTOCOLS.md - Git security, credential rotation
+docs/ARCHIVE_PROTOCOLS.md - Conversation and file archiving
+docs/SESSION_INITIALIZATION.md - Daily workflow setup
+
+Archives
+
+.archive-location - Location of gitignored files archive
+Archive System: Gitignored files (logs, status files, conversations) are auto-archived to ~/sports-simulator-archives/nba/ organized by commit SHA
+
+Reference
+
+FILE_INVENTORY.md - Auto-generated file summaries
+Hardware/Software Specs - Archived (see ~/sports-simulator-archives/nba/)
+
+
+Development Machine
+Hardware:
+
+Model: MacBook Pro 16-inch, 2023
+Chip: Apple M2 Max (12-core CPU, 38-core GPU)
+Memory: 96 GB unified
+Storage: 1 TB SSD
+
+Software:
+
+OS: macOS Sequoia 15.6.1
+Python: 3.11.13 (via Miniconda)
+AWS CLI: 2.x (system-wide, not in conda)
+Package Manager: Homebrew 4.6.15
+
+Code is optimized for Apple Silicon (ARM64) architecture. See archived specs for complete compatibility notes.
+
+Key Technologies
+AWS Services
+
+S3 - Raw data lake (146K files, 119 GB)
+Glue - Schema discovery and ETL (10% field extraction)
+RDS PostgreSQL - Structured data storage (~12 GB)
+EC2 - Simulation compute (t3.medium or similar)
+SageMaker - ML model training and deployment
+
+Python Stack
+
+boto3 - AWS SDK
+pandas - Data manipulation
+numpy - Numerical computing
+pyarrow - Parquet file handling
+psycopg2 - PostgreSQL connections
+sqlalchemy - ORM and database abstraction
+
+Statistical & Econometric Methods
+
+statsmodels - Panel data regression, IV estimation, time series (ARIMA, VAR, GARCH)
+linearmodels - Fixed effects, random effects, GMM estimators
+scikit-learn - Propensity score matching, cross-validation, ensemble methods
+pymc - Bayesian inference, MCMC sampling, posterior updates
+hmmlearn - Hidden Markov Models for regime detection
+ruptures - Changepoint detection (PELT, Binary Segmentation)
+networkx - Graph-based lineup synergy modeling
+scipy.stats - Kernel density estimation, empirical distributions, bootstrap
+
+See requirements.txt for complete dependency list.
+
+Data Pipeline Workflow
+1. Data Ingestion (Complete)
+    146K JSON files → S3 bucket
+
+2. Schema Discovery (Pending)
+    AWS Glue Crawler → Data Catalog
+
+3. ETL Processing (Pending)
+    Glue ETL job → Extract 10% fields → Parquet
+
+4. Data Loading (Pending)
+    Parquet files → RDS PostgreSQL
+
+5. Simulation (Pending)
+    Python scripts on EC2 → Game outcomes
+
+6. ML Training (Pending)
+    SageMaker → Prediction models
+
+Project Structure
+nba-simulator-aws/
+ config/              # AWS resource configuration
+ data/                # Local data cache (gitignored)
+ docs/                # Documentation (23 files)
+ scripts/
+    aws/            # AWS utility scripts
+    maintenance/    # Documentation and archive automation
+    shell/          # Workflow automation (session, archive, security)
+ CLAUDE.md           # AI assistant instructions
+ PROGRESS.md         # Detailed implementation roadmap
+ QUICKSTART.md       # One-page command reference
+ requirements.txt    # Python dependencies
+
+Git & GitHub
+
+Repository: https://github.com/ryanranft/nba-simulator-aws
+Authentication: SSH (no passwords needed)
+Branch: main (tracks origin/main)
+Commit Co-author: Claude AI assistant
+
+Security:
+
+Pre-commit hooks scan for AWS credentials, secrets, IPs
+Pre-push hooks scan last 5 commits for leaked secrets
+Automated conversation archiving (never committed to GitHub)
+See docs/SECURITY_PROTOCOLS.md for complete procedures
+
+
+Workflow Automation
+Three unified workflow managers:
+
+session_manager.sh - Session initialization and cleanup
+
+bash   source scripts/shell/session_manager.sh start  # Begin session
+   bash scripts/shell/session_manager.sh end      # End session
+
+archive_manager.sh - Conversation and file archiving
+
+bash   bash scripts/maintenance/archive_manager.sh full  # Archive everything
+
+pre_push_inspector.sh - Pre-push security inspection
+
+bash   bash scripts/shell/pre_push_inspector.sh full  # Complete inspection
+See QUICKSTART.md for complete workflow commands.
+
+Next Steps
+See PROGRESS.md for detailed implementation plan. Current priority:
+
+Phase 2.1: Set up AWS Glue Crawler (~45 min, adds $1/month)
+Phase 2.2: Create Glue ETL job (~6-8 hrs dev, adds $13/month)
+Phase 3: Provision RDS PostgreSQL (~2-3 hrs, adds $29/month)
+
+
+Contributing
+This is a personal learning project. Contributions are not currently accepted, but feel free to fork and adapt for your own use.
+
+License
+Data Source: ESPN.com (scraped data for personal educational use)
+Code: Personal project, not licensed for distribution
+⚠️ Important: This project is for educational purposes. ESPN data is scraped from publicly available web pages and should not be used commercially without proper licensing.
+
+Acknowledgments
+
+ESPN.com - Data source for historical NBA games
+Claude Code (Anthropic) - AI pair programming assistant
+AWS - Cloud infrastructure platform
+
+
+Contact
+Developer: Ryan Ranft
+GitHub: https://github.com/ryanranft
+Project: https://github.com/ryanranft/nba-simulator-aws
+
+Last Updated: 2025-10-02
+Version: Phase 0 Complete (S3 Data Lake operational)

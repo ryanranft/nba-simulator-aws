@@ -16,19 +16,14 @@ from datetime import datetime, timedelta
 from collections import OrderedDict
 
 # Add module directory to Python path
-sys.path.insert(0, str(Path(__file__).parent.parent / 'scripts/ml'))
+sys.path.insert(0, str(Path(__file__).parent.parent / "scripts/ml"))
 
 # Import from the module
-from feature_store import (
-    FeatureType,
-    FeatureStatus,
-    FeatureMetadata,
-    LRUCache,
-    logger
-)
+from feature_store import FeatureType, FeatureStatus, FeatureMetadata, LRUCache, logger
 
 
 # Fixtures
+
 
 @pytest.fixture
 def sample_datetime():
@@ -50,7 +45,7 @@ def feature_metadata(sample_datetime):
         dependencies=["player_stats"],
         tags=["player", "scoring"],
         schema={"type": "float", "min": 0, "max": 100},
-        statistics={"mean": 15.5, "std": 5.2}
+        statistics={"mean": 15.5, "std": 5.2},
     )
 
 
@@ -68,7 +63,7 @@ def feature_metadata_dict(sample_datetime):
         "dependencies": ["player_stats"],
         "tags": ["player", "scoring"],
         "schema": {"type": "float", "min": 0, "max": 100},
-        "statistics": {"mean": 15.5, "std": 5.2}
+        "statistics": {"mean": 15.5, "std": 5.2},
     }
 
 
@@ -85,6 +80,7 @@ def lru_cache_large():
 
 
 # FeatureType Tests
+
 
 def test_feature_type_enum_values():
     """Test FeatureType enum has correct values."""
@@ -116,6 +112,7 @@ def test_feature_type_invalid_value_raises_error():
 
 # FeatureStatus Tests
 
+
 def test_feature_status_enum_values():
     """Test FeatureStatus enum has correct values."""
     assert FeatureStatus.ACTIVE.value == "active"
@@ -145,6 +142,7 @@ def test_feature_status_invalid_value_raises_error():
 
 # FeatureMetadata Tests
 
+
 def test_feature_metadata_initialization(feature_metadata, sample_datetime):
     """Test FeatureMetadata initialization with all fields."""
     assert feature_metadata.name == "player_points_avg"
@@ -168,7 +166,7 @@ def test_feature_metadata_default_values(sample_datetime):
         feature_type=FeatureType.BOOLEAN,
         description="Test feature",
         created_at=sample_datetime,
-        updated_at=sample_datetime
+        updated_at=sample_datetime,
     )
     assert metadata.status == FeatureStatus.ACTIVE
     assert metadata.dependencies == []
@@ -186,19 +184,19 @@ def test_feature_metadata_to_dict(feature_metadata, feature_metadata_dict):
 def test_feature_metadata_to_dict_converts_enums(feature_metadata):
     """Test to_dict converts enums to string values."""
     result = feature_metadata.to_dict()
-    assert isinstance(result['feature_type'], str)
-    assert isinstance(result['status'], str)
-    assert result['feature_type'] == "numeric"
-    assert result['status'] == "active"
+    assert isinstance(result["feature_type"], str)
+    assert isinstance(result["status"], str)
+    assert result["feature_type"] == "numeric"
+    assert result["status"] == "active"
 
 
 def test_feature_metadata_to_dict_converts_datetime(feature_metadata, sample_datetime):
     """Test to_dict converts datetime to ISO format."""
     result = feature_metadata.to_dict()
-    assert isinstance(result['created_at'], str)
-    assert isinstance(result['updated_at'], str)
-    assert result['created_at'] == sample_datetime.isoformat()
-    assert result['updated_at'] == sample_datetime.isoformat()
+    assert isinstance(result["created_at"], str)
+    assert isinstance(result["updated_at"], str)
+    assert result["created_at"] == sample_datetime.isoformat()
+    assert result["updated_at"] == sample_datetime.isoformat()
 
 
 def test_feature_metadata_from_dict(feature_metadata_dict, sample_datetime):
@@ -243,7 +241,7 @@ def test_feature_metadata_with_empty_lists(sample_datetime):
         created_at=sample_datetime,
         updated_at=sample_datetime,
         dependencies=[],
-        tags=[]
+        tags=[],
     )
     assert metadata.dependencies == []
     assert metadata.tags == []
@@ -255,8 +253,8 @@ def test_feature_metadata_with_complex_schema(sample_datetime):
         "type": "object",
         "properties": {
             "value": {"type": "float"},
-            "confidence": {"type": "float", "min": 0, "max": 1}
-        }
+            "confidence": {"type": "float", "min": 0, "max": 1},
+        },
     }
     metadata = FeatureMetadata(
         name="test",
@@ -265,18 +263,21 @@ def test_feature_metadata_with_complex_schema(sample_datetime):
         description="Test",
         created_at=sample_datetime,
         updated_at=sample_datetime,
-        schema=complex_schema
+        schema=complex_schema,
     )
     assert metadata.schema == complex_schema
 
 
-@pytest.mark.parametrize("feature_type", [
-    FeatureType.NUMERIC,
-    FeatureType.CATEGORICAL,
-    FeatureType.BOOLEAN,
-    FeatureType.EMBEDDING,
-    FeatureType.TIME_SERIES
-])
+@pytest.mark.parametrize(
+    "feature_type",
+    [
+        FeatureType.NUMERIC,
+        FeatureType.CATEGORICAL,
+        FeatureType.BOOLEAN,
+        FeatureType.EMBEDDING,
+        FeatureType.TIME_SERIES,
+    ],
+)
 def test_feature_metadata_with_all_feature_types(feature_type, sample_datetime):
     """Test FeatureMetadata with all possible feature types."""
     metadata = FeatureMetadata(
@@ -285,17 +286,20 @@ def test_feature_metadata_with_all_feature_types(feature_type, sample_datetime):
         feature_type=feature_type,
         description="Test",
         created_at=sample_datetime,
-        updated_at=sample_datetime
+        updated_at=sample_datetime,
     )
     assert metadata.feature_type == feature_type
 
 
-@pytest.mark.parametrize("status", [
-    FeatureStatus.ACTIVE,
-    FeatureStatus.DEPRECATED,
-    FeatureStatus.EXPERIMENTAL,
-    FeatureStatus.ARCHIVED
-])
+@pytest.mark.parametrize(
+    "status",
+    [
+        FeatureStatus.ACTIVE,
+        FeatureStatus.DEPRECATED,
+        FeatureStatus.EXPERIMENTAL,
+        FeatureStatus.ARCHIVED,
+    ],
+)
 def test_feature_metadata_with_all_statuses(status, sample_datetime):
     """Test FeatureMetadata with all possible statuses."""
     metadata = FeatureMetadata(
@@ -305,12 +309,13 @@ def test_feature_metadata_with_all_statuses(status, sample_datetime):
         description="Test",
         created_at=sample_datetime,
         updated_at=sample_datetime,
-        status=status
+        status=status,
     )
     assert metadata.status == status
 
 
 # LRUCache Tests
+
 
 def test_lru_cache_initialization():
     """Test LRUCache initialization with default capacity."""
@@ -353,10 +358,10 @@ def test_lru_cache_eviction_when_full(lru_cache):
     # Fill cache to capacity (5)
     for i in range(5):
         lru_cache.put(f"key{i}", f"value{i}")
-    
+
     # Add one more item, should evict key0
     lru_cache.put("key5", "value5")
-    
+
     assert lru_cache.size() == 5
     assert lru_cache.get("key0") is None
     assert lru_cache.get("key5") == "value5"
@@ -367,13 +372,13 @@ def test_lru_cache_get_updates_access_order(lru_cache):
     # Fill cache
     for i in range(5):
         lru_cache.put(f"key{i}", f"value{i}")
-    
+
     # Access key0 to make it most recently used
     lru_cache.get("key0")
-    
+
     # Add new item, should evict key1 (least recently used)
     lru_cache.put("key5", "value5")
-    
+
     assert lru_cache.get("key0") == "value0"
     assert lru_cache.get("key1") is None
 
@@ -383,9 +388,9 @@ def test_lru_cache_clear(lru_cache):
     lru_cache.put("key1", "value1")
     lru_cache.put("key2", "value2")
     assert lru_cache.size() == 2
-    
+
     lru_cache.clear()
-    
+
     assert lru_cache.size() == 0
     assert lru_cache.get("key1") is None
     assert lru_cache.get("key2") is None
@@ -394,13 +399,13 @@ def test_lru_cache_clear(lru_cache):
 def test_lru_cache_size(lru_cache):
     """Test size method returns correct count."""
     assert lru_cache.size() == 0
-    
+
     lru_cache.put("key1", "value1")
     assert lru_cache.size() == 1
-    
+
     lru_cache.put("key2", "value2")
     assert lru_cache.size() == 2
-    
+
     lru_cache.clear()
     assert lru_cache.size() == 0
 
@@ -441,19 +446,19 @@ def test_lru_cache_thread_safety():
     """Test LRUCache thread safety with concurrent access."""
     cache = LRUCache(capacity=100)
     results = []
-    
+
     def worker(thread_id):
         for i in range(10):
             cache.put(f"key_{thread_id}_{i}", f"value_{thread_id}_{i}")
             value = cache.get(f"key_{thread_id}_{i}")
             results.append(value is not None)
-    
+
     threads = [threading.Thread(target=worker, args=(i,)) for i in range(5)]
     for thread in threads:
         thread.start()
     for thread in threads:
         thread.join()
-    
+
     # All puts and gets should succeed
     assert all(results)
 
@@ -461,17 +466,17 @@ def test_lru_cache_thread_safety():
 def test_lru_cache_concurrent_put_operations():
     """Test concurrent put operations don't corrupt cache."""
     cache = LRUCache(capacity=50)
-    
+
     def put_worker(start_idx):
         for i in range(start_idx, start_idx + 10):
             cache.put(f"key{i}", f"value{i}")
-    
+
     threads = [threading.Thread(target=put_worker, args=(i * 10,)) for i in range(3)]
     for thread in threads:
         thread.start()
     for thread in threads:
         thread.join()
-    
+
     # Cache should have items and not be corrupted
     assert cache.size() > 0
     assert cache.size() <= 50
@@ -504,7 +509,7 @@ def test_lru_cache_capacity_one():
     cache = LRUCache(capacity=1)
     cache.put("key1", "value1")
     assert cache.get("key1") == "value1"
-    
+
     cache.put("key2", "value2")
     assert cache.get("key1") is None
     assert cache.get("key2") == "value2"
@@ -515,7 +520,7 @@ def test_lru_cache_large_capacity(lru_cache_large):
     """Test LRUCache with large capacity."""
     for i in range(500):
         lru_cache_large.put(f"key{i}", f"value{i}")
-    
+
     assert lru_cache_large.size() == 500
     assert lru_cache_large.get("key0") == "value0"
     assert lru_cache_large.get("key499") == "value499"
@@ -526,7 +531,7 @@ def test_lru_cache_overwrite_maintains_size(lru_cache):
     lru_cache.put("key1", "value1")
     lru_cache.put("key2", "value2")
     assert lru_cache.size() == 2
-    
+
     lru_cache.put("key1", "new_value1")
     assert lru_cache.size() == 2
     assert lru_cache.get("key1") == "new_value1"
@@ -537,11 +542,11 @@ def test_lru_cache_various_capacities(capacity):
     """Test LRUCache with various capacity values."""
     cache = LRUCache(capacity=capacity)
     assert cache.capacity == capacity
-    
+
     # Fill to capacity
     for i in range(capacity):
         cache.put(f"key{i}", f"value{i}")
-    
+
     assert cache.size() == capacity
 
 
@@ -566,7 +571,7 @@ def test_lru_cache_put_after_clear(lru_cache):
     lru_cache.put("key1", "value1")
     lru_cache.clear()
     lru_cache.put("key2", "value2")
-    
+
     assert lru_cache.get("key1") is None
     assert lru_cache.get("key2") == "value2"
     assert lru_cache.size() == 1
@@ -576,7 +581,7 @@ def test_lru_cache_boolean_values(lru_cache):
     """Test caching boolean values."""
     lru_cache.put("true_key", True)
     lru_cache.put("false_key", False)
-    
+
     assert lru_cache.get("true_key") is True
     assert lru_cache.get("false_key") is False
 
@@ -586,7 +591,7 @@ def test_lru_cache_numeric_values(lru_cache):
     lru_cache.put("int_key", 42)
     lru_cache.put("float_key", 3.14)
     lru_cache.put("negative_key", -100)
-    
+
     assert lru_cache.get("int_key") == 42
     assert lru_cache.get("float_key") == 3.14
     assert lru_cache.get("negative_key") == -100

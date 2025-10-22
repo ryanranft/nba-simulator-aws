@@ -1,0 +1,3 @@
+#!/bin/bash
+# Pre-commit file size check template
+exit 0
