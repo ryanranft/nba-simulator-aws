@@ -1,6 +1,6 @@
 # Documentation Index - Quick Reference
 
-**Last Updated:** October 8, 2025
+**Last Updated:** October 21, 2025
 
 This index helps Claude Code and developers find the right documentation efficiently. Files are organized by task type and size to optimize context usage.
 
@@ -217,6 +217,71 @@ This index helps Claude Code and developers find the right documentation efficie
 - **session_handoffs/** - Historical session documents
 - **scraper_reports/** - Point-in-time scraper status
 - **planning/** - Pre-implementation planning docs
+- **superseded_documentation/** - Archived documentation from Oct 2-19, 2025 (17 files)
+
+---
+
+## New Documentation Organization (October 21, 2025)
+
+**Major reorganization completed:** 66 files reorganized, 40% reduction in docs/ root (142 → 85 files)
+
+### Specialized System Documentation
+
+**Monitoring Systems:**
+- **docs/monitoring/dims/** - Data Inventory Management System (v3.1.0, 7 files)
+  - PostgreSQL-backed metrics tracking with Jupyter integration
+  - Production-ready DIMS implementation
+
+**ML Systems:**
+- **docs/ml_systems/book_recommendations/** - 214 ML implementations (9 files)
+  - 100% complete autonomous deployment (12 minutes, Oct 19, 2025)
+  - 1,284/1,284 tests passed, ~150,000+ lines of production code
+  - Deployment, testing, and recommendations documentation
+
+**Data Collection:**
+- **docs/data_collection/scrapers/** - Scraper systems & monitoring (10 files)
+  - ESPN, NBA API, Basketball Reference scrapers
+  - Test results: 100% success rate on ESPN, 98.5% on NBA API
+  - Monitoring, deployment, and operations guides
+  - **test_results/** subdirectory with scraper validation reports
+
+**Feature Systems:**
+- **docs/features/shot_charts/** - Shot chart extraction & temporal integration (5 files)
+- **docs/features/box_scores/** - Temporal box score systems (4 files)
+- **docs/features/statistics/** - Advanced statistics (3 files)
+
+### Enhanced Phase Organization
+
+**Phase-Specific Enhancements:**
+- **docs/phases/phase_9/9.0_plus_minus/** - Plus/Minus analysis system (7 files)
+  - 26 ML features for lineup efficiency and player impact
+  - Production-ready implementation
+
+- **docs/phases/phase_0/0.1_basketball_reference/documentation/** - Technical documentation (7 files)
+  - Box score system, PBP discovery, scraping notes
+  - Comparison analysis, test plans, workflow integration
+
+**Phase 5 Cleanup:**
+- Reduced from 11 loose files to 3 essential files
+- Organized ML summaries into proper subdirectories (5.19_drift_detection, 5.2_model_versioning)
+- Removed duplicate implementation guides
+
+### Archive Structure
+
+**docs/archive/superseded_documentation/** - Historical documentation (17 files in 4 categories)
+- **session_summaries/** - Session work from Oct 16-19 (3 files)
+- **validation_summaries/** - Validation reports (2 files)
+- **implementation_summaries/** - Implementation work (7 files)
+- **planning/** - Planning documents from Oct 7-19 (5 files)
+
+**Benefits Achieved:**
+1. ✅ Improved discoverability - Logical grouping by system/feature
+2. ✅ Reduced clutter - 40% reduction in docs/ root
+3. ✅ Better navigation - 14 README files as entry points
+4. ✅ Scalable structure - Easy to add new features/systems
+5. ✅ Context savings - Easier to find relevant documentation
+
+**See also:** docs/DOCUMENTATION_REORGANIZATION_SUMMARY.md for complete details
 
 ---
 
@@ -239,6 +304,19 @@ This index helps Claude Code and developers find the right documentation efficie
 ---
 
 ## Recent Changes
+
+**October 21, 2025 - Comprehensive Documentation Reorganization:**
+- **Reorganized 66 files** across 6 priorities + 3 enhancements
+- **Reduced docs/ root: 142 → 85 files (40% reduction)**
+- **Created 8 new directories** for specialized systems:
+  - monitoring/dims/, ml_systems/book_recommendations/, data_collection/scrapers/
+  - features/ (shot_charts, box_scores, statistics)
+  - archive/superseded_documentation/, phase_9/9.0_plus_minus/
+  - phase_0/0.1_basketball_reference/documentation/
+- **Created 14 README navigation files** for improved discoverability
+- **Phase 5 cleanup: 11 → 3 essential files** (moved summaries to subdirectories)
+- **Archived 17 superseded files** from Oct 2-19, 2025
+- **See:** docs/DOCUMENTATION_REORGANIZATION_SUMMARY.md
 
 **October 11, 2025 - Phase Index Reorganization:**
 - Created phase index system (PHASE_N_INDEX.md) with 4-level hierarchy
