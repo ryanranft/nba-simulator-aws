@@ -30,10 +30,13 @@ This directory contains all active ETL (Extract, Transform, Load) scrapers for t
   - **Expected runtime:** ~1.9 hours for 6 seasons × 9 data types
   - **Rate limit:** 12 seconds between requests
 
-- **`basketball_reference_incremental_scraper.py`** - Delta updates
-  - **Use for:** Daily/weekly incremental updates
-  - **Features:** Only scrapes new/updated games since last run
-  - **Expected runtime:** 5-10 minutes per day
+- **`basketball_reference_incremental_scraper.py`** - Delta updates ✅ **Migrated to AsyncBaseScraper**
+  - **Pattern:** Incremental Scraper (wraps synchronous library client)
+  - **Migration Date:** October 22, 2025
+  - **Use for:** Daily/weekly incremental updates (current season aggregate stats)
+  - **Features:** Rate limiting (12s), retry logic, S3 upload, telemetry
+  - **Data types:** Season totals, advanced totals
+  - **Expected runtime:** ~1 minute during season, <10 seconds off-season
 
 - **`bbref_tier_1_agent.py`** - Autonomous agent
   - **Use for:** Complex multi-phase workflows

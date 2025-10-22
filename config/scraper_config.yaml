@@ -134,6 +134,45 @@ scrapers:
       - team_stats
     custom_settings: {}
 
+  basketball_reference_incremental:
+    base_url: "https://www.basketball-reference.com"
+    rate_limit:
+      requests_per_second: 0.083  # 12 seconds between requests (1/12)
+      burst_size: 1
+      adaptive: false
+      retry_after_header: true
+    retry:
+      max_attempts: 3
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: false
+      retry_on_429_multiplier: 15.0  # For 429 errors, wait 30s/60s/120s
+    timeout: 45
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 1  # Sequential requests only
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "basketball_reference"
+      local_output_dir: "/tmp/basketball_reference_incremental"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8004
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings:
+      data_types:
+        - season_totals
+        - advanced_totals
+      default_scrape_current_season: true
+      default_also_previous_season: false
+      include_combined_values: true  # For traded players
+
 # Global settings
 global:
   aws:

@@ -2,14 +2,17 @@
 """
 Basketball Reference Incremental Scraper - Daily Updates Only
 
-Scrapes current season aggregate data (season totals + advanced stats) for daily updates.
-Designed for nightly automation - NOT for historical backfills.
+Migrated to AsyncBaseScraper framework
+
+Purpose: Scrapes current season aggregate data (season totals + advanced stats) for daily updates
+Data Source: Basketball Reference API (via basketball_reference_web_scraper library)
+Update Frequency: Daily (during season) or as needed
 
 Strategy:
 1. Determine current NBA season
 2. Scrape season totals for current season (updated daily as games are played)
 3. Scrape advanced totals for current season
-4. Upload to S3
+4. Upload to S3 automatically
 5. Optionally re-integrate into local database
 
 During the season:
@@ -24,27 +27,45 @@ Off-season:
 
 Runtime: ~1 minute during season, <10 seconds off-season
 
+Version: 2.0 (Migrated to AsyncBaseScraper)
+Created: October 10, 2025
+Migrated: October 22, 2025
+
+Features:
+- Async framework with synchronous library client
+- Automatic rate limiting (12s between requests)
+- Retry logic with exponential backoff
+- S3 upload integration
+- Telemetry and monitoring
+
 Usage:
     python scripts/etl/basketball_reference_incremental_scraper.py
     python scripts/etl/basketball_reference_incremental_scraper.py --also-previous-season
     python scripts/etl/basketball_reference_incremental_scraper.py --dry-run
 
-Version: 1.0
-Created: October 10, 2025
+Configuration:
+    See config/scraper_config.yaml - basketball_reference_incremental section
 """
 
 import argparse
+import asyncio
 import json
-import time
 import logging
 from pathlib import Path
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, Any
 import sys
 
+# Add parent directory to path for imports
+sys.path.append(str(Path(__file__).parent.parent.parent))
+
+# Import shared infrastructure
+from scripts.etl.async_scraper_base import AsyncBaseScraper
+from scripts.etl.scraper_config import ScraperConfigManager
+
+# Basketball Reference library (synchronous)
 try:
     from basketball_reference_web_scraper import client
-
     HAS_BBREF = True
 except ImportError:
     HAS_BBREF = False
@@ -52,202 +73,182 @@ except ImportError:
     print("Install: pip install basketball_reference_web_scraper")
     sys.exit(1)
 
-try:
-    import boto3
-
-    HAS_BOTO3 = True
-except ImportError:
-    HAS_BOTO3 = False
-    print("⚠️  boto3 not installed, S3 upload will be disabled")
-
-# Configure logging
-logging.basicConfig(level=logging.INFO, format="%(message)s")
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 
-class BasketballReferenceIncrementalScraper:
-    """Incremental scraper for Basketball Reference aggregate data"""
+class BasketballReferenceIncrementalScraper(AsyncBaseScraper):
+    """
+    Incremental scraper for Basketball Reference aggregate data
 
-    def __init__(
-        self,
-        s3_bucket: Optional[str] = None,
-        rate_limit: float = 12.0,
-        dry_run: bool = False,
-    ):
-        self.s3_bucket = s3_bucket
-        self.s3_client = boto3.client("s3") if HAS_BOTO3 and s3_bucket else None
-        self.rate_limit = rate_limit
-        self.last_request_time = 0
-        self.dry_run = dry_run
+    Migrated to AsyncBaseScraper framework for:
+    - Automatic rate limiting (12s between requests)
+    - Retry logic with exponential backoff
+    - S3 upload integration
+    - Telemetry and monitoring
 
-        # Statistics
-        self.stats = {
-            "requests": 0,
-            "successes": 0,
-            "errors": 0,
-            "retries": 0,
+    Note: Uses basketball_reference_web_scraper (synchronous library)
+    wrapped in async methods for compatibility with AsyncBaseScraper.
+    """
+
+    def __init__(self, config, also_previous_season: bool = False):
+        """Initialize incremental scraper with configuration"""
+        super().__init__(config)
+
+        # Custom settings from config
+        self.data_types = config.custom_settings.get('data_types', ['season_totals', 'advanced_totals'])
+        self.include_combined_values = config.custom_settings.get('include_combined_values', True)
+        self.also_previous_season = also_previous_season
+
+        # Statistics tracking
+        self.scrape_stats = {
+            'seasons_scraped': 0,
+            'data_types_scraped': 0,
+            'total_records': 0,
+            'successes': 0,
+            'failures': 0
         }
 
-        # Output directory
-        self.output_dir = Path("/tmp/basketball_reference_incremental")
-        self.output_dir.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Initialized {self.__class__.__name__}")
+        logger.info(f"Data types: {self.data_types}")
+        logger.info(f"Include combined values: {self.include_combined_values}")
+        logger.info(f"Also scrape previous season: {self.also_previous_season}")
 
-    def _rate_limit_wait(self):
-        """Enforce rate limiting"""
-        elapsed = time.time() - self.last_request_time
-        if elapsed < self.rate_limit:
-            sleep_time = self.rate_limit - elapsed
-            logging.debug(f"  Rate limiting: sleeping {sleep_time:.2f}s")
-            time.sleep(sleep_time)
-        self.last_request_time = time.time()
+    def get_current_season(self) -> int:
+        """
+        Get current NBA season end year
 
-    def _exponential_backoff(self, attempt: int, is_rate_limit: bool = False):
-        """Exponential backoff on errors"""
-        if is_rate_limit:
-            # For 429 errors, wait much longer (30s, 60s, 120s)
-            wait_time = min(120, 30 * (2**attempt))
-        else:
-            wait_time = min(60, (2**attempt))
-        logging.warning(f"  Backing off for {wait_time}s (attempt {attempt})")
-        time.sleep(wait_time)
+        NBA season spans two calendar years:
+        - 2024-2025 season = end year 2025
+        - Season starts in October
+        - If Oct-Dec: next year is end year
+        - If Jan-Sep: current year is end year
 
-    def _save_json(self, data: any, filepath: Path):
-        """Save data to JSON file"""
-        if self.dry_run:
-            logging.info(f"  [DRY RUN] Would save to: {filepath}")
-            return
-
-        filepath = Path(filepath)
-        filepath.parent.mkdir(parents=True, exist_ok=True)
-        with open(filepath, "w") as f:
-            json.dump(data, f, indent=2, default=str)
-        logging.debug(f"  Saved: {filepath}")
-
-    def _upload_to_s3(self, local_path: Path, s3_key: str) -> bool:
-        """Upload file to S3"""
-        if self.dry_run:
-            logging.info(f"  [DRY RUN] Would upload to S3: {s3_key}")
-            return True
-
-        if not self.s3_client:
-            return False
-
-        try:
-            self.s3_client.upload_file(str(local_path), self.s3_bucket, s3_key)
-            logging.debug(f"  Uploaded to S3: {s3_key}")
-            return True
-        except Exception as e:
-            logging.error(f"  S3 upload failed: {e}")
-            return False
-
-    def _make_request_with_retry(self, func, *args, max_retries: int = 3, **kwargs):
-        """Make API request with retry logic"""
-        for attempt in range(max_retries):
-            try:
-                self._rate_limit_wait()
-                self.stats["requests"] += 1
-                result = func(*args, **kwargs)
-                self.stats["successes"] += 1
-                return result
-            except Exception as e:
-                self.stats["errors"] += 1
-                # Check if it's a 429 rate limit error
-                is_429 = "429" in str(e) or "Too Many Requests" in str(e)
-                if attempt < max_retries - 1:
-                    self.stats["retries"] += 1
-                    logging.warning(
-                        f"  Request failed (attempt {attempt + 1}/{max_retries}): {e}"
-                    )
-                    self._exponential_backoff(attempt, is_rate_limit=is_429)
-                else:
-                    logging.error(f"  Request failed after {max_retries} attempts: {e}")
-                    raise
-        return None
-
-    def get_current_season(self):
-        """Get current NBA season end year"""
+        Returns:
+            Season end year (e.g., 2025 for 2024-2025 season)
+        """
         now = datetime.now()
-        # NBA season starts in October
-        # If we're in Oct-Dec, it's next year's end year (2024-2025 season = 2025)
-        # If we're in Jan-Sep, it's current year's end year
         if now.month >= 10:
             return now.year + 1
         else:
             return now.year
 
-    def scrape_season_totals(self, season: int) -> bool:
-        """Scrape season totals for a given season"""
-        logging.info(f"\n📊 Scraping season totals for {season-1}-{season} season...")
+    async def scrape_season_totals(self, season: int) -> bool:
+        """
+        Scrape season totals for a given season
+
+        Args:
+            season: Season end year (e.g., 2025 for 2024-2025)
+
+        Returns:
+            True if successful, False otherwise
+        """
+        logger.info(f"\n📊 Scraping season totals for {season-1}-{season} season...")
 
         try:
-            # Get season totals
-            totals = self._make_request_with_retry(
-                client.players_season_totals, season_end_year=season
+            # Wrap synchronous client call with rate limiting
+            # The rate limiter in AsyncBaseScraper will handle delays
+            await self.rate_limiter.acquire()
+
+            # Make synchronous API call (library is not async)
+            totals = await asyncio.to_thread(
+                client.players_season_totals,
+                season_end_year=season
             )
 
             if totals:
-                # Save locally
-                local_path = (
-                    self.output_dir
-                    / "season_totals"
-                    / str(season)
-                    / "player_season_totals.json"
+                # Convert to JSON-serializable format
+                data = [dict(item) for item in totals]
+
+                # Store data (automatically uploads to S3 if configured)
+                filename = f"player_season_totals.json"
+                subdir = f"season_totals/{season}"
+
+                await self.store_data(
+                    data=data,
+                    filename=filename,
+                    subdir=subdir
                 )
-                self._save_json(totals, local_path)
 
-                # Upload to S3
-                if self.s3_client:
-                    s3_key = f"basketball_reference/season_totals/{season}/player_season_totals.json"
-                    self._upload_to_s3(local_path, s3_key)
+                self.scrape_stats['total_records'] += len(data)
+                self.scrape_stats['successes'] += 1
 
-                logging.info(f"  ✓ Season totals: {len(totals)} player records")
+                logger.info(f"  ✓ Season totals: {len(data)} player records")
                 return True
             else:
-                logging.warning(f"  ⚠️  No season totals data returned")
+                logger.warning(f"  ⚠️  No season totals data returned")
+                self.scrape_stats['failures'] += 1
                 return False
 
         except Exception as e:
-            logging.error(f"  ❌ Failed to scrape season totals: {e}")
-            return False
+            logger.error(f"  ❌ Failed to scrape season totals: {e}")
+            self.scrape_stats['failures'] += 1
+            # Let AsyncBaseScraper handle retry logic
+            raise
 
-    def scrape_advanced_totals(self, season: int) -> bool:
-        """Scrape advanced totals for a given season"""
-        logging.info(f"\n📈 Scraping advanced totals for {season-1}-{season} season...")
+    async def scrape_advanced_totals(self, season: int) -> bool:
+        """
+        Scrape advanced totals for a given season
+
+        Args:
+            season: Season end year (e.g., 2025 for 2024-2025)
+
+        Returns:
+            True if successful, False otherwise
+        """
+        logger.info(f"\n📈 Scraping advanced totals for {season-1}-{season} season...")
 
         try:
-            # Get advanced totals with combined values for traded players
-            totals = self._make_request_with_retry(
+            # Wrap synchronous client call with rate limiting
+            await self.rate_limiter.acquire()
+
+            # Make synchronous API call with combined values for traded players
+            totals = await asyncio.to_thread(
                 client.players_advanced_season_totals,
                 season_end_year=season,
-                include_combined_values=True,
+                include_combined_values=self.include_combined_values
             )
 
             if totals:
-                # Save locally
-                local_path = (
-                    self.output_dir
-                    / "advanced_totals"
-                    / str(season)
-                    / "player_advanced_totals.json"
+                # Convert to JSON-serializable format
+                data = [dict(item) for item in totals]
+
+                # Store data (automatically uploads to S3 if configured)
+                filename = f"player_advanced_totals.json"
+                subdir = f"advanced_totals/{season}"
+
+                await self.store_data(
+                    data=data,
+                    filename=filename,
+                    subdir=subdir
                 )
-                self._save_json(totals, local_path)
 
-                # Upload to S3
-                if self.s3_client:
-                    s3_key = f"basketball_reference/advanced_totals/{season}/player_advanced_totals.json"
-                    self._upload_to_s3(local_path, s3_key)
+                self.scrape_stats['total_records'] += len(data)
+                self.scrape_stats['successes'] += 1
 
-                logging.info(f"  ✓ Advanced totals: {len(totals)} player records")
+                logger.info(f"  ✓ Advanced totals: {len(data)} player records")
                 return True
             else:
-                logging.warning(f"  ⚠️  No advanced totals data returned")
+                logger.warning(f"  ⚠️  No advanced totals data returned")
+                self.scrape_stats['failures'] += 1
                 return False
 
         except Exception as e:
-            logging.error(f"  ❌ Failed to scrape advanced totals: {e}")
-            return False
+            logger.error(f"  ❌ Failed to scrape advanced totals: {e}")
+            self.scrape_stats['failures'] += 1
+            raise
 
-    def scrape_incremental(self, also_previous_season: bool = False):
-        """Scrape current season aggregate data"""
+    async def scrape(self) -> None:
+        """
+        Main scraping method - scrapes current season aggregate data
+
+        This method is called by AsyncBaseScraper when run.
+        Implements incremental scraping of current (and optionally previous) season.
+        """
         print("=" * 70)
         print("BASKETBALL REFERENCE INCREMENTAL SCRAPER")
         print("=" * 70)
@@ -256,74 +257,69 @@ class BasketballReferenceIncrementalScraper:
         current_season = self.get_current_season()
 
         print(f"Current NBA season: {current_season-1}-{current_season}")
-        print(f"Rate limit: {self.rate_limit}s between requests")
-        print(f"S3 upload: {'Enabled' if self.s3_client else 'Disabled'}")
-        if self.dry_run:
+        print(f"Rate limit: {1/self.config.rate_limit.requests_per_second:.1f}s between requests")
+        print(f"S3 upload: {'Enabled' if self.config.storage.upload_to_s3 else 'Disabled'}")
+        if self.config.dry_run:
             print("⚠️  DRY RUN MODE - No changes will be made")
         print()
 
+        # Determine seasons to scrape
         seasons_to_scrape = [current_season]
-
-        # Optionally scrape previous season (for end-of-season finalized stats)
-        if also_previous_season:
+        if self.also_previous_season:
             seasons_to_scrape.insert(0, current_season - 1)
-            logging.info(
+            logger.info(
                 f"Also scraping previous season: {current_season-2}-{current_season-1}\n"
             )
 
-        total_success = 0
-        total_failures = 0
-
+        # Scrape each season
         for season in seasons_to_scrape:
-            logging.info(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-            logging.info(f"Season {season-1}-{season}")
-            logging.info(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            logger.info(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            logger.info(f"Season {season-1}-{season}")
+            logger.info(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
             # Scrape season totals
-            season_success = self.scrape_season_totals(season)
-            if season_success:
-                total_success += 1
-            else:
-                total_failures += 1
+            await self.scrape_season_totals(season)
 
-            # Wait between data types
-            if not self.dry_run:
-                time.sleep(5)
+            # Small delay between data types (if not dry run)
+            if not self.config.dry_run:
+                await asyncio.sleep(5)
 
             # Scrape advanced totals
-            advanced_success = self.scrape_advanced_totals(season)
-            if advanced_success:
-                total_success += 1
-            else:
-                total_failures += 1
+            await self.scrape_advanced_totals(season)
+
+            self.scrape_stats['seasons_scraped'] += 1
+            self.scrape_stats['data_types_scraped'] += 2
 
         # Print summary
+        self.print_summary()
+
+    def print_summary(self):
+        """Print scraping summary"""
         print()
         print("=" * 70)
         print("SCRAPING SUMMARY")
         print("=" * 70)
-        print(f"Seasons scraped:     {len(seasons_to_scrape)}")
-        print(f"Data types per season: 2 (season totals + advanced totals)")
-        print(f"Total requests:      {self.stats['requests']}")
-        print(f"Successful:          {total_success}")
-        print(f"Failed:              {total_failures}")
-        print(f"Errors:              {self.stats['errors']}")
-        print(f"Retries:             {self.stats['retries']}")
+        print(f"Seasons scraped:       {self.scrape_stats['seasons_scraped']}")
+        print(f"Data types scraped:    {self.scrape_stats['data_types_scraped']}")
+        print(f"Total records:         {self.scrape_stats['total_records']}")
+        print(f"Successful operations: {self.scrape_stats['successes']}")
+        print(f"Failed operations:     {self.scrape_stats['failures']}")
         print("=" * 70)
         print()
 
-        if total_failures == 0:
+        if self.scrape_stats['failures'] == 0:
             print("✅ All data scraped successfully!")
         else:
-            print(f"⚠️  {total_failures} scraping operations failed")
+            print(f"⚠️  {self.scrape_stats['failures']} scraping operations failed")
 
-        if not self.dry_run and self.s3_client:
+        if not self.config.dry_run and self.config.storage.upload_to_s3:
             print()
             print("Next step: Re-integrate into local database")
             print("  python scripts/etl/integrate_basketball_reference_aggregate.py")
 
 
-def main():
+async def main():
+    """Main entry point for incremental scraper"""
     parser = argparse.ArgumentParser(
         description="Basketball Reference Incremental Scraper - Daily updates only",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -360,26 +356,15 @@ Off-season:
     )
 
     parser.add_argument(
-        "--upload-to-s3", action="store_true", help="Upload scraped data to S3"
-    )
-
-    parser.add_argument(
-        "--s3-bucket",
-        default="nba-sim-raw-data-lake",
-        help="S3 bucket name (default: nba-sim-raw-data-lake)",
-    )
-
-    parser.add_argument(
-        "--rate-limit",
-        type=float,
-        default=12.0,
-        help="Seconds between requests (default: 12.0)",
-    )
-
-    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Dry run mode - don't save files or upload to S3",
+    )
+
+    parser.add_argument(
+        "--config",
+        default="config/scraper_config.yaml",
+        help="Path to scraper config file (default: config/scraper_config.yaml)",
     )
 
     args = parser.parse_args()
@@ -387,18 +372,29 @@ Off-season:
     print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
 
-    # Create scraper and run
-    scraper = BasketballReferenceIncrementalScraper(
-        s3_bucket=args.s3_bucket if args.upload_to_s3 else None,
-        rate_limit=args.rate_limit,
-        dry_run=args.dry_run,
-    )
+    # Load configuration
+    config_manager = ScraperConfigManager(args.config)
+    config = config_manager.get_scraper_config("basketball_reference_incremental")
 
-    scraper.scrape_incremental(also_previous_season=args.also_previous_season)
+    if not config:
+        logger.error("Configuration not found for basketball_reference_incremental")
+        logger.error("Check config/scraper_config.yaml")
+        return
+
+    # Override dry_run if specified
+    if args.dry_run:
+        config.dry_run = True
+
+    # Run scraper
+    async with BasketballReferenceIncrementalScraper(
+        config,
+        also_previous_season=args.also_previous_season
+    ) as scraper:
+        await scraper.scrape()
 
     print()
     print(f"✓ Complete: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
