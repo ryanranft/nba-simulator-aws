@@ -15,8 +15,8 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 **Current State:**
 - 84 active scraper files
 - 39,290 total lines of code
-- 7 using AsyncBaseScraper (8.3%) ✅ +4 from Sessions 2-3
-- 14 using scraper_config.py (16.7%) ✅ +4 from Sessions 2-3
+- 8 using AsyncBaseScraper (9.5%) ✅ +5 from Sessions 2-4 (completed basketball_reference_box_score_scraper)
+- 15 using scraper_config.py (17.9%) ✅ +5 from Sessions 2-4 (completed basketball_reference_box_score_scraper)
 - Shared infrastructure: 1,664 lines (async_scraper_base.py: 490 lines, scraper_config.py: 576 lines, scraper_telemetry.py: 609 lines)
 
 **Target State:**
@@ -40,7 +40,7 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 
 **Status:** Production-ready, serving as migration templates
 
-### High Priority - Primary Scrapers (2 remaining)
+### High Priority - Primary Scrapers (1 remaining)
 **Impact:** High - These are core production scrapers
 **Effort:** 2-3 hours each
 **Session:** 4
@@ -49,7 +49,7 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 2. ~~`espn_incremental_scraper.py`~~ ✅ Completed Session 2
 3. ~~`espn_missing_pbp_scraper.py`~~ ✅ Completed Session 3
 4. ~~`hoopr_incremental_scraper.py`~~ ✅ Completed Session 3 (full migration)
-5. `nba_api_async_scraper.py` (already async, needs config adoption)
+5. ~~`nba_api_async_scraper.py`~~ ✅ Pre-existing (confirmed Session 4)
 6. `basketball_reference_box_score_scraper.py` (box scores)
 
 ### Medium Priority - Specialized Scrapers (12 files)
@@ -319,13 +319,23 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 - [x] `espn_incremental_scraper.py` (Session 2 - 1.5 hours)
 - [x] `espn_missing_pbp_scraper.py` (Session 3 - 45 minutes cleanup)
 - [x] `hoopr_incremental_scraper.py` (Session 3 - 2.5 hours full migration)
-- [ ] `basketball_reference_box_score_scraper.py`
 
-**Files:** 4/5 migrated
+**Files:** 4/4 migrated
 **Progress:** 7/84 scrapers (8.3%)
 **Status:** Session 2-3 complete ✅
 
-### Session 4-6 (Days 4-6)
+### Session 4 (Day 4) ✅
+**Duration:** 2 hours
+**Goal:** Complete high priority scrapers
+
+- [x] ~~`nba_api_async_scraper.py`~~ - Already migrated (verified Session 4)
+- [x] `basketball_reference_box_score_scraper.py` (Session 4 - 2 hours full migration)
+
+**Files:** 1 migrated + 1 verified
+**Progress:** 8/84 scrapers (9.5%)
+**Status:** Session 4 complete ✅
+
+### Session 5-7 (Days 5-7)
 **Duration:** 2-3 hours each
 **Goal:** Medium priority specialized scrapers
 
@@ -334,9 +344,9 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 - [ ] hoopR specialized (4 files)
 
 **Files:** 12 migrated
-**Progress:** 18/84 scrapers (21%)
+**Progress:** 20/84 scrapers (24%)
 
-### Session 7-9 (Days 7-9)
+### Session 8-10 (Days 8-10)
 **Duration:** 3-4 hours each
 **Goal:** Autonomous agents
 
@@ -345,9 +355,9 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 - [ ] Phase agents (6 files)
 
 **Files:** 7 migrated
-**Progress:** 25/84 scrapers (30%)
+**Progress:** 27/84 scrapers (32%)
 
-### Session 10 (Day 10)
+### Session 11 (Day 11)
 **Duration:** 2-3 hours
 **Goal:** Utility scripts config adoption
 
@@ -356,9 +366,9 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 - [ ] Create final summary
 
 **Files:** 19 migrated
-**Progress:** 44/84 scrapers (52%) ✅ TARGET REACHED
+**Progress:** 46/84 scrapers (55%) ✅ TARGET EXCEEDED
 
-**Remaining:** 40 files (special cases, evaluated separately)
+**Remaining:** 38 files (special cases, evaluated separately)
 
 ---
 
@@ -434,17 +444,17 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 | Category | Total | Migrated | Remaining | % Complete |
 |----------|-------|----------|-----------|------------|
 | **Already Migrated** | 3 | 3 | 0 | 100% |
-| **High Priority** | 6 | 0 | 6 | 0% |
+| **High Priority** | 6 | 6 | 0 | 100% ✅ |
 | **Medium Priority** | 12 | 0 | 12 | 0% |
 | **Low Priority (Agents)** | 7 | 0 | 7 | 0% |
 | **Utility (Config Only)** | 19 | 0 | 19 | 0% |
 | **Infrastructure** | 7 | 7 | 0 | 100% |
 | **Special Cases** | 27 | 0 | 27 | 0% |
 | **Other** | 3 | 0 | 3 | 0% |
-| **TOTAL** | 84 | 10 | 74 | 12% |
+| **TOTAL** | 84 | 8 | 76 | 9.5% |
 
 **Target:** 52% (44 files)
-**Projected Completion:** Session 10 (10 sessions over 1-2 weeks)
+**Projected Completion:** Session 11 (11 sessions over 2 weeks)
 
 ---
 
@@ -515,6 +525,57 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
      - ✅ Scraper docstring updated
      - ✅ scripts/etl/README.md updated
      - ✅ Migration plan updated
+
+### Session 4 (October 22, 2025) ✅
+**Status:** Complete
+**Duration:** 2 hours
+
+1. **nba_api_async_scraper.py** - ✅ Already Migrated (Verified)
+   - **Pattern:** Pre-existing migration (verified in Session 4)
+   - **Status:** Already inherits from AsyncBaseScraper, uses ScraperConfigManager
+   - **Configuration:** Already in scraper_config.yaml
+   - **Time taken:** 15 minutes (verification only)
+   - **Documentation:** Migration plan updated to reflect pre-existing status
+
+2. **basketball_reference_box_score_scraper.py** - ✅ Migrated
+   - **Pattern:** Specialized Task Scraper with library wrapping (requests + BeautifulSoup)
+   - **Lines before:** 683
+   - **Lines after:** 776
+   - **Infrastructure removed:** ~120 lines (manual rate limiting, manual S3 upload, manual HTTP, manual error handling)
+   - **Integration added:** ~213 lines (AsyncBaseScraper integration, async wrappers for requests/BeautifulSoup/SQLite, store_data(), rate limiter)
+   - **Net increase:** 93 lines (comprehensive async migration with all sync operations wrapped)
+   - **Time taken:** 2 hours
+   - **Major improvements:**
+     - Inherits from AsyncBaseScraper (line 69)
+     - Loads config via ScraperConfigManager (lines 719-720)
+     - Uses base class rate limiter (line 172)
+     - Uses store_data() for S3 upload (line 418)
+     - **Wrapped all synchronous operations in asyncio.to_thread():**
+       - requests.get() → asyncio.to_thread(requests.get, ...) (lines 175-180)
+       - BeautifulSoup parsing → asyncio.to_thread(self._parse_box_score_sync, ...) (line 200)
+       - SQLite queries → asyncio.to_thread() for all database operations (lines 125, 436, 542)
+     - Standardized rate limiting (12 seconds between requests, configurable)
+     - Configuration via scraper_config.yaml (basketball_reference_box_scores section)
+     - Telemetry integration
+     - Async main() with context manager (lines 684-775)
+     - Preserved all existing functionality (SQLite + S3 + parsing of game_info, team_stats, player_stats, play_by_play)
+   - **Testing:**
+     - ✅ Dry run successful
+     - ✅ Configuration loaded correctly
+     - ✅ Rate limiting configured (12s between requests)
+     - ✅ AsyncBaseScraper integration working
+     - ✅ All parsing methods working
+     - ✅ Telemetry working
+   - **Configuration:**
+     - ✅ Added basketball_reference_box_scores section to scraper_config.yaml
+     - ✅ Rate limit: 0.083 req/s (12 seconds)
+     - ✅ Max concurrent: 1 (strict sequential)
+     - ✅ Retry: 5 attempts with exponential backoff
+     - ✅ Custom settings: database_path, load_to_database, priority_filter, max_games, data_sections
+   - **Documentation:**
+     - ✅ Scraper docstring updated with migration details
+     - ✅ Migration plan updated
+     - ✅ Version updated to 2.0 (Migrated to AsyncBaseScraper)
 
 ---
 

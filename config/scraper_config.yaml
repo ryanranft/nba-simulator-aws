@@ -296,6 +296,48 @@ scrapers:
         - schedule
         - play_by_play
 
+  basketball_reference_box_scores:
+    base_url: "https://www.basketball-reference.com"
+    rate_limit:
+      requests_per_second: 0.083  # 12 seconds between requests (1/12) - VERY conservative
+      burst_size: 1
+      adaptive: false  # Strict fixed rate limit
+      retry_after_header: true
+    retry:
+      max_attempts: 5  # More retries for historical data
+      base_delay: 3.0
+      max_delay: 180.0
+      exponential_backoff: true
+      jitter: true
+      retry_on_429_multiplier: 15.0  # For 429 errors, wait 45s/90s/180s
+    timeout: 30
+    user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    max_concurrent: 1  # MUST be sequential - Basketball Reference is strict
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "basketball_reference/box_scores"
+      local_output_dir: "/tmp/basketball_reference_box_scores"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8008
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings:
+      database_path: "/tmp/basketball_reference_boxscores.db"
+      load_to_database: true  # Load to SQLite in addition to S3
+      priority_filter: null  # Can filter by priority (1-9)
+      max_games: null  # Limit number of games to scrape (for testing)
+      data_sections:
+        - game_info
+        - team_stats
+        - player_stats
+        - play_by_play
+
 # Global settings
 global:
   aws:
