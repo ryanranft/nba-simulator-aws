@@ -13,11 +13,13 @@ Panel Data Output Format:
 - Multi-indexed by (team_id, game_id, game_date)
 - Includes temporal features (season, date)
 - Ready for temporal queries and panel analysis
+
+Version: 2.0 (Migrated to AsyncBaseScraper framework)
+Migration Date: October 22, 2025
 """
 
-import requests
+import asyncio
 import json
-import time
 import logging
 from pathlib import Path
 from datetime import datetime
@@ -32,6 +34,13 @@ from nba_api.stats.endpoints import (
 )
 from nba_api.stats.static import teams
 
+# AsyncBaseScraper imports
+import sys
+
+sys.path.append(str(Path(__file__).parent.parent.parent))
+from scripts.etl.async_scraper_base import AsyncBaseScraper
+from scripts.etl.scraper_config import ScraperConfigManager
+
 try:
     import mlflow
     import mlflow.tracking
@@ -39,28 +48,44 @@ try:
     MLFLOW_AVAILABLE = True
 except ImportError:
     MLFLOW_AVAILABLE = False
-    logger.warning("MLflow not available - tracking disabled")
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
+if not MLFLOW_AVAILABLE:
+    logger.warning("MLflow not available - tracking disabled")
 
-class NBAAPITeamDashboardsScraper:
-    def __init__(self, output_dir="/tmp/nba_api_team_dashboards", use_mlflow=True):
-        self.output_dir = Path(output_dir)
+
+class NBAAPITeamDashboardsScraper(AsyncBaseScraper):
+    def __init__(
+        self,
+        config=None,
+        output_dir=None,
+        use_mlflow=None,
+        scraper_name="nba_api_team_dashboards",
+    ):
+        # Load configuration from scraper_config.yaml if not provided
+        if config is None:
+            config_path = (
+                Path(__file__).parent.parent.parent / "config" / "scraper_config.yaml"
+            )
+            config_manager = ScraperConfigManager(str(config_path))
+            config = config_manager.get_scraper_config(scraper_name)
+
+        # Store config before calling super().__init__
+        self._raw_config = config
+
+        # Initialize parent AsyncBaseScraper
+        super().__init__(config)
+
+        # Override output_dir if provided
+        if output_dir:
+            self.output_dir = Path(output_dir)
+        else:
+            self.output_dir = Path(self._raw_config.storage.local_output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
-
-        self.session = requests.Session()
-        self.session.headers.update(
-            {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                "Accept": "application/json, text/plain, */*",
-                "x-nba-stats-origin": "stats",
-                "x-nba-stats-token": "true",
-            }
-        )
 
         self.dashboard_endpoints = [
             ("general_splits", TeamDashboardByGeneralSplits),
@@ -72,9 +97,19 @@ class NBAAPITeamDashboardsScraper:
         ]
 
         # MLflow tracking setup (ml_systems_1)
-        self.use_mlflow = use_mlflow and MLFLOW_AVAILABLE
+        if use_mlflow is not None:
+            self.use_mlflow = use_mlflow and MLFLOW_AVAILABLE
+        else:
+            self.use_mlflow = (
+                self._raw_config.custom_settings.get("use_mlflow", True)
+                and MLFLOW_AVAILABLE
+            )
+
         if self.use_mlflow:
-            mlflow.set_experiment("nba_api_team_dashboards_scraper")
+            experiment_name = self._raw_config.custom_settings.get(
+                "mlflow_experiment", "nba_api_team_dashboards_scraper"
+            )
+            mlflow.set_experiment(experiment_name)
             logger.info("✅ MLflow tracking enabled")
 
         # Data quality metrics (ml_systems_2)
@@ -87,21 +122,32 @@ class NBAAPITeamDashboardsScraper:
             "empty_responses": 0,
         }
 
-        logger.info("NBA API Team Dashboards Scraper initialized")
+        logger.info(
+            "NBA API Team Dashboards Scraper initialized (AsyncBaseScraper framework)"
+        )
 
-    def get_all_teams(self, season="2023-24"):
-        """Get all teams (static list of 30 teams)"""
+    async def scrape(self):
+        """Required by AsyncBaseScraper - delegates to run()"""
+        pass
+
+    async def get_all_teams(self, season="2023-24"):
+        """Get all teams (static list of 30 teams) (async wrapper for nba_api)"""
         try:
-            all_teams = teams.get_teams()
-            team_ids = [team["id"] for team in all_teams]
-            logger.info(f"Retrieved {len(team_ids)} teams")
+
+            def _get_teams_sync():
+                all_teams = teams.get_teams()
+                team_ids = [team["id"] for team in all_teams]
+                logger.info(f"Retrieved {len(team_ids)} teams")
+                return team_ids
+
+            team_ids = await asyncio.to_thread(_get_teams_sync)
             return team_ids
         except Exception as e:
             logger.error(f"Error getting teams: {e}")
             return []
 
-    def scrape_team_dashboards(self, team_id, season="2023-24"):
-        """Scrape all dashboard endpoints for a team with panel data structure"""
+    async def scrape_team_dashboards(self, team_id, season="2023-24"):
+        """Scrape all dashboard endpoints for a team with panel data structure (async)"""
         team_data = {}
 
         for endpoint_name, endpoint_class in self.dashboard_endpoints:
@@ -109,9 +155,16 @@ class NBAAPITeamDashboardsScraper:
                 logger.info(f"Scraping {endpoint_name} for team {team_id}")
                 self.metrics["api_calls"] += 1
 
-                endpoint = endpoint_class(team_id=team_id, season=season)
+                # Rate limiting via AsyncBaseScraper
+                await self.rate_limiter.acquire()
 
-                data_frames = endpoint.get_data_frames()
+                # Wrap synchronous nba_api call in asyncio.to_thread
+                def _scrape_endpoint_sync():
+                    endpoint = endpoint_class(team_id=team_id, season=season)
+                    return endpoint.get_data_frames()
+
+                data_frames = await asyncio.to_thread(_scrape_endpoint_sync)
+
                 if data_frames and len(data_frames) > 0:
                     records = data_frames[0].to_dict("records")
 
@@ -122,7 +175,6 @@ class NBAAPITeamDashboardsScraper:
                         record["endpoint"] = endpoint_name
                         record["game_date"] = datetime.now().isoformat()
                         record["scraped_at"] = datetime.now().isoformat()
-                        # Add game_id if available in record
                         if "GAME_ID" in record:
                             record["game_id"] = record["GAME_ID"]
 
@@ -136,8 +188,6 @@ class NBAAPITeamDashboardsScraper:
                     team_data[endpoint_name] = []
                     self.metrics["empty_responses"] += 1
 
-                time.sleep(1.5)  # Rate limiting
-
             except Exception as e:
                 logger.error(
                     f"❌ Error scraping {endpoint_name} for team {team_id}: {e}"
@@ -148,11 +198,19 @@ class NBAAPITeamDashboardsScraper:
         self.metrics["teams_processed"] += 1
         return team_data
 
-    def run(self, start_season="2020-21", end_season="2024-25"):
-        """Run the scraper for multiple seasons with MLflow tracking"""
+    async def run(self, start_season=None, end_season=None):
+        """Run the scraper for multiple seasons with MLflow tracking (async)"""
+        if start_season is None:
+            start_season = self._raw_config.custom_settings.get(
+                "default_start_season", "2020-21"
+            )
+        if end_season is None:
+            end_season = self._raw_config.custom_settings.get(
+                "default_end_season", "2024-25"
+            )
+
         start_time = datetime.now()
 
-        # Start MLflow run (ml_systems_1)
         if self.use_mlflow:
             mlflow.start_run(run_name=f"scrape_{start_season}_to_{end_season}")
             mlflow.log_param("start_season", start_season)
@@ -170,45 +228,44 @@ class NBAAPITeamDashboardsScraper:
                 season_dir = self.output_dir / season
                 season_dir.mkdir(exist_ok=True)
 
-                teams = self.get_all_teams(season)
+                teams = await self.get_all_teams(season)
                 logger.info(f"Found {len(teams)} teams for {season}")
 
                 for i, team_id in enumerate(teams):
                     logger.info(f"Processing team {i+1}/{len(teams)}: {team_id}")
 
-                    team_data = self.scrape_team_dashboards(team_id, season)
+                    team_data = await self.scrape_team_dashboards(team_id, season)
 
-                    # Save team data with panel structure
+                    full_team_data = {
+                        "team_id": team_id,
+                        "season": season,
+                        "scraped_at": datetime.now().isoformat(),
+                        "data": team_data,
+                        "panel_structure": {
+                            "multi_index": ["team_id", "game_id", "game_date"],
+                            "temporal_features_ready": True,
+                        },
+                        "features": {"generated": False, "version": "1.0"},
+                    }
+
+                    # Save team data locally
                     team_file = season_dir / f"team_{team_id}.json"
                     with open(team_file, "w") as f:
-                        json.dump(
-                            {
-                                "team_id": team_id,
-                                "season": season,
-                                "scraped_at": datetime.now().isoformat(),
-                                "data": team_data,
-                                # Panel data metadata (rec_22)
-                                "panel_structure": {
-                                    "multi_index": ["team_id", "game_id", "game_date"],
-                                    "temporal_features_ready": True,
-                                },
-                                # Feature engineering metadata (rec_11)
-                                "features": {
-                                    "generated": False,
-                                    "version": "1.0",
-                                },
-                            },
-                            f,
-                            indent=2,
-                        )
+                        json.dump(full_team_data, f, indent=2)
 
                     logger.info(f"Saved team {team_id} data to {team_file}")
 
-                    # Log incremental metrics to MLflow
-                    if self.use_mlflow and (i + 1) % 10 == 0:
-                        mlflow.log_metrics(self.metrics, step=i + 1)
+                    # Optional: Upload to S3 via AsyncBaseScraper
+                    if self._raw_config.storage.upload_to_s3:
+                        s3_key = f"{season}/team_{team_id}.json"
+                        await self.store_data(full_team_data, s3_key)
+                        logger.info(f"Uploaded team {team_id} to S3: {s3_key}")
 
-            # Log final metrics (ml_systems_2)
+                    if (i + 1) % 10 == 0:
+                        logger.info(f"Progress: {i+1}/{len(teams)} teams completed")
+                        if self.use_mlflow:
+                            mlflow.log_metrics(self.metrics, step=i + 1)
+
             duration = (datetime.now() - start_time).total_seconds()
             logger.info(f"\n{'='*80}")
             logger.info(f"SCRAPING COMPLETE")
@@ -241,7 +298,8 @@ class NBAAPITeamDashboardsScraper:
             raise
 
 
-if __name__ == "__main__":
+async def main():
+    """Main entry point for the scraper"""
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -270,4 +328,8 @@ if __name__ == "__main__":
     logger.info(f"  Output: {args.output_dir}")
 
     scraper = NBAAPITeamDashboardsScraper(output_dir=args.output_dir)
-    scraper.run(start_season=args.start_season, end_season=args.end_season)
+    await scraper.run(start_season=args.start_season, end_season=args.end_season)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
