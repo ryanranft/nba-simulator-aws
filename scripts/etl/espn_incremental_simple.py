@@ -17,7 +17,26 @@ For overnight automation (3-source cross-validation):
 
 Version: 3.0 (Simplified)
 Created: October 18, 2025
+
+Migrated to AsyncBaseScraper framework.
+Version: 2.0 (AsyncBaseScraper Integration - Preserve Mode)
+Migrated: October 22, 2025
 """
+
+
+# TODO: AsyncBaseScraper Integration
+# 1. Make your main class inherit from AsyncBaseScraper
+# 2. Add config_name parameter to __init__
+# 3. Call super().__init__(config_name=config_name)
+# 4. Wrap synchronous HTTP calls in asyncio.to_thread()
+# 5. Use self.rate_limiter.acquire() before requests
+# 6. Use self.store_data() for S3 uploads
+#
+# Uncomment these imports when ready:
+# import sys
+# from pathlib import Path
+# sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# from scripts.etl.async_scraper_base import AsyncBaseScraper
 
 import argparse
 import json
@@ -37,12 +56,17 @@ RATE_LIMIT_SECONDS = 1.0  # Be nice to ESPN
 
 
 class ESPNIncrementalScraper:
+
+    # TODO: After inheriting from AsyncBaseScraper:
+    # - Add config_name parameter to __init__
+    # - Call super().__init__(config_name='espn_incremental_simple')
+
     """Simple ESPN scraper - last N days to S3"""
 
     def __init__(self, days_back=3, dry_run=False):
         self.days_back = days_back
         self.dry_run = dry_run
-        self.s3_client = boto3.client('s3') if not dry_run else None
+        self.s3_client = boto3.client("s3") if not dry_run else None
 
         # Stats
         self.stats = {
@@ -53,8 +77,7 @@ class ESPNIncrementalScraper:
 
         # Setup logging
         logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s'
+            level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
         )
         self.logger = logging.getLogger(__name__)
 
@@ -110,7 +133,7 @@ class ESPNIncrementalScraper:
                 Bucket=S3_BUCKET,
                 Key=s3_key,
                 Body=json.dumps(data, indent=2),
-                ContentType='application/json'
+                ContentType="application/json",
             )
             return True
         except Exception as e:
@@ -191,23 +214,15 @@ def main():
         description="ESPN incremental scraper (simplified)"
     )
     parser.add_argument(
-        "--days",
-        type=int,
-        default=3,
-        help="Number of days to scrape back (default: 3)"
+        "--days", type=int, default=3, help="Number of days to scrape back (default: 3)"
     )
     parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Test mode - don't upload to S3"
+        "--dry-run", action="store_true", help="Test mode - don't upload to S3"
     )
 
     args = parser.parse_args()
 
-    scraper = ESPNIncrementalScraper(
-        days_back=args.days,
-        dry_run=args.dry_run
-    )
+    scraper = ESPNIncrementalScraper(days_back=args.days, dry_run=args.dry_run)
     scraper.run()
 
 
