@@ -793,6 +793,216 @@ scrapers:
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings: {}
+  analyze_data_coverage:
+    base_url: ''
+    rate_limit:
+      requests_per_second: 0.0
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 3
+      base_delay: 1.0
+      max_delay: 60.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 60
+    user_agent: NBA-Simulator-Scraper/1.0
+    max_concurrent: 1
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/scraper_output/analyze_data_coverage
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      log_file: null
+      metrics_port: 8021
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings: {}
+  analyze_espn_coverage:
+    base_url: https://site.api.espn.com/apis/site/v2/sports/basketball/nba
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 3
+      base_delay: 1.0
+      max_delay: 60.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 30
+    user_agent: NBA-Simulator-Scraper/1.0
+    max_concurrent: 10
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/scraper_output/analyze_espn_coverage
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      log_file: null
+      metrics_port: 8022
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings: {}
+  bbref_tier_1_agent:
+    base_url: https://www.basketball-reference.com
+    rate_limit:
+      requests_per_second: 0.083
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-Scraper/1.0
+    max_concurrent: 1
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/scraper_output/bbref_tier_1_agent
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      log_file: null
+      metrics_port: 8023
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings: {}
+  build_master_game_list_robust:
+    base_url: https://www.basketball-reference.com
+    rate_limit:
+      requests_per_second: 0.0
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 3
+      base_delay: 1.0
+      max_delay: 60.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 60
+    user_agent: NBA-Simulator-Scraper/1.0
+    max_concurrent: 1
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/scraper_output/build_master_game_list_robust
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      log_file: null
+      metrics_port: 8024
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings: {}
+  build_unified_database:
+    base_url: ''
+    rate_limit:
+      requests_per_second: 0.0
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 3
+      base_delay: 1.0
+      max_delay: 60.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 60
+    user_agent: NBA-Simulator-Scraper/1.0
+    max_concurrent: 1
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/scraper_output/build_unified_database
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      log_file: null
+      metrics_port: 8025
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings: {}
+  complete_schema_update:
+    base_url: ''
+    rate_limit:
+      requests_per_second: 0.0
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 3
+      base_delay: 1.0
+      max_delay: 60.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 60
+    user_agent: NBA-Simulator-Scraper/1.0
+    max_concurrent: 1
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/scraper_output/complete_schema_update
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      log_file: null
+      metrics_port: 8026
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings: {}
+  create_glue_etl_job:
+    base_url: ''
+    rate_limit:
+      requests_per_second: 0.0
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 3
+      base_delay: 1.0
+      max_delay: 60.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 60
+    user_agent: NBA-Simulator-Scraper/1.0
+    max_concurrent: 1
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/scraper_output/create_glue_etl_job
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      log_file: null
+      metrics_port: 8027
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings: {}
 global:
   aws:
     region: us-east-1
