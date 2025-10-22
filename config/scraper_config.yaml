@@ -211,6 +211,91 @@ scrapers:
         scoreboard: "/scoreboard"
         playbyplay: "/playbyplay"
 
+  espn_missing_pbp:
+    base_url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba"
+    rate_limit:
+      requests_per_second: 1.0  # 1s between requests (conservative for gap filling)
+      burst_size: 3
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5  # More retries for missing data
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 3  # Conservative concurrency for gap filling
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "espn/missing_pbp"
+      local_output_dir: "/tmp/espn_missing_pbp"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8006
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings:
+      data_types:
+        - schedule
+        - box_scores
+        - play_by_play
+      progress_tracking: true  # Enable progress tracking for resume capability
+      save_progress_interval: 10  # Save progress every N games
+      default_seasons:
+        - "2022-23"
+        - "2023-24"
+        - "2024-25"
+      endpoints:
+        scoreboard: "/scoreboard"
+        summary: "/summary"
+        playbyplay: "/playbyplay"
+
+  hoopr_incremental:
+    base_url: "https://raw.githubusercontent.com/sportsdataverse/hoopR-data"  # hoopR data repository
+    rate_limit:
+      requests_per_second: 0.5  # 2s between requests (conservative for library calls)
+      burst_size: 3
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5  # More retries for potentially large datasets
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 60  # Longer timeout for potentially large PBP datasets
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 3  # Conservative concurrency for library calls
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "hoopr/incremental"
+      local_output_dir: "/tmp/hoopr_incremental"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8007
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings:
+      database_path: "/tmp/hoopr_local.db"  # SQLite database for hoopR data
+      default_days_back: 7  # Default lookback for incremental updates
+      load_to_database: true  # Load to SQLite in addition to S3
+      backup_to_s3: true  # Backup schedule and PBP data to S3
+      tables:
+        - schedule
+        - play_by_play
+
 # Global settings
 global:
   aws:

@@ -15,8 +15,8 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 **Current State:**
 - 84 active scraper files
 - 39,290 total lines of code
-- 6 using AsyncBaseScraper (7.1%) ✅ +3 from Sessions 2-3
-- 13 using scraper_config.py (15.5%) ✅ +3 from Sessions 2-3
+- 7 using AsyncBaseScraper (8.3%) ✅ +4 from Sessions 2-3
+- 14 using scraper_config.py (16.7%) ✅ +4 from Sessions 2-3
 - Shared infrastructure: 1,664 lines (async_scraper_base.py: 490 lines, scraper_config.py: 576 lines, scraper_telemetry.py: 609 lines)
 
 **Target State:**
@@ -29,25 +29,26 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 
 ## Migration Categories
 
-### Already Migrated (6 files) ✅
+### Already Migrated (7 files) ✅
 1. `basketball_reference_async_scraper.py`
 2. `espn_async_scraper.py`
 3. `nba_api_async_scraper.py`
 4. `basketball_reference_incremental_scraper.py` (Session 2)
 5. `espn_incremental_scraper.py` (Session 2)
-6. `espn_missing_pbp_scraper.py` (Session 3)
+6. `espn_missing_pbp_scraper.py` (Session 3 cleanup)
+7. `hoopr_incremental_scraper.py` (Session 3 full migration)
 
 **Status:** Production-ready, serving as migration templates
 
-### High Priority - Primary Scrapers (3 remaining)
+### High Priority - Primary Scrapers (2 remaining)
 **Impact:** High - These are core production scrapers
 **Effort:** 2-3 hours each
-**Session:** 3-4
+**Session:** 4
 
 1. ~~`basketball_reference_incremental_scraper.py`~~ ✅ Completed Session 2
 2. ~~`espn_incremental_scraper.py`~~ ✅ Completed Session 2
 3. ~~`espn_missing_pbp_scraper.py`~~ ✅ Completed Session 3
-4. `hoopr_incremental_scraper.py` (NCAA data)
+4. ~~`hoopr_incremental_scraper.py`~~ ✅ Completed Session 3 (full migration)
 5. `nba_api_async_scraper.py` (already async, needs config adoption)
 6. `basketball_reference_box_score_scraper.py` (box scores)
 
@@ -317,12 +318,12 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 - [x] `basketball_reference_incremental_scraper.py` (Session 2 - 1.5 hours)
 - [x] `espn_incremental_scraper.py` (Session 2 - 1.5 hours)
 - [x] `espn_missing_pbp_scraper.py` (Session 3 - 45 minutes cleanup)
-- [ ] `hoopr_incremental_scraper.py`
+- [x] `hoopr_incremental_scraper.py` (Session 3 - 2.5 hours full migration)
 - [ ] `basketball_reference_box_score_scraper.py`
 
-**Files:** 3/5 migrated
-**Progress:** 6/84 scrapers (7.1%)
-**Status:** Session 2 complete ✅, Session 3 in progress
+**Files:** 4/5 migrated
+**Progress:** 7/84 scrapers (8.3%)
+**Status:** Session 2-3 complete ✅
 
 ### Session 4-6 (Days 4-6)
 **Duration:** 2-3 hours each

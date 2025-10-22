@@ -2,13 +2,15 @@
 """
 hoopR Incremental Scraper - Daily Updates Only
 
-Scrapes only recent hoopR games (last 7 days) and loads to local database.
+Migrated to AsyncBaseScraper framework
+
+Scrapes only recent hoopR games (last 7 days) and loads to local database + S3.
 Designed for nightly automation - NOT for historical backfills.
 
 Strategy:
 1. Query hoopR DB for latest game date
 2. Use sportsdataverse to fetch recent season games
-3. Load only NEW games to hoopR local database
+3. Load NEW games to hoopR local database + backup to S3
 4. Typically processes 50-100 games during NBA season
 
 Runtime: ~5 minutes during season, <1 minute off-season
@@ -18,16 +20,33 @@ Usage:
     python scripts/etl/hoopr_incremental_scraper.py --days-back 3
     python scripts/etl/hoopr_incremental_scraper.py --dry-run
 
-Version: 1.0
+Version: 2.0 (Migrated to AsyncBaseScraper)
 Created: October 9, 2025
+Migrated: October 22, 2025
+
+Features:
+- Async framework with synchronous sportsdataverse library
+- Automatic rate limiting and retry logic
+- S3 backup in addition to SQLite database
+- Telemetry and monitoring
 """
 
+import asyncio
 import sqlite3
 import sys
+import json
+import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 import argparse
 import pandas as pd
+
+# Add parent directory to path for imports
+sys.path.append(str(Path(__file__).parent.parent.parent))
+
+# Import shared infrastructure
+from scripts.etl.async_scraper_base import AsyncBaseScraper
+from scripts.etl.scraper_config import ScraperConfigManager
 
 # Import sportsdataverse (hoopR Python wrapper)
 try:
@@ -40,19 +59,38 @@ except ImportError:
     print("Install: pip install sportsdataverse")
     sys.exit(1)
 
-# Database path
-HOOPR_DB = "/tmp/hoopr_local.db"
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
-class HoopRIncrementalScraper:
-    """Incremental scraper for hoopR NBA data"""
+class HoopRIncrementalScraper(AsyncBaseScraper):
+    """
+    Incremental scraper for hoopR NBA data
 
-    def __init__(self, db_path=HOOPR_DB, days_back=7, dry_run=False):
-        self.db_path = db_path
-        self.days_back = days_back
-        self.dry_run = dry_run
+    Migrated to AsyncBaseScraper framework for:
+    - Automatic rate limiting and retry logic
+    - S3 backup storage in addition to SQLite
+    - Telemetry and monitoring
 
-        self.stats = {
+    Note: Uses sportsdataverse library (synchronous)
+    wrapped in async methods for compatibility with AsyncBaseScraper.
+    """
+
+    def __init__(self, config, days_back: int = 7):
+        """Initialize incremental scraper with configuration"""
+        super().__init__(config)
+
+        # Custom settings from config
+        self.db_path = config.custom_settings.get("database_path", "/tmp/hoopr_local.db")
+        self.days_back = days_back or config.custom_settings.get("default_days_back", 7)
+        self.load_to_database = config.custom_settings.get("load_to_database", True)
+        self.backup_to_s3 = config.custom_settings.get("backup_to_s3", True)
+
+        # Statistics tracking
+        self.scrape_stats = {
             "games_found": 0,
             "games_new": 0,
             "games_skipped": 0,
@@ -60,28 +98,42 @@ class HoopRIncrementalScraper:
             "errors": 0,
         }
 
+        logger.info(f"Initialized {self.__class__.__name__}")
+        logger.info(f"Database: {self.db_path}")
+        logger.info(f"Days back: {self.days_back}")
+        logger.info(f"Load to database: {self.load_to_database}")
+        logger.info(f"Backup to S3: {self.backup_to_s3}")
+
     def get_latest_game_date(self):
         """Get the latest game date in hoopR database."""
 
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
 
-        cursor.execute(
+            cursor.execute(
+                """
+                SELECT MAX(game_date)
+                FROM schedule
             """
-            SELECT MAX(game_date)
-            FROM schedule
-        """
-        )
+            )
 
-        latest_date = cursor.fetchone()[0]
-        cursor.close()
-        conn.close()
+            latest_date = cursor.fetchone()[0]
+            cursor.close()
+            conn.close()
 
-        if latest_date:
-            return datetime.strptime(latest_date, "%Y-%m-%d")
-        else:
-            # If no games, start from 7 days ago
-            return datetime.now() - timedelta(days=7)
+            if latest_date:
+                return datetime.strptime(latest_date, "%Y-%m-%d")
+            else:
+                # If no games, start from default days back
+                self.logger.info(f"No games in database, using default lookback: {self.days_back} days")
+                return datetime.now() - timedelta(days=self.days_back)
+
+        except (sqlite3.OperationalError, sqlite3.DatabaseError) as e:
+            # Database or table doesn't exist yet
+            self.logger.warning(f"Database not initialized (this is expected for first run): {e}")
+            self.logger.info(f"Using default lookback: {self.days_back} days")
+            return datetime.now() - timedelta(days=self.days_back)
 
     def get_current_season(self):
         """Get current NBA season year."""
@@ -113,8 +165,8 @@ class HoopRIncrementalScraper:
     def load_schedule_to_db(self, schedule_df):
         """Load schedule data to hoopR database."""
 
-        if self.dry_run:
-            print(f"[DRY RUN] Would load {len(schedule_df)} schedule records")
+        if self.config.dry_run:
+            self.logger.info(f"[DRY RUN] Would load {len(schedule_df)} schedule records")
             return
 
         conn = sqlite3.connect(self.db_path)
@@ -150,8 +202,8 @@ class HoopRIncrementalScraper:
             conn.commit()
 
         except Exception as e:
-            print(f"  ❌ Error loading schedule: {e}")
-            self.stats["errors"] += 1
+            self.logger.error(f"  ❌ Error loading schedule: {e}")
+            self.scrape_stats["errors"] += 1
             conn.rollback()
         finally:
             cursor.close()
@@ -160,8 +212,8 @@ class HoopRIncrementalScraper:
     def load_pbp_to_db(self, pbp_df, game_id):
         """Load play-by-play data to hoopR database."""
 
-        if self.dry_run:
-            self.stats["events_loaded"] += len(pbp_df)
+        if self.config.dry_run:
+            self.scrape_stats["events_loaded"] += len(pbp_df)
             return
 
         conn = sqlite3.connect(self.db_path)
@@ -221,23 +273,44 @@ class HoopRIncrementalScraper:
                 )
 
             conn.commit()
-            self.stats["events_loaded"] += len(pbp_df)
+            self.scrape_stats["events_loaded"] += len(pbp_df)
 
         except Exception as e:
-            print(f"    ❌ Error loading PBP: {e}")
-            self.stats["errors"] += 1
+            self.logger.error(f"    ❌ Error loading PBP: {e}")
+            self.scrape_stats["errors"] += 1
             conn.rollback()
         finally:
             cursor.close()
             conn.close()
 
-    def scrape_incremental(self):
-        """Scrape recent games and load to database."""
+    async def _backup_schedule_to_s3(self, schedule_df, season):
+        """Backup schedule data to S3"""
+        try:
+            filename = f"hoopr_schedule_{season}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            schedule_json = schedule_df.to_json(orient="records")
+            success = await self.store_data(json.loads(schedule_json), filename, "schedule")
+            if success:
+                self.logger.info(f"  ✓ Schedule backed up to S3: {filename}")
+        except Exception as e:
+            self.logger.error(f"  ❌ Error backing up schedule to S3: {e}")
 
-        print("=" * 70)
-        print("HOOPR INCREMENTAL SCRAPER")
-        print("=" * 70)
-        print()
+    async def _backup_pbp_to_s3(self, pbp_df, game_id, game_date):
+        """Backup play-by-play data to S3"""
+        try:
+            filename = f"hoopr_pbp_{game_id}_{game_date}.json"
+            pbp_json = pbp_df.to_json(orient="records")
+            success = await self.store_data(json.loads(pbp_json), filename, "play_by_play")
+            if success:
+                self.logger.debug(f"    ✓ PBP backed up to S3: {filename}")
+        except Exception as e:
+            self.logger.error(f"    ❌ Error backing up PBP to S3: {e}")
+
+    async def scrape(self):
+        """Scrape recent games and load to database + S3 (AsyncBaseScraper abstract method)."""
+
+        self.logger.info("=" * 70)
+        self.logger.info("HOOPR INCREMENTAL SCRAPER")
+        self.logger.info("=" * 70)
 
         # Get latest date from database
         latest_date = self.get_latest_game_date()
@@ -246,29 +319,28 @@ class HoopRIncrementalScraper:
         # Determine which season(s) to scrape
         current_season = self.get_current_season()
 
-        print(f"Database: {self.db_path}")
-        print(f"Latest game in DB: {latest_date.strftime('%Y-%m-%d')}")
-        print(f"Target date: {target_date.strftime('%Y-%m-%d')}")
-        print(f"Current season: {current_season}")
-        if self.dry_run:
-            print("⚠️  DRY RUN MODE - No changes will be made to database")
-        print()
+        self.logger.info(f"Database: {self.db_path}")
+        self.logger.info(f"Latest game in DB: {latest_date.strftime('%Y-%m-%d')}")
+        self.logger.info(f"Target date: {target_date.strftime('%Y-%m-%d')}")
+        self.logger.info(f"Current season: {current_season}")
+        if self.config.dry_run:
+            self.logger.warning("⚠️  DRY RUN MODE - No changes will be made to database")
 
-        print(f"Loading hoopR schedule for season {current_season}...")
+        self.logger.info(f"Loading hoopR schedule for season {current_season}...")
 
         try:
-            # Load schedule for current season
-            schedule_df = load_nba_schedule(seasons=[current_season])
+            # Load schedule for current season (wrap sync library call in async)
+            schedule_df = await asyncio.to_thread(load_nba_schedule, seasons=[current_season])
 
             if schedule_df is None or len(schedule_df) == 0:
-                print("❌ No schedule data returned from hoopR")
+                self.logger.error("❌ No schedule data returned from hoopR")
                 return
 
             # Convert to pandas if it's a Polars DataFrame
             if hasattr(schedule_df, "to_pandas"):
                 schedule_df = schedule_df.to_pandas()
 
-            print(f"✓ Loaded {len(schedule_df):,} games from hoopR schedule")
+            self.logger.info(f"✓ Loaded {len(schedule_df):,} games from hoopR schedule")
 
             # Filter to recent games only
             schedule_df["game_date_parsed"] = schedule_df["game_date"].apply(
@@ -277,25 +349,27 @@ class HoopRIncrementalScraper:
 
             recent_games = schedule_df[schedule_df["game_date_parsed"] >= target_date]
 
-            print(
+            self.logger.info(
                 f"✓ Filtered to {len(recent_games):,} games from last {self.days_back} days"
             )
-            print()
 
             if len(recent_games) == 0:
-                print("No new games to scrape")
+                self.logger.info("No new games to scrape")
                 return
 
             # Load schedule to database
-            print("Loading schedule to database...")
+            self.logger.info("Loading schedule to database...")
             self.load_schedule_to_db(recent_games)
-            print(f"✓ Schedule loaded")
-            print()
+            self.logger.info(f"✓ Schedule loaded")
+
+            # Backup schedule to S3 if enabled
+            if self.backup_to_s3:
+                await self._backup_schedule_to_s3(recent_games, current_season)
 
             # Process each game for play-by-play
-            print("Loading play-by-play data...")
+            self.logger.info("Loading play-by-play data...")
 
-            self.stats["games_found"] = len(recent_games)
+            self.scrape_stats["games_found"] = len(recent_games)
 
             for _, game in recent_games.iterrows():
                 game_id = str(game["game_id"])
@@ -312,19 +386,19 @@ class HoopRIncrementalScraper:
                 cursor.close()
                 conn.close()
 
-                if pbp_count > 0 and not self.dry_run:
-                    print(
+                if pbp_count > 0 and not self.config.dry_run:
+                    self.logger.info(
                         f"  ⏭️  {matchup} ({game_date}) - PBP exists ({pbp_count} events), skipping"
                     )
-                    self.stats["games_skipped"] += 1
+                    self.scrape_stats["games_skipped"] += 1
                     continue
 
-                print(f"  🏀 {matchup} ({game_date})")
+                self.logger.info(f"  🏀 {matchup} ({game_date})")
 
                 try:
-                    # Load play-by-play for this specific season
+                    # Load play-by-play for this specific season (wrap sync library call in async)
                     # Note: hoopR loads entire season PBP, so we filter after
-                    pbp_df = load_nba_pbp(seasons=[current_season])
+                    pbp_df = await asyncio.to_thread(load_nba_pbp, seasons=[current_season])
 
                     if pbp_df is not None and len(pbp_df) > 0:
                         # Convert to pandas if it's a Polars DataFrame
@@ -335,38 +409,43 @@ class HoopRIncrementalScraper:
                         game_pbp = pbp_df[pbp_df["game_id"] == int(game_id)]
 
                         if len(game_pbp) > 0:
-                            print(f"    ✓ Found {len(game_pbp):,} PBP events")
+                            self.logger.info(f"    ✓ Found {len(game_pbp):,} PBP events")
                             self.load_pbp_to_db(game_pbp, game_id)
-                            self.stats["games_new"] += 1
+
+                            # Backup PBP to S3 if enabled
+                            if self.backup_to_s3:
+                                await self._backup_pbp_to_s3(game_pbp, game_id, game_date)
+
+                            self.scrape_stats["games_new"] += 1
                         else:
-                            print(f"    ⚠️  No PBP data available")
+                            self.logger.warning(f"    ⚠️  No PBP data available")
                     else:
-                        print(f"    ⚠️  PBP load failed")
+                        self.logger.warning(f"    ⚠️  PBP load failed")
 
                 except Exception as e:
-                    print(f"    ❌ Error: {e}")
-                    self.stats["errors"] += 1
+                    self.logger.error(f"    ❌ Error: {e}")
+                    self.scrape_stats["errors"] += 1
 
             # Print summary
-            print()
-            print("=" * 70)
-            print("SCRAPING SUMMARY")
-            print("=" * 70)
-            print(f"Games found:    {self.stats['games_found']:,}")
-            print(f"Games new:      {self.stats['games_new']:,}")
-            print(f"Games skipped:  {self.stats['games_skipped']:,}")
-            print(f"Events loaded:  {self.stats['events_loaded']:,}")
-            print(f"Errors:         {self.stats['errors']:,}")
-            print("=" * 70)
+            self.logger.info("")
+            self.logger.info("=" * 70)
+            self.logger.info("SCRAPING SUMMARY")
+            self.logger.info("=" * 70)
+            self.logger.info(f"Games found:    {self.scrape_stats['games_found']:,}")
+            self.logger.info(f"Games new:      {self.scrape_stats['games_new']:,}")
+            self.logger.info(f"Games skipped:  {self.scrape_stats['games_skipped']:,}")
+            self.logger.info(f"Events loaded:  {self.scrape_stats['events_loaded']:,}")
+            self.logger.info(f"Errors:         {self.scrape_stats['errors']:,}")
+            self.logger.info("=" * 70)
 
         except Exception as e:
-            print(f"❌ Error loading hoopR data: {e}")
-            self.stats["errors"] += 1
+            self.logger.error(f"❌ Error loading hoopR data: {e}")
+            self.scrape_stats["errors"] += 1
 
 
-def main():
+async def main():
     parser = argparse.ArgumentParser(
-        description="hoopR Incremental Scraper - Daily updates only",
+        description="hoopR Incremental Scraper - Daily updates only (Migrated to AsyncBaseScraper)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -376,11 +455,12 @@ Examples:
   # Scrape last 3 days
   python scripts/etl/hoopr_incremental_scraper.py --days-back 3
 
-  # Dry run (don't modify database)
+  # Dry run (don't modify database or S3)
   python scripts/etl/hoopr_incremental_scraper.py --dry-run
 
 Purpose:
   Designed for nightly automation. Only fetches recent games, NOT historical seasons.
+  Loads to SQLite database + backs up to S3 for redundancy.
   For historical backfills, use: scripts/etl/run_hoopr_comprehensive_overnight.sh
         """,
     )
@@ -388,33 +468,74 @@ Purpose:
     parser.add_argument(
         "--days-back",
         type=int,
-        default=7,
-        help="Number of days to look back (default: 7)",
+        default=None,
+        help="Number of days to look back (default: from config, usually 7)",
     )
 
     parser.add_argument(
-        "--dry-run", action="store_true", help="Dry run mode - don't modify database"
+        "--dry-run", action="store_true", help="Dry run mode - don't modify database or S3"
     )
 
     parser.add_argument(
-        "--db-path", default=HOOPR_DB, help=f"hoopR database path (default: {HOOPR_DB})"
+        "--config-file",
+        type=str,
+        default="config/scraper_config.yaml",
+        help="Configuration file path",
     )
 
     args = parser.parse_args()
 
-    print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print()
+    # Load configuration
+    try:
+        config_manager = ScraperConfigManager(args.config_file)
+        config = config_manager.get_scraper_config("hoopr_incremental")
+        if not config:
+            print("❌ hoopR Incremental configuration not found")
+            return 1
+
+        # Override config with command line args
+        if args.dry_run:
+            config.dry_run = True
+
+        logger.info(f"✅ Loaded hoopR Incremental configuration")
+        logger.info(f"   Database: {config.custom_settings.get('database_path')}")
+        logger.info(f"   Days back: {args.days_back or config.custom_settings.get('default_days_back')}")
+        logger.info(f"   S3 bucket: {config.storage.s3_bucket}")
+        logger.info(f"   Dry run: {config.dry_run}")
+        logger.info("")
+
+    except Exception as e:
+        print(f"❌ Error loading configuration: {e}")
+        return 1
+
+    logger.info(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
     # Create scraper and run
-    scraper = HoopRIncrementalScraper(
-        db_path=args.db_path, days_back=args.days_back, dry_run=args.dry_run
-    )
+    scraper = HoopRIncrementalScraper(config, days_back=args.days_back)
 
-    scraper.scrape_incremental()
+    try:
+        # Run scraper with context manager
+        async with scraper:
+            await scraper.scrape()
 
-    print()
-    print(f"✓ Complete: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        # Print final statistics
+        logger.info("")
+        logger.info("📊 Final Statistics:")
+        logger.info(f"   Requests: {scraper.stats.requests_made}")
+        logger.info(f"   Success rate: {scraper.stats.success_rate:.2%}")
+        logger.info(f"   Elapsed time: {scraper.stats.elapsed_time:.2f}s")
+
+    except KeyboardInterrupt:
+        logger.warning("\n⚠️  Scraping interrupted by user")
+    except Exception as e:
+        logger.error(f"❌ Scraping failed: {e}")
+        return 1
+
+    logger.info("")
+    logger.info(f"✓ Complete: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    exit_code = asyncio.run(main())
+    sys.exit(exit_code)
