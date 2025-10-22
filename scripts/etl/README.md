@@ -165,20 +165,161 @@ This directory contains all active ETL (Extract, Transform, Load) scrapers for t
 
 ---
 
-## Naming Conventions
+## Naming Conventions & Policy
 
-### Active Scrapers (USE THESE)
-- **Primary:** `{source}_async_scraper.py`
-- **Incremental:** `{source}_incremental_scraper.py`
-- **Agents:** `{phase}_{task}_agent.py`
-- **Specialized:** `{source}_{task}_scraper.py`
+**Policy Effective:** October 21, 2025
+**Purpose:** Ensure consistent, discoverable scraper naming across all data sources
+
+### Active Naming Patterns (REQUIRED)
+
+#### 1. Primary Async Scrapers
+**Pattern:** `{source}_async_scraper.py`
+**Use for:** Full async data collection from a data source
+**Examples:**
+- `basketball_reference_async_scraper.py`
+- `espn_async_scraper.py`
+- `nba_api_async_scraper.py`
+
+**Requirements:**
+- Must inherit from `AsyncBaseScraper` (or implement equivalent async pattern)
+- Must include rate limiting via `scraper_config.py`
+- Must upload to S3 by default
+- Must include telemetry via `scraper_telemetry.py`
+
+#### 2. Incremental Scrapers
+**Pattern:** `{source}_incremental_scraper.py`
+**Use for:** Delta updates since last run (daily/weekly updates)
+**Examples:**
+- `basketball_reference_incremental_scraper.py`
+- `espn_incremental_scraper.py`
+
+**Requirements:**
+- Must track last run timestamp
+- Must only scrape new/updated data
+- Must be compatible with primary scraper's output format
+
+#### 3. Autonomous Agents
+**Pattern:** `{phase}_{task}_agent.py`
+**Use for:** Multi-phase autonomous workflows with state persistence
+**Examples:**
+- `bbref_tier_1_agent.py`
+- `phase_1_7_nba_stats_agent.py`
+- `phase_9_2_hoopr_agent.py`
+
+**Requirements:**
+- Must implement checkpoint/recovery logic
+- Must track state between sessions
+- Must support parallel processing where applicable
+
+#### 4. Specialized Scrapers
+**Pattern:** `{source}_{specific_task}_scraper.py`
+**Use for:** Endpoint-specific or task-specific scrapers
+**Examples:**
+- `basketball_reference_box_score_scraper.py`
+- `espn_missing_pbp_scraper.py`
+- `scrape_nba_api_player_dashboards.py`
+
+**Requirements:**
+- Task name must be specific and descriptive
+- Must not duplicate functionality of primary scraper
+
+---
 
 ### Deprecated Patterns (DO NOT USE)
-- ❌ `scrape_{source}.py`
-- ❌ `scrape_{source}_fixed.py`
-- ❌ `scrape_{source}_additional.py`
-- ❌ `scrape_{source}_comprehensive.py`
-- ❌ `{source}_v2.py` or `{source}_optimized.py`
+
+| Pattern | Problem | Use Instead |
+|---------|---------|-------------|
+| `scrape_{source}.py` | Generic, unclear purpose | `{source}_async_scraper.py` |
+| `scrape_{source}_fixed.py` | Suggests bug fix, not version | Use git history for fixes |
+| `scrape_{source}_additional.py` | Unclear what's "additional" | `{source}_incremental_scraper.py` |
+| `scrape_{source}_comprehensive.py` | Redundant with primary | `{source}_async_scraper.py` |
+| `{source}_v2.py` | Version numbers in filename | Use git tags/branches |
+| `{source}_optimized.py` | "Optimized" is subjective | Optimize existing scraper |
+
+---
+
+### Policy Rules
+
+#### Creating New Scrapers
+
+**✅ Create a new scraper when:**
+1. Adding a new data source not yet covered
+2. Adding specialized endpoint not covered by primary scraper
+3. Implementing incremental updates for existing source
+4. Building multi-phase autonomous agent
+
+**❌ Do NOT create a new scraper when:**
+1. Fixing bugs in existing scraper → Fix the existing file
+2. Optimizing existing scraper → Refactor existing file
+3. Adding features to existing scraper → Extend existing file
+4. Temporary testing → Use notebooks or test files
+
+#### Modifying Existing Scrapers
+
+**Before modifying an active scraper:**
+1. Check if it's used in production (grep for imports)
+2. Review git history for context
+3. Add tests if not present
+4. Update documentation in this README
+
+**When to deprecate a scraper:**
+1. New scraper fully replaces functionality
+2. Data source no longer available
+3. Scraper abandoned for >6 months
+
+#### Deprecation Process
+
+1. Move to `scripts/archive/deprecated/{source}/`
+2. Update this README's "Deprecated" section
+3. Create git commit documenting deprecation reason
+4. Verify no broken imports (`grep -r "from scripts.etl.{filename}"`)
+
+---
+
+### Examples
+
+#### Good Naming ✅
+
+```bash
+# Primary scrapers - clear purpose
+basketball_reference_async_scraper.py
+espn_async_scraper.py
+
+# Incremental updates - clear differentiation
+basketball_reference_incremental_scraper.py
+
+# Specialized tasks - specific and descriptive
+basketball_reference_box_score_scraper.py
+espn_missing_pbp_scraper.py
+```
+
+#### Bad Naming ❌
+
+```bash
+# Too generic
+scrape_bball_ref.py
+get_espn_data.py
+
+# Version numbers
+basketball_reference_v2.py
+espn_scraper_new.py
+
+# Subjective adjectives
+basketball_reference_better.py
+espn_fast_scraper.py
+
+# Bug fix indicators
+basketball_reference_fixed.py
+espn_working.py
+```
+
+---
+
+### Enforcement
+
+**Code Reviews:** All new scrapers must follow naming conventions
+**Automated Checks:** DIMS verification checks for deprecated patterns
+**Grandfathering:** Existing specialized scrapers (pre-Oct 2025) are allowed until refactored
 
 ---
 
@@ -224,12 +365,126 @@ python scripts/etl/scrape_nba_api_player_dashboards.py \
 
 ---
 
+## Testing Standards & Coverage
+
+**Policy Effective:** October 21, 2025
+**Goal:** Ensure all active scrapers have basic test coverage
+
+### Current Test Coverage
+
+**Shared Infrastructure (Good Coverage):**
+- ✅ `async_scraper_base.py` - Tested in `tests/test_async_scrapers.py`
+- ✅ `scraper_config.py` - Tested in `tests/test_new_scraper_components.py`
+- ✅ `scraper_telemetry.py` - Tested in `tests/test_new_scraper_components.py`
+- ✅ `scraper_error_handler.py` - Tested in `tests/test_new_scraper_components.py`
+
+**Individual Scrapers (Minimal Coverage):**
+- ⚠️ Basketball Reference: `test_basketball_reference_api.py` (API validation only)
+- ⚠️ ESPN: `test_espn_processor.py` (processor only, not full scraper)
+- ❌ NBA API: No dedicated tests
+- ❌ hoopR: No dedicated tests
+- ❌ Kaggle: No dedicated tests
+
+**Current Stats:**
+- Shared infrastructure coverage: ~80%
+- Individual scraper coverage: ~20%
+- Integration tests: 5 test files
+- Total test files: 8
+
+### Testing Standards for New Scrapers
+
+**Minimum Requirements:**
+
+All new scrapers must include:
+
+1. **Basic Functionality Test**
+   ```python
+   def test_scraper_initialization():
+       """Test scraper can be initialized with config."""
+       scraper = YourAsyncScraper(config)
+       assert scraper is not None
+   ```
+
+2. **Rate Limiting Test**
+   ```python
+   def test_rate_limiting():
+       """Test rate limiter respects configured limits."""
+       # Verify requests_per_second honored
+   ```
+
+3. **Retry Logic Test**
+   ```python
+   def test_retry_on_failure():
+       """Test scraper retries on transient failures."""
+       # Mock 503 error, verify retry attempt
+   ```
+
+4. **Data Validation Test**
+   ```python
+   def test_output_schema():
+       """Test scraped data matches expected schema."""
+       # Verify required fields present
+   ```
+
+5. **S3 Upload Test** (mocked)
+   ```python
+   @mock_s3
+   def test_s3_upload():
+       """Test data successfully uploads to S3."""
+       # Mock S3, verify upload called
+   ```
+
+### Testing Recommendations
+
+**For Existing Scrapers:**
+- Prioritize testing primary async scrapers first
+- Focus on integration tests (does it actually work?)
+- Mock external HTTP calls to avoid rate limits
+- Use pytest fixtures for common test data
+
+**Test File Locations:**
+- Shared infrastructure tests: `tests/test_*.py`
+- Scraper-specific tests: `tests/scrapers/test_{source}_scraper.py`
+- Integration tests: `tests/integration/`
+
+**Running Tests:**
+```bash
+# All tests
+pytest tests/ -v
+
+# Specific scraper
+pytest tests/scrapers/test_basketball_reference_scraper.py -v
+
+# With coverage
+pytest tests/ --cov=scripts/etl --cov-report=html
+```
+
+### Future Improvements
+
+**Short-term (Next Month):**
+- [ ] Add basic tests for primary async scrapers (ESPN, Basketball Reference, NBA API)
+- [ ] Create test fixtures for common mock data
+- [ ] Set up CI/CD to run tests automatically
+
+**Medium-term (Next Quarter):**
+- [ ] Achieve 50% coverage for individual scrapers
+- [ ] Add integration tests for full scraper workflows
+- [ ] Create automated test data generation
+
+**Long-term (Next Year):**
+- [ ] Achieve 80% coverage for all active scrapers
+- [ ] Performance regression testing
+- [ ] Contract testing for external APIs
+
+---
+
 ## Related Documentation
 
 - **Scraper Management:** `docs/data_collection/scrapers/MANAGEMENT.md`
 - **Async Infrastructure:** `README_ASYNC_INFRASTRUCTURE.md`
 - **Deployment Checklist:** `docs/data_collection/scrapers/ASYNC_DEPLOYMENT_CHECKLIST.md`
 - **Monitoring System:** `docs/data_collection/scrapers/MONITORING_SYSTEM.md`
+- **Testing Guide:** See above testing standards
 
 ---
 

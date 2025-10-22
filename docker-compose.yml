@@ -1,7 +1,44 @@
 version: "3.8"
 
+# ==============================================================================
+# NBA Simulator - Scraper Infrastructure
+# ==============================================================================
+#
+# This docker-compose file defines the production scraper infrastructure for
+# collecting NBA data from multiple sources.
+#
+# Active Scrapers (Oct 2025):
+#   - ESPN (play-by-play, box scores)
+#   - Basketball Reference (stats, advanced metrics)
+#   - NBA API (official stats)
+#   - ESPN Missing PBP (gap filling)
+#
+# Monitoring Services:
+#   - Health Monitor (dashboard at :8080)
+#   - Alert Manager (Slack/Email notifications)
+#   - Data Validator (quality checks)
+#
+# Documentation:
+#   - Scraper Guide: scripts/etl/README.md
+#   - Management: docs/data_collection/scrapers/MANAGEMENT.md
+#   - Deployment Checklist: docs/data_collection/scrapers/ASYNC_DEPLOYMENT_CHECKLIST.md
+#
+# ==============================================================================
+
 services:
+  # ==============================================================================
   # ESPN Async Scraper
+  # ==============================================================================
+  # File: scripts/etl/espn_async_scraper.py
+  # Purpose: Full async scraper for ESPN play-by-play and box score data
+  # Coverage: 44,826 games (2000-2025)
+  # Runtime: 15-20 hours for full collection
+  # Status: ✅ Production-ready
+  #
+  # Modes:
+  #   - incremental: Daily updates (default)
+  #   - full: Complete historical collection
+  # ==============================================================================
   espn-scraper:
     build:
       context: ..
@@ -35,7 +72,19 @@ services:
     depends_on:
       - health-monitor
 
+  # ==============================================================================
   # Basketball Reference Async Scraper
+  # ==============================================================================
+  # File: scripts/etl/basketball_reference_async_scraper.py
+  # Purpose: Full async scraper for Basketball Reference statistics and advanced metrics
+  # Coverage: 9 data types (draft, awards, per_game, shooting, pbp, team_ratings, etc.)
+  # Runtime: ~1.9 hours for 6 seasons
+  # Status: ✅ Production-ready
+  #
+  # Modes:
+  #   - tier1: Core statistics (default)
+  #   - comprehensive: All available data types
+  # ==============================================================================
   basketball-reference-scraper:
     build:
       context: ..
@@ -69,7 +118,19 @@ services:
     depends_on:
       - health-monitor
 
+  # ==============================================================================
   # NBA API Async Scraper
+  # ==============================================================================
+  # File: scripts/etl/nba_api_async_scraper.py
+  # Purpose: Full async scraper for official NBA.com API statistics
+  # Coverage: Player stats, team stats, game logs, advanced metrics
+  # Runtime: Variable (depends on endpoints)
+  # Status: ✅ Production-ready
+  #
+  # Modes:
+  #   - comprehensive: All available endpoints (default)
+  #   - targeted: Specific endpoints only
+  # ==============================================================================
   nba-api-scraper:
     build:
       context: ..
@@ -103,7 +164,17 @@ services:
     depends_on:
       - health-monitor
 
-  # ESPN Missing PBP Scraper
+  # ==============================================================================
+  # ESPN Missing PBP Scraper (Specialized)
+  # ==============================================================================
+  # File: scripts/etl/espn_missing_pbp_scraper.py
+  # Purpose: Gap-filling scraper for missing ESPN play-by-play data
+  # Coverage: Games with incomplete/missing PBP data
+  # Runtime: 10-30 minutes (depends on gaps)
+  # Status: ✅ Active
+  #
+  # Note: Runs after main ESPN scraper to fill gaps
+  # ==============================================================================
   espn-missing-pbp-scraper:
     build:
       context: ..
@@ -137,7 +208,15 @@ services:
     depends_on:
       - health-monitor
 
+  # ==============================================================================
   # Health Monitor
+  # ==============================================================================
+  # File: scripts/monitoring/scraper_health_monitor.py
+  # Purpose: Real-time health dashboard for all scrapers
+  # Dashboard: http://localhost:8080
+  # Metrics: Success rates, error rates, runtime, memory usage
+  # Status: ✅ Active
+  # ==============================================================================
   health-monitor:
     build:
       context: ..
@@ -157,7 +236,14 @@ services:
     networks:
       - nba-scrapers
 
+  # ==============================================================================
   # Alert Manager
+  # ==============================================================================
+  # File: scripts/monitoring/alert_manager.py
+  # Purpose: Sends alerts for scraper failures/issues
+  # Channels: Slack (webhook), Email (SES)
+  # Status: ✅ Active
+  # ==============================================================================
   alert-manager:
     build:
       context: ..
@@ -179,7 +265,14 @@ services:
     depends_on:
       - health-monitor
 
+  # ==============================================================================
   # Data Validator Service
+  # ==============================================================================
+  # File: scripts/etl/data_validators.py
+  # Purpose: Validates scraped data quality and completeness
+  # Checks: Schema validation, completeness, consistency
+  # Status: ✅ Active
+  # ==============================================================================
   data-validator:
     build:
       context: ..
