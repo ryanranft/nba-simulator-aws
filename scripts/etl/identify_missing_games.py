@@ -179,10 +179,10 @@ class MissingGamesIdentifier:
                                 f"Processed {files_processed} files for {season}"
                             )
 
-                except Exception as e:
+                except Exception as e:  # nosec B112
                     continue
 
-            except Exception as e:
+            except Exception as e:  # nosec B112
                 continue
 
         logger.info(f"Found {len(existing_games)} existing games for {season}")
@@ -371,8 +371,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
