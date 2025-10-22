@@ -1,6 +1,9 @@
+# NBA Scraper Configuration
+# Centralized configuration for all NBA data scrapers
+
 scrapers:
   espn:
-    base_url: https://site.api.espn.com/apis/site/v2/sports/basketball/nba
+    base_url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba"
     rate_limit:
       requests_per_second: 1.0
       burst_size: 10
@@ -13,24 +16,25 @@ scrapers:
       exponential_backoff: true
       jitter: true
     timeout: 30
-    user_agent: NBA-Simulator-Scraper/1.0
+    user_agent: "NBA-Simulator-Scraper/1.0"
     max_concurrent: 10
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      local_output_dir: /tmp/scraper_output
+      s3_bucket: "nba-sim-raw-data-lake"
+      local_output_dir: "/tmp/scraper_output"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8000
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings: {}
+
   basketball_reference:
-    base_url: https://www.basketball-reference.com
+    base_url: "https://www.basketball-reference.com"
     rate_limit:
       requests_per_second: 0.5
       burst_size: 5
@@ -43,24 +47,25 @@ scrapers:
       exponential_backoff: true
       jitter: true
     timeout: 45
-    user_agent: NBA-Simulator-Scraper/1.0
+    user_agent: "NBA-Simulator-Scraper/1.0"
     max_concurrent: 5
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      local_output_dir: /tmp/scraper_output
+      s3_bucket: "nba-sim-raw-data-lake"
+      local_output_dir: "/tmp/scraper_output"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8001
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings: {}
+
   nba_api:
-    base_url: https://stats.nba.com
+    base_url: "https://stats.nba.com"
     rate_limit:
       requests_per_second: 2.0
       burst_size: 20
@@ -73,29 +78,30 @@ scrapers:
       exponential_backoff: true
       jitter: true
     timeout: 20
-    user_agent: NBA-Simulator-Scraper/1.0
+    user_agent: "NBA-Simulator-Scraper/1.0"
     max_concurrent: 15
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      local_output_dir: /tmp/scraper_output
+      s3_bucket: "nba-sim-raw-data-lake"
+      local_output_dir: "/tmp/scraper_output"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8002
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings: {}
+
   nba_api_reverse:
-    base_url: https://stats.nba.com
-    start_year: 2024
+    base_url: "https://stats.nba.com"
+    start_year: 2024 # Current season
     end_year: 1996
-    test_mode: true
+    test_mode: true # Test endpoints before full scrape
     rate_limit:
-      requests_per_second: 0.67
+      requests_per_second: 0.67 # 1.5s between requests
       burst_size: 5
       adaptive: true
       retry_after_header: true
@@ -106,31 +112,32 @@ scrapers:
       exponential_backoff: true
       jitter: true
     timeout: 30
-    user_agent: NBA-Simulator-Scraper/1.0
+    user_agent: "NBA-Simulator-Scraper/1.0"
     max_concurrent: 5
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      local_output_dir: /tmp/nba_api_reverse
+      s3_bucket: "nba-sim-raw-data-lake"
+      local_output_dir: "/tmp/nba_api_reverse"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8003
       health_check_interval: 60
       alert_thresholds: {}
     endpoints:
-    - play_by_play
-    - box_score
-    - player_stats
-    - team_stats
+      - play_by_play
+      - box_score
+      - player_stats
+      - team_stats
     custom_settings: {}
+
   basketball_reference_incremental:
-    base_url: https://www.basketball-reference.com
+    base_url: "https://www.basketball-reference.com"
     rate_limit:
-      requests_per_second: 0.083
+      requests_per_second: 0.083  # 12 seconds between requests (1/12)
       burst_size: 1
       adaptive: false
       retry_after_header: true
@@ -140,35 +147,36 @@ scrapers:
       max_delay: 120.0
       exponential_backoff: true
       jitter: false
-      retry_on_429_multiplier: 15.0
+      retry_on_429_multiplier: 15.0  # For 429 errors, wait 30s/60s/120s
     timeout: 45
-    user_agent: NBA-Simulator-Scraper/1.0
-    max_concurrent: 1
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 1  # Sequential requests only
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      s3_prefix: basketball_reference
-      local_output_dir: /tmp/basketball_reference_incremental
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "basketball_reference"
+      local_output_dir: "/tmp/basketball_reference_incremental"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8004
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings:
       data_types:
-      - season_totals
-      - advanced_totals
+        - season_totals
+        - advanced_totals
       default_scrape_current_season: true
       default_also_previous_season: false
-      include_combined_values: true
+      include_combined_values: true  # For traded players
+
   espn_incremental:
-    base_url: https://site.api.espn.com/apis/site/v2/sports/basketball/nba
+    base_url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba"
     rate_limit:
-      requests_per_second: 2.0
+      requests_per_second: 2.0  # 0.5s between requests (faster than primary ESPN scraper)
       burst_size: 5
       adaptive: true
       retry_after_header: true
@@ -179,228 +187,234 @@ scrapers:
       exponential_backoff: true
       jitter: true
     timeout: 30
-    user_agent: NBA-Simulator-Scraper/1.0
-    max_concurrent: 10
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 10  # Allow concurrent PBP requests
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      s3_prefix: espn/incremental
-      local_output_dir: /tmp/espn_incremental
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "espn/incremental"
+      local_output_dir: "/tmp/espn_incremental"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8005
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings:
       default_days_back: 14
-      database_path: /tmp/espn_local.db
-      load_to_database: true
+      database_path: "/tmp/espn_local.db"
+      load_to_database: true  # Also load to SQLite in addition to S3
       endpoints:
-        scoreboard: /scoreboard
-        playbyplay: /playbyplay
+        scoreboard: "/scoreboard"
+        playbyplay: "/playbyplay"
+
   espn_missing_pbp:
-    base_url: https://site.api.espn.com/apis/site/v2/sports/basketball/nba
+    base_url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba"
     rate_limit:
-      requests_per_second: 1.0
+      requests_per_second: 1.0  # 1s between requests (conservative for gap filling)
       burst_size: 3
       adaptive: true
       retry_after_header: true
     retry:
-      max_attempts: 5
+      max_attempts: 5  # More retries for missing data
       base_delay: 2.0
       max_delay: 120.0
       exponential_backoff: true
       jitter: true
     timeout: 45
-    user_agent: NBA-Simulator-Scraper/1.0
-    max_concurrent: 3
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 3  # Conservative concurrency for gap filling
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      s3_prefix: espn/missing_pbp
-      local_output_dir: /tmp/espn_missing_pbp
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "espn/missing_pbp"
+      local_output_dir: "/tmp/espn_missing_pbp"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8006
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings:
       data_types:
-      - schedule
-      - box_scores
-      - play_by_play
-      progress_tracking: true
-      save_progress_interval: 10
+        - schedule
+        - box_scores
+        - play_by_play
+      progress_tracking: true  # Enable progress tracking for resume capability
+      save_progress_interval: 10  # Save progress every N games
       default_seasons:
-      - 2022-23
-      - 2023-24
-      - 2024-25
+        - "2022-23"
+        - "2023-24"
+        - "2024-25"
       endpoints:
-        scoreboard: /scoreboard
-        summary: /summary
-        playbyplay: /playbyplay
+        scoreboard: "/scoreboard"
+        summary: "/summary"
+        playbyplay: "/playbyplay"
+
   hoopr_incremental:
-    base_url: https://raw.githubusercontent.com/sportsdataverse/hoopR-data
+    base_url: "https://raw.githubusercontent.com/sportsdataverse/hoopR-data"  # hoopR data repository
     rate_limit:
-      requests_per_second: 0.5
+      requests_per_second: 0.5  # 2s between requests (conservative for library calls)
       burst_size: 3
       adaptive: true
       retry_after_header: true
     retry:
-      max_attempts: 5
+      max_attempts: 5  # More retries for potentially large datasets
       base_delay: 2.0
       max_delay: 120.0
       exponential_backoff: true
       jitter: true
-    timeout: 60
-    user_agent: NBA-Simulator-Scraper/1.0
-    max_concurrent: 3
+    timeout: 60  # Longer timeout for potentially large PBP datasets
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 3  # Conservative concurrency for library calls
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      s3_prefix: hoopr/incremental
-      local_output_dir: /tmp/hoopr_incremental
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "hoopr/incremental"
+      local_output_dir: "/tmp/hoopr_incremental"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8007
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings:
-      database_path: /tmp/hoopr_local.db
-      default_days_back: 7
-      load_to_database: true
-      backup_to_s3: true
+      database_path: "/tmp/hoopr_local.db"  # SQLite database for hoopR data
+      default_days_back: 7  # Default lookback for incremental updates
+      load_to_database: true  # Load to SQLite in addition to S3
+      backup_to_s3: true  # Backup schedule and PBP data to S3
       tables:
-      - schedule
-      - play_by_play
+        - schedule
+        - play_by_play
+
   basketball_reference_box_scores:
-    base_url: https://www.basketball-reference.com
+    base_url: "https://www.basketball-reference.com"
     rate_limit:
-      requests_per_second: 0.083
+      requests_per_second: 0.083  # 12 seconds between requests (1/12) - VERY conservative
       burst_size: 1
-      adaptive: false
+      adaptive: false  # Strict fixed rate limit
       retry_after_header: true
     retry:
-      max_attempts: 5
+      max_attempts: 5  # More retries for historical data
       base_delay: 3.0
       max_delay: 180.0
       exponential_backoff: true
       jitter: true
-      retry_on_429_multiplier: 15.0
+      retry_on_429_multiplier: 15.0  # For 429 errors, wait 45s/90s/180s
     timeout: 30
-    user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36
-    max_concurrent: 1
+    user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    max_concurrent: 1  # MUST be sequential - Basketball Reference is strict
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      s3_prefix: basketball_reference/box_scores
-      local_output_dir: /tmp/basketball_reference_box_scores
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "basketball_reference/box_scores"
+      local_output_dir: "/tmp/basketball_reference_box_scores"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8008
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings:
-      database_path: /tmp/basketball_reference_boxscores.db
-      load_to_database: true
-      priority_filter: null
-      max_games: null
+      database_path: "/tmp/basketball_reference_boxscores.db"
+      load_to_database: true  # Load to SQLite in addition to S3
+      priority_filter: null  # Can filter by priority (1-9)
+      max_games: null  # Limit number of games to scrape (for testing)
       data_sections:
-      - game_info
-      - team_stats
-      - player_stats
-      - play_by_play
+        - game_info
+        - team_stats
+        - player_stats
+        - play_by_play
+
   basketball_reference_daily_pbp:
-    base_url: https://www.basketball-reference.com
+    base_url: "https://www.basketball-reference.com"
     rate_limit:
-      requests_per_second: 0.083
+      requests_per_second: 0.083  # 12 seconds between requests (1/12) - VERY conservative
       burst_size: 1
-      adaptive: false
+      adaptive: false  # Strict fixed rate limit
       retry_after_header: true
     retry:
-      max_attempts: 5
+      max_attempts: 5  # More retries for production daily scraping
       base_delay: 3.0
       max_delay: 180.0
       exponential_backoff: true
       jitter: true
-      retry_on_429_multiplier: 15.0
+      retry_on_429_multiplier: 15.0  # For 429 errors, wait 45s/90s/180s
     timeout: 30
-    user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36
-    max_concurrent: 1
+    user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    max_concurrent: 1  # MUST be sequential - Basketball Reference is strict
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      s3_prefix: basketball_reference/pbp
-      local_output_dir: /tmp/basketball_reference_daily_pbp
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "basketball_reference/pbp"
+      local_output_dir: "/tmp/basketball_reference_daily_pbp"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8009
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings:
-      database_path: /tmp/basketball_reference_pbp.db
-      load_to_database: true
-      espn_api_base_url: https://site.api.espn.com/apis/site/v2/sports/basketball/nba
-      default_days_back: 1
+      database_path: "/tmp/basketball_reference_pbp.db"
+      load_to_database: true  # Load to SQLite in addition to S3
+      espn_api_base_url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba"
+      default_days_back: 1  # Default to yesterday for daily scraping
+
   basketball_reference_pbp_backfill:
-    base_url: https://www.basketball-reference.com
+    base_url: "https://www.basketball-reference.com"
     rate_limit:
-      requests_per_second: 0.083
+      requests_per_second: 0.083  # 12 seconds between requests (1/12) - VERY conservative
       burst_size: 1
-      adaptive: false
+      adaptive: false  # Strict fixed rate limit
       retry_after_header: true
     retry:
-      max_attempts: 5
+      max_attempts: 5  # More retries for long-running historical backfills
       base_delay: 3.0
       max_delay: 180.0
       exponential_backoff: true
       jitter: true
-      retry_on_429_multiplier: 15.0
+      retry_on_429_multiplier: 15.0  # For 429 errors, wait 45s/90s/180s
     timeout: 30
-    user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36
-    max_concurrent: 1
+    user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    max_concurrent: 1  # MUST be sequential - Basketball Reference is strict
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      s3_prefix: basketball_reference/pbp
-      local_output_dir: /tmp/basketball_reference_pbp_backfill
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "basketball_reference/pbp"
+      local_output_dir: "/tmp/basketball_reference_pbp_backfill"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8010
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings:
-      database_path: /tmp/basketball_reference_boxscores.db
-      load_to_database: true
-      default_stop_after_no_pbp: 100
+      database_path: "/tmp/basketball_reference_boxscores.db"  # Uses scraping_progress table
+      load_to_database: true  # Load to SQLite in addition to S3
+      default_stop_after_no_pbp: 100  # Stop after N consecutive games with no PBP
+
   basketball_reference_daily_box_scores:
-    base_url: https://www.basketball-reference.com
+    base_url: "https://www.basketball-reference.com"  # Not used directly (calls box score scraper)
     rate_limit:
-      requests_per_second: 1.0
+      requests_per_second: 1.0  # For ESPN API calls
       burst_size: 3
       adaptive: true
       retry_after_header: true
@@ -411,226 +425,232 @@ scrapers:
       exponential_backoff: true
       jitter: true
     timeout: 10
-    user_agent: NBA-Simulator-Scraper/1.0
-    max_concurrent: 1
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 1  # Sequential coordinator
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      s3_prefix: basketball_reference/daily
-      local_output_dir: /tmp/basketball_reference_daily
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "basketball_reference/daily"
+      local_output_dir: "/tmp/basketball_reference_daily"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8011
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings:
-      database_path: /tmp/basketball_reference_boxscores.db
-      espn_api_base_url: https://site.api.espn.com/apis/site/v2/sports/basketball/nba
+      database_path: "/tmp/basketball_reference_boxscores.db"  # Manages scraping_progress table
+      espn_api_base_url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba"
+
   basketball_reference_pbp_discovery:
-    base_url: https://www.basketball-reference.com
+    base_url: "https://www.basketball-reference.com"
     rate_limit:
-      requests_per_second: 0.083
+      requests_per_second: 0.083  # 12 seconds between requests (1/12) - VERY conservative
       burst_size: 1
-      adaptive: false
+      adaptive: false  # Strict fixed rate limit
       retry_after_header: true
     retry:
-      max_attempts: 3
+      max_attempts: 3  # Research tool - fewer retries needed
       base_delay: 2.0
       max_delay: 120.0
       exponential_backoff: true
       jitter: true
-      retry_on_429_multiplier: 15.0
+      retry_on_429_multiplier: 15.0  # For 429 errors, wait 30s/60s/120s
     timeout: 30
-    user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36
-    max_concurrent: 1
+    user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    max_concurrent: 1  # MUST be sequential - Basketball Reference is strict
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      s3_prefix: basketball_reference/pbp_discovery
-      local_output_dir: reports
-      upload_to_s3: false
+      s3_bucket: "nba-sim-raw-data-lake"  # Not used - research tool outputs to reports/
+      s3_prefix: "basketball_reference/pbp_discovery"
+      local_output_dir: "reports"
+      upload_to_s3: false  # Research tool - no S3 uploads
       compression: false
       deduplication: false
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8012
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings:
-      default_start_year: 2024
-      default_end_year: 1990
-      default_games_per_year: 10
-      report_output_dir: reports
+      default_start_year: 2024  # Default year to start discovery
+      default_end_year: 1990  # Default year to end discovery
+      default_games_per_year: 10  # Default number of sample games to test per year
+      report_output_dir: "reports"  # Directory for JSON reports
+
   nba_api_game_advanced:
-    base_url: https://stats.nba.com
+    base_url: "https://stats.nba.com"
     rate_limit:
-      requests_per_second: 0.67
+      requests_per_second: 0.67  # 1.5s between requests (current scraper behavior)
       burst_size: 3
       adaptive: true
       retry_after_header: true
     retry:
-      max_attempts: 5
+      max_attempts: 5  # More retries for game-level data
       base_delay: 1.5
       max_delay: 90.0
       exponential_backoff: true
       jitter: true
     timeout: 30
-    user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
-    max_concurrent: 1
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    max_concurrent: 1  # Sequential requests for nba_api library
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      s3_prefix: nba_api/game_advanced
-      local_output_dir: /tmp/nba_api_game_advanced
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "nba_api/game_advanced"
+      local_output_dir: "/tmp/nba_api_game_advanced"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8013
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings:
       use_mlflow: true
-      mlflow_experiment: nba_api_game_advanced_scraper
+      mlflow_experiment: "nba_api_game_advanced_scraper"
       endpoints:
-      - rotation
-      default_start_season: 2020-21
-      default_end_season: 2024-25
+        - rotation
+      default_start_season: "2020-21"
+      default_end_season: "2024-25"
+
   nba_api_player_dashboards:
-    base_url: https://stats.nba.com
+    base_url: "https://stats.nba.com"
     rate_limit:
-      requests_per_second: 0.67
+      requests_per_second: 0.67  # 1.5s between requests (current scraper behavior)
       burst_size: 3
       adaptive: true
       retry_after_header: true
     retry:
-      max_attempts: 5
+      max_attempts: 5  # More retries for player data
       base_delay: 1.5
       max_delay: 90.0
       exponential_backoff: true
       jitter: true
     timeout: 30
-    user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
-    max_concurrent: 1
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    max_concurrent: 1  # Sequential requests for nba_api library
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      s3_prefix: nba_api/player_dashboards
-      local_output_dir: /tmp/nba_api_player_dashboards
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "nba_api/player_dashboards"
+      local_output_dir: "/tmp/nba_api_player_dashboards"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8014
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings:
       use_mlflow: true
-      mlflow_experiment: nba_api_player_dashboards_scraper
+      mlflow_experiment: "nba_api_player_dashboards_scraper"
       endpoints:
-      - clutch
-      - general_splits
-      - shooting_splits
-      - last_n_games
-      - team_performance
-      - year_over_year
-      default_start_season: 2020-21
-      default_end_season: 2024-25
+        - clutch
+        - general_splits
+        - shooting_splits
+        - last_n_games
+        - team_performance
+        - year_over_year
+      default_start_season: "2020-21"
+      default_end_season: "2024-25"
+
   nba_api_player_tracking:
-    base_url: https://stats.nba.com
+    base_url: "https://stats.nba.com"
     rate_limit:
-      requests_per_second: 0.67
+      requests_per_second: 0.67  # 1.5s between requests (current scraper behavior)
       burst_size: 3
       adaptive: true
       retry_after_header: true
     retry:
-      max_attempts: 5
+      max_attempts: 5  # More retries for SportVU tracking data
       base_delay: 1.5
       max_delay: 90.0
       exponential_backoff: true
       jitter: true
     timeout: 30
-    user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
-    max_concurrent: 1
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    max_concurrent: 1  # Sequential requests for nba_api library
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      s3_prefix: nba_api/player_tracking
-      local_output_dir: /tmp/nba_api_player_tracking
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "nba_api/player_tracking"
+      local_output_dir: "/tmp/nba_api_player_tracking"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8015
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings:
       use_mlflow: true
-      mlflow_experiment: nba_api_player_tracking_scraper
+      mlflow_experiment: "nba_api_player_tracking_scraper"
       endpoints:
-      - pt_pass
-      - pt_reb
-      - pt_shot_defend
-      - pt_shots
-      default_start_season: 2014-15
-      default_end_season: 2024-25
+        - pt_pass
+        - pt_reb
+        - pt_shot_defend
+        - pt_shots
+      default_start_season: "2014-15"  # SportVU era starts here
+      default_end_season: "2024-25"
+
   nba_api_team_dashboards:
-    base_url: https://stats.nba.com
+    base_url: "https://stats.nba.com"
     rate_limit:
-      requests_per_second: 0.67
+      requests_per_second: 0.67  # 1.5s between requests (current scraper behavior)
       burst_size: 3
       adaptive: true
       retry_after_header: true
     retry:
-      max_attempts: 5
+      max_attempts: 5  # More retries for team dashboard data
       base_delay: 1.5
       max_delay: 90.0
       exponential_backoff: true
       jitter: true
     timeout: 30
-    user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
-    max_concurrent: 1
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    max_concurrent: 1  # Sequential requests for nba_api library
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      s3_prefix: nba_api/team_dashboards
-      local_output_dir: /tmp/nba_api_team_dashboards
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "nba_api/team_dashboards"
+      local_output_dir: "/tmp/nba_api_team_dashboards"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8016
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings:
       use_mlflow: true
-      mlflow_experiment: nba_api_team_dashboards_scraper
+      mlflow_experiment: "nba_api_team_dashboards_scraper"
       endpoints:
-      - general_splits
-      - shooting_splits
-      - lineups
-      - pt_pass
-      - pt_reb
-      - pt_shots
-      default_start_season: 2020-21
-      default_end_season: 2024-25
+        - general_splits
+        - shooting_splits
+        - lineups
+        - pt_pass
+        - pt_reb
+        - pt_shots
+      default_start_season: "2020-21"
+      default_end_season: "2024-25"
+
   hoopr_incremental_simple:
-    base_url: https://raw.githubusercontent.com/sportsdataverse/hoopR-data
+    base_url: "https://raw.githubusercontent.com/sportsdataverse/hoopR-data"
     rate_limit:
-      requests_per_second: 0.5
+      requests_per_second: 0.5  # 2s between requests (matches original RATE_LIMIT_SECONDS)
       burst_size: 3
       adaptive: true
       retry_after_header: true
@@ -641,31 +661,32 @@ scrapers:
       exponential_backoff: true
       jitter: true
     timeout: 45
-    user_agent: NBA-Simulator-Scraper/1.0
-    max_concurrent: 2
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 2  # Conservative for incremental updates
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      s3_prefix: hoopr_incremental
-      local_output_dir: /tmp/hoopr_incremental_simple
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "hoopr_incremental"
+      local_output_dir: "/tmp/hoopr_incremental_simple"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8017
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings:
-      default_days_back: 3
+      default_days_back: 3  # For overnight 3-source cross-validation
       data_types:
-      - play_by_play
-      - schedule
+        - play_by_play
+        - schedule
+
   hoopr_complete_endpoints:
-    base_url: https://raw.githubusercontent.com/sportsdataverse/hoopR-data
+    base_url: "https://raw.githubusercontent.com/sportsdataverse/hoopR-data"
     rate_limit:
-      requests_per_second: 1.67
+      requests_per_second: 1.67  # 0.6s between requests (matches original)
       burst_size: 5
       adaptive: true
       retry_after_header: true
@@ -675,225 +696,78 @@ scrapers:
       max_delay: 120.0
       exponential_backoff: true
       jitter: true
-    timeout: 120
-    user_agent: NBA-Simulator-Scraper/1.0
+    timeout: 120  # Longer timeout for comprehensive endpoints
+    user_agent: "NBA-Simulator-Scraper/1.0"
     max_concurrent: 3
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      s3_prefix: hoopr_complete
-      local_output_dir: /tmp/hoopr_complete
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "hoopr_complete"
+      local_output_dir: "/tmp/hoopr_complete"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8018
       health_check_interval: 120
       alert_thresholds: {}
     custom_settings:
-      include_game_detail: false
+      include_game_detail: false  # Control per-game endpoint scraping
       endpoint_categories:
-      - bulk_loaders
-      - league_dashboards
-      - static_endpoints
+        - bulk_loaders
+        - league_dashboards
+        - static_endpoints
+
   hoopr_missing_games:
-    base_url: https://raw.githubusercontent.com/sportsdataverse/hoopR-data
+    base_url: "https://raw.githubusercontent.com/sportsdataverse/hoopR-data"
     rate_limit:
-      requests_per_second: 1.67
+      requests_per_second: 1.67  # 0.6s between requests (matches DELAY_BETWEEN_GAMES)
       burst_size: 3
       adaptive: true
       retry_after_header: true
     retry:
-      max_attempts: 5
+      max_attempts: 5  # More retries for gap filling
       base_delay: 2.0
       max_delay: 120.0
       exponential_backoff: true
       jitter: true
     timeout: 60
-    user_agent: NBA-Simulator-Scraper/1.0
-    max_concurrent: 2
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 2  # Conservative for gap filling
     storage:
-      s3_bucket: nba-sim-raw-data-lake
-      s3_prefix: hoopr/missing_games
-      local_output_dir: /tmp/hoopr_missing_games
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "hoopr/missing_games"
+      local_output_dir: "/tmp/hoopr_missing_games"
       upload_to_s3: true
       compression: false
       deduplication: true
     monitoring:
       enable_telemetry: true
-      log_level: INFO
+      log_level: "INFO"
       log_file: null
       metrics_port: 8019
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings:
-      gap_list_path: /tmp/missing_from_hoopr.csv
-      database_path: /tmp/hoopr_local.db
+      gap_list_path: "/tmp/missing_from_hoopr.csv"
+      database_path: "/tmp/hoopr_local.db"
       load_to_database: true
       sync_to_rds: false
-  analyze_data_coverage:
-    base_url: ''
-    rate_limit:
-      requests_per_second: 0.0
-      burst_size: 5
-      adaptive: true
-      retry_after_header: true
-    retry:
-      max_attempts: 3
-      base_delay: 1.0
-      max_delay: 60.0
-      exponential_backoff: true
-      jitter: true
-    timeout: 60
-    user_agent: NBA-Simulator-Scraper/1.0
-    max_concurrent: 1
-    storage:
-      s3_bucket: nba-sim-raw-data-lake
-      local_output_dir: /tmp/scraper_output/analyze_data_coverage
-      upload_to_s3: true
-      compression: false
-      deduplication: true
-    monitoring:
-      enable_telemetry: true
-      log_level: INFO
-      log_file: null
-      metrics_port: 8020
-      health_check_interval: 60
-      alert_thresholds: {}
-    custom_settings: {}
-  adaptive_rate_limiter:
-    base_url: ''
-    rate_limit:
-      requests_per_second: 0.0
-      burst_size: 5
-      adaptive: true
-      retry_after_header: true
-    retry:
-      max_attempts: 3
-      base_delay: 1.0
-      max_delay: 60.0
-      exponential_backoff: true
-      jitter: true
-    timeout: 60
-    user_agent: NBA-Simulator-Scraper/1.0
-    max_concurrent: 1
-    storage:
-      s3_bucket: nba-sim-raw-data-lake
-      local_output_dir: /tmp/scraper_output/adaptive_rate_limiter
-      upload_to_s3: true
-      compression: false
-      deduplication: true
-    monitoring:
-      enable_telemetry: true
-      log_level: INFO
-      log_file: null
-      metrics_port: 8020
-      health_check_interval: 60
-      alert_thresholds: {}
-    custom_settings: {}
-  analyze_espn_coverage:
-    base_url: https://site.api.espn.com/apis/site/v2/sports/basketball/nba
-    rate_limit:
-      requests_per_second: 0.5
-      burst_size: 5
-      adaptive: true
-      retry_after_header: true
-    retry:
-      max_attempts: 3
-      base_delay: 1.0
-      max_delay: 60.0
-      exponential_backoff: true
-      jitter: true
-    timeout: 30
-    user_agent: NBA-Simulator-Scraper/1.0
-    max_concurrent: 10
-    storage:
-      s3_bucket: nba-sim-raw-data-lake
-      local_output_dir: /tmp/scraper_output/analyze_espn_coverage
-      upload_to_s3: true
-      compression: false
-      deduplication: true
-    monitoring:
-      enable_telemetry: true
-      log_level: INFO
-      log_file: null
-      metrics_port: 8021
-      health_check_interval: 60
-      alert_thresholds: {}
-    custom_settings: {}
-  bbref_tier_1_agent:
-    base_url: https://www.basketball-reference.com
-    rate_limit:
-      requests_per_second: 0.083
-      burst_size: 5
-      adaptive: true
-      retry_after_header: true
-    retry:
-      max_attempts: 5
-      base_delay: 2.0
-      max_delay: 120.0
-      exponential_backoff: true
-      jitter: true
-    timeout: 45
-    user_agent: NBA-Simulator-Scraper/1.0
-    max_concurrent: 1
-    storage:
-      s3_bucket: nba-sim-raw-data-lake
-      local_output_dir: /tmp/scraper_output/bbref_tier_1_agent
-      upload_to_s3: true
-      compression: false
-      deduplication: true
-    monitoring:
-      enable_telemetry: true
-      log_level: INFO
-      log_file: null
-      metrics_port: 8022
-      health_check_interval: 60
-      alert_thresholds: {}
-    custom_settings: {}
-  build_master_game_list_robust:
-    base_url: https://www.basketball-reference.com
-    rate_limit:
-      requests_per_second: 0.0
-      burst_size: 5
-      adaptive: true
-      retry_after_header: true
-    retry:
-      max_attempts: 3
-      base_delay: 1.0
-      max_delay: 60.0
-      exponential_backoff: true
-      jitter: true
-    timeout: 60
-    user_agent: NBA-Simulator-Scraper/1.0
-    max_concurrent: 1
-    storage:
-      s3_bucket: nba-sim-raw-data-lake
-      local_output_dir: /tmp/scraper_output/build_master_game_list_robust
-      upload_to_s3: true
-      compression: false
-      deduplication: true
-    monitoring:
-      enable_telemetry: true
-      log_level: INFO
-      log_file: null
-      metrics_port: 8023
-      health_check_interval: 60
-      alert_thresholds: {}
-    custom_settings: {}
+
+# Global settings
 global:
   aws:
-    region: us-east-1
-    access_key_id: null
-    secret_access_key: null
+    region: "us-east-1"
+    access_key_id: null # Set via environment variable
+    secret_access_key: null # Set via environment variable
   logging:
-    level: INFO
-    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    file: logs/scraper.log
+    level: "INFO"
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    file: "logs/scraper.log"
   alerts:
-    slack_webhook: null
+    slack_webhook: null # Set via environment variable
     email_alerts: false
     alert_thresholds:
       error_rate: 0.05
