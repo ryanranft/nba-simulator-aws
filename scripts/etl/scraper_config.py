@@ -63,7 +63,9 @@ class StorageConfig:
     """Storage configuration"""
 
     s3_bucket: Optional[str] = None
-    local_output_dir: str = "/tmp/scraper_output"  # nosec B108 - Standard temp directory for scraper output
+    local_output_dir: str = (
+        "/tmp/scraper_output"  # nosec B108 - Standard temp directory for scraper output
+    )
     upload_to_s3: bool = True
     compression: bool = False
     deduplication: bool = True
@@ -566,3 +568,8 @@ if __name__ == "__main__":
             print(f"Validation errors for {scraper_name}: {errors}")
         else:
             print(f"Configuration for {scraper_name} is valid")
+
+
+
+
+

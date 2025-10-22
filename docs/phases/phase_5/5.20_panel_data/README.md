@@ -924,7 +924,7 @@ After mastering rec_22 (Panel Data Processing), you can:
 - `/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/test_rec_22.py` (33 tests)
 
 **Related Documentation:**
-- `/Users/ryanranft/nba-simulator-aws/docs/BOOK_RECOMMENDATIONS_TRACKER.md`
+- `/Users/ryanranft/nba-simulator-aws/docs/ml_systems/book_recommendations/TRACKER.md`
 - `/Users/ryanranft/nba-simulator-aws/docs/MASTER_IMPLEMENTATION_SEQUENCE.md`
 
 **Questions or Issues?**

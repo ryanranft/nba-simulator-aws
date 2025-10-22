@@ -198,20 +198,17 @@ class LocalJSONLoader:
                 "CREATE INDEX IF NOT EXISTS idx_player_dash_player ON nba_api_player_dashboards(player_id, season)",
                 "CREATE INDEX IF NOT EXISTS idx_team_dash_team ON nba_api_team_dashboards(team_id, season)",
                 "CREATE INDEX IF NOT EXISTS idx_comprehensive_type ON nba_api_comprehensive(data_type, season)",
-
                 # Panel data multi-index: (entity_id, game_id, timestamp) for temporal queries
                 "CREATE INDEX IF NOT EXISTS idx_player_tracking_panel ON nba_api_player_tracking(player_id, game_id, event_timestamp)",
                 "CREATE INDEX IF NOT EXISTS idx_player_dash_panel ON nba_api_player_dashboards(player_id, game_id, event_timestamp)",
                 "CREATE INDEX IF NOT EXISTS idx_team_dash_panel ON nba_api_team_dashboards(team_id, game_id, game_date)",
                 "CREATE INDEX IF NOT EXISTS idx_comprehensive_panel ON nba_api_comprehensive(entity_id, game_id, event_timestamp)",
-
                 # Temporal indexes for time-based queries
                 "CREATE INDEX IF NOT EXISTS idx_player_tracking_time ON nba_api_player_tracking(event_timestamp)",
                 "CREATE INDEX IF NOT EXISTS idx_game_advanced_time ON nba_api_game_advanced(game_datetime)",
                 "CREATE INDEX IF NOT EXISTS idx_player_dash_time ON nba_api_player_dashboards(event_timestamp)",
                 "CREATE INDEX IF NOT EXISTS idx_team_dash_time ON nba_api_team_dashboards(game_date)",
                 "CREATE INDEX IF NOT EXISTS idx_comprehensive_time ON nba_api_comprehensive(event_timestamp)",
-
                 # Feature engineering tracking indexes
                 "CREATE INDEX IF NOT EXISTS idx_player_tracking_features ON nba_api_player_tracking(features_generated, feature_version)",
                 "CREATE INDEX IF NOT EXISTS idx_game_advanced_features ON nba_api_game_advanced(features_generated, feature_version)",
@@ -228,7 +225,9 @@ class LocalJSONLoader:
             self.conn.rollback()
             return False
 
-    def check_data_quality(self, batch: List[tuple], table: str, batch_num: int) -> Dict[str, Any]:
+    def check_data_quality(
+        self, batch: List[tuple], table: str, batch_num: int
+    ) -> Dict[str, Any]:
         """
         Monitor data quality metrics for a batch (ml_systems_2)
 
@@ -254,7 +253,11 @@ class LocalJSONLoader:
         for record in batch:
             try:
                 # Extract JSON data
-                json_str = record[json_index] if isinstance(record[json_index], str) else json.dumps(record[json_index])
+                json_str = (
+                    record[json_index]
+                    if isinstance(record[json_index], str)
+                    else json.dumps(record[json_index])
+                )
                 data = json.loads(json_str) if isinstance(json_str, str) else json_str
 
                 if isinstance(data, list):
@@ -284,7 +287,9 @@ class LocalJSONLoader:
             # Establish baseline schema if not set
             if table not in self.baseline_schema:
                 self.baseline_schema[table] = schemas[0] if schemas else set()
-                logger.info(f"📊 Baseline schema for {table}: {len(self.baseline_schema[table])} fields")
+                logger.info(
+                    f"📊 Baseline schema for {table}: {len(self.baseline_schema[table])} fields"
+                )
 
             # Check for schema drift
             for schema in schemas:
@@ -298,12 +303,14 @@ class LocalJSONLoader:
                 if extra:
                     self.quality_metrics["schema_violations"] += 1
                     metrics["schema_issues"].append(f"Extra fields: {extra}")
-                    self.schema_changes.append({
-                        "table": table,
-                        "batch": batch_num,
-                        "extra_fields": list(extra),
-                        "timestamp": datetime.now().isoformat(),
-                    })
+                    self.schema_changes.append(
+                        {
+                            "table": table,
+                            "batch": batch_num,
+                            "extra_fields": list(extra),
+                            "timestamp": datetime.now().isoformat(),
+                        }
+                    )
 
         # Update global quality metrics
         self.quality_metrics["total_records"] += len(batch)
@@ -311,10 +318,14 @@ class LocalJSONLoader:
 
         # Log warnings for quality issues
         if metrics["empty_records"] > 0:
-            logger.warning(f"⚠️ Batch {batch_num} ({table}): {metrics['empty_records']} empty records")
+            logger.warning(
+                f"⚠️ Batch {batch_num} ({table}): {metrics['empty_records']} empty records"
+            )
 
         if metrics["schema_issues"]:
-            logger.warning(f"⚠️ Batch {batch_num} ({table}): {len(metrics['schema_issues'])} schema issues")
+            logger.warning(
+                f"⚠️ Batch {batch_num} ({table}): {len(metrics['schema_issues'])} schema issues"
+            )
 
         return metrics
 
@@ -575,17 +586,21 @@ class LocalJSONLoader:
         logger.info("DATA QUALITY REPORT (ml_systems_2)")
         logger.info("=" * 80)
 
-        logger.info(f"📊 Total Records Analyzed: {self.quality_metrics['total_records']:,}")
+        logger.info(
+            f"📊 Total Records Analyzed: {self.quality_metrics['total_records']:,}"
+        )
         logger.info(f"📊 Total Batches Processed: {self.batch_counter}")
         logger.info(f"📊 Empty Records: {self.quality_metrics['empty_records']:,}")
 
-        if self.quality_metrics['schema_violations'] > 0:
-            logger.warning(f"⚠️  Schema Violations: {self.quality_metrics['schema_violations']}")
+        if self.quality_metrics["schema_violations"] > 0:
+            logger.warning(
+                f"⚠️  Schema Violations: {self.quality_metrics['schema_violations']}"
+            )
 
         # Report missing fields by table
-        if self.quality_metrics['missing_fields']:
+        if self.quality_metrics["missing_fields"]:
             logger.info("\n📋 Missing Fields by Table:")
-            for table, count in self.quality_metrics['missing_fields'].items():
+            for table, count in self.quality_metrics["missing_fields"].items():
                 logger.warning(f"   {table}: {count} missing field instances")
 
         # Report schema changes detected

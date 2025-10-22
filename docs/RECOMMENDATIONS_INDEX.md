@@ -349,7 +349,7 @@ This index tracks implementation of recommendations from machine learning and st
 **Data Engineering:**
 6. *Data Quality: The Accuracy Dimension* - Jack E. Olson
 
-**Complete List:** See `/docs/BOOK_RECOMMENDATIONS_TRACKER.md`
+**Complete List:** See `/docs/ml_systems/book_recommendations/TRACKER.md`
 
 ---
 

@@ -103,7 +103,7 @@ test_rec_22.py::TestCumulativeStats PASSED [100%]
 ## Related Documentation
 
 - [README.md](README.md) - Complete usage guide (500+ lines)
-- [BOOK_RECOMMENDATIONS_TRACKER.md](../../BOOK_RECOMMENDATIONS_TRACKER.md) - Implementation tracker
+- [BOOK_RECOMMENDATIONS_TRACKER.md](../../../ml_systems/book_recommendations/TRACKER.md) - Implementation tracker
 - [PROGRESS.md](../../../PROGRESS.md) - Project status
 
 ---

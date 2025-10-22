@@ -48,10 +48,10 @@ tier3 = []
 for rec_id, info in checker.statuses.items():
     status = info.get('status')
     dependencies = info.get('dependencies', [])
-    
+
     if status == 'COMPLETE':
         continue
-    
+
     if len(dependencies) >= 3:
         # Check if all dependencies are met
         unmet = [d for d in dependencies if d not in completed]
@@ -101,4 +101,8 @@ echo "Calling batch implementation script..."
 echo ""
 
 exec bash "${SCRIPT_DIR}/batch_implement_recommendations.sh" "${TIER3_ARRAY[@]}"
+
+
+
+
 

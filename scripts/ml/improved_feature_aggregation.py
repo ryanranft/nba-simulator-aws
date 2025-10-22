@@ -18,8 +18,23 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from docs.phases.phase_0.implement_rec_22 import PanelDataProcessingSystem
-from docs.phases.phase_0.implement_rec_11 import AdvancedFeatureEngineeringPipeline
+# Import from power directories with periods in names using importlib
+import importlib.util
+spec_rec22 = importlib.util.spec_from_file_location(
+    "implement_rec_22",
+    os.path.join(os.path.dirname(__file__), "../../docs/phases/phase_5/5.20_panel_data/implement_rec_22.py")
+)
+implement_rec_22 = importlib.util.module_from_spec(spec_rec22)
+spec_rec22.loader.exec_module(implement_rec_22)
+PanelDataProcessingSystem = implement_rec_22.PanelDataProcessingSystem
+
+spec_rec11 = importlib.util.spec_from_file_location(
+    "implement_rec_11",
+    os.path.join(os.path.dirname(__file__), "../../docs/phases/phase_5/5.1_feature_engineering/implement_rec_11.py")
+)
+implement_rec_11 = importlib.util.module_from_spec(spec_rec11)
+spec_rec11.loader.exec_module(implement_rec_11)
+AdvancedFeatureEngineeringPipeline = implement_rec_11.AdvancedFeatureEngineeringPipeline
 
 print("=" * 70)
 print("IMPROVED FEATURE AGGREGATION FOR NBA GAME PREDICTION")

@@ -318,7 +318,7 @@ except ImportError:
 - [Data Drift Detection Summary](DATA_DRIFT_DETECTION_SUMMARY.md)
 - [Testing Summary](TESTING_SUMMARY_ML_SYSTEMS.md)
 - [Deployment Summary](DEPLOYMENT_SUMMARY_ML_SYSTEMS.md)
-- [Book Recommendations Tracker](../../BOOK_RECOMMENDATIONS_TRACKER.md)
+- [Book Recommendations Tracker](../../ml_systems/book_recommendations/TRACKER.md)
 
 ### Implementation Files
 - **Enhanced Training:** `/scripts/ml/train_models_with_mlops.py` (490+ lines)

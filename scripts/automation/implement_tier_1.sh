@@ -41,7 +41,7 @@ tier1 = []
 for rec_id, info in checker.statuses.items():
     status = info.get('status')
     dependencies = info.get('dependencies', [])
-    
+
     if status != 'COMPLETE' and len(dependencies) == 0:
         tier1.append(rec_id)
 
@@ -85,4 +85,8 @@ echo "Calling batch implementation script..."
 echo ""
 
 exec bash "${SCRIPT_DIR}/batch_implement_recommendations.sh" "${TIER1_ARRAY[@]}"
+
+
+
+
 

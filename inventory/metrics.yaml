@@ -1,0 +1,162 @@
+metadata:
+  version: 1.0.0
+  last_updated: '2025-10-21T22:57:18.835259Z'
+  last_verified: '2025-10-21T19:00:00Z'
+  verified_by: manual_verification
+  system: DIMS v1.0.0
+  notes: Initial metrics from comprehensive verification on 2025-10-21
+s3_storage:
+  total_objects:
+    value: 172726
+    last_verified: '2025-10-21T14:00:00Z'
+    verification_method: aws_cli
+    cached: false
+    cache_expires: null
+  total_size_gb:
+    value: 118.26
+    last_verified: '2025-10-21T14:00:00Z'
+    verification_method: aws_cli
+    cached: false
+    cache_expires: null
+  hoopr_files:
+    value: 96
+    last_verified: '2025-10-21T14:00:00Z'
+    verification_method: aws_cli
+    cached: false
+    cache_expires: null
+prediction_system:
+  total_lines:
+    value: 2103
+    last_verified: '2025-10-21T14:00:00Z'
+    verification_method: wc_command
+    cached: false
+    cache_expires: null
+  scripts:
+    fetch_upcoming_games:
+      lines: 303
+      path: scripts/ml/fetch_upcoming_games.py
+    fetch_recent_player_data:
+      lines: 341
+      path: scripts/ml/fetch_recent_player_data.py
+    prepare_upcoming_game_features:
+      lines: 416
+      path: scripts/ml/prepare_upcoming_game_features.py
+    predict_upcoming_games:
+      lines: 367
+      path: scripts/ml/predict_upcoming_games.py
+    train_model_for_predictions:
+      lines: 359
+      path: scripts/ml/train_model_for_predictions.py
+    demo_predictions:
+      lines: 181
+      path: scripts/ml/demo_predictions.py
+    daily_predictions_sh:
+      lines: 136
+      path: scripts/ml/daily_predictions.sh
+plus_minus_system:
+  total_lines:
+    value: 4619
+    last_verified: '2025-10-21T22:15:15.424825Z'
+    verification_method: automated
+    components:
+      python: 1616
+      sql: 2318
+      docs: 2054
+    cached: false
+    cache_expires: null
+  python_files:
+    total_lines: 1616
+    scripts:
+      plus_minus_calculator:
+        lines: 497
+        path: scripts/pbp_to_boxscore/plus_minus_calculator.py
+      populate_plus_minus_tables:
+        lines: 767
+        path: scripts/pbp_to_boxscore/populate_plus_minus_tables.py
+      demo_plus_minus_population:
+        lines: 352
+        path: scripts/pbp_to_boxscore/demo_plus_minus_population.py
+  sql_files:
+    total_lines: 2318
+    directory: sql/plus_minus/
+    description: All SQL schemas, views, and migrations for Plus/Minus system
+  documentation:
+    total_lines: 2054
+    files:
+    - name: PLUS_MINUS_ML_INTEGRATION.md
+      lines: 262
+    - name: PLUS_MINUS_IMPLEMENTATION_SUMMARY.md
+      lines: 508
+    - name: PLUS_MINUS_OPTIMIZATION_SUMMARY.md
+      lines: 325
+    - name: REC_11_PLUS_MINUS_COMPLETION_SUMMARY.md
+      lines: 245
+    - name: PLUS_MINUS_RDS_DEPLOYMENT_SUCCESS.md
+      lines: 234
+    - name: REC_11_PLUS_MINUS_INTEGRATION.md
+      lines: 480
+code_base:
+  python_files:
+    value: 1261
+    last_verified: '2025-10-21T21:09:13.131676Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  ml_scripts:
+    value: 56
+    directory: scripts/ml/
+    last_verified: '2025-10-21T14:00:00Z'
+  phase_9_scripts:
+    value: 40
+    directory: scripts/pbp_to_boxscore/
+    last_verified: '2025-10-21T14:00:00Z'
+  test_files:
+    value: 498
+    last_verified: '2025-10-21T21:09:13.252895Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+documentation:
+  markdown_files:
+    value: 1696
+    last_verified: '2025-10-21T22:31:15.431777Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  total_size_mb:
+    value: 32
+    last_verified: '2025-10-21T20:05:41.881918Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+git:
+  book_recommendation_commits:
+    value: 214
+    last_verified: '2025-10-21T14:00:00Z'
+    verification_method: git_log
+    description: Commits for book recommendation implementations (Oct 2025)
+    cached: false
+    cache_expires: null
+workflows:
+  total:
+    value: 60
+    directory: docs/claude_workflows/workflow_descriptions/
+    last_verified: '2025-10-21T14:00:00Z'
+sql_schemas:
+  total_lines:
+    value: 756
+    files:
+    - name: sql/master_schema.sql
+      lines: 468
+    - name: sql/phase9_box_score_snapshots.sql
+      lines: 286
+    last_verified: '2025-10-21T22:57:18.736266Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+local_data:
+  espn_size_gb:
+    value: 843
+    path: /Users/ryanranft/0espn
+    last_verified: '2025-10-21T14:00:00Z'
+    note: Multi-sport data (not NBA-only)

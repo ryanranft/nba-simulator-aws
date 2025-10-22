@@ -459,8 +459,8 @@ if not drift_results['summary']['overall_drift_detected']:
 | **Implementation** | Main code | `docs/phases/phase_0/implement_ml_systems_2.py` |
 | **Tests** | Test suite | `docs/phases/phase_0/test_ml_systems_2.py` |
 | **Guide** | Implementation guide | `docs/phases/phase_0/ml_systems_2_IMPLEMENTATION_GUIDE.md` |
-| **Tracker** | Progress tracking | `docs/BOOK_RECOMMENDATIONS_TRACKER.md` |
-| **Process** | Process documentation | `docs/IMPLEMENTATION_PROCESS_BOOK_RECOMMENDATIONS.md` |
+| **Tracker** | Progress tracking | `docs/ml_systems/book_recommendations/TRACKER.md` |
+| **Process** | Process documentation | `docs/ml_systems/book_recommendations/IMPLEMENTATION_PROCESS.md` |
 
 ---
 

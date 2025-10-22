@@ -672,7 +672,7 @@ bash scripts/shell/validate_references.sh --fix
 # Update all? (y/n): y
 #
 # ✅ Updated docs/DATA_SOURCES.md
-# ✅ Updated docs/SCRAPER_MANAGEMENT.md
+# ✅ Updated docs/data_collection/scrapers/MANAGEMENT.md
 # ✅ Updated PROGRESS.md
 # ✅ Updated scripts/etl/overnight_nba_api.sh
 # ✅ Updated scripts/monitoring/monitor_scrapers.sh

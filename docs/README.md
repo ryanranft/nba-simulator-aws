@@ -45,7 +45,7 @@ This index helps Claude Code and developers find the right documentation efficie
 ### Daily Operations
 - **QUICKSTART.md** - Common commands, daily workflow, make targets
 - **docs/CLAUDE_QUICK_COMMANDS.md** - Claude-specific command patterns
-- **docs/SCRAPER_MANAGEMENT.md** - Scraper operations guide
+- **docs/data_collection/scrapers/MANAGEMENT.md** - Scraper operations guide
 - **docs/SCRAPER_MONITORING_SYSTEM.md** - Monitoring tools and procedures
 
 ### Setup & Configuration

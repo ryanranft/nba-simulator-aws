@@ -273,5 +273,5 @@ echo "ETA: ~$eta hours"
 
 ---
 
-*For complete scraper management procedures, see docs/SCRAPER_MANAGEMENT.md*
+*For complete scraper management procedures, see docs/data_collection/scrapers/MANAGEMENT.md*
 *Updated: October 12, 2025*

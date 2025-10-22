@@ -68,7 +68,7 @@ docs/
 ├── EMERGENCY_RECOVERY.md                  # Disaster recovery procedures
 ├── SECURITY_PROTOCOLS.md                  # Git & credential security
 ├── SCRAPER_MONITORING_SYSTEM.md           # Scraper operations
-├── SCRAPER_MANAGEMENT.md                  # Scraper deployment
+├── data_collection/scrapers/MANAGEMENT.md # Scraper deployment
 ├── REPO_ORGANIZATION.md                   # This file
 │
 ├── phases/                                # Phase-specific documentation
@@ -263,6 +263,7 @@ rm -f .DS_Store 2>/dev/null
 For questions or suggestions, see `docs/README.md` or `CLAUDE.md`.
 
 *Last updated: October 12, 2025*
+
 
 
 

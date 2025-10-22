@@ -87,7 +87,7 @@ if [[ "$MODE" == "specific" ]]; then
     echo "Implementing specific recommendations: ${RECS_TO_IMPLEMENT[*]}"
 elif [[ "$MODE" == "all" || "$MODE" == "next" ]]; then
     echo "Getting next available recommendations..."
-    
+
     # Use Python script to get next available
     RECS_JSON=$(python3 scripts/automation/check_recommendation_status.py --next --json | python3 -c "
 import sys, json
@@ -95,12 +95,12 @@ data = json.load(sys.stdin)
 recs = [item['rec_id'] for item in data[:${COUNT}]]
 print(' '.join(recs))
 ")
-    
+
     if [[ -z "$RECS_JSON" ]]; then
         echo -e "${YELLOW}No recommendations available to implement${NC}"
         exit 0
     fi
-    
+
     # Convert to array
     read -ra RECS_TO_IMPLEMENT <<< "$RECS_JSON"
     echo "Found ${#RECS_TO_IMPLEMENT[@]} recommendations to implement"
@@ -132,36 +132,36 @@ START_TIME=$(date +%s)
 # Implement each recommendation
 for rec in "${RECS_TO_IMPLEMENT[@]}"; do
     TOTAL_ATTEMPTED=$((TOTAL_ATTEMPTED + 1))
-    
+
     echo ""
     echo -e "${BLUE}------------------------------------------------------------------------------${NC}"
     echo -e "${BLUE}[${TOTAL_ATTEMPTED}/${#RECS_TO_IMPLEMENT[@]}] Implementing: $rec${NC}"
     echo -e "${BLUE}------------------------------------------------------------------------------${NC}"
     echo ""
-    
+
     # Run implementation script
     REC_START_TIME=$(date +%s)
-    
+
     if bash "${SCRIPT_DIR}/implement_recommendation.sh" "$rec"; then
         REC_END_TIME=$(date +%s)
         REC_DURATION=$((REC_END_TIME - REC_START_TIME))
-        
+
         echo ""
         echo -e "${GREEN}✓ SUCCESS: $rec completed in ${REC_DURATION}s${NC}"
         TOTAL_SUCCESS=$((TOTAL_SUCCESS + 1))
     else
         REC_END_TIME=$(date +%s)
         REC_DURATION=$((REC_END_TIME - REC_START_TIME))
-        
+
         echo ""
         echo -e "${RED}✗ FAILED: $rec failed after ${REC_DURATION}s${NC}"
         TOTAL_FAILED=$((TOTAL_FAILED + 1))
-        
+
         # Ask if should continue
         echo ""
         echo -e "${YELLOW}Continue with remaining recommendations? [y/N] ${NC}"
         read -r continue_response
-        
+
         if [[ ! "$continue_response" =~ ^[Yy]$ ]]; then
             echo "Stopping batch implementation"
             break
@@ -217,4 +217,8 @@ if [[ $TOTAL_FAILED -gt 0 ]]; then
 else
     exit 0
 fi
+
+
+
+
 

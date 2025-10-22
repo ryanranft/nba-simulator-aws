@@ -33,6 +33,7 @@ from nba_api.stats.endpoints import (
 try:
     import mlflow
     import mlflow.tracking
+
     MLFLOW_AVAILABLE = True
 except ImportError:
     MLFLOW_AVAILABLE = False
@@ -85,25 +86,28 @@ class NBAAPIPlayerTrackingScraper:
         logger.info("NBA API Player Tracking Scraper initialized")
 
     def get_all_players(self, season="2023-24"):
-        """Get all players for a season"""
+        """Get all players for a season with their team info"""
         try:
             players_info = CommonAllPlayers(season=season)
             players_df = players_info.get_data_frames()[0]
-            return players_df["PERSON_ID"].tolist()
+            # Return list of (player_id, team_id) tuples
+            # Filter to only active players (those with a team_id)
+            active_players = players_df[players_df["TEAM_ID"].notna()][["PERSON_ID", "TEAM_ID"]]
+            return [(int(row["PERSON_ID"]), int(row["TEAM_ID"])) for _, row in active_players.iterrows()]
         except Exception as e:
             logger.error(f"Error getting players for {season}: {e}")
             return []
 
-    def scrape_player_tracking(self, player_id, season="2023-24"):
+    def scrape_player_tracking(self, player_id, team_id, season="2023-24"):
         """Scrape all tracking endpoints for a player with panel data structure"""
         player_data = {}
 
         for endpoint_name, endpoint_class in self.tracking_endpoints:
             try:
-                logger.info(f"Scraping {endpoint_name} for player {player_id}")
+                logger.info(f"Scraping {endpoint_name} for player {player_id} (team {team_id})")
                 self.metrics["api_calls"] += 1
 
-                endpoint = endpoint_class(player_id=player_id, season=season)
+                endpoint = endpoint_class(player_id=player_id, team_id=team_id, season=season)
                 data_frames = endpoint.get_data_frames()
 
                 if data_frames and len(data_frames) > 0:
@@ -112,6 +116,7 @@ class NBAAPIPlayerTrackingScraper:
                     # Add panel data structure (rec_22)
                     for record in records:
                         record["player_id"] = player_id
+                        record["team_id"] = team_id
                         record["season"] = season
                         record["endpoint"] = endpoint_name
                         record["event_timestamp"] = datetime.now().isoformat()
@@ -177,12 +182,12 @@ class NBAAPIPlayerTrackingScraper:
                 season_dir.mkdir(exist_ok=True)
 
                 players = self.get_all_players(season)
-                logger.info(f"Found {len(players)} players for {season}")
+                logger.info(f"Found {len(players)} active players for {season}")
 
-                for i, player_id in enumerate(players):
-                    logger.info(f"Processing player {i+1}/{len(players)}: {player_id}")
+                for i, (player_id, team_id) in enumerate(players):
+                    logger.info(f"Processing player {i+1}/{len(players)}: {player_id} (team {team_id})")
 
-                    player_data = self.scrape_player_tracking(player_id, season)
+                    player_data = self.scrape_player_tracking(player_id, team_id, season)
 
                     # Save player data with panel structure
                     player_file = season_dir / f"player_{player_id}.json"
@@ -195,7 +200,11 @@ class NBAAPIPlayerTrackingScraper:
                                 "data": player_data,
                                 # Panel data metadata (rec_22)
                                 "panel_structure": {
-                                    "multi_index": ["player_id", "game_id", "event_timestamp"],
+                                    "multi_index": [
+                                        "player_id",
+                                        "game_id",
+                                        "event_timestamp",
+                                    ],
                                     "temporal_features_ready": True,
                                 },
                                 # Feature engineering metadata (rec_11)
@@ -215,7 +224,7 @@ class NBAAPIPlayerTrackingScraper:
                         logger.info(f"Progress: {i+1}/{len(players)} players completed")
                         # Log incremental metrics to MLflow
                         if self.use_mlflow:
-                            mlflow.log_metrics(self.metrics, step=i+1)
+                            mlflow.log_metrics(self.metrics, step=i + 1)
 
             # Log final metrics (ml_systems_2)
             duration = (datetime.now() - start_time).total_seconds()
@@ -228,13 +237,18 @@ class NBAAPIPlayerTrackingScraper:
             logger.info(f"Failures: {self.metrics['api_failures']}")
             logger.info(f"Records: {self.metrics['records_collected']:,}")
             logger.info(f"Players: {self.metrics['players_processed']}")
-            logger.info(f"Success Rate: {100 * self.metrics['api_successes'] / max(self.metrics['api_calls'], 1):.1f}%")
+            logger.info(
+                f"Success Rate: {100 * self.metrics['api_successes'] / max(self.metrics['api_calls'], 1):.1f}%"
+            )
             logger.info(f"{'='*80}")
 
             if self.use_mlflow:
                 mlflow.log_metrics(self.metrics)
                 mlflow.log_metric("duration_seconds", duration)
-                mlflow.log_metric("success_rate", self.metrics['api_successes'] / max(self.metrics['api_calls'], 1))
+                mlflow.log_metric(
+                    "success_rate",
+                    self.metrics["api_successes"] / max(self.metrics["api_calls"], 1),
+                )
                 mlflow.end_run()
 
         except Exception as e:
@@ -248,3 +262,8 @@ class NBAAPIPlayerTrackingScraper:
 if __name__ == "__main__":
     scraper = NBAAPIPlayerTrackingScraper()
     scraper.run()
+
+
+
+
+

@@ -54,7 +54,7 @@ docs/archive/
 - `ALL_SOURCES_STATUS.md` - All sources status (Oct 6, 2025 snapshot)
 
 **Active replacements:**
-- Operational guide: `docs/SCRAPER_MANAGEMENT.md`
+- Operational guide: `docs/data_collection/scrapers/MANAGEMENT.md`
 - Complete procedures: Workflow #42 (`docs/claude_workflows/workflow_descriptions/42_scraper_management.md`)
 
 **When archived:** After operational procedures are consolidated into active documentation
@@ -186,7 +186,7 @@ git log --all --full-history -- "*/<filename>"
 ### What Stays Active
 
 ⛔ **Keep in docs/ root:**
-- Operational guides (SCRAPER_MANAGEMENT.md, DATA_SOURCES.md)
+- Operational guides (data_collection/scrapers/MANAGEMENT.md, DATA_SOURCES.md)
 - Active workflows (all files in `claude_workflows/`)
 - Architecture decisions (ADR files)
 - Phase documentation (PHASE_N_INDEX.md and phase_N/ subdirectories in `phases/`)

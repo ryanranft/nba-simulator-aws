@@ -78,15 +78,21 @@ class KaggleDatabaseExpander:
             cursor = conn.cursor()
 
             # Get table schema
-            cursor.execute(f"PRAGMA table_info({table_name})")  # nosec B608 - table_name from DB schema, not user input
+            cursor.execute(
+                f"PRAGMA table_info({table_name})"
+            )  # nosec B608 - table_name from DB schema, not user input
             columns = cursor.fetchall()
 
             # Get row count
-            cursor.execute(f"SELECT COUNT(*) FROM {table_name}")  # nosec B608 - table_name from DB schema, not user input
+            cursor.execute(
+                f"SELECT COUNT(*) FROM {table_name}"
+            )  # nosec B608 - table_name from DB schema, not user input
             row_count = cursor.fetchone()[0]
 
             # Get sample data
-            cursor.execute(f"SELECT * FROM {table_name} LIMIT 5")  # nosec B608 - table_name from DB schema, not user input
+            cursor.execute(
+                f"SELECT * FROM {table_name} LIMIT 5"
+            )  # nosec B608 - table_name from DB schema, not user input
             sample_data = cursor.fetchall()
 
             conn.close()
@@ -121,7 +127,9 @@ class KaggleDatabaseExpander:
 
             # Extract all data
             conn = sqlite3.connect(self.db_path)
-            df = pd.read_sql_query(f"SELECT * FROM {table_name}", conn)  # nosec B608 - table_name from DB schema, not user input
+            df = pd.read_sql_query(
+                f"SELECT * FROM {table_name}", conn
+            )  # nosec B608 - table_name from DB schema, not user input
             conn.close()
 
             if df.empty:
@@ -312,3 +320,8 @@ def main():
 
 if __name__ == "__main__":
     exit(main())
+
+
+
+
+

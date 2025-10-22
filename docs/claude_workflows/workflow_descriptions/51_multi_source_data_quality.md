@@ -669,7 +669,7 @@ python scripts/utils/update_data_catalog.py
 
 - **Data Integrity:** `docs/DATA_INTEGRITY_PRINCIPLES.md`
 - **Gap Analysis:** `reports/espn_hoopr_gap_analysis_20251009.md`
-- **Scraper Management:** `docs/SCRAPER_MANAGEMENT.md`
+- **Scraper Management:** `docs/data_collection/scrapers/MANAGEMENT.md`
 
 ---
 

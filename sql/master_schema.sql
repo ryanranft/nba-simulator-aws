@@ -462,3 +462,8 @@ COMMENT ON COLUMN master_play_by_play.source_event_ids IS 'JSON object mapping s
 -- GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO nba_app_user;
 -- GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO nba_app_user;
 
+
+
+
+
+

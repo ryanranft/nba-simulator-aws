@@ -48,10 +48,10 @@ tier2 = []
 for rec_id, info in checker.statuses.items():
     status = info.get('status')
     dependencies = info.get('dependencies', [])
-    
+
     if status == 'COMPLETE':
         continue
-    
+
     dep_count = len(dependencies)
     if dep_count >= 1 and dep_count <= 2:
         # Check if all dependencies are met
@@ -101,4 +101,8 @@ echo "Calling batch implementation script..."
 echo ""
 
 exec bash "${SCRIPT_DIR}/batch_implement_recommendations.sh" "${TIER2_ARRAY[@]}"
+
+
+
+
 

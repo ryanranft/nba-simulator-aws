@@ -365,7 +365,7 @@ Tracks feature generation performance:
 - [test_rec_11.py](test_rec_11.py) - Comprehensive test suite
 - `/docs/phases/phase_0/rec_22_panel_data/` - Required dependency
 - `/docs/ML_FEATURE_CATALOG.md` - Complete feature catalog
-- `/docs/BOOK_RECOMMENDATIONS_TRACKER.md` - Implementation tracker
+- `/docs/ml_systems/book_recommendations/TRACKER.md` - Implementation tracker
 
 ---
 

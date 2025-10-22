@@ -35,6 +35,7 @@ from nba_api.stats.static import teams
 try:
     import mlflow
     import mlflow.tracking
+
     MLFLOW_AVAILABLE = True
 except ImportError:
     MLFLOW_AVAILABLE = False
@@ -205,7 +206,7 @@ class NBAAPITeamDashboardsScraper:
 
                     # Log incremental metrics to MLflow
                     if self.use_mlflow and (i + 1) % 10 == 0:
-                        mlflow.log_metrics(self.metrics, step=i+1)
+                        mlflow.log_metrics(self.metrics, step=i + 1)
 
             # Log final metrics (ml_systems_2)
             duration = (datetime.now() - start_time).total_seconds()
@@ -218,13 +219,18 @@ class NBAAPITeamDashboardsScraper:
             logger.info(f"Failures: {self.metrics['api_failures']}")
             logger.info(f"Records: {self.metrics['records_collected']:,}")
             logger.info(f"Teams: {self.metrics['teams_processed']}")
-            logger.info(f"Success Rate: {100 * self.metrics['api_successes'] / max(self.metrics['api_calls'], 1):.1f}%")
+            logger.info(
+                f"Success Rate: {100 * self.metrics['api_successes'] / max(self.metrics['api_calls'], 1):.1f}%"
+            )
             logger.info(f"{'='*80}")
 
             if self.use_mlflow:
                 mlflow.log_metrics(self.metrics)
                 mlflow.log_metric("duration_seconds", duration)
-                mlflow.log_metric("success_rate", self.metrics['api_successes'] / max(self.metrics['api_calls'], 1))
+                mlflow.log_metric(
+                    "success_rate",
+                    self.metrics["api_successes"] / max(self.metrics["api_calls"], 1),
+                )
                 mlflow.end_run()
 
         except Exception as e:

@@ -127,7 +127,7 @@ df -h /tmp
 
 **3. Review Rate Limit Settings**
 
-See `docs/SCRAPER_MANAGEMENT.md` for current rate limits:
+See `docs/data_collection/scrapers/MANAGEMENT.md` for current rate limits:
 - Basketball Reference: 5 seconds (tested, stable)
 - NBA API: 0.6 seconds (600ms, official limit)
 - hoopR: Managed by library (no manual setting)
@@ -611,7 +611,7 @@ All recommendations have been implemented in `scrape_basketball_reference_compre
 
 ## Related Documentation
 
-- **Central Hub:** `docs/SCRAPER_MANAGEMENT.md` - Complete scraper reference
+- **Central Hub:** `docs/data_collection/scrapers/MANAGEMENT.md` - Complete scraper reference
 - **MCP Recommendations:** `docs/MCP_SCRAPING_RECOMMENDATIONS.md` - Comprehensive scraping best practices
 - **Data Sources:** `docs/DATA_SOURCES.md` - All 5 data source details
 - **Test Results:** `docs/archive/scraper_reports/SCRAPER_TEST_RESULTS.md` - Rate limit testing outcomes

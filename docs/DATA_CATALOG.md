@@ -511,7 +511,7 @@ Created October 9, 2025 to provide seamless 33-year coverage (1993-2025):
 If you have existing SportsDataverse scripts:
 1. Replace with hoopR Phase 1 endpoints
 2. Use `scripts/etl/scrape_hoopr_phase1_foundation.R`
-3. See migration guide in `docs/SCRAPER_MANAGEMENT.md`
+3. See migration guide in `docs/data_collection/scrapers/MANAGEMENT.md`
 
 **Archived Script:** `scripts/archive/deprecated/scrape_sportsdataverse.py`
 
@@ -745,5 +745,5 @@ python scripts/utils/update_data_catalog.py --refresh-all
 
 **For detailed scraper documentation, see:**
 - `docs/ESPN_SCRAPER_GUIDE.md` (ESPN API details)
-- `docs/SCRAPER_MANAGEMENT.md` (hoopR + NBA API + Basketball Reference)
+- `docs/data_collection/scrapers/MANAGEMENT.md` (hoopR + NBA API + Basketball Reference)
 - `docs/DATA_SOURCES.md` (⚠️ DEPRECATED - Use this catalog instead)

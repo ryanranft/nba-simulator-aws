@@ -117,7 +117,7 @@
 
 ### Documentation Review
 - [ ] **README_ASYNC_INFRASTRUCTURE.md**: Reviewed and understood
-- [ ] **SCRAPER_MANAGEMENT.md**: Updated with new infrastructure info
+- [ ] **MANAGEMENT.md**: Updated with new infrastructure info
 - [ ] **Workflow #53**: Deployment workflow reviewed
 - [ ] **API Documentation**: All new APIs documented
 - [ ] **Troubleshooting Guide**: Common issues and solutions documented

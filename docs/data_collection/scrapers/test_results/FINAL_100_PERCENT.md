@@ -337,7 +337,7 @@ feature_version VARCHAR(20)
    - `docs/SCRAPER_TEST_RESULTS_20251017.md` (initial test results)
 
 2. **Implementation Guide:**
-   - `docs/BOOK_RECOMMENDATIONS_DATA_COLLECTION_SUMMARY.md` (180KB technical guide)
+   - `docs/ml_systems/book_recommendations/DATA_COLLECTION_SUMMARY.md` (180KB technical guide)
 
 3. **Updated Plan:**
    - `docs/REMAINING_DATA_COLLECTION_PLAN.md` (8-phase plan with book recommendations)

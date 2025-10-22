@@ -561,7 +561,7 @@ def classify_shot_zone_from_description(description: str) -> str:
 - **Temporal Box Scores:** `docs/ML_TEMPORAL_QUERIES.md`
 - **System Comparison:** `docs/TEMPORAL_BOX_SCORE_SYSTEMS_COMPARISON.md`
 - **PBP Processing:** `docs/PBP_TO_BOXSCORE_SYSTEM.md`
-- **Basketball Reference:** `docs/BASKETBALL_REFERENCE_PBP_SYSTEM.md`
+- **Basketball Reference:** `docs/phases/phase_0/0.1_basketball_reference/documentation/PBP_SYSTEM.md`
 
 ---
 

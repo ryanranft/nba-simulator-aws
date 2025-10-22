@@ -1,0 +1,387 @@
+# NBA Data Inventory Management System (DIMS) Configuration
+# Version: 1.0.0
+# Created: 2025-10-21
+
+version: "1.0.0"
+system_name: "DIMS"
+project_root: "/Users/ryanranft/nba-simulator-aws"
+
+# Feature Toggles
+features:
+  database_backend: true         # ✅ PHASE 2: Enable PostgreSQL history
+  event_driven: true            # ✅ PHASE 2: Enable event hooks
+  live_mode: false              # Lazy evaluation (slow but fresh)
+  approval_workflow: true       # ✅ PHASE 2: 3-tier verification
+  smart_cache: true             # TTL-based caching
+  jupyter_output: true          # ✅ PHASE 3: Interactive Jupyter notebook
+  html_dashboard: false         # Generate HTML dashboard
+
+# Cache Configuration
+cache:
+  enabled: true
+  backend: "file"               # file | redis | memory
+  default_ttl_hours: 24
+  cache_dir: "inventory/cache"
+
+  # Per-metric TTL overrides (in hours)
+  ttl_overrides:
+    s3_objects: 24              # Daily refresh
+    test_files: 1               # Hourly refresh
+    git_commits: 168            # Weekly refresh
+    plus_minus_total: 24
+    documentation_files: 24
+
+# Verification Settings
+verification:
+  enabled: true
+  schedule: "0 9 * * 1"         # Weekly Monday 9 AM
+
+  thresholds:
+    minor_drift_pct: 5          # Log only
+    moderate_drift_pct: 15      # Notify
+    major_drift_pct: 25         # Alert
+
+  # Metric categorization for alerting
+  stable_metrics:               # High-severity alerts if changed
+    - git_commits
+    - book_recommendations_total
+    - plus_minus_total_lines
+
+  volatile_metrics:             # Low-severity alerts
+    - s3_objects
+    - s3_size_gb
+    - documentation_files
+    - python_files
+
+# Event Triggers (✅ PHASE 2: ENABLED, ✅ PHASE 3: WORKFLOW INTEGRATION)
+events:
+  enabled: true                                  # ✅ PHASE 2: Event-driven updates enabled
+  hooks_dir: "inventory/events"
+  cooldown_seconds: 60                          # Prevent spam (60 second cooldown)
+  hooks:
+    - name: "git_post_commit"
+      trigger: "post-commit"
+      metrics: ["code_base.*", "documentation.*", "git.*", "file_inventory.*"]
+
+    - name: "s3_upload_complete"
+      trigger: "s3_event"
+      metrics: ["s3_storage.*", "sync_status.*"]
+
+    - name: "scraper_complete"
+      trigger: "scraper_complete"
+      metrics: ["data_gaps.*", "sync_status.*", "aws_inventory.*"]
+      description: "Triggered when scraper finishes - runs gap analysis and sync check"
+
+    - name: "monthly_audit"
+      trigger: "cron"
+      schedule: "0 0 1 * *"  # Monthly on 1st at midnight
+      metrics: ["file_inventory.*", "local_data.*", "aws_inventory.*", "data_gaps.*", "sync_status.*"]
+      description: "Monthly comprehensive audit of all workflow metrics"
+
+    - name: "daily_sync_check"
+      trigger: "cron"
+      schedule: "0 9 * * *"  # Daily at 9 AM
+      metrics: ["sync_status.*"]
+      description: "Daily sync status verification"
+
+# Database Configuration (✅ PHASE 2: ENABLED)
+database:
+  enabled: true                                  # ✅ PHASE 2: PostgreSQL backend enabled
+  connection:
+    host: "${DB_HOST}"
+    port: 5432
+    database: "nba_simulator"
+    user: "${DB_USER}"
+    password: "${DB_PASSWORD}"
+
+  retention:
+    history_days: 365           # Keep 1 year of history
+    snapshots_daily: 90         # Keep 90 daily snapshots
+
+# Approval Workflow (✅ PHASE 2: ENABLED, ✅ PHASE 3: WORKFLOW INTEGRATION)
+approval:
+  enabled: true                                  # ✅ PHASE 2: Approval workflow enabled
+  critical_metrics:                              # Metrics requiring approval
+    # Original critical metrics
+    - "s3_storage.total_objects"
+    - "s3_storage.total_size_gb"
+    - "prediction_system.total_lines"
+    - "plus_minus_system.total_lines"
+    - "git.book_recommendation_commits"
+
+    # Workflow integration critical metrics (Phase 3)
+    - "aws_inventory.monthly_cost_estimate_usd"  # Cost changes need approval
+    - "data_gaps.missing_games_count"            # Data gaps need review
+    - "data_gaps.games_without_pbp"              # PBP gaps need review
+    - "sync_status.local_s3_sync_status"         # Sync issues need approval
+    - "local_data.archives_size_gb"              # Large storage changes
+
+  require_approval_threshold: 15                 # % drift requiring approval
+
+# Output Configuration
+outputs:
+  markdown:
+    enabled: true
+    files:
+      - path: "docs/MASTER_DATA_INVENTORY.md"
+        template: "master_inventory"
+      - path: "docs/DATA_COLLECTION_INVENTORY.md"
+        template: "collection_inventory"
+
+  json:
+    enabled: true
+    files:
+      - path: "inventory/metrics.json"
+
+  html:
+    enabled: false
+    file: "docs/inventory_dashboard.html"
+
+  jupyter:
+    enabled: true
+    file: "notebooks/dims_explorer.ipynb"
+    auto_execute: false           # Auto-execute on generation
+    export_html: true            # Export to HTML after generation
+
+# Logging Configuration
+logging:
+  enabled: true
+  log_dir: "inventory/logs"
+  log_level: "INFO"           # DEBUG | INFO | WARNING | ERROR
+  log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+  # Separate log files
+  verification_log: "verification.log"
+  update_log: "update.log"
+  error_log: "error.log"
+
+# Metrics Definitions
+# Each metric has a command to calculate its current value
+metrics:
+
+  # S3 Storage Metrics
+  s3_storage:
+    total_objects:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake --recursive --summarize 2>/dev/null | grep 'Total Objects' | awk '{print $3}'"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Total number of objects in S3 bucket"
+
+    total_size_gb:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake --recursive --summarize 2>/dev/null | grep 'Total Size' | awk '{print $3/1024/1024/1024}'"
+      parse_type: "float"
+      precision: 2
+      category: "volatile"
+      description: "Total size of S3 bucket in GB"
+
+    hoopr_files:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/hoopr_parquet/ --recursive 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "stable"
+      description: "Number of hoopR parquet files in S3"
+
+  # Prediction System Metrics
+  prediction_system:
+    total_lines:
+      command: "wc -l scripts/ml/fetch_upcoming_games.py scripts/ml/fetch_recent_player_data.py scripts/ml/prepare_upcoming_game_features.py scripts/ml/predict_upcoming_games.py scripts/ml/train_model_for_predictions.py scripts/ml/demo_predictions.py scripts/ml/daily_predictions.sh 2>/dev/null | tail -1 | awk '{print $1}'"
+      parse_type: "integer"
+      category: "stable"
+      description: "Total lines of code in prediction system"
+
+    fetch_upcoming_games_lines:
+      command: "wc -l scripts/ml/fetch_upcoming_games.py 2>/dev/null | awk '{print $1}'"
+      parse_type: "integer"
+      category: "stable"
+
+    fetch_recent_player_data_lines:
+      command: "wc -l scripts/ml/fetch_recent_player_data.py 2>/dev/null | awk '{print $1}'"
+      parse_type: "integer"
+      category: "stable"
+
+    prepare_upcoming_game_features_lines:
+      command: "wc -l scripts/ml/prepare_upcoming_game_features.py 2>/dev/null | awk '{print $1}'"
+      parse_type: "integer"
+      category: "stable"
+
+    predict_upcoming_games_lines:
+      command: "wc -l scripts/ml/predict_upcoming_games.py 2>/dev/null | awk '{print $1}'"
+      parse_type: "integer"
+      category: "stable"
+
+    train_model_for_predictions_lines:
+      command: "wc -l scripts/ml/train_model_for_predictions.py 2>/dev/null | awk '{print $1}'"
+      parse_type: "integer"
+      category: "stable"
+
+    demo_predictions_lines:
+      command: "wc -l scripts/ml/demo_predictions.py 2>/dev/null | awk '{print $1}'"
+      parse_type: "integer"
+      category: "stable"
+
+    daily_predictions_sh_lines:
+      command: "wc -l scripts/ml/daily_predictions.sh 2>/dev/null | awk '{print $1}'"
+      parse_type: "integer"
+      category: "stable"
+
+  # Plus/Minus System Metrics
+  plus_minus_system:
+    total_lines:
+      command: "echo $(($(find scripts/pbp_to_boxscore -name '*plus_minus*.py' -exec cat {} \\; 2>/dev/null | wc -l) + $(find sql/plus_minus -name '*.sql' -exec cat {} \\; 2>/dev/null | wc -l) + $(wc -l docs/PLUS_MINUS_ML_INTEGRATION.md docs/PLUS_MINUS_IMPLEMENTATION_SUMMARY.md docs/PLUS_MINUS_OPTIMIZATION_SUMMARY.md docs/REC_11_PLUS_MINUS_COMPLETION_SUMMARY.md docs/PLUS_MINUS_RDS_DEPLOYMENT_SUCCESS.md docs/REC_11_PLUS_MINUS_INTEGRATION.md 2>/dev/null | tail -1 | awk '{print $1}')))"
+      parse_type: "integer"
+      category: "stable"
+      description: "Total lines in Plus/Minus system (Python + SQL + Docs)"
+
+    python_lines:
+      command: "wc -l scripts/pbp_to_boxscore/plus_minus_calculator.py scripts/pbp_to_boxscore/populate_plus_minus_tables.py scripts/pbp_to_boxscore/demo_plus_minus_population.py 2>/dev/null | tail -1 | awk '{print $1}'"
+      parse_type: "integer"
+      category: "stable"
+
+    sql_lines:
+      command: "find sql/plus_minus -name '*.sql' -exec cat {} \\; 2>/dev/null | wc -l"
+      parse_type: "integer"
+      category: "stable"
+
+    docs_lines:
+      command: "wc -l docs/PLUS_MINUS_ML_INTEGRATION.md docs/PLUS_MINUS_IMPLEMENTATION_SUMMARY.md docs/PLUS_MINUS_OPTIMIZATION_SUMMARY.md docs/REC_11_PLUS_MINUS_COMPLETION_SUMMARY.md docs/PLUS_MINUS_RDS_DEPLOYMENT_SUCCESS.md docs/REC_11_PLUS_MINUS_INTEGRATION.md 2>/dev/null | tail -1 | awk '{print $1}'"
+      parse_type: "integer"
+      category: "stable"
+
+  # Code Base Metrics
+  code_base:
+    python_files:
+      command: "find . -name '*.py' -type f 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Total Python files in project"
+
+    ml_scripts:
+      command: "find scripts/ml -name '*.py' -type f 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "volatile"
+
+    phase_9_scripts:
+      command: "find scripts/pbp_to_boxscore -name '*.py' -type f 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "volatile"
+
+    test_files:
+      command: "find . -path '*/test*' -name '*.py' -type f 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Total test files in project"
+
+  # Documentation Metrics
+  documentation:
+    markdown_files:
+      command: "find docs -name '*.md' -type f 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Total markdown files in docs/"
+
+    total_size_mb:
+      command: "du -sm docs 2>/dev/null | awk '{print $1}'"
+      parse_type: "integer"
+      category: "volatile"
+
+  # Git Metrics
+  git:
+    book_recommendation_commits:
+      command: "git log --since='2025-10-01' --oneline --all 2>/dev/null | grep -i 'rec_' | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "stable"
+      description: "Number of book recommendation commits"
+
+  # Workflow Metrics
+  workflows:
+    total:
+      command: "find docs/claude_workflows/workflow_descriptions -name '*.md' -type f 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "stable"
+      description: "Total workflow description files"
+
+  # SQL Schema Metrics
+  sql_schemas:
+    total_lines:
+      command: "wc -l sql/master_schema.sql sql/phase9_box_score_snapshots.sql 2>/dev/null | tail -1 | awk '{print $1}'"
+      parse_type: "integer"
+      category: "stable"
+      description: "Total lines in master SQL schemas"
+
+  # Local Data Metrics (optional - can be slow)
+  local_data:
+    espn_size_gb:
+      command: "du -sg /Users/ryanranft/0espn 2>/dev/null | awk '{print $1}'"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Size of local ESPN data in GB"
+      enabled: false  # Disabled by default (slow operation)
+
+    archives_size_gb:
+      command: "du -sg ~/sports-simulator-archives/nba 2>/dev/null | awk '{print $1}'"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Size of NBA archives directory in GB"
+
+    temp_data_size_gb:
+      command: "du -sg ~/nba-sim-temp 2>/dev/null | awk '{print $1}'"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Size of temporary NBA data in GB"
+
+  # File Inventory Metrics (Workflow #13)
+  file_inventory:
+    total_files_documented:
+      command: "[ -f docs/FILE_INVENTORY.md ] && grep -c '^###' docs/FILE_INVENTORY.md 2>/dev/null || echo 0"
+      parse_type: "integer"
+      category: "stable"
+      description: "Total files documented in FILE_INVENTORY.md"
+
+    last_inventory_age_days:
+      command: "[ -f docs/FILE_INVENTORY.md ] && echo $(( ($(date +%s) - $(stat -f %m docs/FILE_INVENTORY.md)) / 86400 )) || echo 999"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Days since last file inventory update"
+
+  # AWS Inventory Metrics (Workflow #47)
+  aws_inventory:
+    rds_database_size_gb:
+      command: "psql -h $DB_HOST -U $DB_USER -d nba_simulator -t -c \"SELECT ROUND(pg_database_size('nba_simulator')::numeric / 1024 / 1024 / 1024, 2)\" 2>/dev/null | tr -d ' ' || echo 0"
+      parse_type: "float"
+      precision: 2
+      category: "volatile"
+      description: "RDS database size in GB"
+
+    rds_allocated_storage_gb:
+      command: "aws rds describe-db-instances --db-instance-identifier nba-simulator --query 'DBInstances[0].AllocatedStorage' --output text 2>/dev/null || echo 0"
+      parse_type: "integer"
+      category: "stable"
+      description: "RDS allocated storage in GB"
+
+    monthly_cost_estimate_usd:
+      command: "python3 -c \"import json; s3=$(aws s3api get-bucket-location --bucket nba-sim-raw-data-lake 2>/dev/null && aws s3api list-objects-v2 --bucket nba-sim-raw-data-lake --query 'sum(Contents[].Size)' 2>/dev/null || echo 0); rds=20; print(f'{(float(s3)/1024/1024/1024*0.023 + rds):.2f}')\""
+      parse_type: "float"
+      precision: 2
+      category: "volatile"
+      description: "Estimated monthly AWS cost in USD"
+
+  # Data Gap Analysis Metrics (Workflow #46)
+  data_gaps:
+    missing_games_count:
+      command: "psql -h $DB_HOST -U $DB_USER -d nba_simulator -t -c \"SELECT COUNT(*) FROM (SELECT DISTINCT game_id FROM games EXCEPT SELECT DISTINCT game_id FROM box_scores) AS gaps\" 2>/dev/null | tr -d ' ' || echo 0"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Number of games missing box score data"
+
+    games_without_pbp:
+      command: "psql -h $DB_HOST -U $DB_USER -d nba_simulator -t -c \"SELECT COUNT(*) FROM (SELECT DISTINCT game_id FROM games EXCEPT SELECT DISTINCT game_id FROM play_by_play) AS gaps\" 2>/dev/null | tr -d ' ' || echo 0"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Number of games without play-by-play data"
+
+  # Sync Status Metrics (Workflow #49)
+  sync_status:
+    local_s3_sync_status:
+      command: "bash scripts/monitoring/check_sync_status.sh --brief 2>/dev/null || echo 'unknown'"
+      parse_type: "string"
+      category: "volatile"
+      description: "Local to S3 sync status (synced/drift/unknown)"

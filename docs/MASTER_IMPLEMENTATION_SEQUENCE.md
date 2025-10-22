@@ -608,7 +608,7 @@ This implementation sequence was created by:
 
 ## Related Documentation
 
-- [Book Recommendations Tracker](/Users/ryanranft/nba-simulator-aws/docs/BOOK_RECOMMENDATIONS_TRACKER.md) - Current progress
+- [Book Recommendations Tracker](/Users/ryanranft/nba-simulator-aws/docs/ml_systems/book_recommendations/TRACKER.md) - Current progress
 - [Panel Data Recommendations](/Users/ryanranft/nba-simulator-aws/docs/PANEL_DATA_RECOMMENDATIONS.md) - Focused panel data plan
 - [Master Recommendations JSON](/Users/ryanranft/nba-mcp-synthesis/analysis_results/master_recommendations.json) - Source data
 - [MLflow Integration Summary](/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/MLFLOW_INTEGRATION_SUMMARY.md) - Completed #7

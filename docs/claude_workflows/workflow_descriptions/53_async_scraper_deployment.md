@@ -398,10 +398,11 @@ After successful deployment:
 ## References
 
 - [README_ASYNC_INFRASTRUCTURE.md](../README_ASYNC_INFRASTRUCTURE.md)
-- [SCRAPER_MANAGEMENT.md](../SCRAPER_MANAGEMENT.md)
+- [SCRAPER_MANAGEMENT.md](../../data_collection/scrapers/MANAGEMENT.md)
 - [ASYNC_DEPLOYMENT_CHECKLIST.md](../ASYNC_DEPLOYMENT_CHECKLIST.md)
 - [Docker Compose Documentation](https://docs.docker.com/compose/)
 - [AWS ECS Documentation](https://docs.aws.amazon.com/ecs/)
+
 
 
 

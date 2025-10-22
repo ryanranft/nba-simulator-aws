@@ -284,7 +284,7 @@ Then proceed to Phase 1 (Data Quality) for the new sport.
 **Related Documentation:**
 - [Data Structure Guide](../DATA_STRUCTURE_GUIDE.md)
 - [Project Vision](../PROJECT_VISION.md)
-- [Scraper Management](../SCRAPER_MANAGEMENT.md)
+- [Scraper Management](../data_collection/scrapers/MANAGEMENT.md)
 
 ---
 
