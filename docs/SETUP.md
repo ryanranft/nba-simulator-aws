@@ -431,6 +431,7 @@ log_cmd git status
 - **Region:** us-east-1
 - **Account ID:** `<your-aws-account-id>`
 - **IAM User:** iam (AdministratorAccess)
+- **Glue Data Catalog:** Planned for cloud-based metadata indexing (see [AWS_GLUE_DATA_CATALOG_STRATEGY.md](AWS_GLUE_DATA_CATALOG_STRATEGY.md))
 
 ### Configuration Files
 

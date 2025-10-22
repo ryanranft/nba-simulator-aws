@@ -15,18 +15,17 @@ For overnight automation (3-source cross-validation):
     - Uploads to S3
     - Enables cross-validation with ESPN and NBA API
 
-Version: 3.0 (Simplified)
+Version: 4.0 (AsyncBaseScraper Integration)
 Created: October 18, 2025
+Updated: October 22, 2025 (Session 7 - Framework Migration)
 """
 
 import argparse
+import asyncio
 import json
-import logging
-import time
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-import sys
-import boto3
 
 # Import hoopR
 try:
@@ -36,19 +35,33 @@ except ImportError:
     print("Install: pip install sportsdataverse")
     sys.exit(1)
 
-# Configuration
-S3_BUCKET = "nba-sim-raw-data-lake"
-S3_PREFIX = "hoopr_incremental"
-RATE_LIMIT_SECONDS = 2.0  # Be nice to hoopR API
+# Import AsyncBaseScraper
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from scripts.scrapers.async_scraper_base import AsyncBaseScraper
 
 
-class HoopRIncrementalScraper:
+class HoopRIncrementalScraper(AsyncBaseScraper):
     """Simple hoopR scraper - last N days to S3"""
 
-    def __init__(self, days_back=3, dry_run=False):
+    def __init__(
+        self, days_back=3, dry_run=False, config_name="hoopr_incremental_simple"
+    ):
+        """
+        Initialize hoopR incremental scraper
+
+        Args:
+            days_back: Number of days to look back
+            dry_run: If True, don't upload to S3
+            config_name: Name of config section in scraper_config.yaml
+        """
+        super().__init__(config_name=config_name)
+
         self.days_back = days_back
         self.dry_run = dry_run
-        self.s3_client = boto3.client('s3') if not dry_run else None
+
+        # Override upload setting if dry run
+        if dry_run:
+            self.config.storage.upload_to_s3 = False
 
         # Stats
         self.stats = {
@@ -56,13 +69,6 @@ class HoopRIncrementalScraper:
             "games_uploaded": 0,
             "errors": 0,
         }
-
-        # Setup logging
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s'
-        )
-        self.logger = logging.getLogger(__name__)
 
     def get_date_range(self):
         """Get list of dates to scrape."""
@@ -77,67 +83,54 @@ class HoopRIncrementalScraper:
 
         return dates
 
-    def get_schedule_for_date(self, date_str):
-        """Get hoopR schedule for a specific date."""
+    async def get_schedule_for_date(self, date_str):
+        """Get hoopR schedule for a specific date (async wrapper)."""
         try:
             # Parse date
             date_obj = datetime.strptime(date_str, "%Y-%m-%d")
             season = date_obj.year if date_obj.month >= 10 else date_obj.year - 1
 
-            # Get schedule
-            schedule = nba_schedule(season)
+            # Get schedule (synchronous call wrapped in executor)
+            schedule = await asyncio.to_thread(nba_schedule, season)
 
             if schedule is None or schedule.empty:
                 return []
 
             # Filter to specific date
-            schedule['game_date'] = schedule['date'].str[:10]
-            games = schedule[schedule['game_date'] == date_str]
+            schedule["game_date"] = schedule["date"].str[:10]
+            games = schedule[schedule["game_date"] == date_str]
 
-            return games['id'].tolist() if not games.empty else []
+            return games["id"].tolist() if not games.empty else []
 
         except Exception as e:
             self.logger.error(f"Error getting schedule for {date_str}: {e}")
             self.stats["errors"] += 1
             return []
 
-    def get_play_by_play(self, game_id):
-        """Get play-by-play for a game."""
+    async def get_play_by_play(self, game_id):
+        """Get play-by-play for a game (async wrapper)."""
         try:
-            pbp_data = nba_pbp(game_id)
+            # Use base class rate limiter
+            await self.rate_limiter.acquire()
+
+            # Fetch PBP (synchronous call wrapped in executor)
+            pbp_data = await asyncio.to_thread(nba_pbp, game_id)
+
             if pbp_data is not None and not pbp_data.empty:
-                return pbp_data.to_dict('records')
+                return pbp_data.to_dict("records")
             return None
+
         except Exception as e:
             self.logger.error(f"Error fetching PBP for game {game_id}: {e}")
             self.stats["errors"] += 1
             return None
 
-    def upload_to_s3(self, data, s3_key):
-        """Upload JSON data to S3."""
-        if self.dry_run:
-            self.logger.info(f"  [DRY RUN] Would upload to s3://{S3_BUCKET}/{s3_key}")
-            return True
-
-        try:
-            self.s3_client.put_object(
-                Bucket=S3_BUCKET,
-                Key=s3_key,
-                Body=json.dumps(data, indent=2),
-                ContentType='application/json'
-            )
-            return True
-        except Exception as e:
-            self.logger.error(f"Error uploading to S3: {e}")
-            self.stats["errors"] += 1
-            return False
-
-    def scrape_date(self, date_str):
+    async def scrape_date(self, date_str):
         """Scrape all games for a specific date."""
         self.logger.info(f"\nScraping hoopR data for {date_str}...")
 
         # Get schedule
-        game_ids = self.get_schedule_for_date(date_str)
+        game_ids = await self.get_schedule_for_date(date_str)
 
         if not game_ids:
             self.logger.info(f"  No games found for {date_str}")
@@ -150,27 +143,37 @@ class HoopRIncrementalScraper:
             self.logger.info(f"  Processing game {game_id}...")
 
             # Get play-by-play
-            time.sleep(RATE_LIMIT_SECONDS)  # Rate limiting
-            pbp_data = self.get_play_by_play(game_id)
+            pbp_data = await self.get_play_by_play(game_id)
 
             if pbp_data:
-                # Upload to S3
-                s3_key = f"{S3_PREFIX}/{date_str}/game_{game_id}_pbp.json"
-                if self.upload_to_s3(pbp_data, s3_key):
+                # Store to S3 using base class
+                s3_key = f"{self.config.storage.s3_prefix}/{date_str}/game_{game_id}_pbp.json"
+
+                if self.dry_run:
+                    self.logger.info(
+                        f"  [DRY RUN] Would upload to s3://{self.config.storage.s3_bucket}/{s3_key}"
+                    )
                     self.stats["games_scraped"] += 1
-                    self.stats["games_uploaded"] += 1
-                    self.logger.info(f"    ✓ Uploaded to S3")
+                else:
+                    success = await self.store_data(
+                        data=pbp_data,
+                        s3_key=s3_key,
+                        local_filename=f"game_{game_id}_pbp.json",
+                    )
 
-            time.sleep(RATE_LIMIT_SECONDS)
+                    if success:
+                        self.stats["games_scraped"] += 1
+                        self.stats["games_uploaded"] += 1
+                        self.logger.info(f"    ✓ Uploaded to S3")
 
-    def run(self):
+    async def run(self):
         """Run incremental scrape."""
         print("\n" + "=" * 70)
-        print("HOOPR INCREMENTAL SCRAPER (Simplified)")
+        print("HOOPR INCREMENTAL SCRAPER (AsyncBaseScraper)")
         print("=" * 70)
         print(f"\nScraping last {self.days_back} days")
         print(f"Dry run: {self.dry_run}")
-        print(f"S3 bucket: {S3_BUCKET}")
+        print(f"S3 bucket: {self.config.storage.s3_bucket}")
         print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
 
         # Get date range
@@ -179,7 +182,7 @@ class HoopRIncrementalScraper:
 
         # Scrape each date
         for date_str in dates:
-            self.scrape_date(date_str)
+            await self.scrape_date(date_str)
 
         # Print summary
         print("\n" + "=" * 70)
@@ -192,29 +195,27 @@ class HoopRIncrementalScraper:
         print(f"\n✓ Complete: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
-def main():
+async def main_async():
+    """Async main function."""
     parser = argparse.ArgumentParser(
-        description="hoopR incremental scraper (simplified)"
+        description="hoopR incremental scraper (AsyncBaseScraper)"
     )
     parser.add_argument(
-        "--days",
-        type=int,
-        default=3,
-        help="Number of days to scrape back (default: 3)"
+        "--days", type=int, default=3, help="Number of days to scrape back (default: 3)"
     )
     parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Test mode - don't upload to S3"
+        "--dry-run", action="store_true", help="Test mode - don't upload to S3"
     )
 
     args = parser.parse_args()
 
-    scraper = HoopRIncrementalScraper(
-        days_back=args.days,
-        dry_run=args.dry_run
-    )
-    scraper.run()
+    scraper = HoopRIncrementalScraper(days_back=args.days, dry_run=args.dry_run)
+    await scraper.run()
+
+
+def main():
+    """Entry point."""
+    asyncio.run(main_async())
 
 
 if __name__ == "__main__":

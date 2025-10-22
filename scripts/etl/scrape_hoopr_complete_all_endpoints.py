@@ -22,9 +22,13 @@ Usage:
 
     # Just today's games with all endpoints
     python scrape_hoopr_complete_all_endpoints.py --today
+
+Version: 2.0 (AsyncBaseScraper Integration)
+Updated: October 22, 2025 (Session 7 - Framework Migration)
 """
 
 import argparse
+import asyncio
 import json
 import sys
 import time
@@ -56,15 +60,12 @@ except ImportError:
     print("❌ sportsdataverse.nba not available")
     sys.exit(1)
 
-try:
-    import boto3
-
-    HAS_BOTO3 = True
-except ImportError:
-    HAS_BOTO3 = False
+# Import AsyncBaseScraper
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from scripts.scrapers.async_scraper_base import AsyncBaseScraper
 
 
-class ComprehensiveNBAScraper:
+class ComprehensiveNBAScraper(AsyncBaseScraper):
     """
     Scrapes ALL NBA Stats API endpoints available through hoopR
 
@@ -75,10 +76,21 @@ class ComprehensiveNBAScraper:
     - Advanced tracking and metrics
     """
 
-    def __init__(self, output_dir="/tmp/hoopr_complete", s3_bucket=None):
-        self.output_dir = Path(output_dir)
-        self.s3_bucket = s3_bucket
-        self.s3_client = boto3.client("s3") if HAS_BOTO3 and s3_bucket else None
+    def __init__(
+        self,
+        output_dir=None,
+        include_game_detail=False,
+        config_name="hoopr_complete_endpoints",
+    ):
+        super().__init__(config_name=config_name)
+
+        # Use configured output dir or override
+        self.output_dir = (
+            Path(output_dir)
+            if output_dir
+            else Path(self.config.storage.local_output_dir)
+        )
+        self.include_game_detail = include_game_detail
 
         # Create comprehensive directory structure
         self.categories = {
@@ -231,23 +243,16 @@ class ComprehensiveNBAScraper:
         with open(filepath, "w") as f:
             json.dump(data, f, indent=2, default=str)
 
-    def upload_to_s3(self, local_path, s3_key):
-        """Upload file to S3"""
-        if not self.s3_client:
-            return False
-
-        try:
-            self.s3_client.upload_file(str(local_path), self.s3_bucket, s3_key)
-            return True
-        except Exception as e:
-            print(f"  ⚠️ S3 upload failed: {e}")
-            return False
-
-    def call_endpoint_safe(self, endpoint_func, *args, **kwargs):
-        """Safely call an endpoint with error handling"""
+    async def call_endpoint_safe(self, endpoint_func, *args, **kwargs):
+        """Safely call an endpoint with error handling and rate limiting"""
         self.stats["endpoints_called"] += 1
         try:
-            result = endpoint_func(*args, **kwargs)
+            # Apply rate limiting
+            await self.rate_limiter.acquire()
+
+            # Call endpoint (wrapped in thread for synchronous hoopR calls)
+            result = await asyncio.to_thread(endpoint_func, *args, **kwargs)
+
             self.stats["endpoints_successful"] += 1
             return result
         except Exception as e:
@@ -266,7 +271,7 @@ class ComprehensiveNBAScraper:
     # BULK LOADERS (Historical efficiency)
     # ====================================================================
 
-    def scrape_bulk_loaders(self, seasons):
+    async def scrape_bulk_loaders(self, seasons):
         """Scrape the 4 main bulk data loaders"""
         print("\n" + "=" * 80)
         print("BULK DATA LOADERS (Most Efficient)")
@@ -274,7 +279,7 @@ class ComprehensiveNBAScraper:
 
         # Play-by-play
         print(f"\n📊 Loading bulk play-by-play for {len(seasons)} seasons...")
-        pbp_data = self.call_endpoint_safe(load_nba_pbp, seasons=seasons)
+        pbp_data = await self.call_endpoint_safe(load_nba_pbp, seasons=seasons)
         if pbp_data is not None and len(pbp_data) > 0:
             season_str = "_".join(map(str, seasons))
             pbp_file = self.output_dir / "bulk_pbp" / f"pbp_seasons_{season_str}.json"
@@ -282,9 +287,16 @@ class ComprehensiveNBAScraper:
             self.stats["total_data_points"] += len(pbp_data)
             print(f"  ✅ Saved {len(pbp_data):,} play-by-play events")
 
+            # Upload to S3 if configured
+            if self.config.storage.upload_to_s3:
+                s3_key = f"{self.config.storage.s3_prefix}/bulk_pbp/pbp_seasons_{season_str}.json"
+                await self.store_data(
+                    pbp_data, s3_key, f"pbp_seasons_{season_str}.json"
+                )
+
         # Player box scores
         print(f"\n📊 Loading bulk player box scores for {len(seasons)} seasons...")
-        player_box_data = self.call_endpoint_safe(
+        player_box_data = await self.call_endpoint_safe(
             load_nba_player_boxscore, seasons=seasons
         )
         if player_box_data is not None and len(player_box_data) > 0:
@@ -298,9 +310,17 @@ class ComprehensiveNBAScraper:
             self.stats["total_data_points"] += len(player_box_data)
             print(f"  ✅ Saved {len(player_box_data):,} player box scores")
 
+            if self.config.storage.upload_to_s3:
+                s3_key = f"{self.config.storage.s3_prefix}/bulk_player_box/player_box_seasons_{season_str}.json"
+                await self.store_data(
+                    player_box_data, s3_key, f"player_box_seasons_{season_str}.json"
+                )
+
         # Team box scores
         print(f"\n📊 Loading bulk team box scores for {len(seasons)} seasons...")
-        team_box_data = self.call_endpoint_safe(load_nba_team_boxscore, seasons=seasons)
+        team_box_data = await self.call_endpoint_safe(
+            load_nba_team_boxscore, seasons=seasons
+        )
         if team_box_data is not None and len(team_box_data) > 0:
             season_str = "_".join(map(str, seasons))
             team_box_file = (
@@ -312,9 +332,17 @@ class ComprehensiveNBAScraper:
             self.stats["total_data_points"] += len(team_box_data)
             print(f"  ✅ Saved {len(team_box_data):,} team box scores")
 
+            if self.config.storage.upload_to_s3:
+                s3_key = f"{self.config.storage.s3_prefix}/bulk_team_box/team_box_seasons_{season_str}.json"
+                await self.store_data(
+                    team_box_data, s3_key, f"team_box_seasons_{season_str}.json"
+                )
+
         # Schedules
         print(f"\n📊 Loading bulk schedules for {len(seasons)} seasons...")
-        schedule_data = self.call_endpoint_safe(load_nba_schedule, seasons=seasons)
+        schedule_data = await self.call_endpoint_safe(
+            load_nba_schedule, seasons=seasons
+        )
         if schedule_data is not None and len(schedule_data) > 0:
             season_str = "_".join(map(str, seasons))
             schedule_file = (
@@ -326,6 +354,12 @@ class ComprehensiveNBAScraper:
             self.stats["total_data_points"] += len(schedule_data)
             print(f"  ✅ Saved {len(schedule_data):,} games")
 
+            if self.config.storage.upload_to_s3:
+                s3_key = f"{self.config.storage.s3_prefix}/bulk_schedule/schedule_seasons_{season_str}.json"
+                await self.store_data(
+                    schedule_data, s3_key, f"schedule_seasons_{season_str}.json"
+                )
+
             # Return games list for further scraping
             return schedule_data
 
@@ -335,11 +369,9 @@ class ComprehensiveNBAScraper:
     # GAME-LEVEL ENDPOINTS (Per-game detail)
     # ====================================================================
 
-    def scrape_game_endpoints(self, game_id, season):
+    async def scrape_game_endpoints(self, game_id, season):
         """Scrape all per-game endpoints for a single game"""
         print(f"\n  🏀 Game {game_id}...")
-
-        game_endpoints = []
 
         # Box score variants (V2 and V3)
         endpoints_to_call = [
@@ -391,11 +423,10 @@ class ComprehensiveNBAScraper:
         ]
 
         for category, endpoint_func, params in endpoints_to_call:
-            data = self.call_endpoint_safe(endpoint_func, **params)
+            data = await self.call_endpoint_safe(endpoint_func, **params)
             if data:
                 filename = self.output_dir / category / f"{game_id}.json"
                 self.save_json(data, filename)
-                time.sleep(0.6)  # Rate limiting
 
         return True
 
@@ -403,7 +434,7 @@ class ComprehensiveNBAScraper:
     # LEAGUE-WIDE ENDPOINTS (Season-level aggregates)
     # ====================================================================
 
-    def scrape_league_endpoints(self, season):
+    async def scrape_league_endpoints(self, season):
         """Scrape all league-wide dashboard endpoints for a season"""
         print(f"\n" + "=" * 80)
         print(f"LEAGUE DASHBOARDS - Season {season}")
@@ -508,17 +539,16 @@ class ComprehensiveNBAScraper:
 
         for category, endpoint_func, params in league_endpoints:
             print(f"  📊 {endpoint_func.__name__}...")
-            data = self.call_endpoint_safe(endpoint_func, **params)
+            data = await self.call_endpoint_safe(endpoint_func, **params)
             if data:
                 filename = self.output_dir / category / f"{season}.json"
                 self.save_json(data, filename)
-            time.sleep(0.6)
 
     # ====================================================================
     # SEASON-LEVEL ENDPOINTS (Historical/meta data)
     # ====================================================================
 
-    def scrape_static_endpoints(self):
+    async def scrape_static_endpoints(self):
         """Scrape endpoints that don't depend on season/game (one-time data)"""
         print("\n" + "=" * 80)
         print("STATIC/META ENDPOINTS (One-time scrapes)")
@@ -541,17 +571,16 @@ class ComprehensiveNBAScraper:
 
         for category, endpoint_func, params in static_endpoints:
             print(f"  📊 {endpoint_func.__name__}...")
-            data = self.call_endpoint_safe(endpoint_func, **params)
+            data = await self.call_endpoint_safe(endpoint_func, **params)
             if data:
                 filename = self.output_dir / category / "data.json"
                 self.save_json(data, filename)
-            time.sleep(0.6)
 
     # ====================================================================
     # MAIN ORCHESTRATION
     # ====================================================================
 
-    def scrape_all(self, seasons, include_game_detail=False):
+    async def scrape_all(self, seasons, include_game_detail=False):
         """
         Master function to scrape ALL endpoints
 
@@ -560,7 +589,7 @@ class ComprehensiveNBAScraper:
             include_game_detail: If True, scrape every endpoint for every game (SLOW!)
         """
         print("\n" + "=" * 80)
-        print("🏀 NBA STATS API - COMPLETE ALL ENDPOINTS SCRAPER")
+        print("🏀 NBA STATS API - COMPLETE ALL ENDPOINTS SCRAPER (ASYNC)")
         print("=" * 80)
         print(f"Seasons: {seasons}")
         print(f"Output: {self.output_dir}")
@@ -570,14 +599,14 @@ class ComprehensiveNBAScraper:
         start_time = time.time()
 
         # Step 1: Bulk loaders (most efficient)
-        schedule_data = self.scrape_bulk_loaders(seasons)
+        schedule_data = await self.scrape_bulk_loaders(seasons)
 
         # Step 2: Static endpoints (one-time)
-        self.scrape_static_endpoints()
+        await self.scrape_static_endpoints()
 
         # Step 3: League dashboards (per season)
         for season in seasons:
-            self.scrape_league_endpoints(season)
+            await self.scrape_league_endpoints(season)
 
         # Step 4: Per-game detail (optional - very slow!)
         if include_game_detail and schedule_data:
@@ -593,7 +622,7 @@ class ComprehensiveNBAScraper:
                 game_id = game.get("game_id")
                 season = game.get("season")
                 if game_id:
-                    self.scrape_game_endpoints(game_id, season)
+                    await self.scrape_game_endpoints(game_id, season)
 
         # Print summary
         elapsed = time.time() - start_time
@@ -614,9 +643,9 @@ class ComprehensiveNBAScraper:
                 print(f"  - {err['endpoint']}: {err['error'][:100]}")
 
 
-def main():
+async def main_async():
     parser = argparse.ArgumentParser(
-        description="Scrape ALL NBA Stats API endpoints via hoopR"
+        description="Scrape ALL NBA Stats API endpoints via hoopR (AsyncBaseScraper)"
     )
     parser.add_argument(
         "--seasons", nargs="+", type=int, help="Season years (e.g., 2023 2024 2025)"
@@ -631,11 +660,7 @@ def main():
         "--game-detail", action="store_true", help="Include per-game endpoints (SLOW!)"
     )
     parser.add_argument(
-        "--output-dir", default="/tmp/hoopr_complete", help="Output directory"
-    )
-    parser.add_argument("--upload-to-s3", action="store_true", help="Upload to S3")
-    parser.add_argument(
-        "--s3-bucket", default="nba-sim-raw-data-lake", help="S3 bucket name"
+        "--output-dir", default=None, help="Output directory (default: from config)"
     )
 
     args = parser.parse_args()
@@ -651,16 +676,20 @@ def main():
         print("❌ Must specify --seasons, --all-seasons, or --today")
         sys.exit(1)
 
-    # Configure S3
-    s3_bucket = args.s3_bucket if args.upload_to_s3 else None
-
     # Create scraper
-    scraper = ComprehensiveNBAScraper(output_dir=args.output_dir, s3_bucket=s3_bucket)
+    scraper = ComprehensiveNBAScraper(
+        output_dir=args.output_dir, include_game_detail=args.game_detail
+    )
 
     # Scrape everything
-    scraper.scrape_all(seasons=seasons, include_game_detail=args.game_detail)
+    await scraper.scrape_all(seasons=seasons, include_game_detail=args.game_detail)
 
     print(f"\n✅ Complete! Data saved to {scraper.output_dir}")
+
+
+def main():
+    """Entry point."""
+    asyncio.run(main_async())
 
 
 if __name__ == "__main__":

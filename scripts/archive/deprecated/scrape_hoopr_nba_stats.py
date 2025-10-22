@@ -72,7 +72,7 @@ class HoopRNBAStatsScraper:
     - Historical data
     """
 
-    def __init__(self, output_dir="/tmp/hoopr_nba_stats", s3_bucket=None):
+    def __init__(self, output_dir="/tmp/hoopr_nba_stats", s3_bucket=None):  # nosec B108
         self.output_dir = Path(output_dir)
         self.s3_bucket = s3_bucket
         self.s3_client = boto3.client("s3") if HAS_BOTO3 and s3_bucket else None
@@ -364,7 +364,9 @@ def main():
         "--all-endpoints", action="store_true", help="Scrape all available endpoints"
     )
     parser.add_argument(
-        "--output-dir", default="/tmp/hoopr_nba_stats", help="Output directory"
+        "--output-dir",
+        default="/tmp/hoopr_nba_stats",  # nosec B108
+        help="Output directory",
     )
     parser.add_argument("--upload-to-s3", action="store_true", help="Upload to S3")
     parser.add_argument(

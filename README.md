@@ -538,6 +538,7 @@ See `docs/SETUP.md` for complete installation and verification procedures.
 
 ### Reference
 - **[FILE_INVENTORY.md](FILE_INVENTORY.md)** - Auto-generated file summaries
+- **[docs/AWS_GLUE_DATA_CATALOG_STRATEGY.md](docs/AWS_GLUE_DATA_CATALOG_STRATEGY.md)** - Cloud-based data indexing strategy (planned)
 - **Hardware/Software Specs** - Archived (see ~/sports-simulator-archives/nba/)
 
 ---
@@ -564,7 +565,7 @@ Code is optimized for Apple Silicon (ARM64) architecture. See archived specs for
 
 ### AWS Services
 - **S3** - Raw data lake (146K files, 119 GB)
-- **Glue** - Schema discovery and ETL (10% field extraction)
+- **Glue** - Schema discovery and ETL (10% field extraction; Data Catalog planned for cloud-based metadata indexing)
 - **RDS PostgreSQL** - Structured data storage (~12 GB)
 - **EC2** - Simulation compute (t3.medium or similar)
 - **SageMaker** - ML model training and deployment

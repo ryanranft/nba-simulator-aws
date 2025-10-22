@@ -50,6 +50,7 @@ This index helps Claude Code and developers find the right documentation efficie
 
 ### Setup & Configuration
 - **docs/SETUP.md** - Environment setup, AWS configuration, credentials
+- **docs/AWS_GLUE_DATA_CATALOG_STRATEGY.md** - Cloud-based data indexing strategy (planned)
 - **README.md** - Project overview, architecture, quick start
 - **docs/PROJECT_VISION.md** - Temporal panel data system vision
 

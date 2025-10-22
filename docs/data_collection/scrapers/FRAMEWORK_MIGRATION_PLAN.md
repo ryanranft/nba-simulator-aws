@@ -13,10 +13,10 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 **Goal:** Migrate 50%+ scrapers to shared infrastructure, reduce code duplication by 3,000-5,000 lines
 
 **Current State:**
-- 84 active scraper files
-- 39,290 total lines of code
-- 16 using AsyncBaseScraper (19%) ✅ +8 from Sessions 2-6 (completed basketball_reference + NBA API specialized)
-- 19 using scraper_config.py (23%) ✅ +8 from Sessions 2-6 (completed basketball_reference + NBA API specialized)
+- 83 active scraper files (-1 duplicate removed in Session 7)
+- 38,882 total lines of code (-408 duplicate lines removed)
+- 19 using AsyncBaseScraper (23%) ✅ +11 from Sessions 2-7 (basketball_reference, NBA API, hoopR specialized)
+- 22 using scraper_config.py (27%) ✅ +11 from Sessions 2-7 (basketball_reference, NBA API, hoopR specialized)
 - Shared infrastructure: 1,664 lines (async_scraper_base.py: 490 lines, scraper_config.py: 576 lines, scraper_telemetry.py: 609 lines)
 
 **Target State:**
@@ -29,7 +29,7 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 
 ## Migration Categories
 
-### Already Migrated (7 files) ✅
+### Already Migrated (10 files) ✅
 1. `basketball_reference_async_scraper.py`
 2. `espn_async_scraper.py`
 3. `nba_api_async_scraper.py`
@@ -37,6 +37,9 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 5. `espn_incremental_scraper.py` (Session 2)
 6. `espn_missing_pbp_scraper.py` (Session 3 cleanup)
 7. `hoopr_incremental_scraper.py` (Session 3 full migration)
+8. `hoopr_incremental_simple.py` (Session 7)
+9. `scrape_hoopr_complete_all_endpoints.py` (Session 7)
+10. `scrape_missing_hoopr_games.py` (Session 7)
 
 **Status:** Production-ready, serving as migration templates
 
@@ -70,10 +73,10 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 14. ~~`scrape_nba_api_team_dashboards.py`~~ ✅ Completed Session 6
 
 **hoopR:**
-15. `hoopr_incremental_simple.py`
-16. `scrape_hoopr_complete_all_endpoints.py`
-17. `scrape_hoopr_nba_stats.py`
-18. `scrape_missing_hoopr_games.py`
+15. ~~`hoopr_incremental_simple.py`~~ ✅ Completed Session 7
+16. ~~`scrape_hoopr_complete_all_endpoints.py`~~ ✅ Completed Session 7
+17. ~~`scrape_hoopr_nba_stats.py`~~ ❌ Removed Session 7 (duplicate of #16 - only used 4 bulk loaders that complete_all_endpoints already has)
+18. ~~`scrape_missing_hoopr_games.py`~~ ✅ Completed Session 7
 
 ### Lower Priority - Autonomous Agents (7 files)
 **Impact:** Low - Complex multi-phase agents, may need custom approach
@@ -683,6 +686,91 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 - ✅ All configurations added to scraper_config.yaml
 - ✅ All scrapers tested and formatted with black
 - ✅ Total time: 2 hours
+
+---
+
+### Session 7: hoopR Specialized Scrapers (October 22, 2025)
+
+**Completed:**
+
+1. **scrape_hoopr_nba_stats.py** - ❌ Removed as duplicate
+   - **Pattern:** Duplicate of scrape_hoopr_complete_all_endpoints.py
+   - **Lines:** 408 lines eliminated
+   - **Reason for removal:** Only implemented 4 bulk data loaders (load_nba_pbp, load_nba_team_boxscore, load_nba_player_boxscore, load_nba_schedule) - all of which are already in scrape_hoopr_complete_all_endpoints.py (scrape_bulk_loaders method, lines 269-332) PLUS 150+ additional endpoints
+   - **Impact:** No functionality lost, reduced technical debt
+   - **Status:** Archived to scripts/archive/deprecated/ with deprecation notice
+
+2. **hoopr_incremental_simple.py** - ✅ Migrated
+   - **Pattern:** Incremental scraper for last N days (default 3)
+   - **Lines before:** 222
+   - **Lines after:** 227
+   - **Net increase:** +5 lines (async wrappers, AsyncBaseScraper integration)
+   - **Time taken:** 45 minutes
+   - **Major improvements:**
+     - Inherits from AsyncBaseScraper
+     - Uses ScraperConfigManager for configuration
+     - Wrapped sportsdataverse.nba calls in asyncio.to_thread()
+     - Uses base class rate limiter (0.5 req/s = 2s between requests)
+     - Uses base class store_data() for optional S3 upload
+     - Configuration via scraper_config.yaml (hoopr_incremental_simple section, port 8017)
+     - **Active in production:** Used by overnight_3_source_validation.sh workflow
+   - **Testing:** ✅ Ready for testing
+
+3. **scrape_hoopr_complete_all_endpoints.py** - ✅ Migrated
+   - **Pattern:** Comprehensive all-endpoint scraper (200+ NBA Stats API endpoints)
+   - **Lines before:** 668
+   - **Lines after:** 675
+   - **Net increase:** +7 lines (async wrappers, minimal overhead)
+   - **Time taken:** 60 minutes
+   - **Major improvements:**
+     - Inherits from AsyncBaseScraper
+     - Uses ScraperConfigManager for configuration
+     - All methods converted to async (scrape_bulk_loaders, scrape_league_endpoints, scrape_static_endpoints, scrape_game_endpoints)
+     - Wrapped all sportsdataverse/hoopR calls in asyncio.to_thread()
+     - Uses base class rate limiter (1.67 req/s = 0.6s between requests)
+     - Optional S3 upload via store_data() for bulk loaders
+     - Configuration via scraper_config.yaml (hoopr_complete_endpoints section, port 8018)
+     - **Preserved all 75 endpoint categories** and comprehensive coverage
+   - **Testing:** ✅ Ready for testing
+
+4. **scrape_missing_hoopr_games.py** - ✅ Migrated
+   - **Pattern:** Gap-filling scraper for 2,464 missing games
+   - **Lines before:** 414
+   - **Lines after:** 432
+   - **Net increase:** +18 lines (async wrappers, config integration)
+   - **Time taken:** 45 minutes
+   - **Major improvements:**
+     - Inherits from AsyncBaseScraper
+     - Uses ScraperConfigManager for configuration
+     - Wrapped hoopR API calls in asyncio.to_thread()
+     - Uses base class rate limiter (1.67 req/s = 0.6s between requests)
+     - Configuration via scraper_config.yaml (hoopr_missing_games section, port 8019)
+     - **Preserved unique features:** CSV gap list loading, SQLite database insertion, coverage verification
+   - **Testing:** ✅ Ready for testing
+
+**Configuration Changes:**
+- Added 3 new scraper configs to scraper_config.yaml:
+  - hoopr_incremental_simple (port 8017)
+  - hoopr_complete_endpoints (port 8018)
+  - hoopr_missing_games (port 8019)
+
+**Session Statistics:**
+- **Scrapers removed:** 1 (duplicate - scrape_hoopr_nba_stats.py)
+- **Scrapers migrated:** 3 (hoopr_incremental_simple, scrape_hoopr_complete_all_endpoints, scrape_missing_hoopr_games)
+- **Lines reduced:** 408 lines (duplicate code eliminated)
+- **Lines added:** 30 lines (net increase from async integration across 3 scrapers)
+- **Total time:** ~2.5 hours
+- **New progress:** 19/83 scrapers using AsyncBaseScraper (23%), 22/83 using scraper_config.py (27%)
+- **Progress toward 50% goal:** 19/42 = 45% of target achieved
+
+**Summary:**
+- ✅ All 3 active hoopR specialized scrapers migrated
+- ❌ 1 duplicate scraper identified and removed (no functionality lost)
+- ✅ All configurations added to scraper_config.yaml (ports 8017-8019)
+- ✅ All scrapers ready for testing
+- ✅ 408 lines of duplicate code eliminated
+- ✅ Total active scrapers: 83 (down from 84)
+- ✅ Total time: 2.5 hours
 
 ---
 
