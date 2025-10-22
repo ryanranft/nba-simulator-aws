@@ -1,40 +1,26 @@
 #!/usr/bin/env python3
 """
-Feature Store - ml_systems_5
+Feature Store for NBA Analytics Platform.
 
-Centralized feature storage and serving system implementing
-recommendation ml_systems_5 from the Master Implementation Sequence.
-
-Features:
-1. Centralized feature storage (offline + online)
-2. Feature versioning and lineage tracking
-3. Online/offline feature serving
-4. Feature sharing across models
-5. Schema validation and type checking
-6. Time-travel capabilities (point-in-time features)
-7. Feature monitoring and drift detection
-
-Implementation: Master Implementation Sequence #13
-Phase: 5 (ML Models)
-Source: Designing Machine Learning Systems
-Dependencies: rec_11 (feature engineering)
+This module provides a comprehensive feature store implementation for managing,
+storing, and retrieving NBA analytics features. It supports feature registration,
+versioning, caching, and efficient retrieval for machine learning pipelines.
 """
 
-import os
-import sys
 import logging
 import json
-from typing import Dict, List, Optional, Any, Union, Tuple
+import hashlib
+import pickle
 from datetime import datetime, timedelta
 from pathlib import Path
-from dataclasses import dataclass, field, asdict
+from typing import Any, Dict, List, Optional, Union, Callable, Tuple
+from dataclasses import dataclass, asdict, field
 from enum import Enum
-import hashlib
+import threading
+from collections import OrderedDict
+import sqlite3
 
-import pandas as pd
-import numpy as np
-
-# Setup logging
+# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -43,660 +29,765 @@ logger = logging.getLogger(__name__)
 
 
 class FeatureType(Enum):
-    """Types of features."""
-    CONTINUOUS = "continuous"
+    """Enumeration of supported feature types."""
+    NUMERIC = "numeric"
     CATEGORICAL = "categorical"
-    BINARY = "binary"
-    TIMESTAMP = "timestamp"
+    BOOLEAN = "boolean"
     EMBEDDING = "embedding"
+    TIME_SERIES = "time_series"
 
 
-class ServingMode(Enum):
-    """Feature serving modes."""
-    ONLINE = "online"      # Low-latency real-time serving
-    OFFLINE = "offline"    # Batch serving for training
-    BOTH = "both"         # Available in both modes
+class FeatureStatus(Enum):
+    """Enumeration of feature statuses."""
+    ACTIVE = "active"
+    DEPRECATED = "deprecated"
+    EXPERIMENTAL = "experimental"
+    ARCHIVED = "archived"
 
 
 @dataclass
 class FeatureMetadata:
-    """
-    Metadata for a feature.
-
-    Attributes:
-        name: Feature name
-        feature_type: Type of feature
-        description: Human-readable description
-        owner: Team/person responsible
-        tags: Searchable tags
-        created_at: Creation timestamp
-        version: Feature version
-    """
+    """Metadata for a feature in the feature store."""
     name: str
+    version: str
     feature_type: FeatureType
-    description: str = ""
-    owner: str = ""
+    description: str
+    created_at: datetime
+    updated_at: datetime
+    status: FeatureStatus = FeatureStatus.ACTIVE
+    dependencies: List[str] = field(default_factory=list)
     tags: List[str] = field(default_factory=list)
-    created_at: datetime = field(default_factory=datetime.now)
-    version: str = "1.0"
-    serving_mode: ServingMode = ServingMode.BOTH
-
+    schema: Dict[str, Any] = field(default_factory=dict)
+    statistics: Dict[str, Any] = field(default_factory=dict)
+    
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary."""
-        return {
-            'name': self.name,
-            'feature_type': self.feature_type.value,
-            'description': self.description,
-            'owner': self.owner,
-            'tags': self.tags,
-            'created_at': self.created_at.isoformat(),
-            'version': self.version,
-            'serving_mode': self.serving_mode.value
-        }
+        """Convert metadata to dictionary."""
+        data = asdict(self)
+        data['feature_type'] = self.feature_type.value
+        data['status'] = self.status.value
+        data['created_at'] = self.created_at.isoformat()
+        data['updated_at'] = self.updated_at.isoformat()
+        return data
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'FeatureMetadata':
+        """Create metadata from dictionary."""
+        data['feature_type'] = FeatureType(data['feature_type'])
+        data['status'] = FeatureStatus(data['status'])
+        data['created_at'] = datetime.fromisoformat(data['created_at'])
+        data['updated_at'] = datetime.fromisoformat(data['updated_at'])
+        return cls(**data)
 
 
-@dataclass
-class FeatureGroup:
-    """
-    Group of related features.
-
-    Attributes:
-        name: Feature group name
-        features: List of feature names in this group
-        entity_key: Primary key for joining (e.g., player_id)
-        timestamp_key: Timestamp column for time-travel
-        description: Group description
-        version: Group version
-    """
-    name: str
-    features: List[str]
-    entity_key: str
-    timestamp_key: Optional[str] = None
-    description: str = ""
-    version: str = "1.0"
-    metadata: Dict[str, FeatureMetadata] = field(default_factory=dict)
-
-    def add_feature(self, feature_name: str, metadata: FeatureMetadata):
-        """Add feature to group."""
-        if feature_name not in self.features:
-            self.features.append(feature_name)
-        self.metadata[feature_name] = metadata
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary."""
-        return {
-            'name': self.name,
-            'features': self.features,
-            'entity_key': self.entity_key,
-            'timestamp_key': self.timestamp_key,
-            'description': self.description,
-            'version': self.version,
-            'feature_metadata': {
-                name: meta.to_dict() for name, meta in self.metadata.items()
-            }
-        }
+class LRUCache:
+    """Thread-safe LRU cache for feature values."""
+    
+    def __init__(self, capacity: int = 1000):
+        """
+        Initialize LRU cache.
+        
+        Args:
+            capacity: Maximum number of items to cache
+        """
+        self.capacity = capacity
+        self.cache: OrderedDict = OrderedDict()
+        self.lock = threading.Lock()
+        logger.info(f"Initialized LRU cache with capacity {capacity}")
+    
+    def get(self, key: str) -> Optional[Any]:
+        """
+        Get value from cache.
+        
+        Args:
+            key: Cache key
+            
+        Returns:
+            Cached value or None if not found
+        """
+        with self.lock:
+            if key not in self.cache:
+                return None
+            self.cache.move_to_end(key)
+            return self.cache[key]
+    
+    def put(self, key: str, value: Any) -> None:
+        """
+        Put value in cache.
+        
+        Args:
+            key: Cache key
+            value: Value to cache
+        """
+        with self.lock:
+            if key in self.cache:
+                self.cache.move_to_end(key)
+            self.cache[key] = value
+            if len(self.cache) > self.capacity:
+                self.cache.popitem(last=False)
+    
+    def clear(self) -> None:
+        """Clear all cached items."""
+        with self.lock:
+            self.cache.clear()
+            logger.info("Cache cleared")
+    
+    def size(self) -> int:
+        """Get current cache size."""
+        with self.lock:
+            return len(self.cache)
 
 
 class FeatureStore:
     """
-    Centralized feature storage and serving system.
-
-    Provides:
-    - Feature registration and versioning
-    - Online and offline feature serving
-    - Point-in-time feature retrieval
-    - Feature lineage tracking
-    - Schema validation
+    Feature store for NBA analytics platform.
+    
+    Manages feature registration, storage, retrieval, and versioning.
     """
-
+    
     def __init__(
         self,
-        storage_path: str,
-        online_cache_size: int = 10000,
-        config: Optional[Dict[str, Any]] = None
+        storage_path: Union[str, Path],
+        cache_size: int = 1000,
+        enable_cache: bool = True
     ):
         """
-        Initialize Feature Store.
-
+        Initialize feature store.
+        
         Args:
-            storage_path: Path to feature store storage
-            online_cache_size: Size of online feature cache
-            config: Configuration options
+            storage_path: Path to storage directory
+            cache_size: Size of LRU cache
+            enable_cache: Whether to enable caching
+            
+        Raises:
+            ValueError: If storage_path is invalid
         """
         self.storage_path = Path(storage_path)
+        self.enable_cache = enable_cache
+        
+        if not self.storage_path:
+            raise ValueError("storage_path cannot be empty")
+        
+        # Create storage directories
         self.storage_path.mkdir(parents=True, exist_ok=True)
-
-        self.online_cache_size = online_cache_size
-        self.config = config or {}
-
-        # Feature groups registry
-        self.feature_groups: Dict[str, FeatureGroup] = {}
-
-        # Online cache (in-memory for fast serving)
-        self.online_cache: Dict[str, pd.DataFrame] = {}
-
-        # Offline storage (on-disk parquet files)
-        self.offline_path = self.storage_path / "offline"
-        self.offline_path.mkdir(exist_ok=True)
-
-        # Metadata storage
         self.metadata_path = self.storage_path / "metadata"
         self.metadata_path.mkdir(exist_ok=True)
-
-        # Load existing feature groups
-        self._load_feature_groups()
-
-        logger.info(f"Initialized Feature Store at {self.storage_path}")
-
-    def register_feature_group(
-        self,
-        feature_group: FeatureGroup
-    ) -> None:
-        """
-        Register a feature group.
-
-        Args:
-            feature_group: FeatureGroup to register
-        """
-        logger.info(f"Registering feature group: {feature_group.name}")
-
-        self.feature_groups[feature_group.name] = feature_group
-
-        # Save metadata
-        metadata_file = self.metadata_path / f"{feature_group.name}.json"
-        with open(metadata_file, 'w') as f:
-            json.dump(feature_group.to_dict(), f, indent=2)
-
-        logger.info(f"Feature group '{feature_group.name}' registered")
-
-    def _load_feature_groups(self):
-        """Load feature groups from metadata."""
-        for metadata_file in self.metadata_path.glob("*.json"):
-            try:
-                with open(metadata_file, 'r') as f:
-                    data = json.load(f)
-
-                # Reconstruct FeatureGroup
-                feature_group = FeatureGroup(
-                    name=data['name'],
-                    features=data['features'],
-                    entity_key=data['entity_key'],
-                    timestamp_key=data.get('timestamp_key'),
-                    description=data.get('description', ''),
-                    version=data.get('version', '1.0')
-                )
-
-                # Reconstruct metadata
-                for fname, fmeta in data.get('feature_metadata', {}).items():
-                    metadata = FeatureMetadata(
-                        name=fmeta['name'],
-                        feature_type=FeatureType(fmeta['feature_type']),
-                        description=fmeta.get('description', ''),
-                        owner=fmeta.get('owner', ''),
-                        tags=fmeta.get('tags', []),
-                        created_at=datetime.fromisoformat(fmeta['created_at']),
-                        version=fmeta.get('version', '1.0'),
-                        serving_mode=ServingMode(fmeta.get('serving_mode', 'both'))
-                    )
-                    feature_group.metadata[fname] = metadata
-
-                self.feature_groups[feature_group.name] = feature_group
-                logger.info(f"Loaded feature group: {feature_group.name}")
-
-            except Exception as e:
-                logger.error(f"Error loading {metadata_file}: {e}")
-
-    def write_offline_features(
-        self,
-        feature_group_name: str,
-        features_df: pd.DataFrame,
-        partition_by: Optional[str] = None
-    ) -> None:
-        """
-        Write features to offline storage.
-
-        Args:
-            feature_group_name: Name of feature group
-            features_df: DataFrame with features
-            partition_by: Column to partition by (e.g., 'game_date')
-        """
-        logger.info(f"Writing {len(features_df)} records to offline store: {feature_group_name}")
-
-        if feature_group_name not in self.feature_groups:
-            raise ValueError(f"Feature group '{feature_group_name}' not registered")
-
-        feature_group = self.feature_groups[feature_group_name]
-
-        # Validate entity key exists
-        if feature_group.entity_key not in features_df.columns:
-            raise ValueError(f"Entity key '{feature_group.entity_key}' not in DataFrame")
-
-        # Create offline storage path
-        offline_group_path = self.offline_path / feature_group_name
-        offline_group_path.mkdir(exist_ok=True)
-
-        # Save as parquet (partitioned if specified)
-        if partition_by and partition_by in features_df.columns:
-            # Partition by specified column
-            for partition_value, partition_df in features_df.groupby(partition_by):
-                partition_path = offline_group_path / f"{partition_by}={partition_value}"
-                partition_path.mkdir(exist_ok=True)
-
-                output_file = partition_path / "features.parquet"
-                partition_df.to_parquet(output_file, index=False, compression='snappy')
-
-            logger.info(f"Written partitioned features to {offline_group_path}")
-        else:
-            # Single file
-            output_file = offline_group_path / f"features_v{feature_group.version}.parquet"
-            features_df.to_parquet(output_file, index=False, compression='snappy')
-
-            logger.info(f"Written features to {output_file}")
-
-    def read_offline_features(
-        self,
-        feature_group_name: str,
-        entity_ids: Optional[List[Any]] = None,
-        feature_names: Optional[List[str]] = None
-    ) -> pd.DataFrame:
-        """
-        Read features from offline storage.
-
-        Args:
-            feature_group_name: Name of feature group
-            entity_ids: Optional list of entity IDs to filter
-            feature_names: Optional list of feature names to retrieve
-
-        Returns:
-            DataFrame with requested features
-        """
-        logger.info(f"Reading offline features: {feature_group_name}")
-
-        if feature_group_name not in self.feature_groups:
-            raise ValueError(f"Feature group '{feature_group_name}' not registered")
-
-        feature_group = self.feature_groups[feature_group_name]
-        offline_group_path = self.offline_path / feature_group_name
-
-        if not offline_group_path.exists():
-            raise ValueError(f"No offline features found for '{feature_group_name}'")
-
-        # Read all parquet files in group
-        parquet_files = list(offline_group_path.glob("**/*.parquet"))
-
-        if not parquet_files:
-            raise ValueError(f"No parquet files found for '{feature_group_name}'")
-
-        # Read and concatenate
-        dfs = []
-        for pfile in parquet_files:
-            df = pd.read_parquet(pfile)
-            dfs.append(df)
-
-        features_df = pd.concat(dfs, ignore_index=True)
-
-        # Filter by entity IDs if specified
-        if entity_ids is not None:
-            features_df = features_df[
-                features_df[feature_group.entity_key].isin(entity_ids)
-            ]
-
-        # Select specific features if specified
-        if feature_names is not None:
-            # Always include entity key
-            columns = [feature_group.entity_key]
-
-            # Add timestamp key if present
-            if feature_group.timestamp_key and feature_group.timestamp_key in features_df.columns:
-                columns.append(feature_group.timestamp_key)
-
-            # Add requested features
-            for fname in feature_names:
-                if fname in features_df.columns and fname not in columns:
-                    columns.append(fname)
-
-            features_df = features_df[columns]
-
-        logger.info(f"Retrieved {len(features_df)} feature records")
-        return features_df
-
-    def write_online_features(
-        self,
-        feature_group_name: str,
-        features_df: pd.DataFrame
-    ) -> None:
-        """
-        Write features to online cache for low-latency serving.
-
-        Args:
-            feature_group_name: Name of feature group
-            features_df: DataFrame with features
-        """
-        logger.info(f"Writing {len(features_df)} records to online cache: {feature_group_name}")
-
-        if feature_group_name not in self.feature_groups:
-            raise ValueError(f"Feature group '{feature_group_name}' not registered")
-
-        feature_group = self.feature_groups[feature_group_name]
-
-        # Index by entity key for fast lookup
-        indexed_df = features_df.set_index(feature_group.entity_key)
-
-        # Limit cache size (LRU-style)
-        if len(indexed_df) > self.online_cache_size:
-            # Keep most recent entries (if timestamp available)
-            if feature_group.timestamp_key and feature_group.timestamp_key in indexed_df.columns:
-                indexed_df = indexed_df.sort_values(feature_group.timestamp_key, ascending=False)
-                indexed_df = indexed_df.head(self.online_cache_size)
-            else:
-                indexed_df = indexed_df.tail(self.online_cache_size)
-
-        self.online_cache[feature_group_name] = indexed_df
-
-        logger.info(f"Online cache updated: {len(indexed_df)} records")
-
-    def read_online_features(
-        self,
-        feature_group_name: str,
-        entity_ids: List[Any],
-        feature_names: Optional[List[str]] = None
-    ) -> pd.DataFrame:
-        """
-        Read features from online cache (fast serving).
-
-        Args:
-            feature_group_name: Name of feature group
-            entity_ids: List of entity IDs to retrieve
-            feature_names: Optional list of feature names to retrieve
-
-        Returns:
-            DataFrame with requested features
-        """
-        if feature_group_name not in self.online_cache:
-            raise ValueError(f"Feature group '{feature_group_name}' not in online cache")
-
-        cached_df = self.online_cache[feature_group_name]
-
-        # Retrieve by entity IDs
+        self.features_path = self.storage_path / "features"
+        self.features_path.mkdir(exist_ok=True)
+        
+        # Initialize cache
+        self.cache = LRUCache(capacity=cache_size) if enable_cache else None
+        
+        # Initialize metadata database
+        self.db_path = self.storage_path / "feature_store.db"
+        self._init_database()
+        
+        # Feature computation functions
+        self.feature_functions: Dict[str, Callable] = {}
+        
+        logger.info(f"Initialized FeatureStore at {self.storage_path}")
+    
+    def _init_database(self) -> None:
+        """Initialize SQLite database for metadata."""
         try:
-            features_df = cached_df.loc[entity_ids]
-        except KeyError:
-            # Some IDs not found - get what we can
-            available_ids = [eid for eid in entity_ids if eid in cached_df.index]
-            if not available_ids:
-                return pd.DataFrame()
-
-            features_df = cached_df.loc[available_ids]
-
-        # Select specific features if requested
-        if feature_names is not None:
-            available_features = [f for f in feature_names if f in features_df.columns]
-            features_df = features_df[available_features]
-
-        return features_df.reset_index()
-
-    def get_point_in_time_features(
+            conn = sqlite3.connect(str(self.db_path))
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS features (
+                    name TEXT NOT NULL,
+                    version TEXT NOT NULL,
+                    feature_type TEXT NOT NULL,
+                    description TEXT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    dependencies TEXT,
+                    tags TEXT,
+                    schema TEXT,
+                    statistics TEXT,
+                    PRIMARY KEY (name, version)
+                )
+            """)
+            
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_feature_name 
+                ON features(name)
+            """)
+            
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_feature_status 
+                ON features(status)
+            """)
+            
+            conn.commit()
+            conn.close()
+            logger.info("Database initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize database: {e}")
+            raise
+    
+    def register_feature(
         self,
-        feature_group_name: str,
-        entity_ids: List[Any],
-        timestamps: Union[datetime, List[datetime]],
-        feature_names: Optional[List[str]] = None
-    ) -> pd.DataFrame:
+        name: str,
+        version: str,
+        feature_type: FeatureType,
+        description: str,
+        computation_fn: Optional[Callable] = None,
+        dependencies: Optional[List[str]] = None,
+        tags: Optional[List[str]] = None,
+        schema: Optional[Dict[str, Any]] = None
+    ) -> FeatureMetadata:
         """
-        Get point-in-time features (time-travel).
-
-        Retrieves features as they existed at specific timestamps,
-        critical for preventing data leakage in training.
-
+        Register a new feature in the store.
+        
         Args:
-            feature_group_name: Name of feature group
-            entity_ids: List of entity IDs
-            timestamps: Single timestamp or list of timestamps
-            feature_names: Optional list of features to retrieve
-
+            name: Feature name
+            version: Feature version
+            feature_type: Type of feature
+            description: Feature description
+            computation_fn: Optional function to compute feature
+            dependencies: List of dependent features
+            tags: List of tags for categorization
+            schema: Feature schema definition
+            
         Returns:
-            DataFrame with point-in-time features
+            FeatureMetadata object
+            
+        Raises:
+            ValueError: If feature already exists or invalid parameters
         """
-        logger.info(f"Getting point-in-time features for {len(entity_ids)} entities")
-
-        if feature_group_name not in self.feature_groups:
-            raise ValueError(f"Feature group '{feature_group_name}' not registered")
-
-        feature_group = self.feature_groups[feature_group_name]
-
-        if not feature_group.timestamp_key:
-            raise ValueError(f"Feature group '{feature_group_name}' has no timestamp key")
-
-        # Read offline features
-        features_df = self.read_offline_features(
-            feature_group_name,
-            entity_ids=entity_ids,
-            feature_names=feature_names
+        if not name or not version:
+            raise ValueError("Feature name and version are required")
+        
+        if self.feature_exists(name, version):
+            raise ValueError(f"Feature {name} version {version} already exists")
+        
+        now = datetime.utcnow()
+        metadata = FeatureMetadata(
+            name=name,
+            version=version,
+            feature_type=feature_type,
+            description=description,
+            created_at=now,
+            updated_at=now,
+            dependencies=dependencies or [],
+            tags=tags or [],
+            schema=schema or {}
         )
-
-        # Convert timestamp column to datetime
-        features_df[feature_group.timestamp_key] = pd.to_datetime(
-            features_df[feature_group.timestamp_key]
-        )
-
-        # Handle single timestamp vs list
-        if isinstance(timestamps, datetime):
-            timestamps = [timestamps] * len(entity_ids)
-
-        # For each entity-timestamp pair, get the most recent features
-        # that existed at that timestamp
-        pit_features = []
-
-        for entity_id, timestamp in zip(entity_ids, timestamps):
-            # Get all features for this entity before the timestamp
-            entity_features = features_df[
-                (features_df[feature_group.entity_key] == entity_id) &
-                (features_df[feature_group.timestamp_key] <= timestamp)
-            ]
-
-            if len(entity_features) > 0:
-                # Get most recent features
-                most_recent = entity_features.sort_values(
-                    feature_group.timestamp_key, ascending=False
-                ).iloc[0]
-
-                pit_features.append(most_recent)
-
-        if not pit_features:
-            return pd.DataFrame()
-
-        return pd.DataFrame(pit_features).reset_index(drop=True)
-
-    def get_feature_stats(
+        
+        try:
+            # Save metadata to database
+            self._save_metadata(metadata)
+            
+            # Register computation function if provided
+            if computation_fn:
+                feature_key = f"{name}:{version}"
+                self.feature_functions[feature_key] = computation_fn
+            
+            logger.info(f"Registered feature {name} version {version}")
+            return metadata
+        except Exception as e:
+            logger.error(f"Failed to register feature {name}: {e}")
+            raise
+    
+    def _save_metadata(self, metadata: FeatureMetadata) -> None:
+        """Save feature metadata to database."""
+        try:
+            conn = sqlite3.connect(str(self.db_path))
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                INSERT OR REPLACE INTO features 
+                (name, version, feature_type, description, created_at, 
+                 updated_at, status, dependencies, tags, schema, statistics)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                metadata.name,
+                metadata.version,
+                metadata.feature_type.value,
+                metadata.description,
+                metadata.created_at.isoformat(),
+                metadata.updated_at.isoformat(),
+                metadata.status.value,
+                json.dumps(metadata.dependencies),
+                json.dumps(metadata.tags),
+                json.dumps(metadata.schema),
+                json.dumps(metadata.statistics)
+            ))
+            
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            logger.error(f"Failed to save metadata: {e}")
+            raise
+    
+    def feature_exists(self, name: str, version: str) -> bool:
+        """
+        Check if a feature exists.
+        
+        Args:
+            name: Feature name
+            version: Feature version
+            
+        Returns:
+            True if feature exists, False otherwise
+        """
+        try:
+            conn = sqlite3.connect(str(self.db_path))
+            cursor = conn.cursor()
+            
+            cursor.execute(
+                "SELECT COUNT(*) FROM features WHERE name = ? AND version = ?",
+                (name, version)
+            )
+            count = cursor.fetchone()[0]
+            conn.close()
+            
+            return count > 0
+        except Exception as e:
+            logger.error(f"Error checking feature existence: {e}")
+            return False
+    
+    def get_metadata(self, name: str, version: str) -> Optional[FeatureMetadata]:
+        """
+        Get feature metadata.
+        
+        Args:
+            name: Feature name
+            version: Feature version
+            
+        Returns:
+            FeatureMetadata or None if not found
+        """
+        try:
+            conn = sqlite3.connect(str(self.db_path))
+            cursor = conn.cursor()
+            
+            cursor.execute(
+                "SELECT * FROM features WHERE name = ? AND version = ?",
+                (name, version)
+            )
+            row = cursor.fetchone()
+            conn.close()
+            
+            if not row:
+                return None
+            
+            return FeatureMetadata(
+                name=row[0],
+                version=row[1],
+                feature_type=FeatureType(row[2]),
+                description=row[3],
+                created_at=datetime.fromisoformat(row[4]),
+                updated_at=datetime.fromisoformat(row[5]),
+                status=FeatureStatus(row[6]),
+                dependencies=json.loads(row[7]),
+                tags=json.loads(row[8]),
+                schema=json.loads(row[9]),
+                statistics=json.loads(row[10])
+            )
+        except Exception as e:
+            logger.error(f"Failed to get metadata for {name}:{version}: {e}")
+            return None
+    
+    def store_feature(
         self,
-        feature_group_name: str
+        name: str,
+        version: str,
+        entity_id: str,
+        value: Any,
+        timestamp: Optional[datetime] = None
+    ) -> bool:
+        """
+        Store a feature value.
+        
+        Args:
+            name: Feature name
+            version: Feature version
+            entity_id: Entity identifier (e.g., player_id, game_id)
+            value: Feature value
+            timestamp: Optional timestamp for the feature
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        if not self.feature_exists(name, version):
+            logger.error(f"Feature {name}:{version} not registered")
+            return False
+        
+        try:
+            feature_key = self._get_feature_key(name, version, entity_id)
+            feature_data = {
+                'value': value,
+                'timestamp': (timestamp or datetime.utcnow()).isoformat(),
+                'entity_id': entity_id
+            }
+            
+            # Store to disk
+            feature_file = self.features_path / f"{feature_key}.pkl"
+            with open(feature_file, 'wb') as f:
+                pickle.dump(feature_data, f)
+            
+            # Update cache
+            if self.cache:
+                self.cache.put(feature_key, feature_data)
+            
+            logger.debug(f"Stored feature {name}:{version} for entity {entity_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to store feature: {e}")
+            return False
+    
+    def get_feature(
+        self,
+        name: str,
+        version: str,
+        entity_id: str,
+        compute_if_missing: bool = True
+    ) -> Optional[Any]:
+        """
+        Retrieve a feature value.
+        
+        Args:
+            name: Feature name
+            version: Feature version
+            entity_id: Entity identifier
+            compute_if_missing: Whether to compute feature if not found
+            
+        Returns:
+            Feature value or None if not found
+        """
+        feature_key = self._get_feature_key(name, version, entity_id)
+        
+        # Check cache first
+        if self.cache:
+            cached_value = self.cache.get(feature_key)
+            if cached_value is not None:
+                logger.debug(f"Cache hit for {feature_key}")
+                return cached_value['value']
+        
+        # Check disk storage
+        feature_file = self.features_path / f"{feature_key}.pkl"
+        if feature_file.exists():
+            try:
+                with open(feature_file, 'rb') as f:
+                    feature_data = pickle.load(f)
+                
+                if self.cache:
+                    self.cache.put(feature_key, feature_data)
+                
+                return feature_data['value']
+            except Exception as e:
+                logger.error(f"Failed to load feature from disk: {e}")
+        
+        # Compute if missing and function available
+        if compute_if_missing:
+            fn_key = f"{name}:{version}"
+            if fn_key in self.feature_functions:
+                try:
+                    logger.info(f"Computing feature {name}:{version} for {entity_id}")
+                    value = self.feature_functions[fn_key](entity_id)
+                    self.store_feature(name, version, entity_id, value)
+                    return value
+                except Exception as e:
+                    logger.error(f"Failed to compute feature: {e}")
+        
+        return None
+    
+    def get_features_batch(
+        self,
+        name: str,
+        version: str,
+        entity_ids: List[str],
+        compute_if_missing: bool = True
     ) -> Dict[str, Any]:
         """
-        Get statistics about a feature group.
-
+        Retrieve multiple feature values.
+        
         Args:
-            feature_group_name: Name of feature group
-
+            name: Feature name
+            version: Feature version
+            entity_ids: List of entity identifiers
+            compute_if_missing: Whether to compute missing features
+            
         Returns:
-            Dictionary with statistics
+            Dictionary mapping entity_id to feature value
         """
-        if feature_group_name not in self.feature_groups:
-            raise ValueError(f"Feature group '{feature_group_name}' not registered")
-
-        feature_group = self.feature_groups[feature_group_name]
-
-        stats = {
-            'name': feature_group.name,
-            'version': feature_group.version,
-            'num_features': len(feature_group.features),
-            'entity_key': feature_group.entity_key,
-            'timestamp_key': feature_group.timestamp_key
+        results = {}
+        
+        for entity_id in entity_ids:
+            try:
+                value = self.get_feature(name, version, entity_id, compute_if_missing)
+                if value is not None:
+                    results[entity_id] = value
+            except Exception as e:
+                logger.error(f"Failed to get feature for {entity_id}: {e}")
+        
+        return results
+    
+    def list_features(
+        self,
+        status: Optional[FeatureStatus] = None,
+        tags: Optional[List[str]] = None
+    ) -> List[FeatureMetadata]:
+        """
+        List all features in the store.
+        
+        Args:
+            status: Filter by status
+            tags: Filter by tags
+            
+        Returns:
+            List of FeatureMetadata objects
+        """
+        try:
+            conn = sqlite3.connect(str(self.db_path))
+            cursor = conn.cursor()
+            
+            query = "SELECT * FROM features"
+            params = []
+            
+            if status:
+                query += " WHERE status = ?"
+                params.append(status.value)
+            
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
+            conn.close()
+            
+            features = []
+            for row in rows:
+                metadata = FeatureMetadata(
+                    name=row[0],
+                    version=row[1],
+                    feature_type=FeatureType(row[2]),
+                    description=row[3],
+                    created_at=datetime.fromisoformat(row[4]),
+                    updated_at=datetime.fromisoformat(row[5]),
+                    status=FeatureStatus(row[6]),
+                    dependencies=json.loads(row[7]),
+                    tags=json.loads(row[8]),
+                    schema=json.loads(row[9]),
+                    statistics=json.loads(row[10])
+                )
+                
+                # Filter by tags if specified
+                if tags:
+                    if any(tag in metadata.tags for tag in tags):
+                        features.append(metadata)
+                else:
+                    features.append(metadata)
+            
+            return features
+        except Exception as e:
+            logger.error(f"Failed to list features: {e}")
+            return []
+    
+    def update_feature_status(
+        self,
+        name: str,
+        version: str,
+        status: FeatureStatus
+    ) -> bool:
+        """
+        Update feature status.
+        
+        Args:
+            name: Feature name
+            version: Feature version
+            status: New status
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        metadata = self.get_metadata(name, version)
+        if not metadata:
+            logger.error(f"Feature {name}:{version} not found")
+            return False
+        
+        try:
+            metadata.status = status
+            metadata.updated_at = datetime.utcnow()
+            self._save_metadata(metadata)
+            logger.info(f"Updated status of {name}:{version} to {status.value}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to update feature status: {e}")
+            return False
+    
+    def delete_feature(self, name: str, version: str) -> bool:
+        """
+        Delete a feature from the store.
+        
+        Args:
+            name: Feature name
+            version: Feature version
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            # Remove from database
+            conn = sqlite3.connect(str(self.db_path))
+            cursor = conn.cursor()
+            cursor.execute(
+                "DELETE FROM features WHERE name = ? AND version = ?",
+                (name, version)
+            )
+            conn.commit()
+            conn.close()
+            
+            # Remove computation function
+            fn_key = f"{name}:{version}"
+            if fn_key in self.feature_functions:
+                del self.feature_functions[fn_key]
+            
+            # Clear cache entries
+            if self.cache:
+                self.cache.clear()
+            
+            logger.info(f"Deleted feature {name}:{version}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to delete feature: {e}")
+            return False
+    
+    def compute_statistics(
+        self,
+        name: str,
+        version: str,
+        entity_ids: List[str]
+    ) -> Dict[str, Any]:
+        """
+        Compute statistics for a feature across entities.
+        
+        Args:
+            name: Feature name
+            version: Feature version
+            entity_ids: List of entity identifiers
+            
+        Returns:
+            Dictionary of statistics
+        """
+        values = []
+        for entity_id in entity_ids:
+            value = self.get_feature(name, version, entity_id, compute_if_missing=False)
+            if value is not None:
+                values.append(value)
+        
+        if not values:
+            return {}
+        
+        try:
+            # Compute basic statistics for numeric features
+            if isinstance(values[0], (int, float)):
+                import statistics
+                stats = {
+                    'count': len(values),
+                    'mean': statistics.mean(values),
+                    'median': statistics.median(values),
+                    'stdev': statistics.stdev(values) if len(values) > 1 else 0,
+                    'min': min(values),
+                    'max': max(values)
+                }
+            else:
+                stats = {
+                    'count': len(values),
+                    'unique_count': len(set(str(v) for v in values))
+                }
+            
+            # Update metadata with statistics
+            metadata = self.get_metadata(name, version)
+            if metadata:
+                metadata.statistics = stats
+                metadata.updated_at = datetime.utcnow()
+                self._save_metadata(metadata)
+            
+            return stats
+        except Exception as e:
+            logger.error(f"Failed to compute statistics: {e}")
+            return {}
+    
+    def _get_feature_key(self, name: str, version: str, entity_id: str) -> str:
+        """Generate a unique key for a feature."""
+        key_string = f"{name}:{version}:{entity_id}"
+        return hashlib.md5(key_string.encode()).hexdigest()
+    
+    def clear_cache(self) -> None:
+        """Clear the feature cache."""
+        if self.cache:
+            self.cache.clear()
+            logger.info("Feature cache cleared")
+    
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """
+        Get cache statistics.
+        
+        Returns:
+            Dictionary with cache statistics
+        """
+        if not self.cache:
+            return {'enabled': False}
+        
+        return {
+            'enabled': True,
+            'size': self.cache.size(),
+            'capacity': self.cache.capacity
         }
 
-        # Offline stats
-        offline_group_path = self.offline_path / feature_group_name
-        if offline_group_path.exists():
-            parquet_files = list(offline_group_path.glob("**/*.parquet"))
-            stats['offline_files'] = len(parquet_files)
 
-            if parquet_files:
-                # Sample first file for stats
-                sample_df = pd.read_parquet(parquet_files[0])
-                stats['offline_sample_size'] = len(sample_df)
-                stats['offline_columns'] = list(sample_df.columns)
-
-        # Online stats
-        if feature_group_name in self.online_cache:
-            cached_df = self.online_cache[feature_group_name]
-            stats['online_cache_size'] = len(cached_df)
-            stats['online_cached'] = True
-        else:
-            stats['online_cached'] = False
-
-        return stats
-
-    def list_feature_groups(self) -> List[Dict[str, Any]]:
-        """
-        List all registered feature groups.
-
-        Returns:
-            List of feature group summaries
-        """
-        return [
-            {
-                'name': fg.name,
-                'version': fg.version,
-                'num_features': len(fg.features),
-                'entity_key': fg.entity_key,
-                'description': fg.description
-            }
-            for fg in self.feature_groups.values()
-        ]
-
-
-def demo_feature_store():
-    """Demonstrate feature store capabilities."""
-    logger.info("="*80)
-    logger.info("Feature Store - Demo")
-    logger.info("="*80)
-
-    # 1. Initialize feature store
-    logger.info("\n1. Initializing Feature Store")
-    feature_store = FeatureStore(
-        storage_path="/tmp/feature_store",
-        online_cache_size=1000
-    )
-
-    # 2. Create feature group
-    logger.info("\n2. Creating Feature Group")
-    player_features = FeatureGroup(
-        name="player_game_features",
-        features=[],
-        entity_key="player_id",
-        timestamp_key="game_date",
-        description="Player performance features per game",
-        version="1.0"
-    )
-
-    # Add feature metadata
-    player_features.add_feature(
-        "points_last_5",
-        FeatureMetadata(
-            name="points_last_5",
-            feature_type=FeatureType.CONTINUOUS,
-            description="Average points in last 5 games",
-            owner="analytics_team",
-            tags=["rolling", "performance"],
-            serving_mode=ServingMode.BOTH
+if __name__ == "__main__":
+    # Example usage and testing
+    import tempfile
+    
+    # Create temporary storage
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Initialize feature store
+        store = FeatureStore(storage_path=tmpdir, cache_size=100)
+        
+        # Register a feature
+        def compute_player_ppg(player_id: str) -> float:
+            """Compute points per game for a player."""
+            # Mock computation
+            return 25.5
+        
+        metadata = store.register_feature(
+            name="player_ppg",
+            version="v1",
+            feature_type=FeatureType.NUMERIC,
+            description="Player points per game",
+            computation_fn=compute_player_ppg,
+            tags=["player", "scoring"]
         )
-    )
-
-    player_features.add_feature(
-        "assists_last_10",
-        FeatureMetadata(
-            name="assists_last_10",
-            feature_type=FeatureType.CONTINUOUS,
-            description="Average assists in last 10 games",
-            tags=["rolling", "playmaking"]
+        
+        print(f"Registered feature: {metadata.name} v{metadata.version}")
+        
+        # Store feature values
+        store.store_feature("player_ppg", "v1", "player_123", 28.5)
+        store.store_feature("player_ppg", "v1", "player_456", 22.3)
+        
+        # Retrieve feature
+        value = store.get_feature("player_ppg", "v1", "player_123")
+        print(f"Retrieved value: {value}")
+        
+        # Batch retrieval
+        batch_values = store.get_features_batch(
+            "player_ppg", "v1", ["player_123", "player_456", "player_789"]
         )
-    )
-
-    feature_store.register_feature_group(player_features)
-
-    # 3. Generate sample features
-    logger.info("\n3. Generating Sample Features")
-    np.random.seed(42)
-
-    sample_features = pd.DataFrame({
-        'player_id': [2544, 2544, 2544, 201935, 201935, 201935],
-        'game_date': pd.date_range('2024-01-01', periods=6, freq='7D'),
-        'points_last_5': np.random.uniform(20, 30, 6),
-        'assists_last_10': np.random.uniform(5, 10, 6),
-        'rebounds_avg': np.random.uniform(6, 9, 6)
-    })
-
-    logger.info(f"Generated {len(sample_features)} feature records")
-
-    # 4. Write offline features
-    logger.info("\n4. Writing to Offline Storage")
-    feature_store.write_offline_features(
-        "player_game_features",
-        sample_features,
-        partition_by='game_date'
-    )
-
-    # 5. Write online features
-    logger.info("\n5. Writing to Online Cache")
-    latest_features = sample_features.sort_values('game_date').groupby('player_id').tail(1)
-    feature_store.write_online_features(
-        "player_game_features",
-        latest_features
-    )
-
-    # 6. Read offline features
-    logger.info("\n6. Reading from Offline Storage")
-    offline_features = feature_store.read_offline_features(
-        "player_game_features",
-        entity_ids=[2544],
-        feature_names=['points_last_5', 'assists_last_10']
-    )
-    logger.info(f"Retrieved {len(offline_features)} offline records")
-
-    # 7. Read online features (fast serving)
-    logger.info("\n7. Reading from Online Cache (fast serving)")
-    online_features = feature_store.read_online_features(
-        "player_game_features",
-        entity_ids=[2544, 201935],
-        feature_names=['points_last_5', 'assists_last_10']
-    )
-    logger.info(f"Retrieved {len(online_features)} online records")
-    logger.info(f"Online features:\n{online_features}")
-
-    # 8. Point-in-time features (time-travel)
-    logger.info("\n8. Point-in-Time Features (preventing data leakage)")
-    pit_features = feature_store.get_point_in_time_features(
-        "player_game_features",
-        entity_ids=[2544],
-        timestamps=datetime(2024, 1, 15),
-        feature_names=['points_last_5']
-    )
-    logger.info(f"Point-in-time features:\n{pit_features}")
-
-    # 9. Get feature statistics
-    logger.info("\n9. Feature Group Statistics")
-    stats = feature_store.get_feature_stats("player_game_features")
-    logger.info(f"Statistics: {json.dumps(stats, indent=2, default=str)}")
-
-    # 10. List all feature groups
-    logger.info("\n10. Listing All Feature Groups")
-    groups = feature_store.list_feature_groups()
-    for group in groups:
-        logger.info(f"  - {group['name']} (v{group['version']}): {group['num_features']} features")
-
-    logger.info("\n" + "="*80)
-    logger.info("✅ Feature Store demo complete!")
-    logger.info("="*80)
-
-
-if __name__ == '__main__':
-    demo_feature_store()
+        print(f"Batch values: {batch_values}")
+        
+        # List features
+        features = store.list_features()
+        print(f"Total features: {len(features)}")
+        
+        # Compute statistics
+        stats = store.compute_statistics(
+            "player_ppg", "v1", ["player_123", "player_456"]
+        )
+        print(f"Statistics: {stats}")
+        
+        # Cache stats
+        cache_stats = store.get_cache_stats()
+        print(f"Cache stats: {cache_stats}")
+        
+        print("\nFeature store demo completed successfully!")
