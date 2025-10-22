@@ -21,6 +21,7 @@ Created: October 13, 2025
 """
 
 import asyncio
+import aiofiles
 import json
 import logging
 import time
@@ -34,11 +35,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 # Import our new async infrastructure
 from scripts.etl.async_scraper_base import AsyncBaseScraper, ScraperConfig
-from scripts.etl.scraper_error_handler import ScraperErrorHandler
-from scripts.etl.scraper_telemetry import ScraperTelemetry
-from scripts.etl.scraper_config import ScraperConfigManager, get_scraper_config
-from scripts.etl.intelligent_extraction import ESPNExtractionStrategy
-from scripts.etl.modular_tools import ToolComposer
+from scripts.etl.scraper_config import ScraperConfigManager
 
 
 class ESPNMissingPbpScraper(AsyncBaseScraper):
@@ -55,12 +52,9 @@ class ESPNMissingPbpScraper(AsyncBaseScraper):
         self.seasons = seasons or []
         self.start_date = start_date
         self.end_date = end_date
-        self.error_handler = ScraperErrorHandler()
-        self.telemetry = ScraperTelemetry("espn_missing_pbp_scraper")
 
         # ESPN-specific settings
         self.base_url = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba"
-        self.rate_limit_seconds = 1.0  # ESPN API rate limit
 
         # Data collection settings
         self.data_types = ["schedule", "box_scores", "play_by_play"]
@@ -112,18 +106,17 @@ class ESPNMissingPbpScraper(AsyncBaseScraper):
 
     async def scrape(self) -> None:
         """Main scraping method"""
-        async with self.telemetry.track_operation("espn_missing_pbp_scrape"):
-            self.logger.info("Starting ESPN missing PBP scraper")
+        self.logger.info("Starting ESPN missing PBP scraper")
 
-            if self.seasons:
-                await self._scrape_seasons()
-            elif self.start_date and self.end_date:
-                await self._scrape_date_range()
-            else:
-                self.logger.error("No seasons or date range specified")
-                return
+        if self.seasons:
+            await self._scrape_seasons()
+        elif self.start_date and self.end_date:
+            await self._scrape_date_range()
+        else:
+            self.logger.error("No seasons or date range specified")
+            return
 
-            self.logger.info("ESPN missing PBP scraper completed")
+        self.logger.info("ESPN missing PBP scraper completed")
 
     async def _scrape_seasons(self) -> None:
         """Scrape missing PBP data for specific seasons"""
@@ -133,77 +126,65 @@ class ESPNMissingPbpScraper(AsyncBaseScraper):
     async def _scrape_season(self, season: str) -> None:
         """Scrape missing PBP data for a specific season"""
         try:
-            async with self.telemetry.track_operation(f"scrape_season_{season}"):
-                self.logger.info(f"Scraping missing PBP data for season {season}")
+            self.logger.info(f"Scraping missing PBP data for season {season}")
 
-                # Get date range for season
-                start_date, end_date = self._get_season_dates(season)
+            # Get date range for season
+            start_date, end_date = self._get_season_dates(season)
 
-                # Get all games in season
-                all_games = await self._get_season_games(start_date, end_date)
+            # Get all games in season
+            all_games = await self._get_season_games(start_date, end_date)
 
-                # Filter to missing games only
-                missing_games = [
-                    game
-                    for game in all_games
-                    if game["id"] not in self.completed_games
-                    and game["id"] not in self.failed_games
-                ]
+            # Filter to missing games only
+            missing_games = [
+                game
+                for game in all_games
+                if game["id"] not in self.completed_games
+                and game["id"] not in self.failed_games
+            ]
 
-                self.logger.info(
-                    f"Found {len(missing_games)} missing games for season {season}"
-                )
+            self.logger.info(
+                f"Found {len(missing_games)} missing games for season {season}"
+            )
 
-                if not missing_games:
-                    self.logger.info(f"No missing games for season {season}")
-                    return
+            if not missing_games:
+                self.logger.info(f"No missing games for season {season}")
+                return
 
-                # Scrape missing games
-                await self._scrape_games(missing_games)
+            # Scrape missing games
+            await self._scrape_games(missing_games)
 
         except Exception as e:
             self.logger.error(f"Error scraping season {season}: {e}")
-            await self.error_handler.handle_error(
-                ContentError(f"Season scraping failed: {e}")
-            )
 
     async def _scrape_date_range(self) -> None:
         """Scrape missing PBP data for date range"""
         try:
-            async with self.telemetry.track_operation("scrape_date_range"):
-                self.logger.info(
-                    f"Scraping missing PBP data from {self.start_date} to {self.end_date}"
-                )
+            self.logger.info(
+                f"Scraping missing PBP data from {self.start_date} to {self.end_date}"
+            )
 
-                # Get all games in date range
-                all_games = await self._get_date_range_games(
-                    self.start_date, self.end_date
-                )
+            # Get all games in date range
+            all_games = await self._get_date_range_games(self.start_date, self.end_date)
 
-                # Filter to missing games only
-                missing_games = [
-                    game
-                    for game in all_games
-                    if game["id"] not in self.completed_games
-                    and game["id"] not in self.failed_games
-                ]
+            # Filter to missing games only
+            missing_games = [
+                game
+                for game in all_games
+                if game["id"] not in self.completed_games
+                and game["id"] not in self.failed_games
+            ]
 
-                self.logger.info(
-                    f"Found {len(missing_games)} missing games in date range"
-                )
+            self.logger.info(f"Found {len(missing_games)} missing games in date range")
 
-                if not missing_games:
-                    self.logger.info("No missing games in date range")
-                    return
+            if not missing_games:
+                self.logger.info("No missing games in date range")
+                return
 
-                # Scrape missing games
-                await self._scrape_games(missing_games)
+            # Scrape missing games
+            await self._scrape_games(missing_games)
 
         except Exception as e:
             self.logger.error(f"Error scraping date range: {e}")
-            await self.error_handler.handle_error(
-                ContentError(f"Date range scraping failed: {e}")
-            )
 
     def _get_season_dates(self, season: str) -> tuple:
         """Get start and end dates for a season"""
@@ -229,9 +210,6 @@ class ESPNMissingPbpScraper(AsyncBaseScraper):
             games.extend(date_games)
 
             current_date += timedelta(days=1)
-
-            # Rate limiting
-            await asyncio.sleep(self.rate_limit_seconds)
 
         return games
 
@@ -309,9 +287,6 @@ class ESPNMissingPbpScraper(AsyncBaseScraper):
                     self.logger.info(
                         f"Progress: {success_count} success, {failure_count} failed"
                     )
-
-                # Rate limiting
-                await asyncio.sleep(self.rate_limit_seconds)
 
             except Exception as e:
                 self.logger.error(f"Error scraping game {game['id']}: {e}")
@@ -477,9 +452,9 @@ async def main():
     # Load configuration
     try:
         config_manager = ScraperConfigManager(args.config_file)
-        config = config_manager.get_scraper_config("espn")
+        config = config_manager.get_scraper_config("espn_missing_pbp")
         if not config:
-            print("❌ ESPN configuration not found")
+            print("❌ ESPN Missing PBP configuration not found")
             return 1
 
         # Override config with command line args
@@ -524,10 +499,6 @@ async def main():
         print(f"   Failed games: {progress['failed_games']}")
         print(f"   Success rate: {progress['success_rate']:.2%}")
 
-        # Export telemetry
-        telemetry_data = scraper.telemetry.export_metrics()
-        print(f"   Telemetry events: {len(telemetry_data['events'])}")
-
     except KeyboardInterrupt:
         print("\n⚠️  Scraping interrupted by user")
         print("💡 Use --resume to continue from where you left off")
@@ -541,8 +512,3 @@ async def main():
 if __name__ == "__main__":
     exit_code = asyncio.run(main())
     sys.exit(exit_code)
-
-
-
-
-
