@@ -1363,6 +1363,36 @@ scrapers:
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings: {}
+  extract_schedule_local:
+    base_url: ''
+    rate_limit:
+      requests_per_second: 0.0
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 3
+      base_delay: 1.0
+      max_delay: 60.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 60
+    user_agent: NBA-Simulator-Scraper/1.0
+    max_concurrent: 1
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/scraper_output/extract_schedule_local
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      log_file: null
+      metrics_port: 8025
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings: {}
 global:
   aws:
     region: us-east-1
