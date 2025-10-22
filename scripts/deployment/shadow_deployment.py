@@ -19,14 +19,14 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
 class DeploymentStatus(Enum):
     """Status of shadow deployment execution."""
+
     SUCCESS = "success"
     FAILURE = "failure"
     TIMEOUT = "timeout"
@@ -35,6 +35,7 @@ class DeploymentStatus(Enum):
 
 class ComparisonResult(Enum):
     """Result of comparing primary and shadow outputs."""
+
     MATCH = "match"
     MISMATCH = "mismatch"
     ERROR = "error"
@@ -43,6 +44,7 @@ class ComparisonResult(Enum):
 @dataclass
 class ShadowResult:
     """Container for shadow deployment execution results."""
+
     deployment_id: str
     timestamp: datetime
     primary_output: Optional[Any]
@@ -58,23 +60,24 @@ class ShadowResult:
     def to_dict(self) -> Dict[str, Any]:
         """Convert result to dictionary for serialization."""
         return {
-            'deployment_id': self.deployment_id,
-            'timestamp': self.timestamp.isoformat(),
-            'primary_output': self.primary_output,
-            'shadow_output': self.shadow_output,
-            'primary_duration_ms': self.primary_duration_ms,
-            'shadow_duration_ms': self.shadow_duration_ms,
-            'primary_status': self.primary_status.value,
-            'shadow_status': self.shadow_status.value,
-            'comparison_result': self.comparison_result.value,
-            'error_message': self.error_message,
-            'metadata': self.metadata
+            "deployment_id": self.deployment_id,
+            "timestamp": self.timestamp.isoformat(),
+            "primary_output": self.primary_output,
+            "shadow_output": self.shadow_output,
+            "primary_duration_ms": self.primary_duration_ms,
+            "shadow_duration_ms": self.shadow_duration_ms,
+            "primary_status": self.primary_status.value,
+            "shadow_status": self.shadow_status.value,
+            "comparison_result": self.comparison_result.value,
+            "error_message": self.error_message,
+            "metadata": self.metadata,
         }
 
 
 @dataclass
 class ShadowMetrics:
     """Aggregated metrics for shadow deployment."""
+
     total_requests: int = 0
     successful_comparisons: int = 0
     mismatches: int = 0
@@ -88,30 +91,32 @@ class ShadowMetrics:
     def update(self, result: ShadowResult) -> None:
         """Update metrics with a new result."""
         self.total_requests += 1
-        
+
         if result.primary_status == DeploymentStatus.FAILURE:
             self.primary_errors += 1
         if result.shadow_status == DeploymentStatus.FAILURE:
             self.shadow_errors += 1
-        if result.primary_status == DeploymentStatus.TIMEOUT or \
-           result.shadow_status == DeploymentStatus.TIMEOUT:
+        if (
+            result.primary_status == DeploymentStatus.TIMEOUT
+            or result.shadow_status == DeploymentStatus.TIMEOUT
+        ):
             self.timeouts += 1
-        
+
         if result.comparison_result == ComparisonResult.MATCH:
             self.successful_comparisons += 1
         elif result.comparison_result == ComparisonResult.MISMATCH:
             self.mismatches += 1
-        
+
         # Update average durations
         self.avg_primary_duration_ms = (
-            (self.avg_primary_duration_ms * (self.total_requests - 1) + 
-             result.primary_duration_ms) / self.total_requests
-        )
+            self.avg_primary_duration_ms * (self.total_requests - 1)
+            + result.primary_duration_ms
+        ) / self.total_requests
         self.avg_shadow_duration_ms = (
-            (self.avg_shadow_duration_ms * (self.total_requests - 1) + 
-             result.shadow_duration_ms) / self.total_requests
-        )
-        
+            self.avg_shadow_duration_ms * (self.total_requests - 1)
+            + result.shadow_duration_ms
+        ) / self.total_requests
+
         # Calculate match rate
         if self.total_requests > 0:
             self.match_rate = self.successful_comparisons / self.total_requests
@@ -119,22 +124,22 @@ class ShadowMetrics:
     def to_dict(self) -> Dict[str, Any]:
         """Convert metrics to dictionary."""
         return {
-            'total_requests': self.total_requests,
-            'successful_comparisons': self.successful_comparisons,
-            'mismatches': self.mismatches,
-            'primary_errors': self.primary_errors,
-            'shadow_errors': self.shadow_errors,
-            'timeouts': self.timeouts,
-            'avg_primary_duration_ms': round(self.avg_primary_duration_ms, 2),
-            'avg_shadow_duration_ms': round(self.avg_shadow_duration_ms, 2),
-            'match_rate': round(self.match_rate, 4)
+            "total_requests": self.total_requests,
+            "successful_comparisons": self.successful_comparisons,
+            "mismatches": self.mismatches,
+            "primary_errors": self.primary_errors,
+            "shadow_errors": self.shadow_errors,
+            "timeouts": self.timeouts,
+            "avg_primary_duration_ms": round(self.avg_primary_duration_ms, 2),
+            "avg_shadow_duration_ms": round(self.avg_shadow_duration_ms, 2),
+            "match_rate": round(self.match_rate, 4),
         }
 
 
 class ShadowDeployment:
     """
     Manages shadow deployments for testing new implementations.
-    
+
     This class allows running a shadow (candidate) implementation alongside
     a primary (production) implementation, comparing results and collecting
     metrics without affecting production traffic.
@@ -147,7 +152,7 @@ class ShadowDeployment:
         comparison_fn: Optional[Callable[[Any, Any], bool]] = None,
         timeout_seconds: float = 30.0,
         sample_rate: float = 1.0,
-        max_workers: int = 2
+        max_workers: int = 2,
     ):
         """
         Initialize shadow deployment.
@@ -165,7 +170,9 @@ class ShadowDeployment:
             ValueError: If sample_rate is not between 0.0 and 1.0.
         """
         if not 0.0 <= sample_rate <= 1.0:
-            raise ValueError(f"sample_rate must be between 0.0 and 1.0, got {sample_rate}")
+            raise ValueError(
+                f"sample_rate must be between 0.0 and 1.0, got {sample_rate}"
+            )
 
         self.primary_callable = primary_callable
         self.shadow_callable = shadow_callable
@@ -173,11 +180,11 @@ class ShadowDeployment:
         self.timeout_seconds = timeout_seconds
         self.sample_rate = sample_rate
         self.max_workers = max_workers
-        
+
         self.metrics = ShadowMetrics()
         self.results_history: List[ShadowResult] = []
         self._executor = ThreadPoolExecutor(max_workers=max_workers)
-        
+
         logger.info(
             f"Initialized ShadowDeployment with sample_rate={sample_rate}, "
             f"timeout={timeout_seconds}s"
@@ -189,10 +196,7 @@ class ShadowDeployment:
         return primary_output == shadow_output
 
     def _execute_callable(
-        self,
-        callable_fn: Callable,
-        *args: Any,
-        **kwargs: Any
+        self, callable_fn: Callable, *args: Any, **kwargs: Any
     ) -> Tuple[Optional[Any], float, DeploymentStatus, Optional[str]]:
         """
         Execute a callable with timeout and error handling.
@@ -222,7 +226,7 @@ class ShadowDeployment:
             error_message = f"{type(e).__name__}: {str(e)}"
             logger.error(
                 f"Error executing {callable_fn.__name__}: {error_message}",
-                exc_info=True
+                exc_info=True,
             )
 
         duration_ms = (time.time() - start_time) * 1000
@@ -233,7 +237,7 @@ class ShadowDeployment:
         primary_output: Optional[Any],
         shadow_output: Optional[Any],
         primary_status: DeploymentStatus,
-        shadow_status: DeploymentStatus
+        shadow_status: DeploymentStatus,
     ) -> ComparisonResult:
         """
         Compare primary and shadow outputs.
@@ -248,8 +252,10 @@ class ShadowDeployment:
             ComparisonResult indicating match, mismatch, or error.
         """
         # If either execution failed, can't compare
-        if primary_status != DeploymentStatus.SUCCESS or \
-           shadow_status != DeploymentStatus.SUCCESS:
+        if (
+            primary_status != DeploymentStatus.SUCCESS
+            or shadow_status != DeploymentStatus.SUCCESS
+        ):
             return ComparisonResult.ERROR
 
         try:
@@ -260,10 +266,7 @@ class ShadowDeployment:
             return ComparisonResult.ERROR
 
     def execute(
-        self,
-        *args: Any,
-        metadata: Optional[Dict[str, Any]] = None,
-        **kwargs: Any
+        self, *args: Any, metadata: Optional[Dict[str, Any]] = None, **kwargs: Any
     ) -> Tuple[Any, ShadowResult]:
         """
         Execute both primary and shadow callables with the given arguments.
@@ -279,25 +282,28 @@ class ShadowDeployment:
         """
         deployment_id = str(uuid.uuid4())
         timestamp = datetime.utcnow()
-        
+
         logger.debug(f"Starting shadow deployment {deployment_id}")
 
         # Always execute primary
-        primary_output, primary_duration, primary_status, primary_error = \
+        primary_output, primary_duration, primary_status, primary_error = (
             self._execute_callable(self.primary_callable, *args, **kwargs)
+        )
 
         # Execute shadow based on sample rate
         import random
-        should_shadow = random.random() < self.sample_rate
+
+        should_shadow = random.random() < self.sample_rate  # nosec B311
 
         if should_shadow:
-            shadow_output, shadow_duration, shadow_status, shadow_error = \
+            shadow_output, shadow_duration, shadow_status, shadow_error = (
                 self._execute_callable(self.shadow_callable, *args, **kwargs)
-            
+            )
+
             comparison_result = self._compare_outputs(
                 primary_output, shadow_output, primary_status, shadow_status
             )
-            
+
             error_message = primary_error or shadow_error
         else:
             # Skip shadow execution
@@ -319,7 +325,7 @@ class ShadowDeployment:
             shadow_status=shadow_status,
             comparison_result=comparison_result,
             error_message=error_message,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         # Update metrics and history
@@ -348,7 +354,7 @@ class ShadowDeployment:
     def get_results_history(
         self,
         limit: Optional[int] = None,
-        status_filter: Optional[ComparisonResult] = None
+        status_filter: Optional[ComparisonResult] = None,
     ) -> List[ShadowResult]:
         """
         Get historical results with optional filtering.
@@ -395,7 +401,7 @@ class ShadowDeployment:
 class ShadowDeploymentManager:
     """
     Manages multiple shadow deployments across different features.
-    
+
     This class provides a centralized way to manage multiple shadow deployments,
     useful for testing multiple features or models simultaneously.
     """
@@ -405,11 +411,7 @@ class ShadowDeploymentManager:
         self.deployments: Dict[str, ShadowDeployment] = {}
         logger.info("Initialized ShadowDeploymentManager")
 
-    def register_deployment(
-        self,
-        name: str,
-        deployment: ShadowDeployment
-    ) -> None:
+    def register_deployment(self, name: str, deployment: ShadowDeployment) -> None:
         """
         Register a shadow deployment.
 
@@ -448,7 +450,7 @@ class ShadowDeploymentManager:
         name: str,
         *args: Any,
         metadata: Optional[Dict[str, Any]] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> Tuple[Any, ShadowResult]:
         """
         Execute a specific shadow deployment.
@@ -523,14 +525,13 @@ if __name__ == "__main__":
         shadow_callable=shadow_predict_score,
         comparison_fn=compare_predictions,
         timeout_seconds=5.0,
-        sample_rate=1.0
+        sample_rate=1.0,
     ) as shadow:
-        
+
         # Execute some predictions
         for i in range(5):
             result, shadow_result = shadow.execute(
-                "Lakers", "Warriors",
-                metadata={"request_id": f"req_{i}"}
+                "Lakers", "Warriors", metadata={"request_id": f"req_{i}"}
             )
             print(f"\nRequest {i + 1}:")
             print(f"  Primary output: {result}")
@@ -540,12 +541,10 @@ if __name__ == "__main__":
 
         # Print metrics
         metrics = shadow.get_metrics()
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("Shadow Deployment Metrics:")
         print(json.dumps(metrics.to_dict(), indent=2))
-        
+
         # Get mismatch history
-        mismatches = shadow.get_results_history(
-            status_filter=ComparisonResult.MISMATCH
-        )
+        mismatches = shadow.get_results_history(status_filter=ComparisonResult.MISMATCH)
         print(f"\nTotal mismatches: {len(mismatches)}")
