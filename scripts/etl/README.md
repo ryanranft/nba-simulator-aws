@@ -71,9 +71,12 @@ This directory contains all active ETL (Extract, Transform, Load) scrapers for t
   - **Data types:** Play-by-play, box scores, game summaries
   - **Expected runtime:** 15-20 hours for 44,826 games
 
-- **`espn_incremental_scraper.py`** - Delta updates
-  - **Use for:** Daily game updates
-  - **Expected runtime:** 10-30 minutes per day
+- **`espn_incremental_scraper.py`** - Delta updates ✅ **Migrated to AsyncBaseScraper**
+  - **Pattern:** Incremental Scraper with database integration
+  - **Migration Date:** October 22, 2025
+  - **Use for:** Daily game updates (last 14 days)
+  - **Features:** Async HTTP, retry logic (new!), rate limiting (0.5s), S3 backup (new!), SQLite database
+  - **Expected runtime:** ~5 minutes during season, <1 minute off-season
 
 ### Specialized Scrapers
 - **`espn_missing_pbp_scraper.py`** - Gap filling

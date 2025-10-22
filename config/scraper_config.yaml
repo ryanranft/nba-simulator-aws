@@ -173,6 +173,44 @@ scrapers:
       default_also_previous_season: false
       include_combined_values: true  # For traded players
 
+  espn_incremental:
+    base_url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba"
+    rate_limit:
+      requests_per_second: 2.0  # 0.5s between requests (faster than primary ESPN scraper)
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 3
+      base_delay: 1.0
+      max_delay: 60.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 30
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 10  # Allow concurrent PBP requests
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "espn/incremental"
+      local_output_dir: "/tmp/espn_incremental"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8005
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings:
+      default_days_back: 14
+      database_path: "/tmp/espn_local.db"
+      load_to_database: true  # Also load to SQLite in addition to S3
+      endpoints:
+        scoreboard: "/scoreboard"
+        playbyplay: "/playbyplay"
+
 # Global settings
 global:
   aws:
