@@ -164,8 +164,9 @@ docs/
 
 ### Docs Root Reduction
 - **Before:** 142 .md files in docs/ root
-- **After:** 100 .md files in docs/ root
-- **Reduction:** 42 files (30%)
+- **After main reorganization:** 101 .md files in docs/ root (-42 files, 30% reduction)
+- **After enhancements:** 85 .md files in docs/ root (-16 more files, 16% additional reduction)
+- **Final reduction:** 57 files total (40% reduction)
 
 ### Benefits Achieved
 1. ✅ **Improved Discoverability** - Logical grouping by system/feature
@@ -221,9 +222,20 @@ docs/
 - [x] Migration mapping documented
 
 **Optional Future Enhancements:**
-1. Archive superseded documentation (10-15 additional files)
-2. Create docs/guides/ for user guides
-3. Phase 5 cleanup (11 loose .md files)
+✅ All enhancements completed (October 21, 2025)
+
+1. ✅ **Archived superseded documentation** (16 files) - Commit 819f25d
+   - Session summaries (5), validation summaries (2), implementation summaries (7), planning docs (4)
+   - All accessible in docs/archive/superseded_documentation/
+
+2. ✅ **Skipped docs/guides/ creation** - Kept guides in root for better discoverability
+   - Existing subdirectories (monitoring/, data_collection/, features/, phases/) provide sufficient organization
+
+3. ✅ **Phase 5 cleanup complete** (8 files organized) - Commit 360bc1e
+   - Moved 5 files to subdirectories (5.19_drift_detection/, 5.2_model_versioning/, ml_systems/book_recommendations/)
+   - Removed 2 duplicate implementation guides
+   - Archived 1 superseded planning file
+   - Result: 11 files → 3 essential files (5.0, PHASE_5_INDEX, BOOK_RECOMMENDATIONS_INDEX)
 
 ---
 
