@@ -338,6 +338,150 @@ scrapers:
         - player_stats
         - play_by_play
 
+  basketball_reference_daily_pbp:
+    base_url: "https://www.basketball-reference.com"
+    rate_limit:
+      requests_per_second: 0.083  # 12 seconds between requests (1/12) - VERY conservative
+      burst_size: 1
+      adaptive: false  # Strict fixed rate limit
+      retry_after_header: true
+    retry:
+      max_attempts: 5  # More retries for production daily scraping
+      base_delay: 3.0
+      max_delay: 180.0
+      exponential_backoff: true
+      jitter: true
+      retry_on_429_multiplier: 15.0  # For 429 errors, wait 45s/90s/180s
+    timeout: 30
+    user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    max_concurrent: 1  # MUST be sequential - Basketball Reference is strict
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "basketball_reference/pbp"
+      local_output_dir: "/tmp/basketball_reference_daily_pbp"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8009
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings:
+      database_path: "/tmp/basketball_reference_pbp.db"
+      load_to_database: true  # Load to SQLite in addition to S3
+      espn_api_base_url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba"
+      default_days_back: 1  # Default to yesterday for daily scraping
+
+  basketball_reference_pbp_backfill:
+    base_url: "https://www.basketball-reference.com"
+    rate_limit:
+      requests_per_second: 0.083  # 12 seconds between requests (1/12) - VERY conservative
+      burst_size: 1
+      adaptive: false  # Strict fixed rate limit
+      retry_after_header: true
+    retry:
+      max_attempts: 5  # More retries for long-running historical backfills
+      base_delay: 3.0
+      max_delay: 180.0
+      exponential_backoff: true
+      jitter: true
+      retry_on_429_multiplier: 15.0  # For 429 errors, wait 45s/90s/180s
+    timeout: 30
+    user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    max_concurrent: 1  # MUST be sequential - Basketball Reference is strict
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "basketball_reference/pbp"
+      local_output_dir: "/tmp/basketball_reference_pbp_backfill"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8010
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings:
+      database_path: "/tmp/basketball_reference_boxscores.db"  # Uses scraping_progress table
+      load_to_database: true  # Load to SQLite in addition to S3
+      default_stop_after_no_pbp: 100  # Stop after N consecutive games with no PBP
+
+  basketball_reference_daily_box_scores:
+    base_url: "https://www.basketball-reference.com"  # Not used directly (calls box score scraper)
+    rate_limit:
+      requests_per_second: 1.0  # For ESPN API calls
+      burst_size: 3
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 3
+      base_delay: 1.0
+      max_delay: 60.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 10
+    user_agent: "NBA-Simulator-Scraper/1.0"
+    max_concurrent: 1  # Sequential coordinator
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"
+      s3_prefix: "basketball_reference/daily"
+      local_output_dir: "/tmp/basketball_reference_daily"
+      upload_to_s3: true
+      compression: false
+      deduplication: true
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8011
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings:
+      database_path: "/tmp/basketball_reference_boxscores.db"  # Manages scraping_progress table
+      espn_api_base_url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba"
+
+  basketball_reference_pbp_discovery:
+    base_url: "https://www.basketball-reference.com"
+    rate_limit:
+      requests_per_second: 0.083  # 12 seconds between requests (1/12) - VERY conservative
+      burst_size: 1
+      adaptive: false  # Strict fixed rate limit
+      retry_after_header: true
+    retry:
+      max_attempts: 3  # Research tool - fewer retries needed
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+      retry_on_429_multiplier: 15.0  # For 429 errors, wait 30s/60s/120s
+    timeout: 30
+    user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    max_concurrent: 1  # MUST be sequential - Basketball Reference is strict
+    storage:
+      s3_bucket: "nba-sim-raw-data-lake"  # Not used - research tool outputs to reports/
+      s3_prefix: "basketball_reference/pbp_discovery"
+      local_output_dir: "reports"
+      upload_to_s3: false  # Research tool - no S3 uploads
+      compression: false
+      deduplication: false
+    monitoring:
+      enable_telemetry: true
+      log_level: "INFO"
+      log_file: null
+      metrics_port: 8012
+      health_check_interval: 60
+      alert_thresholds: {}
+    custom_settings:
+      default_start_year: 2024  # Default year to start discovery
+      default_end_year: 1990  # Default year to end discovery
+      default_games_per_year: 10  # Default number of sample games to test per year
+      report_output_dir: "reports"  # Directory for JSON reports
+
 # Global settings
 global:
   aws:

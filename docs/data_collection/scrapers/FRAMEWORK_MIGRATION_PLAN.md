@@ -335,15 +335,27 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 **Progress:** 8/84 scrapers (9.5%)
 **Status:** Session 4 complete ✅
 
-### Session 5-7 (Days 5-7)
-**Duration:** 2-3 hours each
-**Goal:** Medium priority specialized scrapers
+### Session 5 (Day 5) ✅
+**Duration:** 2 hours
+**Goal:** Complete Basketball Reference specialized scrapers
 
-- [ ] Basketball Reference specialized (4 files)
+- [x] `basketball_reference_daily_pbp.py` (Session 5 - 30 minutes)
+- [x] `basketball_reference_pbp_backfill.py` (Session 5 - 30 minutes)
+- [x] `basketball_reference_daily_box_scores.py` (Session 5 - 30 minutes)
+- [x] `basketball_reference_pbp_discovery.py` (Session 5 - 30 minutes)
+
+**Files:** 4 migrated
+**Progress:** 12/84 scrapers (14%)
+**Status:** Session 5 complete ✅
+
+### Session 6-7 (Days 6-7)
+**Duration:** 2-3 hours each
+**Goal:** NBA API and hoopR specialized scrapers
+
 - [ ] NBA API specialized (4 files)
 - [ ] hoopR specialized (4 files)
 
-**Files:** 12 migrated
+**Files:** 8 migrated
 **Progress:** 20/84 scrapers (24%)
 
 ### Session 8-10 (Days 8-10)
@@ -445,13 +457,13 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 |----------|-------|----------|-----------|------------|
 | **Already Migrated** | 3 | 3 | 0 | 100% |
 | **High Priority** | 6 | 6 | 0 | 100% ✅ |
-| **Medium Priority** | 12 | 0 | 12 | 0% |
+| **Medium Priority** | 12 | 4 | 8 | 33% |
 | **Low Priority (Agents)** | 7 | 0 | 7 | 0% |
 | **Utility (Config Only)** | 19 | 0 | 19 | 0% |
 | **Infrastructure** | 7 | 7 | 0 | 100% |
 | **Special Cases** | 27 | 0 | 27 | 0% |
 | **Other** | 3 | 0 | 3 | 0% |
-| **TOTAL** | 84 | 8 | 76 | 9.5% |
+| **TOTAL** | 84 | 12 | 72 | 14% |
 
 **Target:** 52% (44 files)
 **Projected Completion:** Session 11 (11 sessions over 2 weeks)
@@ -576,6 +588,78 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
      - ✅ Scraper docstring updated with migration details
      - ✅ Migration plan updated
      - ✅ Version updated to 2.0 (Migrated to AsyncBaseScraper)
+
+### Session 5 (October 22, 2025) ✅
+**Status:** Complete
+**Duration:** 2 hours (4 scrapers migrated)
+
+1. **basketball_reference_daily_pbp.py** - ✅ Migrated
+   - **Pattern:** Specialized Task Scraper (daily play-by-play scraping)
+   - **Lines before:** 475
+   - **Lines after:** 571
+   - **Net increase:** 96 lines (async wrappers, improved infrastructure)
+   - **Time taken:** 30 minutes
+   - **Major improvements:**
+     - Inherits from AsyncBaseScraper
+     - Uses ScraperConfigManager for configuration
+     - Wrapped requests.get() in asyncio.to_thread()
+     - Wrapped BeautifulSoup parsing in async
+     - Wrapped SQLite operations in async
+     - Uses base class rate limiter (12s between requests)
+     - Uses store_data() for S3 upload
+     - Configuration via scraper_config.yaml (basketball_reference_daily_pbp section)
+   - **Testing:** ✅ Dry run successful
+
+2. **basketball_reference_pbp_backfill.py** - ✅ Migrated
+   - **Pattern:** Historical Backfill Scraper
+   - **Lines before:** 467
+   - **Lines after:** 540
+   - **Net increase:** 73 lines (async wrappers, improved infrastructure)
+   - **Time taken:** 30 minutes
+   - **Major improvements:**
+     - Inherits from AsyncBaseScraper
+     - Uses ScraperConfigManager for configuration
+     - Wrapped all synchronous operations in async
+     - Uses base class rate limiter (12s between requests)
+     - Uses store_data() for S3 upload
+     - Configuration via scraper_config.yaml (basketball_reference_pbp_backfill section)
+   - **Testing:** ✅ Dry run successful
+
+3. **basketball_reference_daily_box_scores.py** - ✅ Migrated
+   - **Pattern:** Coordinator Scraper (calls basketball_reference_box_score_scraper)
+   - **Lines before:** 308
+   - **Lines after:** 428
+   - **Net increase:** 120 lines (async wrappers, coordinator logic)
+   - **Time taken:** 30 minutes
+   - **Major improvements:**
+     - Inherits from AsyncBaseScraper
+     - Uses ScraperConfigManager for configuration
+     - Wrapped ESPN API calls in async
+     - Coordinator pattern for box score scraper
+     - Configuration via scraper_config.yaml (basketball_reference_daily_box_scores section)
+   - **Testing:** ✅ Dry run successful
+
+4. **basketball_reference_pbp_discovery.py** - ✅ Migrated
+   - **Pattern:** Research/Discovery Tool
+   - **Lines before:** 385
+   - **Lines after:** 512
+   - **Net increase:** 127 lines (async wrappers, AsyncBaseScraper integration)
+   - **Time taken:** 30 minutes
+   - **Major improvements:**
+     - Inherits from AsyncBaseScraper
+     - Uses ScraperConfigManager for configuration
+     - Wrapped requests.get() in asyncio.to_thread()
+     - Wrapped BeautifulSoup parsing in async
+     - Uses base class rate limiter (12s between requests)
+     - Configuration via scraper_config.yaml (basketball_reference_pbp_discovery section)
+     - **Note:** Research tool - no S3 uploads, outputs JSON reports to reports/ directory
+   - **Testing:** ✅ Successfully tested with 2-year range, configuration loads correctly
+
+**Summary:**
+- ✅ All 4 Basketball Reference specialized scrapers migrated
+- ✅ All configurations added to scraper_config.yaml
+- ✅ All scrapers tested and formatted with black
+- ✅ Total time: 2 hours
 
 ---
 
