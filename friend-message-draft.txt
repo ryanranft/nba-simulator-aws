@@ -1,9 +1,0 @@
-So I've been working on this really cool NBA project that's basically like building a time machine for basketball statistics.
-
-The idea is to create a system that can answer questions like "What were Kobe Bryant's career stats at exactly 7:02 PM during his last game?" - not just his final totals, but what his numbers were at any specific moment in time. I'm collecting 25+ years of NBA game data from multiple sources to build this massive database that tracks every play, every stat, at every moment.
-
-What makes this really interesting is that I'm using advanced econometrics textbooks and panel data techniques to create sophisticated game simulators. Instead of just basic predictions, I'm building models that can simulate entire games play-by-play, accounting for things like player fatigue, momentum shifts, and how performance changes over time. The textbooks teach me how to handle temporal data properly - like tracking how a player's shooting percentage evolves throughout a game or season.
-
-The MCP part is basically my guidebook for safely gathering all this data from basketball websites. It's like having a manual that tells me the best way to collect information without overwhelming the websites or getting blocked. Think of it as the difference between politely browsing a library versus storming in and grabbing everything at once. Using these guidelines, I can collect massive amounts of NBA data overnight while being respectful to the sites I'm getting it from.
-
-The coolest part is that this approach isn't really being done publicly yet - most sports analytics projects just look at game-level stats, but I'm building something that can track every single play with millisecond precision. It's like the difference between knowing someone's final exam score versus knowing exactly how they answered each question and when. Someone actually told me I should publish this work because the methodology is pretty novel in the sports world.

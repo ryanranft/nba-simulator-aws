@@ -9,6 +9,14 @@
 **Completed:** October 13, 2025
 **Enhancement Opportunities:** [Book Recommendations](phase_0/RECOMMENDATIONS_FROM_BOOKS.md) - 6 recommendations from technical books
 
+> **📋 Note:** ML-related implementations moved to Phase 5 (October 18-21, 2025):
+> - `5.1_feature_engineering/` (formerly `phase_0/rec_11_feature_engineering/`)
+> - `5.2_model_versioning/` (formerly `phase_0/ml_systems_1_model_versioning/`)
+> - `5.19_drift_detection/` (formerly `phase_0/ml_systems_2_drift_detection/`)
+> - `5.20_panel_data/` (formerly `phase_0/rec_22_panel_data/`)
+>
+> See [PHASE_5_INDEX.md](PHASE_5_INDEX.md) for these implementations.
+
 ---
 
 ## Overview
@@ -24,6 +32,8 @@ See `docs/PROJECT_VISION.md` for the complete vision.
 - **0.1** - Basketball Reference expansion (13 tiers, 234 data types) ✅ COMPLETE
 - **0.2** - ESPN additional scraping ✅ COMPLETE
 - **0.3** - NBA API enhanced collection ✅ COMPLETE
+- **0.4** - Security implementation (13 variations) ✅ COMPLETE
+- **0.5** - Data extraction & structured output ✅ COMPLETE
 
 **Temporal precision levels:**
 - 2020-2025: Millisecond precision (NBA Live API - future)
@@ -40,6 +50,8 @@ See `docs/PROJECT_VISION.md` for the complete vision.
 | **0.1** | Basketball Reference Expansion | ✅ COMPLETE | 140-197h | 865K-10.88M | +$0.005/mo | [0.1_basketball_reference/](phase_0/0.1_basketball_reference/README.md) |
 | **0.2** | ESPN Additional Scraping | ✅ COMPLETE | 8-12h | 3,230 games | $0 | *Completed* |
 | **0.3** | NBA API Enhanced Collection | ✅ COMPLETE | 5-10h | 22,256 files | $0 | *Completed* |
+| **0.4** | Security Implementation | ✅ COMPLETE | ~4h | 13 variations | $0 | [0.4_security_implementation/](phase_0/0.4_security_implementation/README.md) |
+| **0.5** | Data Extraction & Structured Output | ✅ COMPLETE | ~2h | 1 implementation | $0 | [0.5_data_extraction/](phase_0/0.5_data_extraction/README.md) |
 
 ---
 
@@ -280,10 +292,10 @@ Then proceed to Phase 1 (Data Quality) for the new sport.
 
 ---
 
-**Last Updated:** October 11, 2025
+**Last Updated:** October 18, 2025
 **Phase Owner:** Data Collection Team
-**Total Sub-Phases:** 4 (2 defined, 2 future)
-**Status:** 25% complete (1 of 4 sub-phases done)
+**Total Sub-Phases:** 6
+**Status:** ✅ COMPLETE (all 6 sub-phases done)
 
 
 ## Enhancement: Add more comprehensive API examples
