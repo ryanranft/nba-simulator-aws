@@ -1,180 +1,237 @@
-# ETL Scripts Directory
+# ETL Scrapers - Active Scraper Guide
 
-**Last Updated:** October 8, 2025
+**Last Updated:** October 21, 2025
+**Status:** Production-ready
+**Deprecated Files:** See `scripts/archive/deprecated/`
 
----
-
-## 📋 Quick Reference
-
-**Complete documentation:** See Workflow #42 (`docs/claude_workflows/workflow_descriptions/42_scraper_management.md`)
+This directory contains all active ETL (Extract, Transform, Load) scrapers for the NBA Simulator project. This guide helps you identify which scraper to use for each data source and task.
 
 ---
 
-## Active Scripts (Use These)
+## Quick Reference
 
-### Core Scrapers
+| Data Source | Primary Scraper | Purpose | Status |
+|------------|----------------|---------|--------|
+| **Basketball Reference** | `basketball_reference_async_scraper.py` | Full async scraper for all stats | ✅ Active |
+| **ESPN** | `espn_async_scraper.py` | Full async scraper for play-by-play | ✅ Active |
+| **NBA API** | `nba_api_async_scraper.py` | Full async scraper for official stats | ✅ Active |
+| **hoopR** | `hoopr_incremental_scraper.py` | NCAA/NBA college data | ✅ Active |
+| **Kaggle** | `download_kaggle_basketball.py` | Historical datasets | ✅ Active |
 
-#### 1. NBA API Comprehensive
-- **Script:** `scrape_nba_api_comprehensive.py`
-- **Wrapper:** `overnight_nba_api_comprehensive.sh`
-- **Coverage:** 1996-2025 (30 seasons), 24 endpoints
-- **Runtime:** 5-6 hours
-- **Rate Limit:** 600ms between requests
-- **Output:** `/tmp/nba_api_comprehensive/`
+---
 
-#### 2. hoopR Scraper (R-based)
-- **Scripts:** `scrape_hoopr_phase1_foundation.R`, `scrape_hoopr_phase1b_only.R`
-- **Wrappers:** `run_hoopr_phase1.sh`, `run_hoopr_phase1b.sh`
-- **Coverage:** 2002-2025 (24 seasons)
-- **Runtime:** Phase 1A (30 sec), Phase 1B (30-60 min)
-- **Rate Limit:** None
-- **Output:** `/tmp/hoopr_phase1/`, `/tmp/hoopr_phase1b/`
+## Basketball Reference Scrapers
 
-#### 3. Basketball Reference
-- **Script:** `scrape_basketball_reference_complete.py`
-- **Wrapper:** `overnight_basketball_reference_comprehensive.sh`, `scrape_bbref_incremental.sh`
-- **Coverage:** 1946-present (complete history)
-- **Runtime:** 3-4 hours (incremental), 30 hours (full)
-- **Rate Limit:** 3.5s between requests (strict!)
-- **Output:** `/tmp/basketball_reference_incremental/`
+### Primary Scrapers
+- **`basketball_reference_async_scraper.py`** - Modern async scraper
+  - **Use for:** Full data collection (2020-2025)
+  - **Features:** Rate limiting, retry logic, S3 upload, telemetry
+  - **Data types:** Draft, awards, per_game, shooting, play_by_play, team_ratings, playoffs, coaches, standings
+  - **Expected runtime:** ~1.9 hours for 6 seasons × 9 data types
+  - **Rate limit:** 12 seconds between requests
 
-#### 4. Kaggle Database
-- **Script:** `download_kaggle_basketball.py`
-- **Coverage:** 1946-2024 (historical completeness)
-- **Runtime:** 10-15 minutes
-- **Prerequisites:** Kaggle API token configured
-- **Output:** `~/.kaggle/datasets/wyattowalsh/basketball/`
+- **`basketball_reference_incremental_scraper.py`** - Delta updates
+  - **Use for:** Daily/weekly incremental updates
+  - **Features:** Only scrapes new/updated games since last run
+  - **Expected runtime:** 5-10 minutes per day
 
-#### 5. ESPN Gap Filler
-- **Script:** `scrape_missing_espn_data.py`
-- **Wrapper:** `run_espn_scraper.sh`
-- **Coverage:** 2022-2025 (recent seasons)
-- **Runtime:** 2-3 hours
-- **Rate Limit:** None
-- **Output:** `/tmp/espn_missing/`
+- **`bbref_tier_1_agent.py`** - Autonomous agent
+  - **Use for:** Complex multi-phase workflows
+  - **Features:** State persistence, checkpoint recovery, parallel processing
+  - **Expected runtime:** 2-4 hours for comprehensive collection
 
-### Extraction Scripts
+### Specialized Scrapers
+- **`basketball_reference_box_score_scraper.py`** - Box score extraction
+- **`basketball_reference_daily_box_scores.py`** - Daily box scores
+- **`basketball_reference_daily_pbp.py`** - Daily play-by-play
+- **`basketball_reference_pbp_backfill.py`** - Historical PBP gap filling
+- **`basketball_reference_pbp_discovery.py`** - PBP availability detection
 
-#### Temporal Format Converters
-- **ESPN:** `extract_espn_local_to_temporal_v2.py` (active version)
-- **Kaggle:** `extract_kaggle_to_temporal.py`
+### Integration Scripts
+- **`integrate_basketball_reference.py`** - Single source integration
+- **`integrate_basketball_reference_aggregate.py`** - Multi-source aggregation
 
-#### Other Extractors
-- `extract_pbp_local.py` - Play-by-play extraction
-- `extract_boxscores_local.py` - Box score extraction
-- `extract_schedule_local.py` - Schedule extraction
-- `extract_teams_by_year.py` - Team data by year
+### Testing
+- **`test_basketball_reference_api.py`** - API validation tests
 
-### Possession Panel Builders
-- `create_possession_panel_from_espn.py` - ESPN possession panels
-- `create_possession_panel_from_kaggle.py` - Kaggle possession panels
-- `create_possession_panel_from_nba_api.py` - NBA API possession panels
-- `create_possession_panel_from_pbpstats.py` - PBPStats possession panels
-- `create_possession_panel_with_lineups.py` - With lineup integration
-- `create_possession_panel_with_hoopr_lineups.py` - hoopR lineup integration
+### Deprecated
+- ❌ 10 deprecated scrapers moved to `scripts/archive/deprecated/basketball_reference/`
+
+---
+
+## ESPN Scrapers
+
+### Primary Scrapers
+- **`espn_async_scraper.py`** - Modern async scraper
+  - **Use for:** Full play-by-play data collection
+  - **Features:** Rate limiting, retry logic, S3 upload
+  - **Data types:** Play-by-play, box scores, game summaries
+  - **Expected runtime:** 15-20 hours for 44,826 games
+
+- **`espn_incremental_scraper.py`** - Delta updates
+  - **Use for:** Daily game updates
+  - **Expected runtime:** 10-30 minutes per day
+
+### Specialized Scrapers
+- **`espn_missing_pbp_scraper.py`** - Gap filling
+  - **Use for:** Filling missing play-by-play data
+
+### Utility Scripts
+- **`analyze_espn_coverage.py`** - Coverage analysis
+- **`validate_espn_pbp_files.py`** - Data validation
+- **`load_espn_pbp_to_rds.py`** - Database loading
+- **`load_validated_espn_pbp.py`** - Validated data loading
+
+### Processing Scripts
+- **`create_possession_panel_from_espn.py`** - Possession-level panel data
+
+### Deprecated
+- ❌ 6 deprecated scrapers moved to `scripts/archive/deprecated/espn/`
+
+---
+
+## NBA API Scrapers
+
+### Primary Scrapers
+- **`nba_api_async_scraper.py`** - Modern async scraper
+  - **Use for:** Official NBA statistics
+  - **Features:** Rate limiting, retry logic, S3 upload
+  - **Data types:** Player stats, team stats, game logs, advanced metrics
+
+- **`nba_api_incremental_scraper.py`** - Delta updates
+  - **Use for:** Daily stat updates
+  - **Expected runtime:** 5-15 minutes per day
+
+### Specialized Endpoint Scrapers
+- **`scrape_nba_api_game_advanced.py`** - Advanced game metrics
+- **`scrape_nba_api_player_dashboards.py`** - Player dashboards
+- **`scrape_nba_api_player_tracking.py`** - Player tracking data
+- **`scrape_nba_api_team_dashboards.py`** - Team dashboards
+
+### Agent Scripts
+- **`phase_1_7_nba_stats_agent.py`** - Multi-phase autonomous agent
+
+### Utility Scripts
+- **`create_possession_panel_from_nba_api.py`** - Possession panel data
+- **`verify_with_nba_stats.py`** - Cross-validation with official stats
+- **`scrape_nba_lineups.py`** - Lineup data
+
+### Deprecated
+- ❌ 7 deprecated scrapers moved to `scripts/archive/deprecated/nba_api/`
+
+---
+
+## hoopR Scrapers
+
+### Primary Scrapers
+- **`hoopr_incremental_scraper.py`** - College basketball data
+  - **Use for:** NCAA and college-to-NBA data
+  - **Features:** 24 seasons of historical data
+  - **Data types:** 248 CSV files covering college stats
+
+### Agent Scripts
+- **`phase_9_2_hoopr_agent.py`** - Autonomous hoopR collection
+
+---
+
+## Kaggle Scrapers
+
+### Primary Scripts
+- **`download_kaggle_basketball.py`** - Dataset download
+- **`process_kaggle_historical.py`** - Data processing
+
+---
+
+## Shared Infrastructure
+
+### Base Classes
+- **`async_scraper_base.py`** (489 lines) - Modern async base class
+  - **Adoption:** 8% of scrapers → **Goal: 50%**
+
+### Configuration
+- **`scraper_config.py`** (575 lines) - YAML-based configuration
+  - **Adoption:** 12% of scrapers → **Goal: 80%**
+
+### Monitoring
+- **`scraper_telemetry.py`** (609 lines) - Prometheus metrics
+  - **Adoption:** 10% of scrapers → **Goal: 100%**
+
+### Error Handling
+- **`scraper_error_handler.py`** - Centralized error handling
 
 ### Utilities
-- `create_player_id_mapping.py` - Player ID mapping across sources
-- `game_id_decoder.py` - Decode game IDs
-- `validate_lineup_tracking.py` - Lineup validation
-- `verify_with_nba_stats.py` - Cross-source verification
+- **`modular_tools.py`** - Shared utility functions
+- **`provenance_tracker.py`** - Data lineage tracking
 
 ---
 
-## Deprecated Scripts
+## Naming Conventions
 
-**Location:** `scripts/archive/deprecated/`
+### Active Scrapers (USE THESE)
+- **Primary:** `{source}_async_scraper.py`
+- **Incremental:** `{source}_incremental_scraper.py`
+- **Agents:** `{phase}_{task}_agent.py`
+- **Specialized:** `{source}_{task}_scraper.py`
 
-### Archived Files
-- `extract_espn_local_to_temporal.py` (v1 - replaced by v2)
-- `extract_espn_local_to_temporal_UPDATED.py` (replaced by v2)
-- `download_kaggle_database.py` (replaced by download_kaggle_basketball.py)
-- `scrape_sportsdataverse.py` (redundant with hoopR)
-
-**Why archived:** These scripts have been superseded by newer versions or are no longer needed. They are preserved for reference but should not be used in production.
+### Deprecated Patterns (DO NOT USE)
+- ❌ `scrape_{source}.py`
+- ❌ `scrape_{source}_fixed.py`
+- ❌ `scrape_{source}_additional.py`
+- ❌ `scrape_{source}_comprehensive.py`
+- ❌ `{source}_v2.py` or `{source}_optimized.py`
 
 ---
 
-## Quick Start Commands
+## Usage Examples
 
-### Launch Scrapers (Overnight)
-
+### Basketball Reference (Full Collection)
 ```bash
-# NBA API (5-6 hours)
-nohup bash scripts/etl/overnight_nba_api_comprehensive.sh > /tmp/nba_api.log 2>&1 &
-
-# hoopR Phase 1B (30-60 minutes)
-nohup bash scripts/etl/run_hoopr_phase1b.sh > /tmp/hoopr.log 2>&1 &
-
-# Basketball Reference (3-4 hours, 2020-2025)
-nohup bash scripts/etl/scrape_bbref_incremental.sh 2020 2025 > /tmp/bbref.log 2>&1 &
-
-# Kaggle (10-15 minutes)
-python scripts/etl/download_kaggle_basketball.py
-
-# ESPN Gap Filler (2-3 hours)
-nohup bash scripts/etl/run_espn_scraper.sh > /tmp/espn_gap.log 2>&1 &
+python scripts/etl/basketball_reference_async_scraper.py \
+  --start-year 2020 \
+  --end-year 2025 \
+  --data-types all \
+  --upload-s3
 ```
 
-### Monitor Progress
-
+### ESPN (Incremental Updates)
 ```bash
-# Check all running scrapers
-ps aux | grep -E "scrape_nba_api|scrape_hoopr|scrape_bbref" | grep -v grep
+python scripts/etl/espn_incremental_scraper.py \
+  --date-range 2025-10-20,2025-10-21 \
+  --upload-s3
+```
 
-# Monitor all logs
-tail -f /tmp/nba_api.log /tmp/hoopr.log /tmp/bbref.log
-
-# Emergency stop (kill all)
-ps aux | grep -E "scrape" | grep -v grep | awk '{print $2}' | xargs kill -9
+### NBA API (Specific Endpoints)
+```bash
+python scripts/etl/scrape_nba_api_player_dashboards.py \
+  --season 2024-25 \
+  --upload-s3
 ```
 
 ---
 
-## Integration with Workflows
+## Summary Statistics
 
-- **Workflow #38:** Check scraper completion at session start
-- **Workflow #41:** Validate scraper output with test suites
-- **Workflow #42:** Complete scraper execution guide (900+ lines)
+**Total ETL Scripts:** 84 active files (down from 107, 21% reduction)
+**Archived:** 23 deprecated scrapers
 
----
-
-## Best Practices
-
-1. **Always check disk space** before launching overnight scrapers (need 10+ GB free)
-2. **Never reduce Basketball Reference rate limit** below 3 seconds (risk permanent ban)
-3. **Always upload to S3** after completion before cleaning up local files
-4. **Document scraper runs** in PROGRESS.md and COMMAND_LOG.md
-5. **Run pre-flight checklist** from Workflow #42 before overnight launches
-6. **Validate output** with test suites from Workflow #41
+**By Data Source:**
+- Basketball Reference: 8 active + 10 archived
+- ESPN: 6 active + 6 archived
+- NBA API: 9 active + 7 archived
+- hoopR: 2 active
+- Kaggle: 2 active
+- Shared Infrastructure: 7 active
 
 ---
 
-## Troubleshooting
+## Related Documentation
 
-**Common issues:**
-- Duplicate files → Archived old versions to `scripts/archive/deprecated/`
-- Which version to use? → Check this README or Workflow #42
-- Script not working? → Verify it's not in deprecated folder
-- Rate limit errors → Check Workflow #42 for recovery procedures
-
-**Full troubleshooting guide:** See Workflow #42
+- **Scraper Management:** `docs/data_collection/scrapers/MANAGEMENT.md`
+- **Async Infrastructure:** `README_ASYNC_INFRASTRUCTURE.md`
+- **Deployment Checklist:** `docs/data_collection/scrapers/ASYNC_DEPLOYMENT_CHECKLIST.md`
+- **Monitoring System:** `docs/data_collection/scrapers/MONITORING_SYSTEM.md`
 
 ---
 
-## File Organization
-
-```
-scripts/etl/
-├── README.md (this file)
-├── scrape_*.py (core scrapers)
-├── overnight_*.sh (overnight wrappers)
-├── run_*.sh (standard wrappers)
-├── extract_*.py (format converters)
-├── create_*.py (possession panel builders)
-└── scripts/archive/deprecated/ (old versions)
-```
-
----
-
-*For detailed documentation, see Workflow #42: `docs/claude_workflows/workflow_descriptions/42_scraper_management.md`*
+**Last Updated:** October 21, 2025
+**Maintained By:** NBA Simulator AWS Team
