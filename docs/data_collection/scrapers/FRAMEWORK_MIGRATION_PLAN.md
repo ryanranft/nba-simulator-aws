@@ -15,8 +15,8 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 **Current State:**
 - 84 active scraper files
 - 39,290 total lines of code
-- 8 using AsyncBaseScraper (9.5%) ✅ +5 from Sessions 2-4 (completed basketball_reference_box_score_scraper)
-- 15 using scraper_config.py (17.9%) ✅ +5 from Sessions 2-4 (completed basketball_reference_box_score_scraper)
+- 16 using AsyncBaseScraper (19%) ✅ +8 from Sessions 2-6 (completed basketball_reference + NBA API specialized)
+- 19 using scraper_config.py (23%) ✅ +8 from Sessions 2-6 (completed basketball_reference + NBA API specialized)
 - Shared infrastructure: 1,664 lines (async_scraper_base.py: 490 lines, scraper_config.py: 576 lines, scraper_telemetry.py: 609 lines)
 
 **Target State:**
@@ -64,10 +64,10 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 10. `basketball_reference_pbp_discovery.py`
 
 **NBA API:**
-11. `scrape_nba_api_game_advanced.py`
-12. `scrape_nba_api_player_dashboards.py`
-13. `scrape_nba_api_player_tracking.py`
-14. `scrape_nba_api_team_dashboards.py`
+11. ~~`scrape_nba_api_game_advanced.py`~~ ✅ Completed Session 6
+12. ~~`scrape_nba_api_player_dashboards.py`~~ ✅ Completed Session 6
+13. ~~`scrape_nba_api_player_tracking.py`~~ ✅ Completed Session 6
+14. ~~`scrape_nba_api_team_dashboards.py`~~ ✅ Completed Session 6
 
 **hoopR:**
 15. `hoopr_incremental_simple.py`
@@ -348,14 +348,37 @@ This document tracks the systematic migration of 84 active NBA data scrapers to 
 **Progress:** 12/84 scrapers (14%)
 **Status:** Session 5 complete ✅
 
-### Session 6-7 (Days 6-7)
-**Duration:** 2-3 hours each
-**Goal:** NBA API and hoopR specialized scrapers
+### Session 6 (Day 6) ✅
+**Duration:** 2 hours
+**Goal:** NBA API specialized scrapers
 
-- [ ] NBA API specialized (4 files)
-- [ ] hoopR specialized (4 files)
+- [x] `scrape_nba_api_game_advanced.py` (Session 6 - 30 minutes)
+- [x] `scrape_nba_api_player_dashboards.py` (Session 6 - 30 minutes)
+- [x] `scrape_nba_api_player_tracking.py` (Session 6 - 30 minutes)
+- [x] `scrape_nba_api_team_dashboards.py` (Session 6 - 30 minutes)
 
-**Files:** 8 migrated
+**Pattern:** Specialized Task Scraper wrapping nba_api library
+**Key Changes:**
+- All methods converted to async (asyncio.to_thread for nba_api calls)
+- Integrated base class rate limiter (0.67 req/s)
+- Added optional S3 upload capability
+- Preserved MLflow tracking and panel data structure (rec_22)
+- Configuration via scraper_config.yaml
+
+**Files:** 4 migrated
+**Progress:** 16/84 scrapers (19%)
+**Status:** Session 6 complete ✅
+
+### Session 7 (Day 7)
+**Duration:** 2-3 hours
+**Goal:** hoopR specialized scrapers
+
+- [ ] `hoopr_incremental_simple.py`
+- [ ] `scrape_hoopr_complete_all_endpoints.py`
+- [ ] `scrape_hoopr_nba_stats.py`
+- [ ] `scrape_missing_hoopr_games.py`
+
+**Files:** 4 migrated
 **Progress:** 20/84 scrapers (24%)
 
 ### Session 8-10 (Days 8-10)
