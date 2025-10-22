@@ -33,8 +33,10 @@ import logging
 from basketball_reference_web_scraper import client
 
 # Configuration
-DB_PATH = "/tmp/basketball_reference_boxscores.db"
-RATE_LIMIT = 1.0  # 1 second between requests (library handles BB-Ref rate limiting internally)
+DB_PATH = "/tmp/basketball_reference_boxscores.db"  # nosec B108 - Acceptable for archived deprecated code
+RATE_LIMIT = (
+    1.0  # 1 second between requests (library handles BB-Ref rate limiting internally)
+)
 
 # Priority assignments (1=highest, 10=lowest)
 PRIORITY_MAP = {
@@ -51,8 +53,7 @@ PRIORITY_MAP = {
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -73,7 +74,7 @@ class MasterGameListBuilder:
             "seasons_processed": 0,
             "games_found": 0,
             "games_inserted": 0,
-            "errors": 0
+            "errors": 0,
         }
 
     def rate_limit_wait(self):
@@ -102,7 +103,9 @@ class MasterGameListBuilder:
         """Scrape all games for a specific season using basketball_reference_web_scraper"""
         league = self.get_league_abbr(season)
 
-        logger.info(f"Fetching {league} {season-1}-{season % 100:02d} season schedule...")
+        logger.info(
+            f"Fetching {league} {season-1}-{season % 100:02d} season schedule..."
+        )
 
         try:
             # Rate limiting
@@ -121,19 +124,23 @@ class MasterGameListBuilder:
 
                 # Build game_id from date and home team
                 # BB-Ref format: YYYYMMDD0{TEAM_CODE}.html
-                game_date = game['start_time'].strftime('%Y-%m-%d')
-                date_code = game['start_time'].strftime('%Y%m%d')
-                home_code = game['home_team'].name.upper()[:3]  # Team enum to 3-letter code
+                game_date = game["start_time"].strftime("%Y-%m-%d")
+                date_code = game["start_time"].strftime("%Y%m%d")
+                home_code = game["home_team"].name.upper()[
+                    :3
+                ]  # Team enum to 3-letter code
                 game_id = f"{date_code}0{home_code}"
 
-                games.append({
-                    'game_id': game_id,
-                    'game_date': game_date,
-                    'season': season,
-                    'home_team': game['home_team'].value,
-                    'away_team': game['away_team'].value,
-                    'priority': priority
-                })
+                games.append(
+                    {
+                        "game_id": game_id,
+                        "game_date": game_date,
+                        "season": season,
+                        "home_team": game["home_team"].value,
+                        "away_team": game["away_team"].value,
+                        "priority": priority,
+                    }
+                )
 
             logger.info(f"  Found {len(games)} games")
             self.stats["games_found"] += len(games)
@@ -155,18 +162,21 @@ class MasterGameListBuilder:
 
         for game in games:
             try:
-                cursor.execute("""
+                cursor.execute(
+                    """
                     INSERT OR IGNORE INTO scraping_progress
                     (game_id, game_date, season, home_team, away_team, priority, status)
                     VALUES (?, ?, ?, ?, ?, ?, 'pending')
-                """, (
-                    game['game_id'],
-                    game['game_date'],
-                    game['season'],
-                    game['home_team'],
-                    game['away_team'],
-                    game['priority']
-                ))
+                """,
+                    (
+                        game["game_id"],
+                        game["game_date"],
+                        game["season"],
+                        game["home_team"],
+                        game["away_team"],
+                        game["priority"],
+                    ),
+                )
                 self.stats["games_inserted"] += cursor.rowcount
             except Exception as e:
                 logger.error(f"Error inserting game {game['game_id']}: {e}")
@@ -194,7 +204,9 @@ class MasterGameListBuilder:
 
             # Progress update every 10 seasons
             if season % 10 == 0:
-                logger.info(f"Progress: {season - self.start_season + 1}/{self.end_season - self.start_season + 1} seasons")
+                logger.info(
+                    f"Progress: {season - self.start_season + 1}/{self.end_season - self.start_season + 1} seasons"
+                )
 
         # Final summary
         print("\n" + "=" * 70)
@@ -213,10 +225,14 @@ class MasterGameListBuilder:
             cursor.execute("SELECT COUNT(*) FROM scraping_progress")
             total_count = cursor.fetchone()[0]
 
-            cursor.execute("SELECT COUNT(*) FROM scraping_progress WHERE status = 'pending'")
+            cursor.execute(
+                "SELECT COUNT(*) FROM scraping_progress WHERE status = 'pending'"
+            )
             pending_count = cursor.fetchone()[0]
 
-            cursor.execute("SELECT MIN(game_date), MAX(game_date) FROM scraping_progress")
+            cursor.execute(
+                "SELECT MIN(game_date), MAX(game_date) FROM scraping_progress"
+            )
             date_range = cursor.fetchone()
 
             print(f"\nDatabase Status:")
@@ -225,12 +241,14 @@ class MasterGameListBuilder:
             print(f"  Date range:       {date_range[0]} to {date_range[1]}")
 
             # Games by priority
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT priority, COUNT(*) as count
                 FROM scraping_progress
                 GROUP BY priority
                 ORDER BY priority
-            """)
+            """
+            )
             print(f"\nGames by priority:")
             for priority, count in cursor.fetchall():
                 print(f"  Priority {priority}: {count:,} games")
@@ -251,26 +269,19 @@ def main():
         "--start-season",
         type=int,
         default=1947,
-        help="Starting season (default: 1947 for BAA first season)"
+        help="Starting season (default: 1947 for BAA first season)",
     )
     parser.add_argument(
-        "--end-season",
-        type=int,
-        default=2025,
-        help="Ending season (default: 2025)"
+        "--end-season", type=int, default=2025, help="Ending season (default: 2025)"
     )
     parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Test mode - don't insert into database"
+        "--dry-run", action="store_true", help="Test mode - don't insert into database"
     )
 
     args = parser.parse_args()
 
     builder = MasterGameListBuilder(
-        start_season=args.start_season,
-        end_season=args.end_season,
-        dry_run=args.dry_run
+        start_season=args.start_season, end_season=args.end_season, dry_run=args.dry_run
     )
 
     try:
