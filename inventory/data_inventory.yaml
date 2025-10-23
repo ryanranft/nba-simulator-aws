@@ -1,0 +1,127 @@
+# NBA Data Inventory - Expected Coverage
+# Version: 0.1 MVP (ESPN Only)
+# Created: 2025-10-22
+# Purpose: Define what data we SHOULD have for reconciliation
+
+version: "0.1-mvp"
+last_updated: "2025-10-22"
+
+# MVP: ESPN only for initial validation
+# Will expand to all sources in Phase 2B
+
+expected_coverage:
+  espn:
+    # Start with recent seasons only for MVP
+    seasons:
+      - 2023-24
+      - 2024-25
+
+    data_types:
+      play_by_play:
+        required: true
+        freshness_days: 7 # Recent games must be < 7 days old
+        path_patterns:
+          - "nba_pbp/espn/{season}/play_by_play_{game_id}.json"
+          - "nba_pbp/{season}/play_by_play_{game_id}.json"
+        completeness_threshold: 0.95 # 95% of games required
+        description: "Play-by-play data from ESPN API"
+
+      box_scores:
+        required: true
+        freshness_days: 7
+        path_patterns:
+          - "nba_box_score/espn/{season}/box_score_{game_id}.json"
+          - "nba_box_score/{season}/box_score_{game_id}.json"
+        completeness_threshold: 0.95
+        description: "Box score data from ESPN API"
+
+      schedule:
+        required: true
+        freshness_days: 1 # Schedule updated daily
+        path_patterns:
+          - "nba_schedule_json/espn/{season}/schedule.json"
+          - "nba_schedule_json/{season}/schedule.json"
+        completeness_threshold: 1.0 # Must have schedule
+        description: "Season schedule from ESPN API"
+
+# Expected game counts per season (regular season + playoffs)
+expected_game_counts:
+  regular_season: 1230 # 82 games × 30 teams ÷ 2
+  playoffs_min: 60 # Minimum playoff games
+  playoffs_max: 105 # Maximum playoff games (all series go to 7)
+  total_min: 1290
+  total_max: 1335
+
+# Data quality requirements
+quality_requirements:
+  min_file_size_bytes: 100 # Flag suspiciously small files (< 100 bytes)
+  max_file_age_days: 365 # Flag very old files in current season
+
+  required_fields:
+    play_by_play:
+      - game_id
+      - timestamp
+      - description
+      - score_home
+      - score_away
+
+    box_scores:
+      - game_id
+      - player_id
+      - player_name
+      - points
+      - rebounds
+      - assists
+
+    schedule:
+      - game_id
+      - game_date
+      - home_team
+      - away_team
+
+# Priority definitions for gap detection
+priority_rules:
+  critical:
+    description: "Recent games missing (urgent collection needed)"
+    conditions:
+      - "game_date within last 7 days"
+      - "required data type missing"
+
+  high:
+    description: "Current season incomplete"
+    conditions:
+      - "season is 2024-25"
+      - "completeness < 95%"
+
+  medium:
+    description: "Recent season gaps"
+    conditions:
+      - "season is 2023-24"
+      - "completeness < 95%"
+
+  low:
+    description: "Historical backfill"
+    conditions:
+      - "season before 2023-24"
+      - "completeness < 90%"
+
+# Configuration for reconciliation engine
+reconciliation_config:
+  scan_mode: "sample" # MVP: sample | full (Phase 2B)
+  sample_rate: 0.10 # Scan 10% of S3 for MVP
+  cache_ttl_hours: 24 # Cache S3 inventory for 24 hours
+  dry_run: true # MVP: Don't trigger actions, just report
+
+  performance_targets:
+    s3_scan_max_minutes: 5
+    coverage_analysis_max_seconds: 30
+    gap_detection_max_seconds: 60
+    full_cycle_max_minutes: 10
+
+# Metadata
+metadata:
+  phase: "2A-MVP"
+  focus: "ESPN data only"
+  next_phase: "2B - Expand to all sources"
+  created_by: "claude_code_agent"
+  documentation: "reports/dims_phase2_readiness_report.md"

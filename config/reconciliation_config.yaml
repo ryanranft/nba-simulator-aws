@@ -1,0 +1,107 @@
+# Reconciliation Engine Configuration
+# ADCE Phase 2A MVP
+
+version: "0.1-mvp"
+last_updated: "2025-10-22"
+
+# S3 Scanning Configuration
+s3:
+  bucket: nba-sim-raw-data-lake
+  sample_rate: 0.1 # MVP: Scan 10% of files (full scan = null)
+  cache_ttl_hours: 24 # Cache S3 inventory for 24 hours
+  parallel_workers: 4 # Parallel S3 list operations
+  prefixes: # Optional: limit scan to specific prefixes
+    - nba_pbp
+    - nba_box_score
+    - nba_schedule_json
+
+# Gap Detection Configuration
+gap_detection:
+  critical_threshold_days: 7 # Games within 7 days = CRITICAL
+  high_priority_seasons:
+    - 2024-25 # Current season
+  medium_priority_seasons:
+    - 2023-24 # Recent season
+  completeness_thresholds:
+    critical: 0.50 # < 50% = CRITICAL
+    high: 0.80 # < 80% = HIGH
+    medium: 0.95 # < 95% = MEDIUM
+    low: 0.99 # < 99% = LOW
+
+# Task Queue Configuration
+task_queue:
+  max_tasks_per_run: 1000 # Limit task queue size
+  max_tasks_per_priority:
+    critical: 100
+    high: 300
+    medium: 400
+    low: 200
+  task_ttl_days: 30 # Remove tasks older than 30 days
+  output_file: inventory/gaps.json
+
+# Reconciliation Loop Configuration
+reconciliation_loop:
+  enabled: false # MVP: Manual execution only
+  interval_hours: 1 # Run every hour
+  max_retries: 3 # Retry failed reconciliations
+  alert_on_failure: true # Send alerts on failure
+  alert_channels:
+    - email
+    - slack
+
+# Performance Targets (fail if exceeded)
+performance:
+  s3_scan_max_minutes: 5 # MVP sample scan
+  coverage_analysis_max_seconds: 30
+  gap_detection_max_seconds: 60
+  task_generation_max_seconds: 30
+  full_cycle_max_minutes: 10
+
+# Integration Configuration
+integration:
+  dims:
+    enabled: true # Integrate with DIMS for metrics
+    update_on_complete: true
+    event_triggers:
+      - reconciliation_complete
+      - gaps_detected
+
+  existing_tools:
+    # Leverage existing gap detection tools
+    enabled: true
+    scripts:
+      - scripts/etl/identify_missing_games.py
+      - scripts/analysis/find_missing_games.sh
+      - scripts/analysis/find_temporal_gaps.sh
+
+# Dry Run Mode
+dry_run:
+  enabled: true # MVP: Don't trigger actions, just report
+  save_results: true # Save analysis even in dry run
+  skip_task_generation: false # Generate tasks even in dry run
+
+# Logging Configuration
+logging:
+  level: INFO # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  output_dir: logs/reconciliation
+  max_file_size_mb: 100
+  backup_count: 5
+
+# Notification Configuration
+notifications:
+  enabled: false # MVP: No notifications
+  critical_gaps_threshold: 10 # Notify if > 10 critical gaps
+  email:
+    to: []
+    subject_prefix: "[ADCE Reconciliation]"
+  slack:
+    webhook_url: ""
+    channel: "#nba-data-alerts"
+
+# Metadata
+metadata:
+  phase: "2A-MVP"
+  focus: "ESPN data only"
+  documentation: "reports/dims_phase2_readiness_report.md"
+  next_phase: "2B - Full Implementation"
