@@ -1,6 +1,6 @@
 metadata:
   version: 1.0.0
-  last_updated: '2025-10-22T19:01:10.911678Z'
+  last_updated: '2025-10-22T21:00:15.577548Z'
   last_verified: '2025-10-21T19:00:00Z'
   verified_by: manual_verification
   system: DIMS v1.0.0
@@ -97,8 +97,8 @@ plus_minus_system:
       lines: 480
 code_base:
   python_files:
-    value: 1268
-    last_verified: '2025-10-22T16:26:21.329120Z'
+    value: 1279
+    last_verified: '2025-10-22T20:30:13.602746Z'
     verification_method: automated
     cached: false
     cache_expires: null
@@ -121,8 +121,8 @@ code_base:
     cache_expires: null
 documentation:
   markdown_files:
-    value: 1701
-    last_verified: '2025-10-22T15:46:23.672183Z'
+    value: 1708
+    last_verified: '2025-10-22T20:44:15.532380Z'
     verification_method: automated
     cached: false
     cache_expires: null
@@ -147,13 +147,13 @@ workflows:
     last_verified: '2025-10-21T14:00:00Z'
 sql_schemas:
   total_lines:
-    value: 762
+    value: 758
     files:
     - name: sql/master_schema.sql
       lines: 468
     - name: sql/phase9_box_score_snapshots.sql
       lines: 286
-    last_verified: '2025-10-22T19:01:10.805131Z'
+    last_verified: '2025-10-22T19:50:07.868415Z'
     verification_method: automated
     cached: false
     cache_expires: null

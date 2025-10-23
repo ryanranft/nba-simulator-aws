@@ -291,16 +291,16 @@ def main():
 Examples:
   # Run daemon with default 1-hour interval
   python reconciliation_daemon.py
-  
+
   # Run with 2-hour interval
   python reconciliation_daemon.py --interval-hours 2
-  
+
   # Run once and exit (for testing)
   python reconciliation_daemon.py --run-once
-  
+
   # Dry run mode (don't generate task queue)
   python reconciliation_daemon.py --dry-run
-  
+
   # Use AWS S3 Inventory instead of sampling
   python reconciliation_daemon.py --use-aws-inventory
         """,

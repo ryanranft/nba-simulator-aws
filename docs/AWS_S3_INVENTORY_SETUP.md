@@ -2,7 +2,7 @@
 
 **Purpose:** Enable automated daily inventory reports for 1000x faster data reconciliation
 
-**Status:** Optional (Phase 2B enhancement)  
+**Status:** Optional (Phase 2B enhancement)
 **Benefit:** Replace 27-second sample scans with <2-minute automated inventory reads
 
 ---
@@ -214,7 +214,7 @@ API calls: ~10 (just to read manifest + data files)
 Freshness: 24 hours old
 ```
 
-**Performance gain:** ~15x faster for full inventory  
+**Performance gain:** ~15x faster for full inventory
 **Cost savings:** ~99% reduction in API calls
 
 ---
@@ -316,7 +316,7 @@ If you prefer not to enable AWS Inventory:
 
 ---
 
-**Last Updated:** October 22, 2025  
-**Status:** Phase 2B Enhancement (Optional)  
+**Last Updated:** October 22, 2025
+**Status:** Phase 2B Enhancement (Optional)
 **Recommendation:** Enable for production deployment
 

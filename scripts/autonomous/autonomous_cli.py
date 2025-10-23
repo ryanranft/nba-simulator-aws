@@ -429,13 +429,13 @@ Commands:
 Examples:
   # Start autonomous loop
   python autonomous_cli.py start
-  
+
   # Check status
   python autonomous_cli.py status
-  
+
   # View logs
   python autonomous_cli.py logs --tail 100
-  
+
   # Follow logs
   python autonomous_cli.py logs --follow
         """,

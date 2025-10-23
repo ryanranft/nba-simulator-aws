@@ -32,6 +32,14 @@ Phase 0 focuses on: data collection, scraping, and ingestion from various source
 
 ---
 
+## Recent Updates
+
+- **October 22, 2025:** Phase 0.9 (ADCE) added - complete autonomous data collection system
+- **October 22, 2025:** Housekeeping completed - MLOps docs moved to Phase 5, outdated files archived
+- **October 22, 2025:** Enhanced ADCE documentation with security and scraper integration cross-references
+
+---
+
 ## Navigation
 
 **Previous Phase:** [Phase -1](../phase_-1/PHASE_-1_INDEX.md) (if 0 > 0)

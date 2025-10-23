@@ -405,13 +405,13 @@ def main():
 Examples:
   # Execute all tasks
   python scraper_orchestrator.py
-  
+
   # Execute only critical priority tasks
   python scraper_orchestrator.py --priority critical
-  
+
   # Dry run (show execution plan)
   python scraper_orchestrator.py --dry-run
-  
+
   # Limit concurrent scrapers
   python scraper_orchestrator.py --max-concurrent 3
         """,

@@ -508,10 +508,10 @@ def main():
 Examples:
   # Start autonomous loop
   python autonomous_loop.py
-  
+
   # Start with custom config
   python autonomous_loop.py --config my_config.yaml
-  
+
   # Dry run mode
   python autonomous_loop.py --dry-run
         """,

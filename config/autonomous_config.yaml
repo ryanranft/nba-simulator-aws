@@ -32,7 +32,7 @@ health_check:
   enabled: true
   port: 8080 # HTTP port for health check endpoints
   check_interval_seconds: 60 # How often to check component health
-  
+
   # Alert thresholds
   alert_thresholds:
     reconciliation_daemon_down_minutes: 5 # Alert if daemon down for 5+ min
@@ -57,7 +57,7 @@ alerts:
       enabled: false
       webhook_url: ""
       channel: "#nba-data-alerts"
-  
+
   # Alert conditions
   alert_on:
     - reconciliation_daemon_stopped
@@ -95,10 +95,10 @@ integration:
       - tasks_executed
       - orchestrator_success_rate
       - error_count
-  
+
   scraper_config:
     file: config/scraper_config.yaml
-  
+
   reconciliation_config:
     file: config/reconciliation_config.yaml
 
@@ -122,4 +122,3 @@ metadata:
   description: "24/7 self-healing data collection system"
   documentation: "docs/AUTONOMOUS_OPERATION.md"
   status: "production"
-
