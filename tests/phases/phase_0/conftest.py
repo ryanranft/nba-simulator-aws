@@ -160,3 +160,45 @@ def kaggle_tables():
         "team_history",
         "team_info_common",
     ]
+
+
+# Basketball Reference-specific Fixtures
+
+
+@pytest.fixture(scope="module")
+def basketball_reference_categories():
+    """Provide list of Basketball Reference data category names."""
+    return [
+        "advanced_totals",
+        "awards",
+        "coaches",
+        "draft",
+        "per_game",
+        "play_by_play",
+        "playoffs",
+        "schedules",
+        "season_totals",
+        "shooting",
+        "standings",
+        "standings_by_date",
+        "team_ratings",
+        "transactions",
+    ]
+
+
+@pytest.fixture(scope="module")
+def basketball_reference_s3_prefix():
+    """Provide Basketball Reference S3 prefix."""
+    return "basketball_reference/"
+
+
+@pytest.fixture(scope="module")
+def basketball_reference_expected_file_count():
+    """Provide expected Basketball Reference file count range."""
+    return {"min": 400, "max": 500}
+
+
+@pytest.fixture(scope="module")
+def basketball_reference_expected_years():
+    """Provide expected Basketball Reference year range."""
+    return {"min": 1953, "max": 2025}

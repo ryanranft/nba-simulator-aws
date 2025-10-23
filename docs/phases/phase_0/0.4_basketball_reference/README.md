@@ -2,11 +2,145 @@
 
 **Phase:** 0 (Data Collection)
 **Project:** Basketball Reference Complete Expansion (Option C)
-**Status:** ⏸️ PENDING
+**Status:** ✅ COMPLETE ✓ (Validated: October 23, 2025)
 **Total Scope:** 234 data types across 7 basketball domains
 **Total Time:** 140-197 hours
 **Total Records:** 865K-10.88M records
-**Last Updated:** October 11, 2025
+**Last Updated:** October 23, 2025
+
+---
+
+## Current Status (Phase 0.4 Complete)
+
+**Data Collected (October 2025):**
+- ✅ **444 files** across 14 data categories
+- ✅ **99.9 MB** of Basketball Reference data
+- ✅ **Temporal coverage:** 1953-2025 (72 years)
+- ✅ **14 data categories:** advanced_totals, awards, coaches, draft, per_game, play_by_play, playoffs, schedules, season_totals, shooting, standings, standings_by_date, team_ratings, transactions
+- ✅ **S3 location:** `s3://nba-sim-raw-data-lake/basketball_reference/`
+- ✅ **Validation:** 100% pass rate (6/6 validator checks, 30/30 tests)
+
+**Get current Basketball Reference metrics (always up-to-date):**
+```bash
+python scripts/monitoring/dims_cli.py verify --category s3_storage
+```
+
+**See also:** Workflow #56 (DIMS Management), `inventory/metrics.yaml`
+
+---
+
+## How This Phase Enables the Simulation Vision
+
+Phase 0.4 provides Basketball Reference data that powers the **hybrid econometric + nonparametric simulation system** described in the [main README](../../../README.md#simulation-methodology).
+
+### 1. Econometric Causal Inference Foundation
+
+Basketball Reference data enables panel data regression with causal identification:
+
+**Player performance modeling (advanced_totals, per_game, shooting):**
+- **Fixed effects models:** Control for unobserved player heterogeneity across seasons
+- **Instrumental variables:** Use draft position, team changes as instruments for playing time
+- **Panel data structure:** Player-season observations enable within-player variation analysis
+- **Example:** Estimate aging curves using player fixed effects + age polynomial interactions
+
+**Team performance analysis (team_ratings, standings, standings_by_date):**
+- **Difference-in-differences:** Measure impact of coaching changes, roster moves on team performance
+- **Regression discontinuity:** Playoff cutoff creates natural experiment for "tournament experience" effects
+- **Propensity score matching:** Find comparable teams when evaluating strategy effectiveness
+
+**Shot selection modeling (shooting, play_by_play):**
+- **Discrete choice models:** Structural estimation of shot selection decisions
+- **Contextual effects:** Estimate how shot percentages vary by defender quality, game situation
+- **Spatial analysis:** Model shot location choices as function of floor spacing, defensive positioning
+
+### 2. Nonparametric Event Modeling (Distribution-Free)
+
+Basketball Reference data enables empirical distribution estimation without parametric assumptions:
+
+**Irregular event frequencies (play_by_play, transactions):**
+- **Kernel density estimation:** Model technical foul rates, coach's challenges using empirical densities
+- **Bootstrap resampling:** Generate injury occurrences by resampling from observed transaction data
+- **Empirical CDFs:** Draw ejections, flagrant fouls directly from observed cumulative distributions
+
+**Performance variability (per_game, shooting):**
+- **Quantile regression:** Model shooting "hot streaks" with fat-tailed distributions
+- **Empirical transition matrices:** Capture make/miss patterns without geometric assumptions
+- **Changepoint detection:** Identify momentum shifts using PELT algorithm on play-by-play data
+
+### 3. Context-Adaptive Simulations
+
+Using Basketball Reference data, simulations adapt to:
+
+**Historical context (standings_by_date, schedules):**
+- Query team standing at exact date to model "playoff push" vs. "tanking" behavior
+- Use schedule density (back-to-backs, road trips) for fatigue modeling
+- Incorporate playoff seeding implications in late-season game intensity
+
+**Player career arcs (advanced_totals by season):**
+- Estimate aging curves with player fixed effects + time-varying coefficients
+- Model "prime years" vs. "declining phase" using nonlinear age effects
+- Track skill evolution (3PT shooting %, assist rates) across player development
+
+**Coaching effects (coaches, team_ratings):**
+- Use coach transitions as natural experiments for strategy impact
+- Model defensive/offensive rating changes controlling for roster changes
+- Estimate "coach fixed effects" on team performance
+
+**Draft class comparisons (draft):**
+- Propensity score matching to evaluate draft pick value
+- Regression discontinuity at draft cutoffs (lottery vs. non-lottery)
+- Panel data models of rookie development trajectories
+
+### 4. Integration with Main README Methodology
+
+**Panel data regression (Main README: Lines 73-82):**
+- Basketball Reference provides player-season panel structure
+- Enables fixed effects, random effects, GMM estimation
+- Supports instrumental variables for endogeneity correction
+
+**Nonparametric methods (Main README: Lines 84-93):**
+- Play-by-play data provides empirical distributions for irregular events
+- Transaction data enables bootstrap resampling for injuries
+- Shooting data supports kernel density estimation for performance variance
+
+**Temporal precision reconstruction:**
+- Box score data (1953-1996): Simulation-based temporal reconstruction using econometric PPP estimates
+- Play-by-play availability (varies by year): Millisecond-precision event sequencing where available
+- Advanced stats (2013+): Player tracking enables spatial-temporal modeling
+
+### 5. Specific Use Cases
+
+**Game simulation (econometric PPP estimation):**
+```python
+# Use Basketball Reference data to estimate Points Per Possession
+# via panel data regression with player/team fixed effects
+ppp_model = estimate_ppp_panel_regression(
+    data='advanced_totals + per_game + shooting',
+    fixed_effects='player + team + season',
+    instruments='draft_position + age',
+)
+```
+
+**Irregular event injection (nonparametric sampling):**
+```python
+# Use transactions data to model injury occurrence
+# via bootstrap resampling (distribution-free)
+injury_rate = bootstrap_resample(
+    data='transactions',
+    event_type='injury',
+    filters='in_game_injury',
+)
+```
+
+**Propensity score matching for comparable games:**
+```python
+# Find comparable historical games for counterfactual simulation
+comparable_games = propensity_score_match(
+    data='schedules + standings_by_date + team_ratings',
+    treatment='playoff_implications',
+    covariates=['team_strength', 'days_rest', 'home_away'],
+)
+```
 
 ---
 
