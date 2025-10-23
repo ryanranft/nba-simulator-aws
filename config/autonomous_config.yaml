@@ -1,0 +1,125 @@
+# Autonomous Loop Configuration
+# ADCE Phase 4 - 24/7 Self-Healing System
+
+version: "1.0"
+last_updated: "2025-10-22"
+
+# Enable/Disable Autonomous Mode
+enabled: true
+
+# Reconciliation Configuration
+reconciliation_interval_hours: 1 # Run reconciliation every hour
+use_aws_inventory: true # Use AWS S3 Inventory when available
+fallback_to_sample: true # Fall back to sampling if inventory unavailable
+
+# Orchestrator Configuration
+min_tasks_to_trigger: 1 # Minimum tasks in queue to trigger orchestrator
+max_orchestrator_runtime_minutes: 120 # Kill orchestrator if runs longer than 2 hours
+max_concurrent_scrapers: 5 # Maximum concurrent scraper processes
+
+# Task Queue Configuration
+task_queue_file: inventory/gaps.json
+task_processing:
+  priority_order: # Execute tasks in this order
+    - CRITICAL
+    - HIGH
+    - MEDIUM
+    - LOW
+  max_tasks_per_run: 1000 # Limit tasks per orchestrator run
+
+# Health Check Configuration
+health_check:
+  enabled: true
+  port: 8080 # HTTP port for health check endpoints
+  check_interval_seconds: 60 # How often to check component health
+  
+  # Alert thresholds
+  alert_thresholds:
+    reconciliation_daemon_down_minutes: 5 # Alert if daemon down for 5+ min
+    orchestrator_timeout_minutes: 120 # Alert if orchestrator runs > 2 hours
+    task_queue_stale_hours: 24 # Alert if task queue not updated in 24h
+    error_rate_threshold: 0.1 # Alert if error rate > 10%
+
+# Retry Configuration
+max_retries: 3 # Retry failed operations
+retry_delay_seconds: 60 # Wait between retries
+exponential_backoff: true # Use exponential backoff for retries
+
+# Alert Configuration
+alerts:
+  enabled: false # MVP: Disable alerts (future: email/Slack)
+  channels:
+    email:
+      enabled: false
+      to: []
+      subject_prefix: "[ADCE Autonomous Loop]"
+    slack:
+      enabled: false
+      webhook_url: ""
+      channel: "#nba-data-alerts"
+  
+  # Alert conditions
+  alert_on:
+    - reconciliation_daemon_stopped
+    - orchestrator_timeout
+    - high_error_rate
+    - critical_tasks_stale
+
+# Logging Configuration
+logging:
+  level: INFO # DEBUG, INFO, WARNING, ERROR
+  file: logs/autonomous_loop.log
+  max_size_mb: 100
+  backup_count: 5
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Resource Limits
+resource_limits:
+  max_memory_mb: 2048 # Kill if memory usage exceeds 2GB
+  max_cpu_percent: 80 # Warning if CPU usage exceeds 80%
+  disk_space_threshold_gb: 10 # Warning if free disk space < 10GB
+
+# Performance Targets
+performance:
+  reconciliation_max_minutes: 10 # Target: reconciliation < 10 min
+  orchestrator_max_minutes: 120 # Target: orchestration < 2 hours
+  task_completion_rate_target: 0.95 # Target: 95% task success rate
+
+# Integration Configuration
+integration:
+  dims:
+    enabled: true
+    update_on_cycle_complete: true
+    metrics_to_track:
+      - cycles_completed
+      - tasks_executed
+      - orchestrator_success_rate
+      - error_count
+  
+  scraper_config:
+    file: config/scraper_config.yaml
+  
+  reconciliation_config:
+    file: config/reconciliation_config.yaml
+
+# Maintenance Windows
+maintenance:
+  enabled: false
+  windows: [] # Future: Define maintenance windows when system should pause
+  # Example:
+  # - day: Sunday
+  #   start_time: "02:00"
+  #   end_time: "04:00"
+  #   timezone: "America/Chicago"
+
+# Dry Run Mode
+dry_run:
+  enabled: false # If true, simulate operations without executing
+
+# Metadata
+metadata:
+  phase: "Phase 4 - Autonomous Loop"
+  description: "24/7 self-healing data collection system"
+  documentation: "docs/AUTONOMOUS_OPERATION.md"
+  status: "production"
+

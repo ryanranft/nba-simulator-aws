@@ -1,0 +1,64 @@
+[Unit]
+Description=NBA Simulator Autonomous Loop - 24/7 Self-Healing Data Collection
+Documentation=file:///Users/ryanranft/nba-simulator-aws/docs/AUTONOMOUS_OPERATION.md
+After=network.target
+
+[Service]
+Type=simple
+User=ryanranft
+WorkingDirectory=/Users/ryanranft/nba-simulator-aws
+Environment="PATH=/Users/ryanranft/miniforge3/envs/nba-aws/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONUNBUFFERED=1"
+
+# Main command
+ExecStart=/Users/ryanranft/miniforge3/envs/nba-aws/bin/python scripts/autonomous/autonomous_loop.py
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=200
+StartLimitBurst=5
+
+# Resource limits
+MemoryLimit=2G
+CPUQuota=200%
+
+# Logging
+StandardOutput=append:/Users/ryanranft/nba-simulator-aws/logs/autonomous_loop.log
+StandardError=append:/Users/ryanranft/nba-simulator-aws/logs/autonomous_loop_error.log
+SyslogIdentifier=nba-autonomous-loop
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Graceful shutdown
+TimeoutStopSec=30
+KillMode=mixed
+KillSignal=SIGTERM
+
+[Install]
+WantedBy=multi-user.target
+
+# Installation Instructions:
+# 1. Copy this file to systemd directory:
+#    sudo cp scripts/autonomous/autonomous_loop.service /etc/systemd/system/
+#
+# 2. Reload systemd:
+#    sudo systemctl daemon-reload
+#
+# 3. Enable service (start on boot):
+#    sudo systemctl enable autonomous-loop
+#
+# 4. Start service:
+#    sudo systemctl start autonomous-loop
+#
+# 5. Check status:
+#    sudo systemctl status autonomous-loop
+#
+# 6. View logs:
+#    sudo journalctl -u autonomous-loop -f
+#
+# 7. Stop service:
+#    sudo systemctl stop autonomous-loop
+
