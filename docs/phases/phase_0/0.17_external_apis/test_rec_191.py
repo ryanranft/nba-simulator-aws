@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Test Suite: Make a Robust Architecture
+Test Suite: Enhance the System by Using External APIs
 
-Tests for rec_189 implementation.
+Tests for rec_191 implementation.
 """
 
 import unittest
@@ -12,19 +12,19 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from implement_rec_189 import MakeARobustArchitecture
+from implement_rec_191 import EnhanceTheSystemByUsingExternalApis
 
 
-class TestRec189(unittest.TestCase):
-    """Test suite for Make a Robust Architecture."""
+class TestRec191(unittest.TestCase):
+    """Test suite for Enhance the System by Using External APIs."""
 
     def setUp(self):
         """Set up test fixtures."""
-        self.impl = MakeARobustArchitecture()
+        self.impl = EnhanceTheSystemByUsingExternalApis()
 
     def tearDown(self):
         """Clean up after tests."""
-        if hasattr(self.impl, 'cleanup'):
+        if hasattr(self.impl, "cleanup"):
             self.impl.cleanup()
 
     def test_initialization(self):
@@ -35,7 +35,7 @@ class TestRec189(unittest.TestCase):
     def test_setup(self):
         """Test setup method."""
         result = self.impl.setup()
-        self.assertTrue(result['success'])
+        self.assertTrue(result["success"])
         self.assertTrue(self.impl.initialized)
 
     def test_execute_without_setup(self):
@@ -47,7 +47,7 @@ class TestRec189(unittest.TestCase):
         """Test successful execution."""
         self.impl.setup()
         result = self.impl.execute()
-        self.assertTrue(result['success'])
+        self.assertTrue(result["success"])
 
     def test_validate(self):
         """Test validation method."""
@@ -71,7 +71,7 @@ class TestRec189(unittest.TestCase):
 
 def run_tests():
     """Run test suite."""
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestRec189)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestRec191)
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     return result.wasSuccessful()

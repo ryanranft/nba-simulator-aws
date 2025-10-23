@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Test Suite: Implement Data Collection Pipeline with Dispatcher and Crawlers
+Test Suite: Perform extensive error analysis on outputs to reduce hallucination rate.
 
-Tests for rec_044 implementation.
+Tests for rec_093 implementation.
 """
 
 import unittest
@@ -12,19 +12,21 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from implement_rec_044 import ImplementDataCollectionPipelineWithDispatcherAndCrawlers
+from implement_rec_093 import (
+    PerformExtensiveErrorAnalysisOnOutputsToReduceHallucinationRate,
+)
 
 
-class TestRec044(unittest.TestCase):
-    """Test suite for Implement Data Collection Pipeline with Dispatcher and Crawlers."""
+class TestRec093(unittest.TestCase):
+    """Test suite for Perform extensive error analysis on outputs to reduce hallucination rate.."""
 
     def setUp(self):
         """Set up test fixtures."""
-        self.impl = ImplementDataCollectionPipelineWithDispatcherAndCrawlers()
+        self.impl = PerformExtensiveErrorAnalysisOnOutputsToReduceHallucinationRate()
 
     def tearDown(self):
         """Clean up after tests."""
-        if hasattr(self.impl, 'cleanup'):
+        if hasattr(self.impl, "cleanup"):
             self.impl.cleanup()
 
     def test_initialization(self):
@@ -35,7 +37,7 @@ class TestRec044(unittest.TestCase):
     def test_setup(self):
         """Test setup method."""
         result = self.impl.setup()
-        self.assertTrue(result['success'])
+        self.assertTrue(result["success"])
         self.assertTrue(self.impl.initialized)
 
     def test_execute_without_setup(self):
@@ -47,7 +49,7 @@ class TestRec044(unittest.TestCase):
         """Test successful execution."""
         self.impl.setup()
         result = self.impl.execute()
-        self.assertTrue(result['success'])
+        self.assertTrue(result["success"])
 
     def test_validate(self):
         """Test validation method."""
@@ -71,7 +73,7 @@ class TestRec044(unittest.TestCase):
 
 def run_tests():
     """Run test suite."""
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestRec044)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestRec093)
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     return result.wasSuccessful()

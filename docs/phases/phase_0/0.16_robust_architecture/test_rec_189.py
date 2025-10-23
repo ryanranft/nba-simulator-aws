@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Test Suite: Perform extensive error analysis on outputs to reduce hallucination rate.
+Test Suite: Make a Robust Architecture
 
-Tests for rec_093 implementation.
+Tests for rec_189 implementation.
 """
 
 import unittest
@@ -12,19 +12,19 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from implement_rec_093 import PerformExtensiveErrorAnalysisOnOutputsToReduceHallucinationRate
+from implement_rec_189 import MakeARobustArchitecture
 
 
-class TestRec093(unittest.TestCase):
-    """Test suite for Perform extensive error analysis on outputs to reduce hallucination rate.."""
+class TestRec189(unittest.TestCase):
+    """Test suite for Make a Robust Architecture."""
 
     def setUp(self):
         """Set up test fixtures."""
-        self.impl = PerformExtensiveErrorAnalysisOnOutputsToReduceHallucinationRate()
+        self.impl = MakeARobustArchitecture()
 
     def tearDown(self):
         """Clean up after tests."""
-        if hasattr(self.impl, 'cleanup'):
+        if hasattr(self.impl, "cleanup"):
             self.impl.cleanup()
 
     def test_initialization(self):
@@ -35,7 +35,7 @@ class TestRec093(unittest.TestCase):
     def test_setup(self):
         """Test setup method."""
         result = self.impl.setup()
-        self.assertTrue(result['success'])
+        self.assertTrue(result["success"])
         self.assertTrue(self.impl.initialized)
 
     def test_execute_without_setup(self):
@@ -47,7 +47,7 @@ class TestRec093(unittest.TestCase):
         """Test successful execution."""
         self.impl.setup()
         result = self.impl.execute()
-        self.assertTrue(result['success'])
+        self.assertTrue(result["success"])
 
     def test_validate(self):
         """Test validation method."""
@@ -71,7 +71,7 @@ class TestRec093(unittest.TestCase):
 
 def run_tests():
     """Run test suite."""
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestRec093)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestRec189)
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     return result.wasSuccessful()

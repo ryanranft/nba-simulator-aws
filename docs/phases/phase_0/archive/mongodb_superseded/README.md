@@ -24,7 +24,7 @@ These three sub-phases originally planned to use MongoDB for flexible data stora
 ## Archived Sub-Phases
 
 ### 1. 0.1: Store Raw Data in NoSQL Database (rec_033)
-**Superseded By:** [0.1 PostgreSQL JSONB Storage](../../0.1_postgresql_jsonb_storage/README.md)
+**Superseded By:** [0.10 PostgreSQL JSONB Storage](../../0.10_postgresql_jsonb_storage/README.md)
 
 **Original Goal:** Store raw NBA data in MongoDB with flexible schema
 
@@ -33,7 +33,7 @@ These three sub-phases originally planned to use MongoDB for flexible data stora
 ---
 
 ### 2. 0.2: Implement RAG Feature Pipeline (rec_034)
-**Superseded By:** [0.2 RAG Pipeline with pgvector](../../0.2_rag_pipeline_pgvector/README.md)
+**Superseded By:** [0.11 RAG Pipeline with pgvector](../../0.11_rag_pipeline_pgvector/README.md)
 
 **Original Goal:** RAG pipeline with Qdrant vector database
 
@@ -42,7 +42,7 @@ These three sub-phases originally planned to use MongoDB for flexible data stora
 ---
 
 ### 3. 0.6: Combine RAG and LLM (rec_188)
-**Superseded By:** [0.6 PostgreSQL RAG + LLM](../../0.6_rag_llm_integration/README.md)
+**Superseded By:** [0.12 PostgreSQL RAG + LLM](../../0.12_rag_llm_integration/README.md)
 
 **Original Goal:** Combine RAG with LLM using MongoDB + Qdrant
 
@@ -59,9 +59,9 @@ The original implementations are preserved in their respective directories for h
 ## Related Documentation
 
 - [Phase 0 Index](../../PHASE_0_INDEX.md) - Current Phase 0 structure
-- [PostgreSQL JSONB Implementation](../../0.1_postgresql_jsonb_storage/README.md)
-- [pgvector RAG Pipeline](../../0.2_rag_pipeline_pgvector/README.md)
-- [PostgreSQL RAG + LLM](../../0.6_rag_llm_integration/README.md)
+- [PostgreSQL JSONB Implementation](../../0.10_postgresql_jsonb_storage/README.md)
+- [pgvector RAG Pipeline](../../0.11_rag_pipeline_pgvector/README.md)
+- [PostgreSQL RAG + LLM](../../0.12_rag_llm_integration/README.md)
 
 ---
 

@@ -1,6 +1,6 @@
 # Phase 0: Data Collection & Initial Upload
 
-**Status:** ✅ COMPLETE (All Sub-Phases) | 📚 **6 Book Recommendations Available**
+**Status:** 🔄 IN PROGRESS (7 complete, 11 planned) | 📚 **18 Sub-Phases Total**
 **Priority:** COMPLETE
 **Prerequisites:** None (foundational phase)
 **Estimated Time:** Total: 150+ hours (✅ complete)
@@ -28,12 +28,23 @@ Get raw data from multiple sources into AWS S3 with temporal precision. This is 
 See `docs/PROJECT_VISION.md` for the complete vision.
 
 **Phase 0 Sub-Phases:**
-- **0.0** - Initial data collection (ESPN data, 146K files) ✅ COMPLETE
-- **0.1** - Basketball Reference expansion (13 tiers, 234 data types) ✅ COMPLETE
-- **0.2** - ESPN additional scraping ✅ COMPLETE
-- **0.3** - NBA API enhanced collection ✅ COMPLETE
-- **0.4** - Security implementation (13 variations) ✅ COMPLETE
-- **0.5** - Data extraction & structured output ✅ COMPLETE
+
+**Data Sources (0.1-0.7):**
+- **0.1** - ESPN Initial Upload (local machine → S3, 146K files) ✅ COMPLETE
+- **0.2** - hoopR Data Collection (R package → RDS, 30K games) ✅ COMPLETE
+- **0.3** - Kaggle Historical Database (2004-2020, 26K games) ✅ COMPLETE
+- **0.4** - Basketball Reference (web scraping, 13 tiers, 79 years) ✅ COMPLETE
+- **0.5** - NBA Stats API Collection (2020-2025, 22K files) ✅ COMPLETE
+- **0.6** - ESPN Additional Scraping (3,230 games) ✅ COMPLETE
+- **0.7** - Odds API Data (betting lines from The Odds API) 🔵 PLANNED
+
+**Infrastructure (0.8-0.9):**
+- **0.8** - Security Implementation (13 variations) ✅ COMPLETE
+- **0.9** - Data Extraction & Structured Output ✅ COMPLETE
+
+**Advanced Features (0.10-0.18):**
+- **0.10-0.12** - PostgreSQL implementations (JSONB, pgvector, RAG+LLM) 🔵 PLANNED
+- **0.13-0.18** - Book recommendations (dispatcher, error analysis, etc.) 🔵 PLANNED
 
 **Temporal precision levels:**
 - 2020-2025: Millisecond precision (NBA Live API - future)
@@ -46,16 +57,42 @@ See `docs/PROJECT_VISION.md` for the complete vision.
 
 | Sub-Phase | Name | Status | Time | Records | Cost | File |
 |-----------|------|--------|------|---------|------|------|
-| **0.0** | Initial Data Collection | ✅ COMPLETE | 2 days | 146K files | $2.74/mo | [0.0_initial_data_collection.md](phase_0/0.0_initial_data_collection.md) |
-| **0.1** | Basketball Reference Expansion | ✅ COMPLETE | 140-197h | 865K-10.88M | +$0.005/mo | [0.1_basketball_reference/](phase_0/0.1_basketball_reference/README.md) |
-| **0.2** | ESPN Additional Scraping | ✅ COMPLETE | 8-12h | 3,230 games | $0 | *Completed* |
-| **0.3** | NBA API Enhanced Collection | ✅ COMPLETE | 5-10h | 22,256 files | $0 | *Completed* |
-| **0.4** | Security Implementation | ✅ COMPLETE | ~4h | 13 variations | $0 | [0.4_security_implementation/](phase_0/0.4_security_implementation/README.md) |
-| **0.5** | Data Extraction & Structured Output | ✅ COMPLETE | ~2h | 1 implementation | $0 | [0.5_data_extraction/](phase_0/0.5_data_extraction/README.md) |
+| **0.1** | ESPN Initial Upload | ✅ COMPLETE | 2 days | 146K files | $2.74/mo | [0.1_initial_data_collection/](phase_0/0.1_initial_data_collection/README.md) |
+| **0.2** | hoopR Data Collection | ✅ COMPLETE | 6h | 30K games, 13M events | $0.96/mo | [0.2_hoopr_data_collection/](phase_0/0.2_hoopr_data_collection/README.md) |
+| **0.3** | Kaggle Historical Database | ✅ COMPLETE | Pre-project | 26K games (2004-2020) | $0 | [0.3_kaggle_historical_database/](phase_0/0.3_kaggle_historical_database/README.md) |
+| **0.4** | Basketball Reference Scraping | ✅ COMPLETE | 140-197h | 13 tiers, 79 years | +$0.005/mo | [0.4_basketball_reference/](phase_0/0.4_basketball_reference/README.md) |
+| **0.5** | NBA Stats API Collection | ✅ COMPLETE | 5-10h | 22,256 files | $0 | *Completed* |
+| **0.6** | ESPN Additional Scraping | ✅ COMPLETE | 8-12h | 3,230 games | $0 | *Completed* |
+| **0.7** | Odds API Data | 🔵 PLANNED | ~1 week | Betting lines | $0.25/mo | [0.7_odds_api_data/](phase_0/0.7_odds_api_data/README.md) |
+| **0.8** | Security Implementation | ✅ COMPLETE | ~4h | 13 variations | $0 | [0.8_security_implementation/](phase_0/0.8_security_implementation/README.md) |
+| **0.9** | Data Extraction & Output | ✅ COMPLETE | ~2h | 1 implementation | $0 | [0.9_data_extraction/](phase_0/0.9_data_extraction/README.md) |
+| **0.10** | PostgreSQL JSONB Storage | 🔵 PLANNED | ~1 week | Flexible schema | $0 | [0.10_postgresql_jsonb_storage/](phase_0/0.10_postgresql_jsonb_storage/README.md) |
+| **0.11** | RAG Pipeline with pgvector | 🔵 PLANNED | ~1 week | Vector embeddings | $0 | [0.11_rag_pipeline_pgvector/](phase_0/0.11_rag_pipeline_pgvector/README.md) |
+| **0.12** | RAG + LLM Integration | 🔵 PLANNED | 4-5 days | LLM integration | Variable | [0.12_rag_llm_integration/](phase_0/0.12_rag_llm_integration/README.md) |
+| **0.13** | Dispatcher Pipeline | 🔵 PLANNED | 5-6 days | rec_044 | $5-15/mo | [0.13_dispatcher_pipeline/](phase_0/0.13_dispatcher_pipeline/README.md) |
+| **0.14** | Error Analysis | 🔵 PLANNED | 3-4 days | rec_093 | $0 | [0.14_error_analysis/](phase_0/0.14_error_analysis/README.md) |
+| **0.15** | Information Availability | 🔵 PLANNED | 3-4 days | rec_180 | $0 | [0.15_information_availability/](phase_0/0.15_information_availability/README.md) |
+| **0.16** | Robust Architecture | 🔵 PLANNED | 1 week | rec_189 | $0 | [0.16_robust_architecture/](phase_0/0.16_robust_architecture/README.md) |
+| **0.17** | External APIs | 🔵 PLANNED | 4-5 days | rec_191 | Variable | [0.17_external_apis/](phase_0/0.17_external_apis/README.md) |
+| **0.18** | Autonomous Data Collection | 🔵 PLANNED | 2 weeks | Multi-source | $0 | [0.18_autonomous_data_collection/](phase_0/0.18_autonomous_data_collection/README.md) |
 
 ---
 
-## Sub-Phase 0.0: Initial Data Collection
+## Archived Sub-Phases
+
+The following sub-phases were archived on October 22, 2025 and superseded by PostgreSQL implementations:
+
+| Original | Name | Reason | Replaced By |
+|----------|------|--------|-------------|
+| 0.1 (MongoDB) | NoSQL Storage | PostgreSQL JSONB provides same flexibility | [0.10](phase_0/0.10_postgresql_jsonb_storage/README.md) |
+| 0.2 (Qdrant) | RAG Pipeline | pgvector provides vector search | [0.11](phase_0/0.11_rag_pipeline_pgvector/README.md) |
+| 0.6 (MongoDB+Qdrant) | RAG + LLM | Unified PostgreSQL architecture | [0.12](phase_0/0.12_rag_llm_integration/README.md) |
+
+**See:** [Archive Documentation](phase_0/archive/mongodb_superseded/README.md)
+
+---
+
+## Sub-Phase 0.1: Initial Data Collection
 
 **Status:** ✅ COMPLETE (October 1, 2025)
 
@@ -74,11 +111,11 @@ See `docs/PROJECT_VISION.md` for the complete vision.
 
 **Cost:** $2.74/month (S3 storage)
 
-**See:** [Sub-Phase 0.0 Details](phase_0/0.0_initial_data_collection.md)
+**See:** [Sub-Phase 0.1 Details](phase_0/0.1_initial_data_collection/README.md)
 
 ---
 
-## Sub-Phase 0.1: Basketball Reference Expansion
+## Sub-Phase 0.2: Basketball Reference Expansion
 
 **Status:** 🔄 READY TO IMPLEMENT (13 tiers organized, October 11, 2025)
 
@@ -122,7 +159,7 @@ Execute data collection, upload to S3
 
 ## Success Criteria
 
-### Sub-Phase 0.0 (Initial Collection)
+### Sub-Phase 0.1 (Initial Collection)
 - [x] S3 bucket created in us-east-1
 - [x] All 147,382 files collected locally (70,522 uploaded to S3)
 - [x] Total size matches source (119 GB)
@@ -132,7 +169,7 @@ Execute data collection, upload to S3
 - [x] Data structure documented
 - [x] Local backup created
 
-### Sub-Phase 0.1 (Basketball Reference Expansion)
+### Sub-Phase 0.2 (Basketball Reference Expansion)
 - [ ] Tier 1-2 completed (IMMEDIATE priority)
 - [ ] Tier 3-4 completed (HIGH priority)
 - [ ] Tier 5-7 completed (MEDIUM priority - recommended)
@@ -146,14 +183,14 @@ Execute data collection, upload to S3
 
 ## Cost Breakdown
 
-### Current Costs (Sub-Phase 0.0)
+### Current Costs (Sub-Phase 0.1)
 | Resource | Configuration | Monthly Cost | Notes |
 |----------|--------------|--------------|-------|
 | S3 Standard Storage | 119 GB | $2.74 | 119 GB × $0.023/GB |
 | S3 GET Requests | Minimal | ~$0.01 | Occasional downloads |
 | **Total** | | **$2.74/month** | Recurring storage only |
 
-### Expansion Cost Impact (Sub-Phase 0.1)
+### Expansion Cost Impact (Sub-Phase 0.2)
 | Tier Group | Records | Storage | Cost Impact |
 |------------|---------|---------|-------------|
 | Tier 1-9 (NBA) | 600K-8M | ~2-10 GB | +$0.05-0.23/mo |
@@ -175,8 +212,8 @@ Execute data collection, upload to S3
 - [ ] Python 3.11 environment
 - [ ] Sufficient local disk space
 
-**For Sub-Phase 0.1 (Basketball Reference):**
-- [x] Sub-Phase 0.0 complete (S3 bucket operational)
+**For Sub-Phase 0.2 (Basketball Reference):**
+- [x] Sub-Phase 0.1 complete (S3 bucket operational)
 - [x] Tier structure documented (13 tiers organized)
 - [ ] Scraper implementation ready
 - [ ] Rate limiting configured (12s between requests)
@@ -198,14 +235,14 @@ Execute data collection, upload to S3
 
 ## Critical Workflows
 
-**For Sub-Phase 0.0 (Initial Collection):**
+**For Sub-Phase 0.1 (Initial Collection):**
 - Workflow #1: Session Start
 - Workflow #17: Environment Setup
 - Workflow #18: Cost Management
 - Workflow #24: AWS Resource Setup
 - Workflow #21: Data Validation
 
-**For Sub-Phase 0.1 (Basketball Reference):**
+**For Sub-Phase 0.2 (Basketball Reference):**
 - Workflow #38: Overnight Scraper Handoff
 - Workflow #39: Scraper Monitoring
 - Workflow #42: Scraper Management
@@ -265,11 +302,11 @@ Then proceed to Phase 1 (Data Quality) for the new sport.
 
 ## Next Steps
 
-**After Sub-Phase 0.0 complete:**
-- ✅ S3 bucket operational with initial data
-- → Begin Sub-Phase 0.1 (Basketball Reference Tier 1-2)
-
 **After Sub-Phase 0.1 complete:**
+- ✅ S3 bucket operational with initial data
+- → Begin Sub-Phase 0.2 (Basketball Reference Tier 1-2)
+
+**After Sub-Phase 0.2 complete:**
 - → Proceed to [Phase 1: Data Quality & Gap Analysis](PHASE_1_INDEX.md)
 
 ---
@@ -292,10 +329,10 @@ Then proceed to Phase 1 (Data Quality) for the new sport.
 
 ---
 
-**Last Updated:** October 18, 2025
+**Last Updated:** October 23, 2025
 **Phase Owner:** Data Collection Team
-**Total Sub-Phases:** 6
-**Status:** ✅ COMPLETE (all 6 sub-phases done)
+**Total Sub-Phases:** 18 (7 complete, 11 planned)
+**Status:** 🔄 IN PROGRESS (Data sources documented, advanced features pending)
 
 
 ## Enhancement: Add more comprehensive API examples
