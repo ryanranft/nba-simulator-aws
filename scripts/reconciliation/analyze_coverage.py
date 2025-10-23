@@ -283,7 +283,9 @@ class CoverageAnalyzer:
 
     def _count_stale_files(self, files, freshness_days):
         """Count files older than freshness threshold"""
-        cutoff_date = datetime.now() - timedelta(days=freshness_days)
+        from datetime import timezone
+
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=freshness_days)
         stale_count = 0
 
         for file_meta in files:

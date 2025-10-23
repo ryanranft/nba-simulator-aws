@@ -1,62 +1,156 @@
 # NBA Data Inventory - Expected Coverage
-# Version: 0.1 MVP (ESPN Only)
+# Version: 0.2 (Refined for Actual Data)
 # Created: 2025-10-22
+# Updated: 2025-10-22
 # Purpose: Define what data we SHOULD have for reconciliation
 
-version: "0.1-mvp"
+version: "0.2-refined"
 last_updated: "2025-10-22"
 
-# MVP: ESPN only for initial validation
-# Will expand to all sources in Phase 2B
+# Based on actual S3 data analysis (10% sample scan):
+# - basketball_reference: 43 files (11.1 MB) - Advanced stats, player totals
+# - hoopr: 44 files (543.8 MB) - Play-by-play parquet files
+# - nba_api: 2,461 files (242.5 MB) - Comprehensive box scores, team stats
+#
+# Total S3: 172,754 objects, 118 GB
+# Sample: 17,366 objects (10%), 11.89 GB
 
 expected_coverage:
-  espn:
-    # Start with recent seasons only for MVP
+  basketball_reference:
+    # Historical player advanced statistics from Basketball Reference
+    # Path pattern: basketball_reference/advanced_totals/{year}/player_advanced_totals.json
     seasons:
-      - 2023-24
-      - 2024-25
-
+      - 1962
+      - 1963
+      - 1964
+      - 1965
+      - 1966
+      - 1967
+      - 1968
+      - 1969
+      - 1970-2024  # Continuous years
+    
+    data_types:
+      player_advanced_totals:
+        required: true
+        freshness_days: 365  # Annual data, updated yearly
+        path_patterns:
+          - "basketball_reference/advanced_totals/{year}/player_advanced_totals.json"
+        completeness_threshold: 0.90  # 90% of years required
+        description: "Player advanced statistics totals by year (PER, WS, BPM, VORP)"
+        expected_years: 63  # 1962-2024
+  
+  hoopr:
+    # Play-by-play data in parquet format from Hoopr
+    # Path pattern: hoopr_parquet/play_by_play/nba_data_{year}.parquet
+    seasons:
+      - 2004
+      - 2005
+      - 2006-2024  # Continuous years
+    
     data_types:
       play_by_play:
         required: true
-        freshness_days: 7 # Recent games must be < 7 days old
+        freshness_days: 30  # Updated monthly
         path_patterns:
-          - "nba_pbp/espn/{season}/play_by_play_{game_id}.json"
-          - "nba_pbp/{season}/play_by_play_{game_id}.json"
-        completeness_threshold: 0.95 # 95% of games required
-        description: "Play-by-play data from ESPN API"
-
-      box_scores:
+          - "hoopr_parquet/play_by_play/nba_data_{year}.parquet"
+        completeness_threshold: 0.95  # 95% of years required
+        description: "Play-by-play data in parquet format"
+        expected_years: 21  # 2004-2024
+  
+  nba_api:
+    # Comprehensive NBA API data (box scores, team stats, player stats)
+    # Path pattern: nba_api_comprehensive/{type}/{file}
+    seasons:
+      - 2000-01
+      - 2001-02
+      - 2002-03
+      - 2003-04
+      - 2004-05
+      - 2005-06
+      - 2006-07
+      - 2007-08
+      - 2008-09
+      - 2009-10
+      - 2010-11
+      - 2011-12
+      - 2012-13
+      - 2013-14
+      - 2014-15
+      - 2015-16
+      - 2016-17
+      - 2017-18
+      - 2018-19
+      - 2019-20
+      - 2020-21
+      - 2021-22
+      - 2022-23
+      - 2023-24
+      - 2024-25  # Current season
+    
+    data_types:
+      boxscores_advanced:
+        required: true
+        freshness_days: 7  # Recent games updated weekly
+        path_patterns:
+          - "nba_api_comprehensive/boxscores_advanced/advanced_{game_id}.json"
+        completeness_threshold: 0.95
+        description: "Advanced box score statistics per game"
+        expected_per_season: 1320  # ~1,230 regular season + ~90 playoffs
+      
+      boxscores_traditional:
         required: true
         freshness_days: 7
         path_patterns:
-          - "nba_box_score/espn/{season}/box_score_{game_id}.json"
-          - "nba_box_score/{season}/box_score_{game_id}.json"
+          - "nba_api_comprehensive/boxscores_traditional/traditional_{game_id}.json"
         completeness_threshold: 0.95
-        description: "Box score data from ESPN API"
-
-      schedule:
+        description: "Traditional box score statistics per game"
+        expected_per_season: 1320
+      
+      team_stats:
         required: true
-        freshness_days: 1 # Schedule updated daily
+        freshness_days: 14
         path_patterns:
-          - "nba_schedule_json/espn/{season}/schedule.json"
-          - "nba_schedule_json/{season}/schedule.json"
-        completeness_threshold: 1.0 # Must have schedule
-        description: "Season schedule from ESPN API"
+          - "nba_api_comprehensive/team_stats/{season}/{stat_type}.json"
+          - "nba_api_comprehensive/team_dashboards/{season}/{team_id}.json"
+        completeness_threshold: 0.90
+        description: "Team statistics and dashboards by season"
+        expected_per_season: 30  # 30 teams
+      
+      player_stats:
+        required: false
+        freshness_days: 30
+        path_patterns:
+          - "nba_api_comprehensive/player_stats/{season}/{player_id}.json"
+        completeness_threshold: 0.85
+        description: "Individual player statistics"
+        expected_per_season: 500  # ~500 active players per season
 
-# Expected game counts per season (regular season + playoffs)
+# Expected game counts per season (for validation)
 expected_game_counts:
-  regular_season: 1230 # 82 games × 30 teams ÷ 2
-  playoffs_min: 60 # Minimum playoff games
-  playoffs_max: 105 # Maximum playoff games (all series go to 7)
+  regular_season: 1230  # 82 games × 30 teams ÷ 2
+  playoffs_min: 60      # Minimum playoff games (all series best-of-7)
+  playoffs_max: 105     # Maximum playoff games (all series go to 7)
   total_min: 1290
   total_max: 1335
 
+# Expected file counts (based on actual data)
+expected_file_counts:
+  basketball_reference:
+    player_advanced_totals: 63  # 1962-2024
+  hoopr:
+    play_by_play: 21  # 2004-2024
+  nba_api:
+    boxscores_advanced: 33000  # ~1,320 games/season × 25 seasons
+    boxscores_traditional: 33000
+    team_stats: 750  # 30 teams × 25 seasons
+    player_stats: 12500  # ~500 players × 25 seasons
+
 # Data quality requirements
 quality_requirements:
-  min_file_size_bytes: 100 # Flag suspiciously small files (< 100 bytes)
-  max_file_age_days: 365 # Flag very old files in current season
-
+  min_file_size_bytes: 100  # Flag suspiciously small files (< 100 bytes)
+  max_file_age_days: 365    # Flag very old files in current season
+  
   required_fields:
     play_by_play:
       - game_id
@@ -64,7 +158,7 @@ quality_requirements:
       - description
       - score_home
       - score_away
-
+    
     box_scores:
       - game_id
       - player_id
@@ -72,12 +166,21 @@ quality_requirements:
       - points
       - rebounds
       - assists
-
-    schedule:
-      - game_id
-      - game_date
-      - home_team
-      - away_team
+    
+    player_advanced_totals:
+      - player_name
+      - season
+      - PER
+      - WS
+      - BPM
+      - VORP
+    
+    team_stats:
+      - team_id
+      - season
+      - wins
+      - losses
+      - points_per_game
 
 # Priority definitions for gap detection
 priority_rules:
@@ -86,32 +189,33 @@ priority_rules:
     conditions:
       - "game_date within last 7 days"
       - "required data type missing"
-
+      - "current season < 80% complete"
+  
   high:
     description: "Current season incomplete"
     conditions:
       - "season is 2024-25"
       - "completeness < 95%"
-
+  
   medium:
-    description: "Recent season gaps"
+    description: "Recent seasons gaps (last 2 years)"
     conditions:
-      - "season is 2023-24"
+      - "season is 2023-24 or 2022-23"
       - "completeness < 95%"
-
+  
   low:
-    description: "Historical backfill"
+    description: "Historical backfill (before 2022)"
     conditions:
-      - "season before 2023-24"
+      - "season before 2022-23"
       - "completeness < 90%"
 
 # Configuration for reconciliation engine
 reconciliation_config:
-  scan_mode: "sample" # MVP: sample | full (Phase 2B)
-  sample_rate: 0.10 # Scan 10% of S3 for MVP
-  cache_ttl_hours: 24 # Cache S3 inventory for 24 hours
-  dry_run: true # MVP: Don't trigger actions, just report
-
+  scan_mode: "sample"  # sample | full
+  sample_rate: 0.10    # Scan 10% of S3 for speed
+  cache_ttl_hours: 24  # Cache S3 inventory for 24 hours
+  dry_run: true        # Don't trigger actions, just report
+  
   performance_targets:
     s3_scan_max_minutes: 5
     coverage_analysis_max_seconds: 30
@@ -120,8 +224,10 @@ reconciliation_config:
 
 # Metadata
 metadata:
-  phase: "2A-MVP"
-  focus: "ESPN data only"
-  next_phase: "2B - Expand to all sources"
+  phase: "2A-MVP-Refined"
+  focus: "Actual data sources: basketball_reference, hoopr, nba_api"
+  next_phase: "2B - Full implementation with automation"
   created_by: "claude_code_agent"
-  documentation: "reports/dims_phase2_readiness_report.md"
+  refinement_date: "2025-10-22"
+  based_on_scan: "2025-10-22 19:49 UTC (10% sample, 27s scan)"
+  documentation: "reports/reconciliation_engine_phase2a_complete.md"
