@@ -14,9 +14,9 @@ s3:
     - nba_pbp
     - nba_box_score
     - nba_schedule_json
-  
+
   # Phase 2B: AWS S3 Inventory integration
-  use_aws_inventory: false # Enable for Phase 2B (requires setup)
+  use_aws_inventory: true # ✅ ENABLED - AWS Inventory configured on 2025-10-22
   inventory_bucket: nba-sim-raw-data-lake # Where inventory reports are stored
   inventory_prefix: inventory-reports/ # Prefix for inventory reports
   fallback_to_sample: true # Fall back to sampling if inventory unavailable
