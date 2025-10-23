@@ -380,35 +380,6 @@ pytest tests/phases/phase_0/test_0_1_initial_data_collection.py::TestS3BucketCon
 
 ---
 
-## Multi-Sport Replication
-
-**For future sports (NFL, MLB, NHL, Soccer):**
-
-This phase is **sport-agnostic** - follow the same steps:
-
-1. **Sub-Phase 0.1:** Set up environment (same conda env can be reused)
-2. **Sub-Phase 0.2:** Create sport-specific S3 bucket (e.g., `s3://nfl-sim-raw-data-lake`)
-3. **Sub-Phase 0.3:** Upload sport data from local source
-4. **Sub-Phase 0.4:** Verify upload
-
-**Example for NFL:**
-```bash
-# Create bucket
-aws s3 mb s3://nfl-sim-raw-data-lake --region us-east-1
-
-# Upload data
-aws s3 sync /Users/ryanranft/0espn/data/nfl/ \
-  s3://nfl-sim-raw-data-lake/schedule/ \
-  --exclude "*" --include "*.json"
-
-# Verify
-aws s3 ls s3://nfl-sim-raw-data-lake/ --recursive | wc -l
-```
-
-**Then proceed to Phase 1 (Data Quality & Gap Analysis) for the new sport.**
-
----
-
 ## Troubleshooting
 
 **Common issues encountered:**
