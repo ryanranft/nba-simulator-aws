@@ -27,7 +27,13 @@ Get raw data from multiple sources into AWS S3 with temporal precision. This is 
 
 **⚠️ IMPORTANT: This is a temporal panel data system, not a traditional game simulator.**
 
-See `docs/PROJECT_VISION.md` for the complete vision.
+**Project vision:** See [main README](../../../README.md) for the complete vision including:
+- Econometric causal inference framework
+- Nonparametric event modeling (distribution-free)
+- Hybrid simulation methodology
+- Advanced modeling techniques (Bayesian updating, regime-switching, network effects)
+
+**Phase 0.1 role:** Collect the temporal raw data that makes this vision possible.
 
 **This phase includes:**
 - Local development environment setup
@@ -43,10 +49,74 @@ See `docs/PROJECT_VISION.md` for the complete vision.
 - Establish S3 as the single source of truth for temporal raw data
 - Enable snapshot queries: "Show me NBA state at exactly 7:02:34 PM on June 19, 2016"
 
-**Temporal precision levels:**
-- 2020-2025: Millisecond precision (NBA Live API - future)
-- 1993-2019: Minute-level precision (NBA Stats PlayByPlayV2)
-- 1946-1992: Game-level aggregates (Basketball Reference)
+**Temporal precision by data availability:**
+
+**Play-by-play data available (~1996-present):**
+- **Millisecond-precision reconstruction**
+  - Sources: ESPN, NBA Stats API (PlayByPlayV2)
+  - Method: Wall clock timestamps + game clock alignment
+  - Enables: Exact snapshot queries ("What were Kobe's stats at 7:02:34 PM on June 19, 2016?")
+
+**Box score data only (1946-1996):**
+- **Simulation-based temporal reconstruction**
+  - Sources: Basketball Reference historical box scores
+  - Method: Econometric + nonparametric simulation (see main README)
+  - Generates: Plausible possession sequences with temporal estimates
+  - Techniques: Regime-switching models, Bayesian updating, empirical distributions
+
+**Key insight:** We can achieve millisecond precision for the entire play-by-play era, not just recent seasons. Pre-play-by-play games require simulation techniques described in the [main README](../../../README.md#simulation-methodology).
+
+---
+
+## How Phase 0.1 Data Enables the Simulation Vision
+
+This phase collects the foundational temporal data that powers the **hybrid econometric + nonparametric simulation system** described in the [main README](../../../README.md#simulation-methodology).
+
+**What this data enables:**
+
+### 1. Temporal Panel Data Structure
+- **Player-game-possession observations** with exact timestamps
+- **Wall clock + game clock alignment** for millisecond precision
+- **Player ages calculated dynamically** at any moment in history
+
+### 2. Econometric Causal Inference (Main README: Lines 49-87)
+From this data, we estimate:
+- **Points Per Possession (PPP)** using panel data regression (fixed effects, random effects)
+- **Instrumental variables** to address endogeneity (usage rates, rest days as instruments)
+- **Treatment effects** of offensive plays vs defensive schemes
+- **Propensity score matching** to find comparable historical possessions
+
+### 3. Nonparametric Event Modeling (Main README: Lines 88-97)
+From this data, we build empirical distributions:
+- **Technical fouls** - kernel density estimation (no parametric assumptions)
+- **Injuries** - bootstrap resampling from observed events
+- **Momentum shifts** - changepoint detection (PELT algorithm)
+- **Referee bias** - empirical CDFs by official and game context
+
+### 4. Simulation for Pre-Play-by-Play Era (1946-1996)
+For games without play-by-play data:
+- **Input:** Box score aggregates (points, rebounds, assists per game)
+- **Method:** Possession-level simulation using techniques from main README:
+  - Regime-switching models (normal play, garbage time, desperation)
+  - Bayesian updating (teams learn opponent strategies in-game)
+  - Network effects (lineup synergies via graph models)
+- **Output:** Plausible temporal snapshots with uncertainty quantification
+
+### 5. Context-Adaptive Game Simulations
+This temporal data enables simulations that adapt to:
+- **Game situation:** Tied double-OT Finals vs 40-point blowout
+- **Player aging:** Rookie vs prime vs declining performance (exact age at game time)
+- **Fatigue states:** Back-to-back games, minutes played, stamina depletion
+- **Strategic adaptation:** Coach adjustments based on opponent tendencies
+- **Irregular events:** Injuries, technical fouls, momentum swings (sampled from empirical distributions)
+
+**See [main README](../../../README.md) for complete simulation methodology including:**
+- Game theory strategy optimization (Nash equilibrium from estimated payoff matrices)
+- Bayesian updating (posterior beliefs about opponent strategy)
+- Model ensembling (BMA, cross-validation stacking, inverse variance weighting)
+- Counterfactual validation (synthetic controls, difference-in-differences)
+
+**This phase is the foundation.** Without temporally-indexed raw data in S3, the advanced simulation techniques cannot function.
 
 ---
 
@@ -65,15 +135,32 @@ cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.1_initial_data_colle
 python validate_upload_completeness.py
 ```
 
-### Data Growth Trajectory
+### Data Growth Tracking (Live - Powered by DIMS)
 
-| Milestone | Files | Size | Date | Source |
-|-----------|-------|------|------|--------|
-| **Phase 0.1 Initial Upload** | 146,115 | 119 GB | Oct 2024 | ESPN historical data |
-| **ADCE Autonomous Collection** | +25,323 | +TBD | Oct 2025 | 8 new data sources (Phase 0.9) |
-| **Current Total** | 172,719* | 118 GB* | _Live_ | Query S3 for current count |
+**Get current S3 metrics (always up-to-date):**
+```bash
+# Quick verification
+python scripts/monitoring/dims_cli.py verify --category s3_storage
 
-\* *Excludes 35 artifact files (athena-results, ml-models, etc.)*
+# Detailed view with trends
+python scripts/monitoring/dims_cli.py history s3_storage.total_objects --days 90
+```
+
+**Expected output:**
+```
+s3_storage.total_objects: 172,726 (baseline: 146,115, +18.2% growth)
+s3_storage.total_size_gb: 118.26 GB (baseline: 119 GB, -0.6% compression)
+s3_storage.hoopr_files: 96 (ADCE autonomous collection)
+```
+
+**Historical milestones:**
+- **Oct 2024 (Phase 0.1 Initial Upload):** 146,115 files, 119 GB (ESPN historical)
+- **Oct 2025 (ADCE Autonomous Collection):** +25,323 files (8 new data sources)
+
+**See:**
+- Workflow #56 (DIMS Management) - Complete data tracking guide
+- `inventory/metrics.yaml` - Current metrics (auto-updated at session end)
+- `inventory/historical/` - Daily snapshots for trend analysis
 
 ### ADCE Data Sources (Phase 0.9)
 

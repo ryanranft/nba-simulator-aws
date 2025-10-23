@@ -1,6 +1,6 @@
 metadata:
   version: 1.0.0
-  last_updated: '2025-10-23T01:37:11.923998Z'
+  last_updated: '2025-10-23T01:52:27.431007Z'
   last_verified: '2025-10-21T19:00:00Z'
   verified_by: manual_verification
   system: DIMS v1.0.0
@@ -121,8 +121,8 @@ code_base:
     cache_expires: null
 documentation:
   markdown_files:
-    value: 1719
-    last_verified: '2025-10-23T00:13:20.518246Z'
+    value: 1720
+    last_verified: '2025-10-23T01:52:27.212224Z'
     verification_method: automated
     cached: false
     cache_expires: null
@@ -142,9 +142,9 @@ git:
     cache_expires: null
 workflows:
   total:
-    value: 62
+    value: 63
     directory: docs/claude_workflows/workflow_descriptions/
-    last_verified: '2025-10-23T00:55:13.948538Z'
+    last_verified: '2025-10-23T01:52:27.327396Z'
     verification_method: automated
     cached: false
     cache_expires: null

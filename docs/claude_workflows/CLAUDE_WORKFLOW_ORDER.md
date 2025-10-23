@@ -45,6 +45,7 @@ All detailed workflow descriptions are located in: `/docs/claude_workflows/workf
 15. **Session End** → `14_session_end.md` (end of session)
 16. **Context Management** → `15_context_management.md` (at 75%/90% context)
 56. **DIMS Management** → `56_dims_management.md` (session start/end, weekly maintenance)
+57. **Phase-README Alignment** → `57_phase_readme_alignment.md` (phase completion, monthly review)
 
 ### Testing (By Phase)
 
@@ -215,12 +216,13 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
 - **🚀 Integrated data pipeline?** → `48` (unified workflow: inventory → gaps → plan → collect → validate)
 - **📊 Run data audit?** → `49` (automated inventory update & sync verification - runs after scraping)
 - **Verify project metrics?** → `56` (DIMS - track S3, code, docs, tests)
+- **Validate phase docs?** → `57` (align phase READMEs with main README vision)
 
 ---
 
 ## 📊 Workflow Statistics
 
-- **Total workflows**: 56
+- **Total workflows**: 57
 - **Total size**: ~830 KB
 - **Average workflow**: ~19 KB
 - **Largest workflow**: `24_aws_resource_setup.md` (92 KB)

@@ -290,7 +290,7 @@ The autonomous implementation system has completed its mission. Next steps:
 
 **Update hierarchy:**
 1. **Sub-phase completes** → Update phase_N/N.M_name.md, then PHASE_N_INDEX.md
-2. **Full phase completes** → Update PHASE_N_INDEX.md, then PROGRESS.md
+2. **Full phase completes** → Update PHASE_N_INDEX.md, then PROGRESS.md, **then validate phase README against main README**
 3. **Session ends** → Update PROGRESS.md "Current Session Context"
 
 **What to update in PROGRESS.md:**
@@ -302,6 +302,17 @@ The autonomous implementation system has completed its mission. Next steps:
 - Sub-phase completion (belongs in phase index)
 - Implementation details (belong in sub-phase files)
 - Commands (belong in COMMAND_LOG.md)
+
+**Phase-README Validation (Required before marking phase complete):**
+- **Source of truth:** Main README.md defines the project vision
+- **When:** Before marking any phase ✅ COMPLETE
+- **Workflow:** #57 (Phase-README Alignment)
+- **Checklist:**
+  - [ ] Temporal precision statements match main README
+  - [ ] Data tracking uses DIMS (no static file counts)
+  - [ ] Phase README explains how it enables main README vision
+  - [ ] Methodology terminology aligns (econometric + nonparametric)
+  - [ ] Cross-reference links work
 
 ---
 
@@ -401,6 +412,7 @@ The autonomous implementation system has completed its mission. Next steps:
 - **Archiving:** docs/ARCHIVE_PROTOCOLS.md
 - **Documentation System:** docs/DOCUMENTATION_SYSTEM.md
 - **DIMS Management:** docs/claude_workflows/workflow_descriptions/56_dims_management.md
+- **Phase-README Alignment:** docs/claude_workflows/workflow_descriptions/57_phase_readme_alignment.md
 
 ---
 
