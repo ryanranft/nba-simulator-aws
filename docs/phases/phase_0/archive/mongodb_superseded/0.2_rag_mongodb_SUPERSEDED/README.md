@@ -1,8 +1,37 @@
+# 🗄️ SUPERSEDED: Implement RAG Feature Pipeline (Qdrant/MongoDB)
+
+**Original Status:** 🔵 PLANNED
+**New Status:** 🗄️ **ARCHIVED - SUPERSEDED**
+**Superseded By:** [0.2 RAG Pipeline with pgvector](../../0.2_rag_pipeline_pgvector/README.md)
+**Archived Date:** October 22, 2025
+**Implementation ID:** rec_034 (Qdrant/MongoDB-based - superseded)
+
+---
+
+## ⚠️ This Implementation Has Been Superseded
+
+**This sub-phase planned to use Qdrant** (or similar vector database) for embeddings. After analysis, we determined that **PostgreSQL with pgvector extension** provides all the same capabilities with better integration.
+
+### Why pgvector Instead of Qdrant?
+
+- ✅ **Vector embeddings:** pgvector supports HNSW and IVFFlat indexes
+- ✅ **Single database:** No separate vector DB infrastructure needed
+- ✅ **ACID transactions:** Embeddings and data in same transaction
+- ✅ **Lower cost:** $0 additional (using existing RDS)
+- ✅ **Simpler architecture:** One connection pool, one backup strategy
+- ✅ **Better integration:** Join embeddings with temporal data
+
+**Current Implementation:** [0.2 RAG Pipeline with pgvector](../../0.2_rag_pipeline_pgvector/README.md)
+
+---
+
+## Original Plan (Historical Reference)
+
 # 0.2: Implement a RAG Feature Pipeline
 
 **Sub-Phase:** 0.2 (ML)
-**Parent Phase:** [Phase 0: Data Collection](../PHASE_0_INDEX.md)
-**Status:** 🔵 PLANNED
+**Parent Phase:** [Phase 0: Data Collection](../../../PHASE_0_INDEX.md)
+**Original Status:** 🔵 PLANNED
 **Priority:** ⭐ CRITICAL
 **Implementation ID:** rec_034
 

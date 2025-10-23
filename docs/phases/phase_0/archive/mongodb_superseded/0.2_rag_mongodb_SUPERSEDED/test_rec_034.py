@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Test Suite: Combine Retrieval-Augmented Generation (RAG) and the LLM
+Test Suite: Implement a RAG Feature Pipeline
 
-Tests for rec_188 implementation.
+Tests for rec_034 implementation.
 """
 
 import unittest
@@ -12,19 +12,19 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from implement_rec_188 import CombineRetrievalaugmentedGenerationRagAndTheLlm
+from implement_rec_034 import ImplementARagFeaturePipeline
 
 
-class TestRec188(unittest.TestCase):
-    """Test suite for Combine Retrieval-Augmented Generation (RAG) and the LLM."""
+class TestRec034(unittest.TestCase):
+    """Test suite for Implement a RAG Feature Pipeline."""
 
     def setUp(self):
         """Set up test fixtures."""
-        self.impl = CombineRetrievalaugmentedGenerationRagAndTheLlm()
+        self.impl = ImplementARagFeaturePipeline()
 
     def tearDown(self):
         """Clean up after tests."""
-        if hasattr(self.impl, 'cleanup'):
+        if hasattr(self.impl, "cleanup"):
             self.impl.cleanup()
 
     def test_initialization(self):
@@ -35,7 +35,7 @@ class TestRec188(unittest.TestCase):
     def test_setup(self):
         """Test setup method."""
         result = self.impl.setup()
-        self.assertTrue(result['success'])
+        self.assertTrue(result["success"])
         self.assertTrue(self.impl.initialized)
 
     def test_execute_without_setup(self):
@@ -47,7 +47,7 @@ class TestRec188(unittest.TestCase):
         """Test successful execution."""
         self.impl.setup()
         result = self.impl.execute()
-        self.assertTrue(result['success'])
+        self.assertTrue(result["success"])
 
     def test_validate(self):
         """Test validation method."""
@@ -71,7 +71,7 @@ class TestRec188(unittest.TestCase):
 
 def run_tests():
     """Run test suite."""
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestRec188)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestRec034)
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     return result.wasSuccessful()

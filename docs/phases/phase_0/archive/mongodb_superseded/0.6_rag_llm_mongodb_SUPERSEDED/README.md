@@ -1,8 +1,37 @@
+# 🗄️ SUPERSEDED: Combine RAG and LLM (MongoDB/Qdrant-based)
+
+**Original Status:** 🔵 PLANNED
+**New Status:** 🗄️ **ARCHIVED - SUPERSEDED**
+**Superseded By:** [0.6 PostgreSQL RAG + LLM Integration](../../0.6_rag_llm_integration/README.md)
+**Archived Date:** October 22, 2025
+**Implementation ID:** rec_188 (MongoDB/Qdrant-based - superseded)
+
+---
+
+## ⚠️ This Implementation Has Been Superseded
+
+**This sub-phase planned to combine RAG with LLM** using separate MongoDB and vector databases. After analysis, we determined that **PostgreSQL with JSONB and pgvector** provides a unified solution.
+
+### Why PostgreSQL RAG + LLM?
+
+- ✅ **Single database:** Context and embeddings in PostgreSQL
+- ✅ **JSONB storage:** Flexible response caching and metadata
+- ✅ **pgvector search:** Fast similarity search for RAG retrieval
+- ✅ **Lower cost:** $0 additional infrastructure
+- ✅ **Simpler architecture:** One database for everything
+- ✅ **Better integration:** Join embeddings, data, and LLM responses
+
+**Current Implementation:** [0.6 PostgreSQL RAG + LLM Integration](../../0.6_rag_llm_integration/README.md)
+
+---
+
+## Original Plan (Historical Reference)
+
 # 0.6: Combine Retrieval-Augmented Generation (RAG) and the LLM
 
 **Sub-Phase:** 0.6 (Security)
-**Parent Phase:** [Phase 0: Data Collection](../PHASE_0_INDEX.md)
-**Status:** 🔵 PLANNED
+**Parent Phase:** [Phase 0: Data Collection](../../../PHASE_0_INDEX.md)
+**Original Status:** 🔵 PLANNED
 **Priority:** 🟡 IMPORTANT
 **Implementation ID:** rec_188
 

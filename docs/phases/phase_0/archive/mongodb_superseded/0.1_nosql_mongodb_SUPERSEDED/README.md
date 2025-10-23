@@ -1,8 +1,37 @@
+# 🗄️ SUPERSEDED: Store Raw Data in NoSQL Database (MongoDB)
+
+**Original Status:** 🔵 PLANNED
+**New Status:** 🗄️ **ARCHIVED - SUPERSEDED**
+**Superseded By:** [0.1 PostgreSQL JSONB Storage](../../0.1_postgresql_jsonb_storage/README.md)
+**Archived Date:** October 22, 2025
+**Implementation ID:** rec_033 (MongoDB-based - superseded)
+
+---
+
+## ⚠️ This Implementation Has Been Superseded
+
+**This sub-phase planned to use MongoDB** for flexible schema storage. After analysis, we determined that **PostgreSQL with JSONB** provides all the same benefits with superior integration for our temporal panel data system.
+
+### Why PostgreSQL Instead of MongoDB?
+
+- ✅ **Flexible schema:** JSONB columns provide document-like flexibility
+- ✅ **JSON indexing:** GIN indexes on JSONB for fast queries
+- ✅ **Better integration:** Native joins with temporal data
+- ✅ **ACID transactions:** Data consistency guaranteed
+- ✅ **Lower cost:** $0 additional (using existing RDS)
+- ✅ **Simpler architecture:** Single database
+
+**Current Implementation:** [0.1 PostgreSQL JSONB Storage](../../0.1_postgresql_jsonb_storage/README.md)
+
+---
+
+## Original Plan (Historical Reference)
+
 # 0.1: Store Raw Data in a NoSQL Database
 
 **Sub-Phase:** 0.1 (Data Processing)
-**Parent Phase:** [Phase 0: Data Collection](../PHASE_0_INDEX.md)
-**Status:** 🔵 PLANNED
+**Parent Phase:** [Phase 0: Data Collection](../../../PHASE_0_INDEX.md)
+**Original Status:** 🔵 PLANNED
 **Priority:** ⭐ CRITICAL
 **Implementation ID:** rec_033
 
