@@ -13,7 +13,7 @@
 bash scripts/shell/session_end.sh
 ```
 
-**What this does (4-part checklist):**
+**What this does (5-part checklist):**
 
 #### Part 1: Git Status Check
 
@@ -112,12 +112,53 @@ git status --porcelain
 💡 Consider updating documentation before next session
 ```
 
-#### Part 4: Next Session Preview
+#### Part 4: DIMS (Data Inventory Management System)
+
+**Automatically verifies and updates project metrics:**
+
+**What DIMS does at session end:**
+- Verifies all 25 project metrics (S3, code, docs, tests, etc.)
+- Auto-updates any metrics with drift from baseline
+- Saves updated metrics to `inventory/metrics.yaml`
+- Creates daily snapshot in `inventory/historical/`
+
+**Sample output:**
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 4. DATA INVENTORY (DIMS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Verifying and updating project metrics...
+✓ DIMS metrics updated
+
+OR (if drift detected):
+
+Verifying and updating project metrics...
+⚠️  3 metrics drifted:
+  - s3_storage.total_objects: 172,726 → 174,891 (+1.3%)
+  - code_base.python_files: 1,308 → 1,315 (+0.5%)
+  - documentation.markdown_files: 1,719 → 1,720 (+0.1%)
+✓ DIMS metrics updated (3 metrics refreshed)
+```
+
+**Manual operations (if needed):**
+```bash
+# View full drift report
+python scripts/monitoring/dims_cli.py verify
+
+# Force update all metrics
+python scripts/monitoring/dims_cli.py update
+
+# See complete documentation
+# Workflow #56: docs/claude_workflows/workflow_descriptions/56_dims_management.md
+```
+
+#### Part 5: Next Session Preview
 
 **Shows next pending task from PROGRESS.md:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 4. NEXT SESSION
+🚀 5. NEXT SESSION
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Next pending task in PROGRESS.md:

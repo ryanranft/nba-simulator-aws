@@ -33,7 +33,7 @@ PROGRESS.md → PHASE_N_INDEX.md → phase_N/N.M_name.md → workflows → execu
 ```
 
 **Quick reference - Every session:**
-1. **Initialize** (`bash scripts/shell/session_manager.sh start`) - auto-checks credentials, overnight jobs
+1. **Initialize** (`bash scripts/shell/session_manager.sh start`) - auto-checks credentials, overnight jobs, DIMS metrics
 2. **Ask user** what they completed since last session
 3. If work completed → Update PROGRESS.md
 4. If 'none' → Proceed with "Next planned task"
@@ -400,6 +400,7 @@ The autonomous implementation system has completed its mission. Next steps:
 - **Security & Git:** docs/SECURITY_PROTOCOLS.md
 - **Archiving:** docs/ARCHIVE_PROTOCOLS.md
 - **Documentation System:** docs/DOCUMENTATION_SYSTEM.md
+- **DIMS Management:** docs/claude_workflows/workflow_descriptions/56_dims_management.md
 
 ---
 

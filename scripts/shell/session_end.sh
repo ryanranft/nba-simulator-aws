@@ -129,9 +129,33 @@ fi
 
 echo ""
 
-# 4. Next session prep
+# 4. DIMS (Data Inventory Management System) - Auto-update
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🚀 4. NEXT SESSION"
+echo "📊 4. DATA INVENTORY (DIMS)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# Check if DIMS is available
+if [ -f "scripts/monitoring/dims_cli.py" ]; then
+    echo "Verifying and updating project metrics..."
+    python scripts/monitoring/dims_cli.py verify --update 2>/dev/null
+    dims_exit_code=$?
+
+    if [ $dims_exit_code -eq 0 ]; then
+        echo -e "${GREEN}✓ DIMS metrics updated${NC}"
+    else
+        echo -e "${YELLOW}⚠️  DIMS update failed (non-critical)${NC}"
+        echo -e "${BLUE}💡 Run manually: python scripts/monitoring/dims_cli.py verify${NC}"
+    fi
+else
+    echo -e "${CYAN}ℹ️  DIMS not installed (optional monitoring tool)${NC}"
+fi
+
+echo ""
+
+# 5. Next session prep
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🚀 5. NEXT SESSION"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 

@@ -13,6 +13,7 @@ bash scripts/shell/session_manager.sh start
 - ✅ **NEW:** Verifies NBA simulator credentials loaded
 - ✅ **NEW:** Auto-checks overnight scraper jobs (if applicable)
 - ✅ **NEW:** Displays session context summary (last session, next task, pending commits)
+- ✅ **NEW:** DIMS verification (Data Inventory Management System - checks metric drift)
 
 **Note:** Path is `scripts/shell/session_manager.sh` (not `scripts/session_manager.sh`)
 
@@ -411,6 +412,23 @@ Previously required reading PROGRESS.md separately - now all context displayed i
 - **If 7+ days since last inventory:** "Should I run `make inventory` to update file summaries?"
 - **If new AWS resources may exist:** "Should I run `make sync-progress` to check PROGRESS.md matches AWS?"
 - **If .md files were modified:** "After these changes, should I run `make inventory` to update FILE_INVENTORY.md?"
+
+### DIMS Integration
+
+**DIMS (Data Inventory Management System)** runs automatically during session startup to verify project metrics.
+
+**What DIMS checks:**
+- S3 storage (object counts, size, hoopr files)
+- Code metrics (Python files, test files, ML scripts)
+- Documentation metrics (markdown files, size)
+- SQL schemas, workflows, git metrics
+
+**Manual DIMS operations:**
+- Full verification: `python scripts/monitoring/dims_cli.py verify`
+- Update metrics: `python scripts/monitoring/dims_cli.py verify --update`
+- View trends: `python scripts/monitoring/dims_cli.py history METRIC_PATH --days 30`
+
+**See:** Workflow #56 (`56_dims_management.md`) for complete DIMS documentation
 
 ---
 

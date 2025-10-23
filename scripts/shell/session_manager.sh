@@ -186,6 +186,28 @@ if [ $stale_found -eq 0 ]; then
     echo "    ✓ All documentation is recent (< 30 days)"
 fi
 
+# ─────────────────────────────────────────────────────────────────────────
+# DIMS (Data Inventory Management System) - Quick verification
+# ─────────────────────────────────────────────────────────────────────────
+echo ""
+echo "▶ DATA INVENTORY (DIMS)"
+
+# Check if DIMS is available
+if [ -f "scripts/monitoring/dims_cli.py" ]; then
+    # Run quick verification (shows drift status)
+    python scripts/monitoring/dims_cli.py verify --quiet 2>/dev/null
+    dims_exit_code=$?
+
+    if [ $dims_exit_code -eq 0 ]; then
+        echo "  ✓ DIMS verification complete"
+    else
+        echo "  ⚠️  DIMS verification failed (non-critical)"
+        echo "  💡 Run manually: python scripts/monitoring/dims_cli.py verify"
+    fi
+else
+    echo "  ℹ️  DIMS not installed (optional monitoring tool)"
+fi
+
 echo ""
 echo "╔═══════════════════════════════════════════════════════════════╗"
 echo "║ ✓ Diagnostics complete - ready to work                        ║"

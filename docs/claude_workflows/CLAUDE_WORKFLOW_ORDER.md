@@ -44,6 +44,7 @@ All detailed workflow descriptions are located in: `/docs/claude_workflows/workf
 14. **File Inventory** → `13_file_inventory.md` (automatic after file changes)
 15. **Session End** → `14_session_end.md` (end of session)
 16. **Context Management** → `15_context_management.md` (at 75%/90% context)
+56. **DIMS Management** → `56_dims_management.md` (session start/end, weekly maintenance)
 
 ### Testing (By Phase)
 
@@ -213,12 +214,13 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
 - **Inventory AWS data?** → `47` (AWS services inventory - S3, RDS, Glue, Athena, costs)
 - **🚀 Integrated data pipeline?** → `48` (unified workflow: inventory → gaps → plan → collect → validate)
 - **📊 Run data audit?** → `49` (automated inventory update & sync verification - runs after scraping)
+- **Verify project metrics?** → `56` (DIMS - track S3, code, docs, tests)
 
 ---
 
 ## 📊 Workflow Statistics
 
-- **Total workflows**: 49
+- **Total workflows**: 56
 - **Total size**: ~830 KB
 - **Average workflow**: ~19 KB
 - **Largest workflow**: `24_aws_resource_setup.md` (92 KB)
