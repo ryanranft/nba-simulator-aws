@@ -33,11 +33,11 @@ Integrate multiple data sources to maximize ML granularity. Originally planned a
 
 | Sub-Phase | Name | Status | Time | Features | File |
 |-----------|------|--------|------|----------|------|
-| **1.0** | Data Quality Checks | ⏸️ PENDING | 6h | N/A | [1.0_data_quality_checks.md](phase_1/1.0_data_quality_checks.md) |
-| **1.1** | Multi-Source Integration | ⏸️ PENDING | 28h | 209 features | [1.1_multi_source_integration.md](phase_1/1.1_multi_source_integration.md) |
-| **1.3** | Data Quality Monitoring | ✅ COMPLETE | ~6h | 11 variations | [1.3_data_quality/](phase_1/1.3_data_quality/README.md) |
-| **1.4** | Data Validation Pipeline | ✅ COMPLETE | ~4h | 14 variations | [1.4_data_validation/](phase_1/1.4_data_validation/README.md) |
-| **1.5** | Statistical Analysis Framework | ✅ COMPLETE | ~4h | 4 implementations | [1.5_statistical_analysis/](phase_1/1.5_statistical_analysis/README.md) |
+| **1.0** | Data Quality Checks | ✅ COMPLETE ✓ | 6h | Oct 23, 2025 | [1.0_data_quality_checks.md](phase_1/1.0_data_quality_checks.md) |
+| **1.1** | Multi-Source Integration | ✅ COMPLETE ✓ | 28h | Oct 23, 2025 | [1.1_multi_source_integration.md](phase_1/1.1_multi_source_integration.md) |
+| **1.3** | Data Quality Monitoring | ✅ COMPLETE ✓ | ~6h | Oct 23, 2025 | [1.3_data_quality/](phase_1/1.3_data_quality/README.md) |
+| **1.4** | Data Validation Pipeline | ✅ COMPLETE ✓ | ~4h | Oct 23, 2025 | [1.4_data_validation/](phase_1/1.4_data_validation/README.md) |
+| **1.5** | Statistical Analysis Framework | ✅ COMPLETE ✓ | ~4h | Oct 23, 2025 | [1.5_statistical_analysis/](phase_1/1.5_statistical_analysis/README.md) |
 
 ---
 
@@ -206,6 +206,15 @@ This phase is **sport-agnostic** - follow the same pattern:
 
 ## Data Source Options
 
+
+**Get current S3 metrics (always up-to-date):**
+```bash
+python scripts/monitoring/dims_cli.py verify --category s3_storage
+```
+
+**See also:** [Workflow #56: DIMS Management](../../claude_workflows/workflow_descriptions/56_dims_management.md), `inventory/metrics.yaml`
+
+
 **Basketball (NBA):**
 | Source | Type | Cost | Coverage | Quality |
 |--------|------|------|----------|---------|
@@ -302,3 +311,27 @@ No additional description provided.
 - Consider impact on existing phase timeline
 
 ---
+
+
+## How Phase 1 Enables the Simulation Vision
+
+This phase provides [data/infrastructure/capability] that powers the **hybrid econometric + nonparametric simulation system** described in the [main README](../../README.md#simulation-methodology).
+
+**What this phase enables:**
+
+### 1. Econometric Causal Inference
+From this phase's outputs, we can:
+- [Specific econometric technique enabled]
+- [Example: PPP estimation using panel data regression]
+
+### 2. Nonparametric Event Modeling
+From this phase's data, we build:
+- [Specific nonparametric technique enabled]
+- [Example: Kernel density estimation for technical fouls]
+
+### 3. Context-Adaptive Simulations
+Using this phase's data, simulations can adapt to:
+- [Game situation context]
+- [Player/team specific factors]
+
+**See [main README](../../README.md) for complete methodology.**

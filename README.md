@@ -77,7 +77,7 @@ The system employs a **hybrid econometric + nonparametric model** that combines 
 
 1. **Temporal feature engineering:** Extract game context (score differential, time remaining, playoff stakes, days rest, stamina levels) at each play-by-play event
 
-2. **Econometric PPP (Points Per Possession) estimation:** 
+2. **Econometric PPP (Points Per Possession) estimation:**
    - Use panel data regression models (fixed effects, random effects) to estimate causal relationships between game context and outcomes
    - Employ instrumental variables (IV) estimation to address endogeneity (e.g., star players' minutes affected by score, which affects outcomes)
    - Apply propensity score matching to find comparable historical possessions controlling for selection bias
@@ -107,7 +107,7 @@ The system employs a **hybrid econometric + nonparametric model** that combines 
    - Defense ratings incorporate opponent quality adjustments via control function approach
    - Usage rates estimated from structural discrete choice models of shot selection
 
-6. **Model validation & out-of-sample testing:** 
+6. **Model validation & out-of-sample testing:**
    - Cross-validation: Train on seasons t-3 to t-1, test prediction accuracy on season t
    - Compare predicted vs. actual possession outcomes using likelihood ratio tests
    - Assess model fit with R², adjusted R², and information criteria (AIC/BIC)
@@ -115,7 +115,7 @@ The system employs a **hybrid econometric + nonparametric model** that combines 
    - Validate causal identification assumptions using falsification tests and placebo checks
    - **Nonparametric validation:** Kolmogorov-Smirnov tests to verify simulated event frequencies match empirical distributions without assuming functional form
 
-7. **Monte Carlo generation with parameter uncertainty:** 
+7. **Monte Carlo generation with parameter uncertainty:**
    - Run 10,000+ simulations per game, incorporating econometric estimation uncertainty
    - Each simulation draws from posterior distributions of estimated coefficients
    - **Nonparametric event injection:** At each possession, sample from empirical distributions of irregular events (injuries, technicals, challenges)
@@ -123,7 +123,7 @@ The system employs a **hybrid econometric + nonparametric model** that combines 
    - Possession outcomes resolved stochastically using estimated probabilities + confidence bands
    - Track both sampling variation (Monte Carlo) and parameter uncertainty (econometric estimation)
 
-8. **Betting applications with rigorous inference:** 
+8. **Betting applications with rigorous inference:**
    - Aggregate outcomes accounting for both econometric uncertainty and nonparametric event variability
    - Calculate implied probabilities with econometrically-justified confidence intervals
    - Identify +EV opportunities where market odds fall outside model's prediction intervals

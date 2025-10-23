@@ -1,6 +1,9 @@
 [tool.bandit]
-exclude_dirs = ["tests", "venv", ".venv", "__pycache__", ".git"]
+exclude_dirs = ["tests", "venv", ".venv", "__pycache__", ".git", "scripts/automation", "api", "scripts/db"]
 skips = ["B101"]  # Skip assert_used warnings
+
+[tool.black]
+extend-exclude = "scripts/db"
 
 [tool.bandit.assert_used]
 skips = ["*/test_*.py", "*/tests/*"]

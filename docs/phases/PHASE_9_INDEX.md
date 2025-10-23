@@ -94,6 +94,15 @@ Play-by-Play Data → Processor → Box Score Snapshots → Verification → Sto
 
 ## Data Sources
 
+
+**Get current S3 metrics (always up-to-date):**
+```bash
+python scripts/monitoring/dims_cli.py verify --category s3_storage
+```
+
+**See also:** [Workflow #56: DIMS Management](../../claude_workflows/workflow_descriptions/56_dims_management.md), `inventory/metrics.yaml`
+
+
 | Source | Games | Date Range | Priority | Notes |
 |--------|-------|------------|----------|-------|
 | ESPN | 44,826 | 1993-2025 | HIGHEST | Start here, best quality |
@@ -322,3 +331,27 @@ From ML Systems book: Ch 9
 
 
 
+
+
+## How Phase 9 Enables the Simulation Vision
+
+This phase provides [data/infrastructure/capability] that powers the **hybrid econometric + nonparametric simulation system** described in the [main README](../../README.md#simulation-methodology).
+
+**What this phase enables:**
+
+### 1. Econometric Causal Inference
+From this phase's outputs, we can:
+- [Specific econometric technique enabled]
+- [Example: PPP estimation using panel data regression]
+
+### 2. Nonparametric Event Modeling
+From this phase's data, we build:
+- [Specific nonparametric technique enabled]
+- [Example: Kernel density estimation for technical fouls]
+
+### 3. Context-Adaptive Simulations
+Using this phase's data, simulations can adapt to:
+- [Game situation context]
+- [Player/team specific factors]
+
+**See [main README](../../README.md) for complete methodology.**

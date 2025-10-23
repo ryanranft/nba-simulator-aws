@@ -616,6 +616,88 @@ CREATE INDEX ... WITH (m = 32, ef_construction = 200);
 
 ---
 
+
+
+---
+
+## How This Phase Enables the Simulation Vision
+
+This phase provides critical infrastructure that powers the **hybrid econometric + nonparametric simulation system** described in the [main README](../../../README.md#simulation-methodology).
+
+**What this phase enables:**
+
+### 1. Econometric Causal Inference Foundation
+
+ML/AI infrastructure augments econometric causal inference:
+
+**Causal ML integration:**
+- **Double machine learning:** ML for nuisance parameter estimation in causal models
+- **Causal forests:** Heterogeneous treatment effect estimation using random forests
+- **Targeted learning:** Data-adaptive causal inference combining ML with econometrics
+
+**Instrumental variables enhancement:**
+- **Deep IV:** Neural networks for flexible IV estimation with high-dimensional instruments
+- **Weak instrument detection:** ML-based tests for instrument relevance
+- **Optimal instrument selection:** Automated IV selection from candidate set
+
+**Propensity score refinement:**
+- **ML for propensity scores:** Gradient boosting, random forests for treatment assignment modeling
+- **Overlap diagnostics:** Automated detection of common support violations
+- **Doubly robust estimation:** Combines outcome regression with propensity scores
+
+### 2. Nonparametric Event Modeling (Distribution-Free)
+
+ML/AI enhances nonparametric modeling:
+
+**Flexible function approximation:**
+- **Neural networks:** Universal approximators without functional form assumptions
+- **Random forests:** Nonparametric regression trees for conditional distributions
+- **Gaussian processes:** Nonparametric Bayesian approach with uncertainty quantification
+
+**Density estimation:**
+- **Normalizing flows:** Deep generative models for complex empirical distributions
+- **Mixture density networks:** Neural networks outputting full conditional distributions
+- **Variational autoencoders:** Learn latent representations of irregular events
+
+**Distribution-free prediction:**
+- **Conformal prediction:** Distribution-free prediction intervals with coverage guarantees
+- **Quantile regression forests:** Estimate conditional quantiles without distributional assumptions
+- **Kernel methods:** Nonparametric classification and regression
+
+### 3. Context-Adaptive Simulations
+
+Using ML/AI, simulations adapt intelligently:
+
+**Real-time predictions:**
+- Neural networks for instant win probability updates
+- Reinforcement learning for adaptive strategy selection
+- Transfer learning from historical to current game context
+
+**Context-aware embeddings:**
+- Vector representations capture game situation nuances
+- Attention mechanisms focus on relevant historical context
+- Contextual bandits for dynamic decision-making
+
+**Personalized modeling:**
+- Player-specific models learned from individual history
+- Team-specific strategy models
+- Matchup-specific performance predictions
+
+### 4. Integration with Main README Methodology
+
+**Panel data regression (Main README: Lines 81-87):**
+- ML models trained on panel data structure with cross-sectional and time series dimensions
+
+**Nonparametric validation (Main README: Line 116):**
+- ML predictions validated using conformal prediction with distribution-free guarantees
+
+**Monte Carlo simulation (Main README: Line 119):**
+- ML models provide parameter distributions for Monte Carlo uncertainty quantification
+
+**See [main README](../../../README.md) for complete methodology.**
+
+---
+
 ## Related Documentation
 
 - **[PHASE_0_INDEX.md](../../PHASE_0_INDEX.md)** - Phase 0 overview
