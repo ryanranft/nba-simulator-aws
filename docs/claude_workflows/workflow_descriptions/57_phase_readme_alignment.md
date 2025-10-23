@@ -1,11 +1,21 @@
 ## 📋 Phase README Alignment Workflow
 
+> **⚠️ DEPRECATION NOTICE (October 23, 2025)**
+>
+> This workflow has been consolidated into **[Workflow #58: Phase Completion & Validation](58_phase_completion_validation.md)**.
+>
+> **Why:** Workflow #58 provides the complete phase completion process including test generation, validation, and README alignment.
+>
+> **What to do:** Use Workflow #58 for phase completion. This file is kept for reference on the 6-point validation checklist.
+>
+> **Phase README alignment is now:** Phase 5 of Workflow #58
+
 **Purpose:** Ensure phase-specific READMEs stay aligned with the project vision defined in the main README.md
 
 **Key principle:** The **main README.md is the single source of truth** for the project vision. Phase READMEs explain how their work enables that vision.
 
 **When to use:**
-- When completing a phase (required before marking ✅ COMPLETE)
+- When completing a phase (required before marking ✅ COMPLETE) - **Use Workflow #58 instead**
 - When updating the main README vision (propagate to relevant phases)
 - Monthly documentation review (Workflow #20)
 - Before major releases or presentations

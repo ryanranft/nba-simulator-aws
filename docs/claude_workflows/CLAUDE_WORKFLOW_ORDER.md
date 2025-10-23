@@ -44,8 +44,11 @@ All detailed workflow descriptions are located in: `/docs/claude_workflows/workf
 14. **File Inventory** → `13_file_inventory.md` (automatic after file changes)
 15. **Session End** → `14_session_end.md` (end of session)
 16. **Context Management** → `15_context_management.md` (at 75%/90% context)
+~~52. **Phase Index Management**~~ → DEPRECATED - See #58
+~~53. **Phase Test/Validator Organization**~~ → DEPRECATED - See #58
 56. **DIMS Management** → `56_dims_management.md` (session start/end, weekly maintenance)
-57. **Phase-README Alignment** → `57_phase_readme_alignment.md` (phase completion, monthly review)
+~~57. **Phase-README Alignment**~~ → DEPRECATED - See #58
+58. **Phase Completion & Validation** → `58_phase_completion_validation.md` (BEFORE marking any phase ✅ COMPLETE)
 
 ### Testing (By Phase)
 
@@ -216,17 +219,19 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
 - **🚀 Integrated data pipeline?** → `48` (unified workflow: inventory → gaps → plan → collect → validate)
 - **📊 Run data audit?** → `49` (automated inventory update & sync verification - runs after scraping)
 - **Verify project metrics?** → `56` (DIMS - track S3, code, docs, tests)
-- **Validate phase docs?** → `57` (align phase READMEs with main README vision)
+- **Complete & validate a phase?** → `58` (unified end-to-end phase completion with test generation, validation, README alignment)
+- **~~Validate phase docs?~~** → ~~`57`~~ DEPRECATED - Use #58 instead
 
 ---
 
 ## 📊 Workflow Statistics
 
-- **Total workflows**: 57
-- **Total size**: ~830 KB
-- **Average workflow**: ~19 KB
+- **Total workflows**: 58 (3 deprecated, 55 active)
+- **Total size**: ~900 KB
+- **Average workflow**: ~18 KB
 - **Largest workflow**: `24_aws_resource_setup.md` (92 KB)
 - **Smallest workflow**: `04_plan_change_protocol.md` (595 bytes)
+- **Newest workflow**: `58_phase_completion_validation.md` (725 lines) - Replaces #52, #53, #57
 
 **Old system**: 1 file, 9,533 lines, 284 KB (unreadable by Claude)
 **New system**: 44 files, average 265 lines per file (fully readable)

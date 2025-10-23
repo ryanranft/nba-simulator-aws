@@ -1,10 +1,26 @@
 # Workflow #52: Phase Index Management
 
-**Version:** 1.0
+**Version:** 1.0 (SUPERSEDED by Workflow #58)
 **Created:** October 11, 2025
+**Status:** ⚠️ **DEPRECATED** - See [Workflow #58: Phase Completion & Validation](58_phase_completion_validation.md)
 **Purpose:** Manage phase index files and sub-phase organization
 **Trigger:** When creating/updating phases or sub-phases
 **Frequency:** As needed during phase work
+
+> **⚠️ DEPRECATION NOTICE (October 23, 2025)**
+>
+> This workflow has been consolidated into **[Workflow #58: Phase Completion & Validation](58_phase_completion_validation.md)**.
+>
+> **Why:** Workflow #58 provides a unified end-to-end process that includes:
+> - Test & validator generation (the missing piece)
+> - Test & validator organization (Workflow #53)
+> - Phase index management (this workflow - Workflow #52)
+> - README alignment (Workflow #57)
+> - DIMS integration (Workflow #56)
+>
+> **What to do:** Use Workflow #58 instead. This file is kept for reference only.
+>
+> **Phase index management is now:** Phase 7 of Workflow #58
 
 ---
 

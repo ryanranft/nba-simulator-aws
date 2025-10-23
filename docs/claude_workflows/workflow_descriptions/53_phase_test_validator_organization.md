@@ -1,10 +1,21 @@
 # Workflow #53: Phase Test & Validator Organization
 
-**Version:** 1.0
+**Version:** 1.0 (SUPERSEDED by Workflow #58)
 **Created:** October 23, 2025
+**Status:** ⚠️ **DEPRECATED** - See [Workflow #58: Phase Completion & Validation](58_phase_completion_validation.md)
 **Purpose:** Organize tests and validators for phase-specific validation
 **Trigger:** When creating tests/validators for any phase
 **Frequency:** Every new phase or sub-phase
+
+> **⚠️ DEPRECATION NOTICE (October 23, 2025)**
+>
+> This workflow has been consolidated into **[Workflow #58: Phase Completion & Validation](58_phase_completion_validation.md)**.
+>
+> **Why:** Workflow #58 provides complete phase validation including test/validator **generation** (not just organization).
+>
+> **What to do:** Use Workflow #58 instead. This file is kept for reference on directory structure and naming conventions.
+>
+> **Test/validator organization is now:** Phases 2-3 of Workflow #58
 
 ---
 

@@ -303,16 +303,22 @@ The autonomous implementation system has completed its mission. Next steps:
 - Implementation details (belong in sub-phase files)
 - Commands (belong in COMMAND_LOG.md)
 
-**Phase-README Validation (Required before marking phase complete):**
-- **Source of truth:** Main README.md defines the project vision
+**Phase Completion & Validation (Required before marking phase ✅ COMPLETE):**
+- **Primary workflow:** #58 (Phase Completion & Validation) - Unified end-to-end process
 - **When:** Before marking any phase ✅ COMPLETE
-- **Workflow:** #57 (Phase-README Alignment)
-- **Checklist:**
-  - [ ] Temporal precision statements match main README
-  - [ ] Data tracking uses DIMS (no static file counts)
-  - [ ] Phase README explains how it enables main README vision
-  - [ ] Methodology terminology aligns (econometric + nonparametric)
-  - [ ] Cross-reference links work
+- **What it includes:**
+  - Test & validator generation (Phase 2)
+  - Test & validator organization (Phase 3)
+  - Validation execution (Phase 4)
+  - README alignment with main README (Phase 5)
+  - DIMS integration (Phase 6)
+  - Phase index update (Phase 7)
+  - Final validation (Phase 8)
+- **Quick checklist:**
+  - [ ] All tests pass (100% success rate)
+  - [ ] README aligned with main README vision
+  - [ ] DIMS metrics integrated
+  - [ ] Phase index updated
 
 ---
 
