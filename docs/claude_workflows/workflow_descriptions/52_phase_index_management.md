@@ -286,6 +286,28 @@ Add to phase's sub-phase list:
 
 ---
 
+## Tests & Validators for Phases
+
+**New as of October 2025:** Tests and validators are now organized separately from phase documentation.
+
+###Where to Put Tests & Validators
+
+**Tests:** `tests/phases/phase_N/test_N_M_name.py`
+- Example: `tests/phases/phase_0/test_0_1_initial_data_collection.py`
+- Run via: `pytest tests/phases/phase_N/test_N_M_name.py -v`
+
+**Validators:** `validators/phases/phase_N/validate_N_M_feature.py`
+- Example: `validators/phases/phase_0/validate_0_1_s3_bucket_config.py`
+- Run via: `python validators/phases/phase_N/validate_N_M_feature.py`
+
+**Documentation:** `docs/phases/phase_N/N.M_name/README.md`
+- Contains ONLY documentation (no .py files)
+- References tests/validators with example commands
+
+**See Workflow #53 (Phase Test & Validator Organization) for complete guidance.**
+
+---
+
 ## Sub-Phase File Template
 
 **Use this template for all sub-phase files:**

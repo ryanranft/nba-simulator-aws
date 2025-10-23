@@ -50,6 +50,52 @@ See `docs/PROJECT_VISION.md` for the complete vision.
 
 ---
 
+## 📊 Data Growth Tracking (ADCE Integration)
+
+**This documentation now uses ADCE (Autonomous Data Collection Ecosystem) for live data tracking.**
+
+Instead of hardcoded file counts, the validation scripts query S3 in real-time to show:
+- **Phase 0.1 Initial Upload Baseline** (October 2024)
+- **ADCE Autonomous Collection Additions** (Phase 0.9 onwards)
+- **Current Total with Growth Metrics**
+
+**To see current data state, run:**
+```bash
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.1_initial_data_collection
+python validate_upload_completeness.py
+```
+
+### Data Growth Trajectory
+
+| Milestone | Files | Size | Date | Source |
+|-----------|-------|------|------|--------|
+| **Phase 0.1 Initial Upload** | 146,115 | 119 GB | Oct 2024 | ESPN historical data |
+| **ADCE Autonomous Collection** | +25,323 | +TBD | Oct 2025 | 8 new data sources (Phase 0.9) |
+| **Current Total** | 172,719* | 118 GB* | _Live_ | Query S3 for current count |
+
+\* *Excludes 35 artifact files (athena-results, ml-models, etc.)*
+
+### ADCE Data Sources (Phase 0.9)
+
+The following data sources were added by ADCE autonomous collection:
+
+1. **nba_api_comprehensive** (~22,256 files) - Comprehensive NBA stats
+2. **nba_api_playbyplay** (~2,163 files) - Additional play-by-play coverage
+3. **basketball_reference** (~444 files) - Advanced box score stats
+4. **hoopr_phase1** (~218 files) - hoopR integration data
+5. **hoopr_parquet** (~96 files) - Parquet-format hoopR data
+6. **nba_api_reverse** (~80 files) - Reverse chronological backfill
+7. **nba_api_incremental** (~54 files) - Incremental updates
+8. **sportsdataverse** (~12 files) - Sports data aggregation
+
+**Growth Validation:**
+- Initial upload data preserved (no data loss)
+- Original data types grew: box_scores +8 files, team_stats +1,273 files
+- ADCE added 8 new complementary data sources
+- Total system growth: ~18.2% from baseline
+
+---
+
 ## Prerequisites
 
 Before starting this phase:
@@ -289,6 +335,8 @@ python -m json.tool /tmp/test.json > /dev/null && echo "Valid JSON"
 
 **Time Period:** NBA games 1993-2025
 
+### Phase 0.1 Initial Upload (Baseline)
+
 **File Breakdown:**
 - Schedule files: 11,633 (YYYYMMDD format)
 - Play-by-play files: 44,826 (game ID format)
@@ -301,6 +349,32 @@ python -m json.tool /tmp/test.json > /dev/null && echo "Valid JSON"
 - ~83% files contain usable game data
 - ~17% files are empty (future/cancelled games)
 - Average file size: ~815 KB
+
+### Current State (ADCE Tracking)
+
+**For live data counts, run validators:**
+```bash
+# From project root
+python validators/phases/phase_0/validate_0_1_upload_completeness.py
+python validators/phases/phase_0/validate_0_1_s3_bucket_config.py
+```
+
+**Run tests:**
+```bash
+# All Phase 0.1 tests
+pytest tests/phases/phase_0/test_0_1_initial_data_collection.py -v
+
+# Fast tests only (skip slow S3 scans)
+pytest tests/phases/phase_0/test_0_1_initial_data_collection.py -v -m "not slow"
+
+# Specific test
+pytest tests/phases/phase_0/test_0_1_initial_data_collection.py::TestS3BucketConfiguration::test_bucket_exists -v
+```
+
+**Current data includes:**
+- Original Phase 0.1 data (preserved)
+- ADCE autonomous collection (8 new sources)
+- Continuous growth from autonomous agents
 
 **See `docs/DATA_STRUCTURE_GUIDE.md` for complete field mappings.**
 
