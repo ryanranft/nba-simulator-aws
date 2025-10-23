@@ -1,3 +1,18 @@
+"""
+⚠️ DEPRECATED - This file has been migrated to tests/phases/phase_0/
+
+This file is kept for backward compatibility only.
+Please use the new location: tests/phases/phase_0/test_{phase_num}_{name}.py
+
+See docs/TEST_VALIDATOR_MIGRATION_GUIDE.md for details.
+
+Migrated: October 23, 2025
+Part of: Phase 0 Complete Reorganization
+"""
+
+# Original implementation below (deprecated)
+# ===========================================
+
 #!/usr/bin/env python3
 """
 Test Suite: Increase Information Availability

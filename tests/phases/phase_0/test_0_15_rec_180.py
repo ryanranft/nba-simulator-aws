@@ -1,23 +1,8 @@
-"""
-⚠️ DEPRECATED - This file has been migrated to tests/phases/phase_0/
-
-This file is kept for backward compatibility only.
-Please use the new location: tests/phases/phase_0/test_{phase_num}_{name}.py
-
-See docs/TEST_VALIDATOR_MIGRATION_GUIDE.md for details.
-
-Migrated: October 23, 2025
-Part of: Phase 0 Complete Reorganization
-"""
-
-# Original implementation below (deprecated)
-# ===========================================
-
 #!/usr/bin/env python3
 """
-Test Suite: Make a Robust Architecture
+Test Suite: Increase Information Availability
 
-Tests for rec_189 implementation.
+Tests for rec_180 implementation.
 """
 
 import unittest
@@ -27,15 +12,15 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from implement_rec_189 import MakeARobustArchitecture
+from implement_rec_180 import IncreaseInformationAvailability
 
 
-class TestRec189(unittest.TestCase):
-    """Test suite for Make a Robust Architecture."""
+class TestRec180(unittest.TestCase):
+    """Test suite for Increase Information Availability."""
 
     def setUp(self):
         """Set up test fixtures."""
-        self.impl = MakeARobustArchitecture()
+        self.impl = IncreaseInformationAvailability()
 
     def tearDown(self):
         """Clean up after tests."""
@@ -86,7 +71,7 @@ class TestRec189(unittest.TestCase):
 
 def run_tests():
     """Run test suite."""
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestRec189)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestRec180)
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     return result.wasSuccessful()
