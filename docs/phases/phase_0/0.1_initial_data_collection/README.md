@@ -131,8 +131,8 @@ Instead of hardcoded file counts, the validation scripts query S3 in real-time t
 
 **To see current data state, run:**
 ```bash
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.1_initial_data_collection
-python validate_upload_completeness.py
+cd /Users/ryanranft/nba-simulator-aws
+python validators/phases/phase_0/validate_0_1_upload_completeness.py
 ```
 
 ### Data Growth Tracking (Live - Powered by DIMS)
