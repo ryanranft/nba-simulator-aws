@@ -1,6 +1,6 @@
 metadata:
   version: 1.0.0
-  last_updated: '2025-10-22T22:48:48.886057Z'
+  last_updated: '2025-10-23T00:13:20.778900Z'
   last_verified: '2025-10-21T19:00:00Z'
   verified_by: manual_verification
   system: DIMS v1.0.0
@@ -97,8 +97,8 @@ plus_minus_system:
       lines: 480
 code_base:
   python_files:
-    value: 1279
-    last_verified: '2025-10-22T20:30:13.602746Z'
+    value: 1287
+    last_verified: '2025-10-23T00:13:20.243571Z'
     verification_method: automated
     cached: false
     cache_expires: null
@@ -114,15 +114,15 @@ code_base:
     directory: scripts/pbp_to_boxscore/
     last_verified: '2025-10-21T14:00:00Z'
   test_files:
-    value: 501
-    last_verified: '2025-10-22T16:26:21.436463Z'
+    value: 504
+    last_verified: '2025-10-23T00:13:20.370102Z'
     verification_method: automated
     cached: false
     cache_expires: null
 documentation:
   markdown_files:
-    value: 1716
-    last_verified: '2025-10-22T22:48:48.779155Z'
+    value: 1719
+    last_verified: '2025-10-23T00:13:20.518246Z'
     verification_method: automated
     cached: false
     cache_expires: null
@@ -142,9 +142,12 @@ git:
     cache_expires: null
 workflows:
   total:
-    value: 60
+    value: 61
     directory: docs/claude_workflows/workflow_descriptions/
-    last_verified: '2025-10-21T14:00:00Z'
+    last_verified: '2025-10-23T00:13:20.651943Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
 sql_schemas:
   total_lines:
     value: 758
