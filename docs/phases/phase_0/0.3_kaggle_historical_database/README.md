@@ -2,37 +2,86 @@
 
 **Sub-Phase:** 0.3 (Data Collection - Historical Database)
 **Parent Phase:** [Phase 0: Data Collection](../../PHASE_0_INDEX.md)
-**Status:** ✅ COMPLETE (Pre-project)
+**Status:** ✅ COMPLETE ✓ (Pre-project, Validated: Oct 23, 2025)
 **Priority:** ⭐ HIGH
-**Data Source:** Kaggle NBA Database (2004-2020)
+**Data Source:** Kaggle NBA Database (EXPANDED: 1946-2023, originally 2004-2020)
+
+---
+
+## ⚠️ Important: Database Expanded
+
+**Original database (documented below):** 2004-2020, 26,496 games, 280 MB
+**Current database (as of Oct 2025):** 1946-2023, 65,698 games, 2.2 GB, 13.5M play-by-play rows
+
+The database has been **significantly expanded** from its original scope. All validation (Workflow #58) is based on the **current expanded version**.
 
 ---
 
 ## Overview
 
-Historical NBA database from Kaggle providing comprehensive game, player, and team statistics for 2004-2020 seasons. This SQLite database serves as foundational historical data for model training and validation.
+Historical NBA database from Kaggle providing comprehensive game, player, and team statistics spanning **77 years** of NBA history. This SQLite database serves as foundational historical data for model training and validation with **complete temporal coverage** from the NBA's founding to modern era.
 
-**Key Achievements:**
-- **26,496 games** with complete statistics
-- **17 relational tables** with normalized schema
-- **280 MB** compact SQLite database
-- **2004-2020 coverage** (16+ years of historical data)
+**Key Achievements (Current Database):**
+- **65,698 games** with complete statistics (1946-2023)
+- **13.6 million play-by-play events** for temporal reconstruction
+- **16 relational tables** with normalized schema
+- **2.2 GB** comprehensive SQLite database
+- **1946-2023 coverage** (77 years of NBA history)
 - **Pre-processed** and ready for analysis
+
+---
+
+## How This Phase Enables the Simulation Vision
+
+This phase provides the **historical foundation** for the temporal panel data system and econometric + nonparametric simulation framework described in the [main README](../../../../README.md#advanced-simulation-vision).
+
+### Comprehensive Historical Training Data
+
+The Kaggle database's **77-year coverage (1946-2023)** with **65,698 games** provides the extensive historical panel data required for robust econometric model estimation:
+
+- **Panel data regression**: 77 years of game data enables fixed effects models that control for unobserved team/player heterogeneity across eras (see [main README lines 73-82](../../../../README.md#L73-L82))
+- **Instrumental variables**: Historical data provides instruments for endogeneity correction (e.g., using career averages to instrument for current performance)
+- **Propensity score matching**: Large historical sample enables finding comparable possessions for causal inference
+
+### Play-by-Play for Temporal Reconstruction
+
+The **13.6 million play-by-play events** enable millisecond-level temporal reconstruction and event sequence modeling:
+
+- **Temporal feature engineering** at possession-level granularity
+- **Nonparametric event modeling**: Empirical distributions of irregular events (technical fouls, injuries, momentum shifts) drawn from 13.6M observed events without parametric assumptions (see [main README lines 84-92](../../../../README.md#L84-L92))
+- **Changepoint detection**: Identify momentum shifts and regime changes using distribution-free methods (PELT, Binary Segmentation)
+
+### Historical Context for Model Training
+
+- **Training temporal models**: 1946-2023 coverage captures evolution of NBA rules, pace, and strategy across eras
+- **Out-of-sample validation**: Can train on 1946-2019, validate on 2020-2023
+- **Era-specific effects**: Model how basketball fundamentals changed from 1950s low-scoring games to modern pace-and-space offense
+- **Survival bias correction**: Complete historical record enables accounting for team/player attrition over time
+
+### Integration with Modern Data
+
+Kaggle's historical data (1946-2023) **bridges** with modern high-frequency data:
+- **ESPN** (2015-2025) - Real-time millisecond-precision data
+- **hoopR** (2002-2025) - Modern analytics and advanced metrics
+- **Combined panel**: 79 years of NBA history for comprehensive econometric analysis
+
+This historical foundation enables the **hybrid econometric + nonparametric simulation framework** that combines causal inference for regular play with distribution-free modeling of irregular events.
 
 ---
 
 ## Data Coverage
 
-### Temporal Coverage
-- **Date Range:** 2004-2020 (16 years)
-- **Seasons:** 17 complete seasons
-- **Games:** 26,496 total games
-- **Players:** ~4,500 unique players
-- **Quality:** Good (pre-validated historical data)
+### Temporal Coverage (Current Database)
+- **Date Range:** 1946-2023 (77 years) - Complete NBA history
+- **Seasons:** 77 distinct seasons
+- **Games:** 65,698 total games (expanded from 26,496)
+- **Play-by-Play Events:** 13,592,899 events for temporal reconstruction
+- **Players:** ~4,800 unique players across all eras
+- **Quality:** Excellent (validated via Workflow #58 with 100% test pass rate)
 
 ### Database Schema
 
-**17 Tables:**
+**16 Tables (Current Database):**
 
 | Table | Records | Description |
 |-------|---------|-------------|
@@ -152,22 +201,23 @@ conn.close()
 
 ```
 data/kaggle/
-├── nba.sqlite          # Main database (280 MB)
-├── nba_games.db        # Backup copy (280 MB)
-└── csv/                # Source CSV files
+├── nba.sqlite          # Main database (2.2 GB, expanded from 280 MB)
+├── nba_games.db        # Backup copy (if exists)
+└── csv/                # Source CSV files (if exists)
     ├── game.csv
     ├── player.csv
     ├── team.csv
-    └── [14 more CSV files]
+    └── [additional CSV files]
 ```
 
-### Database Details
+### Database Details (Current)
 
 **File:** `nba.sqlite`
-**Size:** 280 MB
+**Size:** 2.2 GB (2,241 MB) - Expanded from 280 MB
 **Format:** SQLite 3.x
 **Encoding:** UTF-8
 **Indexes:** Primary keys and foreign keys on all tables
+**Play-by-Play:** 13.6M rows (was empty in original database)
 
 ---
 

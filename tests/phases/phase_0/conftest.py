@@ -101,3 +101,62 @@ def hoopr_s3_prefixes():
         "hoopr_parquet/team_box/",
         "hoopr_phase1/",
     ]
+
+
+# Kaggle-specific Fixtures
+
+
+@pytest.fixture(scope="module")
+def kaggle_db_path():
+    """Provide path to Kaggle SQLite database."""
+    from pathlib import Path
+
+    project_root = Path(__file__).resolve().parents[3]
+    return project_root / "data" / "kaggle" / "nba.sqlite"
+
+
+@pytest.fixture(scope="module")
+def kaggle_db_connection(kaggle_db_path):
+    """
+    Provide Kaggle SQLite database connection.
+
+    Returns None if database file not available.
+    Tests should skip gracefully if connection is None.
+    """
+    import sqlite3
+
+    if not kaggle_db_path.exists():
+        # Database file not found - tests should skip
+        yield None
+        return
+
+    try:
+        conn = sqlite3.connect(kaggle_db_path)
+        yield conn
+        conn.close()
+    except Exception:
+        # Database connection failed - tests should skip
+        yield None
+
+
+@pytest.fixture(scope="module")
+def kaggle_tables():
+    """Provide list of Kaggle database table names (updated schema, 16 tables)."""
+    return [
+        "game",
+        "team",
+        "player",
+        "play_by_play",
+        "game_info",
+        "game_summary",
+        "line_score",
+        "inactive_players",
+        "officials",
+        "other_stats",
+        "draft_history",
+        "draft_combine_stats",
+        "common_player_info",
+        "team_details",
+        "team_history",
+        "team_info_common",
+    ]
