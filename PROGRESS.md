@@ -619,10 +619,32 @@ Claude Code (Anthropic) - AI pair programming assistant
 AWS - Cloud infrastructure platform
 
 
+## Autonomous Data Collection (NEW! 🎉)
+
+**Phase 0 now includes ADCE (Autonomous Data Collection Ecosystem)** - a complete 24/7 self-healing system:
+
+- ✅ **Phase 0.9.1:** Unified Scraper System (75/75 scrapers migrated to YAML configuration)
+- ✅ **Phase 0.9.2:** Reconciliation Engine (automated gap detection with AWS S3 Inventory)
+- ✅ **Phase 0.9.3:** Scraper Orchestrator (priority-based task execution)
+- ✅ **Phase 0.9.4:** Autonomous Loop (24/7 master controller with health monitoring)
+
+**Result:** Zero-intervention data collection with automatic gap detection and filling
+
+**Quick Start:**
+```bash
+python scripts/autonomous/autonomous_cli.py start  # Start autonomous loop
+python scripts/autonomous/autonomous_cli.py status # Check system status
+```
+
+**Documentation:** [Phase 0.9: ADCE](docs/phases/phase_0/0.9_autonomous_data_collection/README.md)  
+**Operations Guide:** [Autonomous Operation Guide](docs/AUTONOMOUS_OPERATION.md)
+
+---
+
 Contact
 Developer: Ryan Ranft
 GitHub: https://github.com/ryanranft
 Project: https://github.com/ryanranft/nba-simulator-aws
 
-Last Updated: 2025-10-02
-Version: Phase 0 Complete (S3 Data Lake operational)
+Last Updated: 2025-10-22
+Version: Phase 0 Complete with Autonomous Operation (ADCE System Operational)

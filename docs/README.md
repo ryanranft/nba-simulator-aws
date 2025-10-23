@@ -29,7 +29,8 @@ This index helps Claude Code and developers find the right documentation efficie
 - **PROGRESS.md** - Current phase status, session context, cost tracking
 
 ### Phase Implementation
-- **docs/phases/PHASE_0_INDEX.md** - Data collection (✅ Complete initial, 🔄 Expansion ready)
+- **docs/phases/PHASE_0_INDEX.md** - Data collection (✅ Complete with **ADCE autonomous system**)
+  - **NEW:** [Phase 0.9: Autonomous Data Collection](phases/phase_0/0.9_autonomous_data_collection/README.md) - 24/7 self-healing system
 - **docs/phases/PHASE_1_INDEX.md** - Multi-source integration (⏸️ Pending)
 - **docs/phases/PHASE_2_INDEX.md** - ETL pipeline (✅ Complete)
 - **docs/phases/PHASE_3_INDEX.md** - RDS setup (✅ Complete)
@@ -44,6 +45,8 @@ This index helps Claude Code and developers find the right documentation efficie
 
 ### Daily Operations
 - **QUICKSTART.md** - Common commands, daily workflow, make targets
+- **scripts/autonomous/autonomous_cli.py** - Manage autonomous data collection (start, stop, status, health, logs, tasks)
+- **docs/AUTONOMOUS_OPERATION.md** - Complete guide to 24/7 autonomous operation
 - **docs/CLAUDE_QUICK_COMMANDS.md** - Claude-specific command patterns
 - **docs/data_collection/scrapers/MANAGEMENT.md** - Scraper operations guide
 - **docs/SCRAPER_MONITORING_SYSTEM.md** - Monitoring tools and procedures
