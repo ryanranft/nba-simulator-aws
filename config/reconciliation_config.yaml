@@ -14,6 +14,12 @@ s3:
     - nba_pbp
     - nba_box_score
     - nba_schedule_json
+  
+  # Phase 2B: AWS S3 Inventory integration
+  use_aws_inventory: false # Enable for Phase 2B (requires setup)
+  inventory_bucket: nba-sim-raw-data-lake # Where inventory reports are stored
+  inventory_prefix: inventory-reports/ # Prefix for inventory reports
+  fallback_to_sample: true # Fall back to sampling if inventory unavailable
 
 # Gap Detection Configuration
 gap_detection:
@@ -41,13 +47,15 @@ task_queue:
 
 # Reconciliation Loop Configuration
 reconciliation_loop:
-  enabled: false # MVP: Manual execution only
+  enabled: true # Phase 2B: Automated execution
   interval_hours: 1 # Run every hour
+  daemon_mode: true # Run as background daemon
   max_retries: 3 # Retry failed reconciliations
   alert_on_failure: true # Send alerts on failure
   alert_channels:
     - email
     - slack
+  health_check_port: 8050 # HTTP port for health checks
 
 # Performance Targets (fail if exceeded)
 performance:
