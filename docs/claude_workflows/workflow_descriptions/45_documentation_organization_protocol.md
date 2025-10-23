@@ -291,7 +291,7 @@ command here
 ```markdown
 ## Phase Details
 
-- ✅ [Phase 0: Data Collection](docs/phases/PHASE_0_INDEX.md) - COMPLETE
+- ✅ [Phase 0: Data Collection](docs/phases/phase_0/PHASE_0_INDEX.md) - COMPLETE
   - 🔄 **[Project Name](docs/phases/phase_N/N.M_project_name/README.md)** - N tiers
     - ⏸️ [Tier 1: Name](docs/phases/phase_N/N.M_project_name/TIER_01_NAME.md) - X types, Y hours
     - ⏸️ [Tier 2: Name](docs/phases/phase_N/N.M_project_name/TIER_02_NAME.md) - X types, Y hours

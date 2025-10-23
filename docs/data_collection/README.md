@@ -46,7 +46,7 @@ Complete documentation for scraper systems including:
 ## Related Documentation
 
 **Phase Documentation:**
-- [Phase 0: Data Collection](../phases/PHASE_0_INDEX.md)
+- [Phase 0: Data Collection](../phases/phase_0/PHASE_0_INDEX.md)
 - [Phase 0.1: Basketball Reference](../phases/phase_0/0.1_basketball_reference/)
 - [Phase 1: Data Quality](../phases/PHASE_1_INDEX.md)
 

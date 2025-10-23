@@ -211,7 +211,7 @@ bash scripts/monitoring/launch_scraper.sh --recovery-mode
 **Return to:** [Data Collection Documentation](../)
 **Parent:** [Main Documentation Index](../../README.md)
 **Related:**
-- [Phase 0: Data Collection](../../phases/PHASE_0_INDEX.md)
+- [Phase 0: Data Collection](../../phases/phase_0/PHASE_0_INDEX.md)
 - [Monitoring Systems](../../monitoring/)
 
 ---

@@ -1,7 +1,7 @@
-# 0.7: PostgreSQL JSONB Storage
+# 0.10: PostgreSQL JSONB Storage
 
-**Sub-Phase:** 0.7 (Data Storage)
-**Parent Phase:** [Phase 0: Data Collection](../../PHASE_0_INDEX.md)
+**Sub-Phase:** 0.10 (Data Storage)
+**Parent Phase:** [Phase 0: Data Collection](../PHASE_0_INDEX.md)
 **Status:** 🔵 PLANNED
 **Priority:** ⭐ CRITICAL
 **Implementation ID:** rec_033_postgresql
@@ -12,7 +12,7 @@
 
 Store raw NBA data using PostgreSQL JSONB columns for flexible schema storage. This provides document-like flexibility while maintaining ACID guarantees and native integration with our temporal panel data system.
 
-**Supersedes:** [0.1 MongoDB NoSQL Storage](../archive/mongodb_superseded/0.1_nosql_mongodb_SUPERSEDED/README.md) (archived October 22, 2025)
+**Supersedes:** MongoDB NoSQL Storage (see `../archive/mongodb_superseded/0.1_nosql_mongodb_SUPERSEDED/`) - archived October 22, 2025
 
 **Key Capabilities:**
 - Flexible schema storage using JSONB columns

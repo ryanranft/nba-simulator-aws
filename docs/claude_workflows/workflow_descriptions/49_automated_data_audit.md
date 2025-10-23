@@ -185,7 +185,7 @@ When `--update-docs` flag is used, the audit automatically updates all documents
    - `PROGRESS.md` - Project status summary
 
 2. **Phase Documentation:**
-   - `docs/phases/PHASE_0_INDEX.md` - Data collection phase status
+   - `docs/phases/phase_0/PHASE_0_INDEX.md` - Data collection phase status
    - `docs/phases/PHASE_8_INDEX.md` - Audit phase status
 
 3. **Archive Process:**

@@ -1,9 +1,9 @@
-# 0.9: RAG + LLM Integration
+# 0.12: RAG + LLM Integration
 
-**Sub-Phase:** 0.9 (RAG + LLM)
-**Parent Phase:** [Phase 0: Data Collection](../../PHASE_0_INDEX.md)
+**Sub-Phase:** 0.12 (RAG + LLM)
+**Parent Phase:** [Phase 0: Data Collection](../PHASE_0_INDEX.md)
 **Status:** 🔵 PLANNED
-**Priority:** ⭐ MEDIUM
+**Priority:** 🟡 MEDIUM
 **Implementation ID:** rec_188_postgresql
 
 ---
@@ -12,7 +12,7 @@
 
 Combine Retrieval-Augmented Generation (RAG) pipeline with Large Language Models (LLMs) using unified PostgreSQL architecture. This enables natural language querying over NBA temporal data with context-aware responses.
 
-**Supersedes:** [0.6 MongoDB+Qdrant RAG+LLM](../archive/mongodb_superseded/0.6_rag_llm_mongodb_SUPERSEDED/README.md) (archived October 22, 2025)
+**Supersedes:** MongoDB+Qdrant RAG+LLM (see `../archive/mongodb_superseded/0.6_rag_llm_mongodb_SUPERSEDED/`) - archived October 22, 2025
 
 **Key Capabilities:**
 - Natural language queries over NBA data

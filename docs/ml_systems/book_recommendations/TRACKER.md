@@ -477,7 +477,7 @@ For each recommendation:
 - [Master Recommendations](/Users/ryanranft/nba-mcp-synthesis/analysis_results/master_recommendations.json)
 - [Multi-Pass Progress](/Users/ryanranft/nba-mcp-synthesis/analysis_results/multi_pass_progress.json)
 - [Cross-Project Status](../CROSS_PROJECT_IMPLEMENTATION_STATUS.md)
-- [Phase Indexes](phases/PHASE_0_INDEX.md) through [PHASE_9_INDEX.md](phases/PHASE_9_INDEX.md)
+- [Phase Indexes](phases/phase_0/PHASE_0_INDEX.md) through [PHASE_9_INDEX.md](phases/PHASE_9_INDEX.md)
 
 ---
 

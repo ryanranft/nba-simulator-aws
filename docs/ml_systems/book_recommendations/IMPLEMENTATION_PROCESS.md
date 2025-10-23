@@ -28,7 +28,7 @@ This document describes the process of integrating 200+ book recommendations int
 - Linked to RECOMMENDATIONS_FROM_BOOKS.md
 - Pattern repeatable for all 9 phases
 
-**Example:** `/Users/ryanranft/nba-simulator-aws/docs/phases/PHASE_0_INDEX.md:3`
+**Example:** `/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/PHASE_0_INDEX.md:3`
 
 ### Step 3: Created Master Tracker
 - Created `docs/BOOK_RECOMMENDATIONS_TRACKER.md`
@@ -282,7 +282,7 @@ All required packages already in requirements.txt:
 
 ### Modified
 1. `/Users/ryanranft/nba-simulator-aws/PROGRESS.md` (added book recs section)
-2. `/Users/ryanranft/nba-simulator-aws/docs/phases/PHASE_0_INDEX.md` (added badge)
+2. `/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/PHASE_0_INDEX.md` (added badge)
 3. `/Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/implement_ml_systems_1.py` (578 lines, fully implemented)
 
 ### Dependencies

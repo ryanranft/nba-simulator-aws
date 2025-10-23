@@ -1,9 +1,9 @@
-# 0.8: RAG Pipeline with pgvector
+# 0.11: RAG Pipeline with pgvector
 
-**Sub-Phase:** 0.8 (RAG Infrastructure)
-**Parent Phase:** [Phase 0: Data Collection](../../PHASE_0_INDEX.md)
+**Sub-Phase:** 0.11 (RAG Infrastructure)
+**Parent Phase:** [Phase 0: Data Collection](../PHASE_0_INDEX.md)
 **Status:** 🔵 PLANNED
-**Priority:** ⭐ HIGH
+**Priority:** 🟡 MEDIUM
 **Implementation ID:** rec_034_pgvector
 
 ---
@@ -12,7 +12,7 @@
 
 Implement a Retrieval-Augmented Generation (RAG) feature pipeline using PostgreSQL's pgvector extension for vector embeddings and similarity search. This provides enterprise-grade vector search capabilities within our existing database infrastructure.
 
-**Supersedes:** [0.2 Qdrant RAG Pipeline](../archive/mongodb_superseded/0.2_rag_mongodb_SUPERSEDED/README.md) (archived October 22, 2025)
+**Supersedes:** MongoDB/Qdrant RAG Pipeline (see `../archive/mongodb_superseded/0.2_rag_mongodb_SUPERSEDED/`) - archived October 22, 2025
 
 **Key Capabilities:**
 - Vector embeddings storage with pgvector extension
