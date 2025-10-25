@@ -91,3 +91,4 @@ exec bash "${SCRIPT_DIR}/batch_implement_recommendations.sh" "${TIER1_ARRAY[@]}"
 
 
 
+

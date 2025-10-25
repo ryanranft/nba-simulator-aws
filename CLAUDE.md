@@ -104,6 +104,9 @@ PROGRESS.md → PHASE_N_INDEX.md → phase_N/N.M_name.md → workflows → execu
 
 **Benefits:** 64% reduction in PROGRESS.md size, 78% reduction in phase navigation context, 96% context available for work, consistent navigation patterns
 
+**⚠️ CRITICAL - Project Scope:**
+This project is **NBA-only**. Phase 0.5 & 0.6 are **NOT** awaiting NCAA/International data - they were permanently superseded by PostgreSQL implementations (0.10/0.11). **Never suggest** filling these with non-NBA data. Other sports will be built as **separate projects** in separate directories using this NBA infrastructure as a template.
+
 ---
 
 ## ML Framework Navigation

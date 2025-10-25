@@ -1,16 +1,38 @@
-# Basketball Reference - Complete Data Collection
+# Basketball Reference - ADCE Integration
 
 **Phase:** 0 (Data Collection)
-**Project:** Basketball Reference Complete Expansion (Option C)
-**Status:** ✅ COMPLETE ✓ (Validated: October 23, 2025)
-**Total Scope:** 234 data types across 7 basketball domains
-**Total Time:** 140-197 hours
-**Total Records:** 865K-10.88M records
-**Last Updated:** October 23, 2025
+**Project:** Basketball Reference ADCE Integration (Option A)
+**Status:** ✅ COMPLETE ✓ (ADCE Integration: October 25, 2025)
+**Implemented Scope:** 43 data types (NBA + G League) configured for autonomous collection
+**Total Time:** 3.5 hours (comprehensive ADCE integration)
+**Last Updated:** October 25, 2025
 
 ---
 
-## Current Status (Phase 0.4 Complete)
+## ⚠️ IMPLEMENTATION STATUS (October 25, 2025)
+
+**IMPLEMENTED:** 43 data types across Tiers 1-9 and 11
+- ✅ **NBA (Tiers 1-9):** 33 types - Complete modern NBA + historical leagues (ABA/BAA/Early NBA)
+- ✅ **G League (Tier 11):** 10 types - Complete G League ecosystem (2002-2025)
+
+**NOT IMPLEMENTED (Reserved for Future Expansion):**
+- ⏸️ **Tier 10 (WNBA):** 16 types - Marked EXECUTE but not extracted
+- ⏸️ **Tier 12 (International):** 40 types - Marked OPTIONAL, not extracted
+- ⏸️ **Tier 13 (NCAA):** 10 types - Marked OPTIONAL, not extracted
+
+**Current Focus:** Autonomous collection of implemented 43 types (6-9 weeks estimated)
+
+**Priority Order (Option A):**
+1. NBA Modern (Tiers 1-4): 16 types → 3-4 weeks
+2. NBA Advanced (Tiers 5-8): 14 types → 2-3 weeks
+3. Historical Leagues (Tier 9): 3 types (ABA/BAA) → 1 week
+4. G League (Tier 11): 10 types → 1 week
+
+**See:** [BASKETBALL_REFERENCE_ADCE_DEPLOYMENT.md](../../../../BASKETBALL_REFERENCE_ADCE_DEPLOYMENT.md) for complete deployment details
+
+---
+
+## Current Status (Phase 0.4 ADCE Integration Complete)
 
 **Data Collected (October 2025):**
 - ✅ **444 files** across 14 data categories

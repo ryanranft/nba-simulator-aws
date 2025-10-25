@@ -632,8 +632,3 @@ if __name__ == "__main__":
     generator.generate_all_docs(args.source)
 
     print(f"Documentation generated successfully in {args.output}")
-
-
-
-
-

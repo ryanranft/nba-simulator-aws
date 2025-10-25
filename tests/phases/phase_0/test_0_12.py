@@ -1,59 +1,97 @@
 """
-Tests for Phase 0.12
+Tests for Phase 0.12: RAG + LLM Integration
 
-Auto-generated test template.
+Tests query understanding, RAG retrieval, prompt building, and LLM integration.
 
-Usage:
+Run with:
     pytest tests/phases/phase_0/test_0_12.py -v
 """
 
 import pytest
+import os
 import sys
-from pathlib import Path
+from unittest.mock import Mock, patch, MagicMock
 
-# Import validator
-validators_path = (
-    Path(__file__).parent.parent.parent.parent / "validators" / "phases" / f"phase_0"
-)
-sys.path.insert(0, str(validators_path))
+# Add project root to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../.."))
 
-from validate_0_12 import Phase012Validator
-
-
-class TestPhase012Validation:
-    """Tests for Phase 0.12 validation."""
-
-    @pytest.fixture
-    def validator(self):
-        """Create validator instance."""
-        return Phase012Validator(verbose=False)
-
-    def test_feature_1_validation(self, validator):
-        """Test feature 1 validation."""
-        assert (
-            validator.validate_feature_1() == True
-        ), f"Feature 1 failed: {validator.failures}"
-
-    def test_feature_2_validation(self, validator):
-        """Test feature 2 validation."""
-        assert (
-            validator.validate_feature_2() == True
-        ), f"Feature 2 failed: {validator.failures}"
-
-    def test_all_validations(self, validator):
-        """Test all validations pass."""
-        all_passed, results = validator.run_all_validations()
-        assert all_passed == True, f"Not all validations passed: {results}"
+from scripts.ml.query_understanding import QueryUnderstanding
+from scripts.ml.prompt_builder import PromptBuilder
+from scripts.ml.llm_integration import LLMIntegration
 
 
-class TestPhase012Integration:
-    """Integration tests for Phase 0.12."""
+class TestQueryUnderstanding:
+    """Test query parsing and understanding"""
 
-    def test_phase_complete_validation(self):
-        """Comprehensive phase completion test."""
-        validator = Phase012Validator(verbose=False)
-        all_passed, results = validator.run_all_validations()
+    def test_classify_intent_comparison(self):
+        """Test comparison intent classification"""
+        qp = QueryUnderstanding()
+        query = "Compare LeBron James and Michael Jordan"
+        analysis = qp.analyze_query(query)
+        assert analysis["intent"] == "comparison"
 
-        assert all_passed == True, "Phase 0.12 validation failed"
-        assert results["feature_1_valid"] == True
-        assert results["feature_2_valid"] == True
+    def test_classify_intent_statistics(self):
+        """Test statistics intent classification"""
+        qp = QueryUnderstanding()
+        query = "What are LeBron James's career stats?"
+        analysis = qp.analyze_query(query)
+        assert analysis["intent"] == "statistics"
+
+    def test_extract_season(self):
+        """Test season extraction"""
+        qp = QueryUnderstanding()
+        query = "Who won MVP in the 2022 season?"
+        analysis = qp.analyze_query(query)
+        assert 2022 in analysis["entities"]["seasons"]
+
+
+class TestPromptBuilder:
+    """Test prompt construction"""
+
+    def test_build_prompt_basic(self):
+        """Test basic prompt building"""
+        builder = PromptBuilder(model="gpt-4")
+        contexts = [
+            {
+                "source": "player",
+                "metadata": {"name": "LeBron James"},
+                "content": "Test",
+                "similarity": 0.95,
+            }
+        ]
+        query_analysis = {
+            "intent": "general",
+            "query_type": "general_query",
+            "entities": {},
+            "temporal": {},
+        }
+        prompt = builder.build_prompt("Who is LeBron James?", contexts, query_analysis)
+        assert "LeBron James" in prompt
+
+    def test_cost_estimation(self):
+        """Test cost calculation"""
+        builder = PromptBuilder(model="gpt-4")
+        prompt = "Test prompt"
+        cost = builder.estimate_cost(prompt, response_tokens=500)
+        assert cost["total_cost"] > 0
+
+
+class TestLLMIntegration:
+    """Test LLM API integration"""
+
+    @patch("openai.ChatCompletion.create")
+    def test_generate_response(self, mock_create):
+        """Test response generation"""
+        mock_response = MagicMock()
+        mock_response.choices = [MagicMock()]
+        mock_response.choices[0].message.content = "Test response"
+        mock_response.usage.prompt_tokens = 100
+        mock_response.usage.completion_tokens = 50
+        mock_create.return_value = mock_response
+        llm = LLMIntegration(model="gpt-3.5-turbo")
+        response = llm._generate_standard("Test prompt", "Test system")
+        assert response == "Test response"
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "--tb=short"])

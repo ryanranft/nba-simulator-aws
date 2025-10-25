@@ -656,8 +656,3 @@ if __name__ == "__main__":
         traceback.print_exc()
 
     print("\n✅ Enhanced Advanced Metrics Calculator test completed!")
-
-
-
-
-

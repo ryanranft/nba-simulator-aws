@@ -1,0 +1,2093 @@
+scrapers:
+  basketball_reference_g_league_season_standings_2002_2025:
+    base_url: https://www.basketball-reference.com
+    data_type: g_league_season_standings_2002_2025
+    tier: 11
+    priority: execute
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/g_league_season_standings_2002_2025
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/gleague/standings/{season}/standings.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /gleague/years/NBA-D-League_{season}.html
+    metadata:
+      name: G League Season Standings (2002-2025)
+      coverage: 23 seasons
+      estimated_records: ~450 team-seasons
+      estimated_hours: '0'
+      description: 'G League Season Standings (2002-2025)
+
+
+        **Coverage:** 23 seasons
+
+        **Records:** ~450 team-seasons
+
+        **Time:** 30 minutes
+
+        **Priority:** HIGH
+
+
+        #### Implementation:
+
+        - **URL Pattern:** `/gleague/years/NBA-D-Le'
+  basketball_reference_g_league_player_statistics_2002_2025:
+    base_url: https://www.basketball-reference.com
+    data_type: g_league_player_statistics_2002_2025
+    tier: 11
+    priority: execute
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/g_league_player_statistics_2002_2025
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/gleague/season_stats/{season}/player_stats.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    metadata:
+      name: G League Player Statistics (2002-2025)
+      coverage: 23 seasons, ~15,000 player-seasons
+      estimated_records: ~15,000
+      estimated_hours: '3'
+      description: 'G League Player Statistics (2002-2025)
+
+
+        **Coverage:** 23 seasons, ~15,000 player-seasons
+
+        **Records:** ~15,000
+
+        **Time:** 3 hours
+
+        **Priority:** CRITICAL
+
+
+        #### Implementation:
+
+        - **URL Pattern:** Same as.'
+  basketball_reference_g_league_team_rosters_2002_2025:
+    base_url: https://www.basketball-reference.com
+    data_type: g_league_team_rosters_2002_2025
+    tier: 11
+    priority: execute
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/g_league_team_rosters_2002_2025
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/gleague/rosters/{season}/{team}/roster.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /gleague/teams/{TEAM}/{season}.html
+    metadata:
+      name: G League Team Rosters (2002-2025)
+      coverage: 23 seasons, ~450 team rosters
+      estimated_records: ~450
+      estimated_hours: '1'
+      description: 'G League Team Rosters (2002-2025)
+
+
+        **Coverage:** 23 seasons, ~450 team rosters
+
+        **Records:** ~450
+
+        **Time:** 1 hour
+
+        **Priority:** MEDIUM
+
+
+        #### Implementation:
+
+        - **URL Pattern:** `/gleague/teams/{TEAM}/{'
+  basketball_reference_g_league_game_logs_2002_2025:
+    base_url: https://www.basketball-reference.com
+    data_type: g_league_game_logs_2002_2025
+    tier: 11
+    priority: execute
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/g_league_game_logs_2002_2025
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/gleague/game_logs/{player_slug}/{season}/gamelog.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /gleague/players/{X}/{player_slug}/gamelog/{season}
+    metadata:
+      name: G League Game Logs (2002-2025)
+      coverage: Top prospects, selective collection
+      estimated_records: ~10,000 (selective) or ~100,000 (comprehensive)
+      estimated_hours: '2'
+      description: 'G League Game Logs (2002-2025)
+
+
+        **Coverage:** Top prospects, selective collection
+
+        **Records:** ~10,000 (selective) or ~100,000 (comprehensive)
+
+        **Time:** 2 hours (selective) or 8-10 hours (all players)'
+  basketball_reference_g_league_daily_scores_2002_2025:
+    base_url: https://www.basketball-reference.com
+    data_type: g_league_daily_scores_2002_2025
+    tier: 11
+    priority: execute
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/g_league_daily_scores_2002_2025
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/gleague/daily_scores/{season}/games.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /gleague/years/NBA-D-League_{season}_games.html
+    metadata:
+      name: G League Daily Scores (2002-2025)
+      coverage: ~5,000 games total
+      estimated_records: ~5,000
+      estimated_hours: '0'
+      description: 'G League Daily Scores (2002-2025)
+
+
+        **Coverage:** ~5,000 games total
+
+        **Records:** ~5,000
+
+        **Time:** 30 minutes
+
+        **Priority:** MEDIUM
+
+
+        #### Implementation:
+
+        - **URL Pattern:** `/gleague/years/NBA-D-League_'
+  basketball_reference_g_league_awards_2002_2025:
+    base_url: https://www.basketball-reference.com
+    data_type: g_league_awards_2002_2025
+    tier: 11
+    priority: execute
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/g_league_awards_2002_2025
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/gleague/awards/{award_type}/all_years.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    metadata:
+      name: G League Awards (2002-2025)
+      coverage: 23 seasons, ~500 award winners
+      estimated_records: ~500
+      estimated_hours: '1'
+      description: 'G League Awards (2002-2025)
+
+
+        **Coverage:** 23 seasons, ~500 award winners
+
+        **Records:** ~500
+
+        **Time:** 1 hour
+
+        **Priority:** MEDIUM-HIGH
+
+
+        #### Implementation:
+
+        - **URL Pattern:** G League awards pages
+
+        -.'
+  basketball_reference_g_league_season_leaders_2002_2025:
+    base_url: https://www.basketball-reference.com
+    data_type: g_league_season_leaders_2002_2025
+    tier: 11
+    priority: execute
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/g_league_season_leaders_2002_2025
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/gleague/leaders/{season}/season_leaders.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    metadata:
+      name: G League Season Leaders (2002-2025)
+      coverage: 23 seasons
+      estimated_records: ~2,000
+      estimated_hours: '0'
+      description: 'G League Season Leaders (2002-2025)
+
+
+        **Coverage:** 23 seasons
+
+        **Records:** ~2,000
+
+        **Time:** 30 minutes
+
+        **Priority:** LOW-MEDIUM
+
+
+        #### Implementation:
+
+        - **Data:** Top performers in each category per se'
+  basketball_reference_g_league_career_leaders_all_time:
+    base_url: https://www.basketball-reference.com
+    data_type: g_league_career_leaders_all_time
+    tier: 11
+    priority: execute
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/g_league_career_leaders_all_time
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/gleague/leaders/career/career_leaders.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    metadata:
+      name: G League Career Leaders (All-time)
+      coverage: Complete G League history
+      estimated_records: ~500
+      estimated_hours: '0'
+      description: 'G League Career Leaders (All-time)
+
+
+        **Coverage:** Complete G League history
+
+        **Records:** ~500
+
+        **Time:** 30 minutes
+
+        **Priority:** LOW
+
+
+        #### Implementation:
+
+        - **Data:** Career statistical leaders
+
+        - **Ca'
+  basketball_reference_g_league_top_performers_current_season:
+    base_url: https://www.basketball-reference.com
+    data_type: g_league_top_performers_current_season
+    tier: 11
+    priority: execute
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/g_league_top_performers_current_season
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/gleague/leaders/current/top_performers.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    metadata:
+      name: G League Top Performers (Current season)
+      coverage: Current season only
+      estimated_records: Variable (~50-100)
+      estimated_hours: '0'
+      description: 'G League Top Performers (Current season)
+
+
+        **Coverage:** Current season only
+
+        **Records:** Variable (~50-100)
+
+        **Time:** 15 minutes
+
+        **Priority:** LOW
+
+
+        #### Implementation:
+
+        - **Data:** Recent standout per'
+  basketball_reference_g_league_box_scores_2002_2025:
+    base_url: https://www.basketball-reference.com
+    data_type: g_league_box_scores_2002_2025
+    tier: 11
+    priority: execute
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/g_league_box_scores_2002_2025
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/gleague/box_scores/{season}/{game_id}/box_score.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    metadata:
+      name: G League Box Scores (2002-2025)
+      coverage: ~5,000 games
+      estimated_records: ~5,000
+      estimated_hours: '1'
+      description: 'G League Box Scores (2002-2025)
+
+
+        **Coverage:** ~5,000 games
+
+        **Records:** ~5,000
+
+        **Time:** 1 hour (if collecting detailed box scores)
+
+        **Priority:** LOW
+
+
+        #### Implementation:
+
+        - **URL Pattern:** Game-spe'
+  basketball_reference_player_game_logs_season_career:
+    base_url: https://www.basketball-reference.com
+    data_type: player_game_logs_season_career
+    tier: 1
+    priority: immediate
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/player_game_logs_season_career
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/player_game_logs/{player_slug}/{season}/gamelog.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /players/{X}/{player_slug}/gamelog/{season}
+    table_id: pgl_basic
+    metadata:
+      name: Player Game Logs (Season & Career)
+      coverage: All NBA players, all seasons (1946-2025)
+      estimated_records: ~500,000 individual games
+      estimated_hours: 5-7
+      description: 'Player Game Logs (Season & Career)
+
+
+        **Coverage:** All NBA players, all seasons (1946-2025)
+
+        **Records:** ~500,000 individual games
+
+        **Time:** 5-7 hours (selective: active + significant players)
+
+        **Priori'
+  basketball_reference_play_by_play_data:
+    base_url: https://www.basketball-reference.com
+    data_type: play_by_play_data
+    tier: 1
+    priority: immediate
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/play_by_play_data
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/play_by_play/{season}/{game_id}/pbp.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /boxscores/pbp/{game_id}.html
+    table_id: pbp
+    metadata:
+      name: Play-by-Play Data
+      coverage: NBA games with available play-by-play (2000-2025)
+      estimated_records: "~500,000 games \xD7 200 events = ~100M events"
+      estimated_hours: 4-6
+      description: "Play-by-Play Data\n\n**Coverage:** NBA games with available play-by-play (2000-2025)\n**Records:** ~500,000\
+        \ games \xD7 200 events = ~100M events\n**Time:** 4-6 hours (selective: recent seasons + playoffs)\n**"
+  basketball_reference_shot_chart_data:
+    base_url: https://www.basketball-reference.com
+    data_type: shot_chart_data
+    tier: 1
+    priority: immediate
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/shot_chart_data
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/shot_charts/{season}/{game_id}/shots.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /boxscores/shot-chart/{game_id}.html
+    metadata:
+      name: Shot Chart Data
+      coverage: NBA games with shot location data (2000-2025)
+      estimated_records: "~25,000 games \xD7 200 shots = ~5M shots"
+      estimated_hours: 3-4
+      description: "Shot Chart Data\n\n**Coverage:** NBA games with shot location data (2000-2025)\n**Records:** ~25,000 games\
+        \ \xD7 200 shots = ~5M shots\n**Time:** 3-4 hours\n**Priority:** HIGH\n\n#### Implementation:\n- **URL Pat"
+  basketball_reference_player_tracking_data:
+    base_url: https://www.basketball-reference.com
+    data_type: player_tracking_data
+    tier: 1
+    priority: immediate
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/player_tracking_data
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/tracking/{season}/player_tracking.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /leagues/NBA_{season}_tracking.html
+    metadata:
+      name: Player Tracking Data
+      coverage: NBA seasons with tracking data (2013-2025)
+      estimated_records: ~10,000 player-seasons
+      estimated_hours: 2-3
+      description: 'Player Tracking Data
+
+
+        **Coverage:** NBA seasons with tracking data (2013-2025)
+
+        **Records:** ~10,000 player-seasons
+
+        **Time:** 2-3 hours
+
+        **Priority:** MEDIUM-HIGH
+
+
+        #### Implementation:
+
+        - **URL Pattern:*'
+  basketball_reference_lineup_data_5_man_combinations:
+    base_url: https://www.basketball-reference.com
+    data_type: lineup_data_5_man_combinations
+    tier: 1
+    priority: immediate
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/lineup_data_5_man_combinations
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/lineups/{season}/{team}/lineups.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /teams/{team}/{season}_lineups.html
+    table_id: lineups
+    metadata:
+      name: Lineup Data (5-Man Combinations)
+      coverage: NBA lineups with sufficient minutes (2007-2025)
+      estimated_records: ~50,000 unique lineups
+      estimated_hours: 1-2
+      description: 'Lineup Data (5-Man Combinations)
+
+
+        **Coverage:** NBA lineups with sufficient minutes (2007-2025)
+
+        **Records:** ~50,000 unique lineups
+
+        **Time:** 1-2 hours
+
+        **Priority:** MEDIUM
+
+
+        #### Implementation:
+
+        - **U'
+  basketball_reference_on_off_court_statistics:
+    base_url: https://www.basketball-reference.com
+    data_type: on_off_court_statistics
+    tier: 2
+    priority: immediate
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/on_off_court_statistics
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/on_off/{season}/{team}/on_off.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /teams/{team}/{season}/on-off/
+    metadata:
+      name: On/Off Court Statistics
+      coverage: NBA seasons (2000-2025)
+      estimated_records: ~15,000 player-seasons
+      estimated_hours: 5-7
+      description: 'On/Off Court Statistics
+
+
+        **Coverage:** NBA seasons (2000-2025)
+
+        **Records:** ~15,000 player-seasons
+
+        **Time:** 5-7 hours
+
+        **Priority:** CRITICAL
+
+
+        #### Implementation:
+
+        - **URL Pattern:** `/teams/{team}/{s'
+  basketball_reference_shooting_splits_comprehensive:
+    base_url: https://www.basketball-reference.com
+    data_type: shooting_splits_comprehensive
+    tier: 2
+    priority: immediate
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/shooting_splits_comprehensive
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/shooting_splits/{player_slug}/{season}/splits.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /players/{X}/{player_slug}/splits/{season}
+    metadata:
+      name: Shooting Splits (Comprehensive)
+      coverage: All NBA players with sufficient attempts (1996-2025)
+      estimated_records: ~50,000 player-seasons
+      estimated_hours: 8-10
+      description: 'Shooting Splits (Comprehensive)
+
+
+        **Coverage:** All NBA players with sufficient attempts (1996-2025)
+
+        **Records:** ~50,000 player-seasons
+
+        **Time:** 8-10 hours
+
+        **Priority:** HIGH
+
+
+        #### Implementation:
+
+        -.'
+  basketball_reference_matchup_data_head_to_head:
+    base_url: https://www.basketball-reference.com
+    data_type: matchup_data_head_to_head
+    tier: 2
+    priority: immediate
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/matchup_data_head_to_head
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/matchups/{season}/matchup_data.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /friv/matchups.fcgi
+    metadata:
+      name: Matchup Data (Head-to-Head)
+      coverage: Player vs Player matchups (2007-2025)
+      estimated_records: ~100,000 matchups
+      estimated_hours: 4-6
+      description: 'Matchup Data (Head-to-Head)
+
+
+        **Coverage:** Player vs Player matchups (2007-2025)
+
+        **Records:** ~100,000 matchups
+
+        **Time:** 4-6 hours
+
+        **Priority:** MEDIUM-HIGH
+
+
+        #### Implementation:
+
+        - **URL Pattern:** `'
+  basketball_reference_synergy_play_type_stats:
+    base_url: https://www.basketball-reference.com
+    data_type: synergy_play_type_stats
+    tier: 2
+    priority: immediate
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/synergy_play_type_stats
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/synergy/{season}/play_types.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    metadata:
+      name: Synergy Play Type Stats
+      coverage: NBA seasons with synergy data (2015-2025)
+      estimated_records: ~5,000 player-seasons
+      estimated_hours: 3-4
+      description: 'Synergy Play Type Stats
+
+
+        **Coverage:** NBA seasons with synergy data (2015-2025)
+
+        **Records:** ~5,000 player-seasons
+
+        **Time:** 3-4 hours
+
+        **Priority:** MEDIUM
+
+
+        #### Implementation:
+
+        - **URL Pattern:** Ma'
+  basketball_reference_awards_and_honors:
+    base_url: https://www.basketball-reference.com
+    data_type: awards_and_honors
+    tier: 3
+    priority: high
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/awards_and_honors
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/awards/{award_type}/all_years.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /awards/awards_{season}.html
+    metadata:
+      name: Awards and Honors
+      coverage: Complete NBA history (1946-2025)
+      estimated_records: ~3,000 award winners
+      estimated_hours: 4-5
+      description: 'Awards and Honors
+
+
+        **Coverage:** Complete NBA history (1946-2025)
+
+        **Records:** ~3,000 award winners
+
+        **Time:** 4-5 hours
+
+        **Priority:** HIGH
+
+
+        #### Implementation:
+
+        - **URL Pattern:** `/awards/awards_{sea'
+  basketball_reference_playoff_statistics:
+    base_url: https://www.basketball-reference.com
+    data_type: playoff_statistics
+    tier: 3
+    priority: high
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/playoff_statistics
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/playoffs/{season}/playoff_stats.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /playoffs/NBA_{season}.html
+    metadata:
+      name: Playoff Statistics
+      coverage: All NBA playoffs (1947-2025)
+      estimated_records: ~50,000 player playoff performances
+      estimated_hours: 4-6
+      description: 'Playoff Statistics
+
+
+        **Coverage:** All NBA playoffs (1947-2025)
+
+        **Records:** ~50,000 player playoff performances
+
+        **Time:** 4-6 hours
+
+        **Priority:** HIGH
+
+
+        #### Implementation:
+
+        - **URL Pattern:** `/playof'
+  basketball_reference_season_leaders_and_records:
+    base_url: https://www.basketball-reference.com
+    data_type: season_leaders_and_records
+    tier: 3
+    priority: high
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/season_leaders_and_records
+      upload_to_s3: true
+      compression: false
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /leaders/
+    metadata:
+      name: Season Leaders and Records
+      coverage: Complete NBA history (1946-2025)
+      estimated_records: ~20,000 leader entries
+      estimated_hours: 2-4
+      description: 'Season Leaders and Records
+
+
+        **Coverage:** Complete NBA history (1946-2025)
+
+        **Records:** ~20,000 leader entries
+
+        **Time:** 2-4 hours
+
+        **Priority:** MEDIUM-HIGH
+
+
+        #### Implementation:
+
+        - **URL Pattern:** `/'
+  basketball_reference_streaks_and_game_highs:
+    base_url: https://www.basketball-reference.com
+    data_type: streaks_and_game_highs
+    tier: 4
+    priority: high
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/streaks_and_game_highs
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/streaks/{player_slug}/career_streaks.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /friv/streaks.cgi
+    metadata:
+      name: Streaks and Game Highs
+      coverage: NBA history (1946-2025)
+      estimated_records: ~100,000 streak records
+      estimated_hours: 5-7
+      description: 'Streaks and Game Highs
+
+
+        **Coverage:** NBA history (1946-2025)
+
+        **Records:** ~100,000 streak records
+
+        **Time:** 5-7 hours
+
+        **Priority:** HIGH
+
+
+        #### Implementation:
+
+        - **URL Pattern:** `/friv/streaks.cgi` o'
+  basketball_reference_advanced_box_scores_four_factors:
+    base_url: https://www.basketball-reference.com
+    data_type: advanced_box_scores_four_factors
+    tier: 4
+    priority: high
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/advanced_box_scores_four_factors
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/advanced_box/{season}/{game_id}/four_factors.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /boxscores/{game_id}.html
+    metadata:
+      name: Advanced Box Scores (Four Factors)
+      coverage: NBA games (1996-2025, where available)
+      estimated_records: ~40,000 games
+      estimated_hours: 4-6
+      description: 'Advanced Box Scores (Four Factors)
+
+
+        **Coverage:** NBA games (1996-2025, where available)
+
+        **Records:** ~40,000 games
+
+        **Time:** 4-6 hours
+
+        **Priority:** MEDIUM-HIGH
+
+
+        #### Implementation:
+
+        - **URL Pattern:'
+  basketball_reference_franchise_history_and_records:
+    base_url: https://www.basketball-reference.com
+    data_type: franchise_history_and_records
+    tier: 4
+    priority: high
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/franchise_history_and_records
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/franchises/{team}/franchise_history.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /teams/{team}/
+    metadata:
+      name: Franchise History and Records
+      coverage: All NBA franchises (current and defunct)
+      estimated_records: ~10,000 franchise-season records
+      estimated_hours: 3-4
+      description: 'Franchise History and Records
+
+
+        **Coverage:** All NBA franchises (current and defunct)
+
+        **Records:** ~10,000 franchise-season records
+
+        **Time:** 3-4 hours
+
+        **Priority:** MEDIUM
+
+
+        #### Implementation:
+
+        - **U'
+  basketball_reference_all_star_game_data:
+    base_url: https://www.basketball-reference.com
+    data_type: all_star_game_data
+    tier: 4
+    priority: high
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/all_star_game_data
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/all_star/{season}/allstar_game.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /allstar/NBA_{season}.html
+    metadata:
+      name: All-Star Game Data
+      coverage: All NBA All-Star Games (1951-2025)
+      estimated_records: ~2,000 All-Star player performances
+      estimated_hours: 3-4
+      description: 'All-Star Game Data
+
+
+        **Coverage:** All NBA All-Star Games (1951-2025)
+
+        **Records:** ~2,000 All-Star player performances
+
+        **Time:** 3-4 hours
+
+        **Priority:** MEDIUM
+
+
+        #### Implementation:
+
+        - **URL Pattern:**.'
+  basketball_reference_defensive_tracking_data:
+    base_url: https://www.basketball-reference.com
+    data_type: defensive_tracking_data
+    tier: 5
+    priority: medium
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/defensive_tracking_data
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/defensive_tracking/{season}/defensive_stats.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /leagues/NBA_{season}_defensive.html
+    metadata:
+      name: Defensive Tracking Data
+      coverage: NBA seasons with defensive tracking (2013-2025)
+      estimated_records: ~6,000 player-seasons
+      estimated_hours: 3-4
+      description: 'Defensive Tracking Data
+
+
+        **Coverage:** NBA seasons with defensive tracking (2013-2025)
+
+        **Records:** ~6,000 player-seasons
+
+        **Time:** 3-4 hours
+
+        **Priority:** MEDIUM-HIGH
+
+
+        #### Implementation:
+
+        - **URL Pa'
+  basketball_reference_hustle_stats:
+    base_url: https://www.basketball-reference.com
+    data_type: hustle_stats
+    tier: 5
+    priority: medium
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/hustle_stats
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/hustle_stats/{season}/hustle.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /leagues/NBA_{season}_hustle.html
+    metadata:
+      name: Hustle Stats
+      coverage: NBA seasons with hustle tracking (2016-2025)
+      estimated_records: ~4,500 player-seasons
+      estimated_hours: 2-3
+      description: 'Hustle Stats
+
+
+        **Coverage:** NBA seasons with hustle tracking (2016-2025)
+
+        **Records:** ~4,500 player-seasons
+
+        **Time:** 2-3 hours
+
+        **Priority:** MEDIUM
+
+
+        #### Implementation:
+
+        - **URL Pattern:** `/leagues/'
+  basketball_reference_plus_minus_data_detailed:
+    base_url: https://www.basketball-reference.com
+    data_type: plus_minus_data_detailed
+    tier: 5
+    priority: medium
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/plus_minus_data_detailed
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/plus_minus/{season}/{player_slug}/plus_minus.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    metadata:
+      name: Plus/Minus Data (Detailed)
+      coverage: NBA seasons (2000-2025)
+      estimated_records: ~40,000 player-seasons
+      estimated_hours: 3-5
+      description: 'Plus/Minus Data (Detailed)
+
+
+        **Coverage:** NBA seasons (2000-2025)
+
+        **Records:** ~40,000 player-seasons
+
+        **Time:** 3-5 hours
+
+        **Priority:** MEDIUM
+
+
+        #### Implementation:
+
+        - **URL Pattern:** Player pages or.'
+  basketball_reference_similar_players_comparables:
+    base_url: https://www.basketball-reference.com
+    data_type: similar_players_comparables
+    tier: 6
+    priority: medium
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/similar_players_comparables
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/similar_players/{player_slug}/comparables.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /players/{X}/{player_slug}.html
+    metadata:
+      name: Similar Players (Comparables)
+      coverage: All NBA players with sufficient career data
+      estimated_records: "~5,000 players \xD7 ~10 comparables = ~50,000 comparisons"
+      estimated_hours: 4-5
+      description: "Similar Players (Comparables)\n\n**Coverage:** All NBA players with sufficient career data\n**Records:**\
+        \ ~5,000 players \xD7 ~10 comparables = ~50,000 comparisons\n**Time:** 4-5 hours\n**Priority:** MEDIUM-HI"
+  basketball_reference_adjusted_shooting_stats_era_adjusted:
+    base_url: https://www.basketball-reference.com
+    data_type: adjusted_shooting_stats_era_adjusted
+    tier: 6
+    priority: medium
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/adjusted_shooting_stats_era_adjusted
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/adjusted_stats/{player_slug}/era_adjusted.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    metadata:
+      name: Adjusted Shooting Stats (Era-Adjusted)
+      coverage: All NBA players (1946-2025)
+      estimated_records: ~5,000 players with adjusted stats
+      estimated_hours: 3-4
+      description: 'Adjusted Shooting Stats (Era-Adjusted)
+
+
+        **Coverage:** All NBA players (1946-2025)
+
+        **Records:** ~5,000 players with adjusted stats
+
+        **Time:** 3-4 hours
+
+        **Priority:** MEDIUM
+
+
+        #### Implementation:
+
+        - **URL'
+  basketball_reference_advanced_player_comparisons:
+    base_url: https://www.basketball-reference.com
+    data_type: advanced_player_comparisons
+    tier: 6
+    priority: medium
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/advanced_player_comparisons
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/player_comparisons/{player1}_{player2}/comparison.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /friv/player_comparison.cgi
+    metadata:
+      name: Advanced Player Comparisons
+      coverage: Player vs Player statistical comparison tool
+      estimated_records: ~10,000 unique player pair comparisons
+      estimated_hours: 3-4
+      description: 'Advanced Player Comparisons
+
+
+        **Coverage:** Player vs Player statistical comparison tool
+
+        **Records:** ~10,000 unique player pair comparisons
+
+        **Time:** 3-4 hours
+
+        **Priority:** MEDIUM
+
+
+        #### Implementatio'
+  basketball_reference_projection_systems_carmelo_etc:
+    base_url: https://www.basketball-reference.com
+    data_type: projection_systems_carmelo_etc
+    tier: 6
+    priority: medium
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/projection_systems_carmelo_etc
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/projections/{player_slug}/career_projections.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    metadata:
+      name: Projection Systems (CARMELO, etc.)
+      coverage: Current NBA players with projections
+      estimated_records: ~500 active players
+      estimated_hours: 2-3
+      description: 'Projection Systems (CARMELO, etc.)
+
+
+        **Coverage:** Current NBA players with projections
+
+        **Records:** ~500 active players
+
+        **Time:** 2-3 hours
+
+        **Priority:** LOW-MEDIUM
+
+
+        #### Implementation:
+
+        - **URL Patte'
+  basketball_reference_clutch_statistics:
+    base_url: https://www.basketball-reference.com
+    data_type: clutch_statistics
+    tier: 7
+    priority: medium
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/clutch_statistics
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/clutch_stats/{player_slug}/{season}/clutch.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    metadata:
+      name: Clutch Statistics
+      coverage: NBA games with clutch data (2000-2025)
+      estimated_records: ~25,000 player-seasons with clutch stats
+      estimated_hours: 4-5
+      description: 'Clutch Statistics
+
+
+        **Coverage:** NBA games with clutch data (2000-2025)
+
+        **Records:** ~25,000 player-seasons with clutch stats
+
+        **Time:** 4-5 hours
+
+        **Priority:** MEDIUM-HIGH
+
+
+        #### Implementation:
+
+        - **UR'
+  basketball_reference_rest_and_fatigue_analysis:
+    base_url: https://www.basketball-reference.com
+    data_type: rest_and_fatigue_analysis
+    tier: 7
+    priority: medium
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/rest_and_fatigue_analysis
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/rest_analysis/{season}/{team}/rest_data.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    metadata:
+      name: Rest and Fatigue Analysis
+      coverage: All NBA games (1946-2025)
+      estimated_records: ~60,000 team-game records with rest data
+      estimated_hours: 3-4
+      description: 'Rest and Fatigue Analysis
+
+
+        **Coverage:** All NBA games (1946-2025)
+
+        **Records:** ~60,000 team-game records with rest data
+
+        **Time:** 3-4 hours
+
+        **Priority:** MEDIUM
+
+
+        #### Implementation:
+
+        - **URL Pattern:'
+  basketball_reference_travel_and_timezone_impact:
+    base_url: https://www.basketball-reference.com
+    data_type: travel_and_timezone_impact
+    tier: 7
+    priority: medium
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/travel_and_timezone_impact
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/travel_data/{season}/{team}/travel.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    metadata:
+      name: Travel and Timezone Impact
+      coverage: All NBA games (1946-2025)
+      estimated_records: ~60,000 games with travel data
+      estimated_hours: 3-4
+      description: 'Travel and Timezone Impact
+
+
+        **Coverage:** All NBA games (1946-2025)
+
+        **Records:** ~60,000 games with travel data
+
+        **Time:** 3-4 hours
+
+        **Priority:** MEDIUM
+
+
+        #### Implementation:
+
+        - **URL Pattern:** Calcul'
+  basketball_reference_strength_of_schedule:
+    base_url: https://www.basketball-reference.com
+    data_type: strength_of_schedule
+    tier: 7
+    priority: medium
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/strength_of_schedule
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/strength_of_schedule/{season}/sos.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    metadata:
+      name: Strength of Schedule
+      coverage: All NBA seasons (1946-2025)
+      estimated_records: ~2,000 team-seasons
+      estimated_hours: 2-3
+      description: 'Strength of Schedule
+
+
+        **Coverage:** All NBA seasons (1946-2025)
+
+        **Records:** ~2,000 team-seasons
+
+        **Time:** 2-3 hours
+
+        **Priority:** LOW-MEDIUM
+
+
+        #### Implementation:
+
+        - **URL Pattern:** Calculate from sc'
+  basketball_reference_referee_data:
+    base_url: https://www.basketball-reference.com
+    data_type: referee_data
+    tier: 8
+    priority: low
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/referee_data
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/referees/{season}/{game_id}/ref_assignment.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /boxscores/{game_id}.html
+    metadata:
+      name: Referee Data
+      coverage: NBA games with referee data (1988-2025)
+      estimated_records: ~40,000 games with ref assignments
+      estimated_hours: 3-4
+      description: 'Referee Data
+
+
+        **Coverage:** NBA games with referee data (1988-2025)
+
+        **Records:** ~40,000 games with ref assignments
+
+        **Time:** 3-4 hours
+
+        **Priority:** LOW-MEDIUM
+
+
+        #### Implementation:
+
+        - **URL Pattern:*'
+  basketball_reference_transactions_trades_waivers_signings:
+    base_url: https://www.basketball-reference.com
+    data_type: transactions_trades_waivers_signings
+    tier: 8
+    priority: low
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/transactions_trades_waivers_signings
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/transactions/{season}/transactions.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /friv/transactions.cgi
+    metadata:
+      name: Transactions (Trades, Waivers, Signings)
+      coverage: Complete NBA history (1946-2025)
+      estimated_records: ~10,000 transactions
+      estimated_hours: 4-6
+      description: 'Transactions (Trades, Waivers, Signings)
+
+
+        **Coverage:** Complete NBA history (1946-2025)
+
+        **Records:** ~10,000 transactions
+
+        **Time:** 4-6 hours
+
+        **Priority:** LOW
+
+
+        #### Implementation:
+
+        - **URL Pattern:*'
+  basketball_reference_miscellaneous_records_and_milestones:
+    base_url: https://www.basketball-reference.com
+    data_type: miscellaneous_records_and_milestones
+    tier: 8
+    priority: low
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/miscellaneous_records_and_milestones
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/records/all_records.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /friv/records.cgi
+    metadata:
+      name: Miscellaneous Records and Milestones
+      coverage: Complete NBA history (1946-2025)
+      estimated_records: ~1,000 unique records/milestones
+      estimated_hours: 2-3
+      description: 'Miscellaneous Records and Milestones
+
+
+        **Coverage:** Complete NBA history (1946-2025)
+
+        **Records:** ~1,000 unique records/milestones
+
+        **Time:** 2-3 hours
+
+        **Priority:** LOW
+
+
+        #### Implementation:
+
+        - **URL P'
+  basketball_reference_aba_complete_data_1967_1976:
+    base_url: https://www.basketball-reference.com
+    data_type: aba_complete_data_1967_1976
+    tier: 9
+    priority: low
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/aba_complete_data_1967_1976
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/aba/{season}/season_stats.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /aba/years/ABA_{season}.html
+    metadata:
+      name: ABA Complete Data (1967-1976)
+      coverage: All 9 ABA seasons
+      estimated_records: ~10,000 player-seasons, ~1,200 games per season
+      estimated_hours: 3-4
+      description: 'ABA Complete Data (1967-1976)
+
+
+        **Coverage:** All 9 ABA seasons
+
+        **Records:** ~10,000 player-seasons, ~1,200 games per season
+
+        **Time:** 3-4 hours
+
+        **Priority:** LOW-MEDIUM
+
+
+        #### Implementation:
+
+        - **URL P'
+  basketball_reference_baa_complete_data_1946_1949:
+    base_url: https://www.basketball-reference.com
+    data_type: baa_complete_data_1946_1949
+    tier: 9
+    priority: low
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/baa_complete_data_1946_1949
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/baa/{season}/season_stats.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /baa/years/BAA_{season}.html
+    metadata:
+      name: BAA Complete Data (1946-1949)
+      coverage: All 3 BAA seasons (precursor to NBA)
+      estimated_records: ~300 player-seasons, ~200 games per season
+      estimated_hours: 1-2
+      description: 'BAA Complete Data (1946-1949)
+
+
+        **Coverage:** All 3 BAA seasons (precursor to NBA)
+
+        **Records:** ~300 player-seasons, ~200 games per season
+
+        **Time:** 1-2 hours
+
+        **Priority:** LOW
+
+
+        #### Implementation:
+
+        -.'
+  basketball_reference_early_nba_data_1949_1952_pre_shot_clock:
+    base_url: https://www.basketball-reference.com
+    data_type: early_nba_data_1949_1952_pre_shot_clock
+    tier: 9
+    priority: low
+    rate_limit:
+      requests_per_second: 0.5
+      burst_size: 5
+      adaptive: true
+      retry_after_header: true
+    retry:
+      max_attempts: 5
+      base_delay: 2.0
+      max_delay: 120.0
+      exponential_backoff: true
+      jitter: true
+    timeout: 45
+    user_agent: NBA-Simulator-ADCE/1.0
+    max_concurrent: 5
+    storage:
+      s3_bucket: nba-sim-raw-data-lake
+      local_output_dir: /tmp/bbref_scraper/early_nba_data_1949_1952_pre_shot_clock
+      upload_to_s3: true
+      compression: false
+      s3_prefix: basketball_reference/nba/early_nba/{season}/season_stats.json
+    monitoring:
+      enable_telemetry: true
+      log_level: INFO
+      track_progress: true
+    url_pattern: /leagues/NBA_{season}.html
+    metadata:
+      name: Early NBA Data (1949-1952, Pre-Shot Clock)
+      coverage: First 3-4 NBA seasons (post-BAA merger)
+      estimated_records: ~400 player-seasons, ~300 games per season
+      estimated_hours: 1-2
+      description: 'Early NBA Data (1949-1952, Pre-Shot Clock)
+
+
+        **Coverage:** First 3-4 NBA seasons (post-BAA merger)
+
+        **Records:** ~400 player-seasons, ~300 games per season
+
+        **Time:** 1-2 hours
+
+        **Priority:** LOW
+
+
+        #### Im'
+metadata:
+  generated_from: config/basketball_reference_data_types_catalog.json
+  total_scrapers: 43
+  basketball_reference_tiers: 10
+  total_estimated_hours: 136.0

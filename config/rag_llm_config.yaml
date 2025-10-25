@@ -1,0 +1,158 @@
+# Phase 0.12: RAG + LLM Integration Configuration
+#
+# Configuration for NBA RAG+LLM natural language query system.
+# Customize retrieval parameters, LLM settings, and cost limits.
+
+# Retrieval Configuration
+retrieval:
+  # Number of context items to retrieve
+  top_k: 10
+
+  # Minimum similarity threshold (0.0-1.0)
+  similarity_threshold: 0.7
+
+  # Entity distribution for hybrid search
+  entity_distribution:
+    players: 5   # 50% of results
+    games: 3     # 30% of results
+    plays: 2     # 20% of results
+
+  # Enable JSONB enrichment
+  enrich_with_jsonb: true
+
+# LLM Configuration
+llm:
+  # Provider: "openai", "anthropic", "local"
+  provider: "openai"
+
+  # Model selection
+  # - gpt-4: Best quality, highest cost ($0.03-0.06/1K tokens)
+  # - gpt-4-turbo: Good quality, medium cost ($0.01-0.03/1K tokens)
+  # - gpt-3.5-turbo: Fastest, lowest cost ($0.0005-0.0015/1K tokens)
+  model: "gpt-4"
+
+  # Maximum response tokens
+  max_tokens: 1000
+
+  # Temperature (0.0-2.0)
+  # - 0.0: Deterministic, factual
+  # - 0.7: Balanced (recommended)
+  # - 1.5+: Creative, varied
+  temperature: 0.7
+
+  # Enable streaming responses
+  stream: true
+
+  # Fallback to cheaper model for simple queries
+  use_gpt35_for_simple: true
+  simple_query_threshold: 0.6  # Confidence threshold
+
+# Prompt Configuration
+prompt:
+  # Maximum context tokens (reserve 30% for response)
+  max_context_tokens: 3000
+
+  # System prompt template path (relative to project root)
+  system_prompt_template: null  # Use default if null
+
+  # Intent-specific instructions
+  use_intent_instructions: true
+
+# Cost Optimization
+cost_optimization:
+  # Enable response caching
+  cache_responses: true
+
+  # Cache time-to-live (seconds)
+  cache_ttl: 3600  # 1 hour
+
+  # Daily token budget (null = unlimited)
+  token_budget_per_day: 100000  # ~100K tokens/day
+
+  # Daily cost limit (USD, null = unlimited)
+  cost_limit_per_day: 10.00  # $10/day max
+
+  # Warn when approaching limits
+  warn_at_percentage: 80  # Warn at 80% of limit
+
+# Database Configuration
+database:
+  # PostgreSQL connection (uses environment variables by default)
+  dbname: ${POSTGRES_DB:nba_data}
+  user: ${POSTGRES_USER:nba_admin}
+  password: ${POSTGRES_PASSWORD}
+  host: ${POSTGRES_HOST:localhost}
+  port: ${POSTGRES_PORT:5432}
+
+  # Connection pool settings
+  pool_min_connections: 1
+  pool_max_connections: 5
+
+# Logging Configuration
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR
+  level: INFO
+
+  # Log file path (null = console only)
+  file: logs/rag_llm.log
+
+  # Log format
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+  # Log queries and responses
+  log_queries: true
+  log_responses: false  # Privacy: don't log full responses
+
+# Metrics Configuration
+metrics:
+  # Enable metrics collection
+  enabled: true
+
+  # Metrics file path
+  file: metrics/rag_llm_metrics.json
+
+  # Save metrics interval (seconds, 0 = only on exit)
+  save_interval: 300  # Every 5 minutes
+
+  # Track per-user metrics
+  track_per_user: false
+
+# Interactive Mode Configuration
+interactive:
+  # Show welcome message
+  show_welcome: true
+
+  # Enable command history
+  enable_history: true
+  history_file: .rag_llm_history
+
+  # Prompt string
+  prompt: ">>> "
+
+  # Auto-save metrics on exit
+  auto_save_metrics: true
+
+# Query Understanding Configuration
+query_understanding:
+  # Enable database-backed entity extraction
+  use_database_entities: true
+
+  # Confidence threshold for query routing
+  confidence_threshold: 0.5
+
+  # Enable temporal parsing
+  parse_temporal: true
+
+# Development/Testing Configuration
+development:
+  # Enable debug mode
+  debug: false
+
+  # Use mock LLM (for testing without API calls)
+  mock_llm: false
+
+  # Verbose output
+  verbose: false
+
+  # Dry run mode (analyze query but don't call LLM)
+  dry_run: false

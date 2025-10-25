@@ -14,6 +14,19 @@ Phase 0 establishes the complete data collection infrastructure for the NBA temp
 
 ---
 
+## ⚠️ Project Scope: NBA Only
+
+**This project is strictly NBA basketball data collection.** It will **NEVER** incorporate:
+- ❌ NCAA basketball data
+- ❌ International basketball (EuroLeague, FIBA, Olympics, etc.)
+- ❌ Other sports (MLB, NFL, NHL, soccer, etc.)
+
+**Future Sports Platforms:** Other sports will be built as **separate projects** in separate directories, using this NBA infrastructure as a template/foundation.
+
+**Phase 0.5 & 0.6:** These are **NOT** reserved for other sports. They were permanently superseded by PostgreSQL implementations (see "Architecture Notes → Missing Sub-Phases" section below).
+
+---
+
 ## Sub-Phases
 
 | # | Sub-Phase | Status | Priority | Completed | Description |
@@ -21,13 +34,13 @@ Phase 0 establishes the complete data collection infrastructure for the NBA temp
 | **0.1** | [Initial Data Collection](0.1_initial_data_collection/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 23, 2025 | ESPN data upload (172,719 files, 118GB) |
 | **0.2** | [hoopR Data Collection](0.2_hoopr_data_collection/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 9, 2025 (Validated: Oct 23, 2025) | hoopR package data (410 files, 8.2GB) |
 | **0.3** | [Kaggle Historical Database](0.3_kaggle_historical_database/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Pre-project (Validated: Oct 23, 2025) | Historical database (66K games, 1946-2023, EXPANDED) |
-| **0.4** | [Basketball Reference](0.4_basketball_reference/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Oct 23, 2025 (Validated) | Basketball Reference data (444 files, 99.9 MB, 1953-2025) |
+| **0.4** | [Basketball Reference](0.4_basketball_reference/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Oct 25, 2025 (ADCE Integration) | Basketball Reference ADCE Integration (444 files + 43 data types configured, NBA + G League) |
 | **0.7** | [Odds API Data](0.7_odds_api_data/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Oct 23, 2025 (Validated) | Betting odds integration (odds-api scraper, 5 tables, 10+ bookmakers) |
 | **0.8** | [Security Implementation](0.8_security_implementation/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 23, 2025 | 13 security variations (rec_034-047) |
 | **0.9** | [Data Extraction](0.9_data_extraction/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 23-24, 2025 | **Full validation complete: 93.1% success** (160,609/172,433 files, 100/100 quality, all schemas working) |
-| **0.10** | [PostgreSQL JSONB Storage](0.10_postgresql_jsonb_storage/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 23, 2025 | JSONB columns for flexible schema (rec_033) |
-| **0.11** | [RAG Pipeline with pgvector](0.11_rag_pipeline_pgvector/README.md) | ✅ COMPLETE ✓ | 🟡 MEDIUM | Oct 23, 2025 | Vector embeddings for RAG (rec_034) |
-| **0.12** | [RAG + LLM Integration](0.12_rag_llm_integration/README.md) | ✅ COMPLETE ✓ | 🟡 MEDIUM | Oct 23, 2025 | Combined RAG and LLM system (rec_188) |
+| **0.10** | [PostgreSQL JSONB Storage](0.10_postgresql_jsonb_storage/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 25, 2025 | JSONB columns for flexible schema (rec_033) - Deployed & Tested |
+| **0.11** | [RAG Pipeline with pgvector](0.11_rag_pipeline_pgvector/README.md) | ✅ COMPLETE ✓ | 🟡 MEDIUM | Oct 25, 2025 | Vector embeddings for RAG (rec_034) - 3,584 lines, 19/24 tests passing |
+| **0.12** | [RAG + LLM Integration](0.12_rag_llm_integration/README.md) | ✅ COMPLETE ✓ | 🟡 MEDIUM | Oct 25, 2025 | Natural language query interface - 2,412 lines, 7 files (rec_188) |
 | **0.13** | [Dispatcher Pipeline](0.13_dispatcher_pipeline/README.md) | ✅ COMPLETE ✓ | 🟡 IMPORTANT | Oct 23, 2025 | Modular data collection routing (rec_044/190) |
 | **0.14** | [Error Analysis](0.14_error_analysis/README.md) | ✅ COMPLETE ✓ | 🟡 IMPORTANT | Oct 23, 2025 | Reduce hallucinations in outputs (rec_192) |
 | **0.15** | [Information Availability](0.15_information_availability/README.md) | ✅ COMPLETE ✓ | 🟡 MEDIUM | Oct 23, 2025 | Increase data accessibility (rec_193) |
@@ -41,9 +54,10 @@ Phase 0 establishes the complete data collection infrastructure for the NBA temp
 
 ### Completion Status
 - **Complete:** 15 sub-phases (0.1, 0.2, 0.3, 0.4, 0.7, 0.8, 0.9, 0.10, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18)
+- **In Progress:** 0 sub-phases
 - **Pending:** 0 sub-phases
 - **Planned:** 0 sub-phases
-- **Total:** 16 sub-phases (awaiting 0.5 & 0.6 - NCAA/International data sources)
+- **Total:** 16 sub-phases (0.5 & 0.6 superseded by 0.10/0.11 PostgreSQL implementations)
 
 ### Data Collection Achievements
 
@@ -69,19 +83,41 @@ python scripts/monitoring/dims_cli.py verify --category s3_storage
 - ✅ Phase 0.2 validated via Workflow #58 (October 23, 2025) - 100% test pass rate (27/27 checks)
 - ✅ Phase 0.3 validated via Workflow #58 (October 23, 2025) - 100% test pass rate (26/26 checks)
   - **Discovery:** Database massively expanded from 26K games (2004-2020) to 66K games (1946-2023, 13.6M play-by-play events)
-- ✅ Phase 0.4 validated via Workflow #58 (October 23, 2025) - 100% test pass rate (36/36 checks)
-  - **Basketball Reference data:** 444 files (99.9 MB), 14 categories, 1953-2025 temporal coverage
+- ✅ Phase 0.4 ADCE integration complete (October 25, 2025) - 100% test pass rate (9/9 comprehensive tests)
+  - **Basketball Reference:** 444 existing files + 43 data types configured for autonomous collection
+  - **Scope:** NBA (Tiers 1-9, 33 types) + G League (Tier 11, 10 types)
+  - **Priority order:** NBA Modern → NBA Advanced → Historical (ABA/BAA) → G League
+  - **Timeline:** 6-9 weeks autonomous 24/7 collection
 - ✅ Phase 0.7 validated via Workflow #58 (October 23, 2025) - 100% test pass rate (29/29 checks)
   - **Odds API integration:** Autonomous odds-api scraper, 5 database tables, 10+ bookmakers, real-time betting market data
+- ✅ Phase 0.10 & 0.11 completed (October 25, 2025) - PostgreSQL JSONB + RAG Pipeline with pgvector
+  - **Phase 0.10:** 2,573 lines production code, 27/30 tests passing (90%), temporal query integration
+  - **Phase 0.11:** 3,584 lines production code, 19/24 tests passing (79%), OpenAI embeddings, HNSW vector search
+  - **Combined:** ~6,157 lines of production code for unified PostgreSQL data/vector storage
 
 ---
 
 ## Architecture Notes
 
-### Missing Sub-Phases (0.5, 0.6)
-These sub-phases were **archived/superseded** by PostgreSQL implementations:
-- `0.5` → Superseded by `0.10_postgresql_jsonb_storage`
-- `0.6` → Superseded by `0.11_rag_pipeline_pgvector` and `0.12_rag_llm_integration`
+### Missing Sub-Phases (0.5, 0.6) - SUPERSEDED, NOT AWAITING NCAA DATA
+
+**⚠️ IMPORTANT:** These sub-phases were **permanently superseded** by PostgreSQL implementations. They are **NOT** placeholders for NCAA/International data.
+
+**Why they're missing:**
+- `0.5` → **Superseded** by `0.10_postgresql_jsonb_storage` (rec_033)
+  - Originally: MongoDB NoSQL storage with flexible schema
+  - Replaced with: PostgreSQL JSONB columns (same flexibility, better integration)
+- `0.6` → **Superseded** by `0.11_rag_pipeline_pgvector` (rec_034) and `0.12_rag_llm_integration` (rec_188)
+  - Originally: RAG pipeline with Qdrant vector database
+  - Replaced with: PostgreSQL pgvector extension (same capabilities, unified database)
+
+**PostgreSQL architecture decision:** MongoDB + Qdrant were replaced with PostgreSQL JSONB + pgvector for:
+- Cost savings: $0 vs $25-50/month for additional database infrastructure
+- Better integration: Native JOINs with temporal panel data
+- Simpler architecture: Single database vs. 3 separate databases
+- ACID transactions: Data consistency across all operations
+
+**Project Scope:** This project is **strictly NBA-only**. NCAA, international, and other sports will be **separate projects** using this as a template.
 
 See `archive/mongodb_superseded/` for historical context.
 
@@ -178,10 +214,12 @@ pytest tests/phases/phase_0/ -v
 
 ## Next Steps
 
-1. **Complete Phase 0.4** (Basketball Reference) - 234 data types across 13 tiers
-2. **Migrate remaining Python files** - Move tests/validators from `docs/` to proper locations
-3. **Add ADCE tracking** - Update all validators with dynamic S3 querying
-4. **Create power directories** - For complex sub-phases (0.4, 0.8, 0.13-0.17)
+1. ✅ **Complete Phase 0.4** (Basketball Reference) - 43 data types configured for ADCE (October 25, 2025)
+   - Priority order: NBA Modern (Tiers 1-4) → NBA Advanced (Tiers 5-8) → Historical (Tier 9) → G League (Tier 11)
+   - Future expansion: WNBA (Tier 10), International (Tier 12), NCAA (Tier 13)
+2. **Begin autonomous collection** - Deploy ADCE to collect 43 Basketball Reference data types
+3. **Monitor collection progress** - Track S3 uploads via DIMS metrics
+4. **Migrate remaining Python files** - Move tests/validators from `docs/` to proper locations (if any remain)
 
 ---
 

@@ -1,11 +1,11 @@
 # NBA Data Inventory - Expected Coverage
-# Version: 0.2 (Refined for Actual Data)
+# Version: 0.3 (Basketball Reference ADCE Integration)
 # Created: 2025-10-22
-# Updated: 2025-10-22
+# Updated: 2025-10-25
 # Purpose: Define what data we SHOULD have for reconciliation
 
-version: "0.2-refined"
-last_updated: "2025-10-22"
+version: "0.3-bbref-adce"
+last_updated: "2025-10-25"
 
 # Based on actual S3 data analysis (10% sample scan):
 # - basketball_reference: 43 files (11.1 MB) - Advanced stats, player totals
@@ -17,28 +17,509 @@ last_updated: "2025-10-22"
 
 expected_coverage:
   basketball_reference:
-    # Historical player advanced statistics from Basketball Reference
-    # Path pattern: basketball_reference/advanced_totals/{year}/player_advanced_totals.json
+    # Comprehensive Basketball Reference data across 43 data types (13 tiers)
+    # Generated: 2025-10-25 via autonomous extraction + configuration
+    # Total: 43 data types spanning NBA (1946-2025), G League (2002-2025), ABA, BAA
+
     seasons:
-      - 1962
-      - 1963
-      - 1964
-      - 1965
-      - 1966
-      - 1967
-      - 1968
-      - 1969
-      - 1970-2024 # Continuous years
+      nba: "1946-2025" # 79 years of NBA data
+      gleague: "2002-2025" # 23 years of G League
+      aba: "1967-1976" # 9 years of ABA
+      baa: "1946-1949" # 3 years of BAA (pre-NBA)
 
     data_types:
+      # ========== TIER 1: NBA HIGH VALUE (IMMEDIATE) ==========
+      player_game_logs_season_career:
+        required: true
+        priority: "IMMEDIATE"
+        tier: 1
+        freshness_days: 7
+        path_patterns:
+          - "basketball_reference/nba/player_game_logs/{player_slug}/{season}/gamelog.json"
+        completeness_threshold: 0.95
+        description: "Player game logs for all NBA players (1946-2025)"
+        estimated_records: 500000
+
+      play_by_play_data:
+        required: true
+        priority: "IMMEDIATE"
+        tier: 1
+        freshness_days: 7
+        path_patterns:
+          - "basketball_reference/nba/play_by_play/{season}/{game_id}/pbp.json"
+        completeness_threshold: 0.90
+        description: "Play-by-play data for NBA games (2000-2025)"
+        estimated_records: 100000000  # ~100M events
+
+      shot_chart_data:
+        required: true
+        priority: "IMMEDIATE"
+        tier: 1
+        freshness_days: 7
+        path_patterns:
+          - "basketball_reference/nba/shot_charts/{season}/{game_id}/shots.json"
+        completeness_threshold: 0.85
+        description: "Shot location data for NBA games (2000-2025)"
+        estimated_records: 5000000  # ~5M shots
+
+      player_tracking_data:
+        required: true
+        priority: "IMMEDIATE"
+        tier: 1
+        freshness_days: 30
+        path_patterns:
+          - "basketball_reference/nba/tracking/{season}/player_tracking.json"
+        completeness_threshold: 0.95
+        description: "Player tracking data (2013-2025)"
+        estimated_records: 10000
+
+      lineup_data_5_man_combinations:
+        required: true
+        priority: "IMMEDIATE"
+        tier: 1
+        freshness_days: 30
+        path_patterns:
+          - "basketball_reference/nba/lineups/{season}/{team}/lineups.json"
+        completeness_threshold: 0.90
+        description: "5-man lineup combinations (2007-2025)"
+        estimated_records: 50000
+
+      # ========== TIER 2: NBA STRATEGIC (IMMEDIATE) ==========
+      on_off_court_statistics:
+        required: true
+        priority: "IMMEDIATE"
+        tier: 2
+        freshness_days: 30
+        path_patterns:
+          - "basketball_reference/nba/on_off/{season}/{team}/on_off.json"
+        completeness_threshold: 0.90
+        description: "On/off court statistics (2000-2025)"
+        estimated_records: 15000
+
+      shooting_splits_comprehensive:
+        required: true
+        priority: "IMMEDIATE"
+        tier: 2
+        freshness_days: 30
+        path_patterns:
+          - "basketball_reference/nba/shooting_splits/{player_slug}/{season}/splits.json"
+        completeness_threshold: 0.85
+        description: "Comprehensive shooting splits by situation (1996-2025)"
+        estimated_records: 50000
+
+      matchup_data_head_to_head:
+        required: false
+        priority: "IMMEDIATE"
+        tier: 2
+        freshness_days: 30
+        path_patterns:
+          - "basketball_reference/nba/matchups/{season}/matchup_data.json"
+        completeness_threshold: 0.80
+        description: "Player vs player matchup data (2007-2025)"
+        estimated_records: 100000
+
+      synergy_play_type_stats:
+        required: false
+        priority: "IMMEDIATE"
+        tier: 2
+        freshness_days: 30
+        path_patterns:
+          - "basketball_reference/nba/synergy/{season}/play_types.json"
+        completeness_threshold: 0.75
+        description: "Synergy play type statistics (2015-2025)"
+        estimated_records: 5000
+
+      # ========== TIER 3: NBA HISTORICAL (HIGH) ==========
+      awards_and_honors:
+        required: true
+        priority: "HIGH"
+        tier: 3
+        freshness_days: 365
+        path_patterns:
+          - "basketball_reference/nba/awards/{award_type}/all_years.json"
+        completeness_threshold: 0.95
+        description: "NBA awards and honors (1946-2025)"
+        estimated_records: 3000
+
+      playoff_statistics:
+        required: true
+        priority: "HIGH"
+        tier: 3
+        freshness_days: 30
+        path_patterns:
+          - "basketball_reference/nba/playoffs/{season}/playoff_stats.json"
+        completeness_threshold: 0.95
+        description: "Playoff statistics (1947-2025)"
+        estimated_records: 50000
+
+      season_leaders_and_records:
+        required: true
+        priority: "HIGH"
+        tier: 3
+        freshness_days: 365
+        path_patterns:
+          - "basketball_reference/nba/leaders/{season}/leaders.json"
+        completeness_threshold: 0.90
+        description: "Season leaders and records (1946-2025)"
+        estimated_records: 20000
+
+      # ========== TIER 4: NBA PERFORMANCE (HIGH) ==========
+      streaks_and_game_highs:
+        required: false
+        priority: "HIGH"
+        tier: 4
+        freshness_days: 90
+        path_patterns:
+          - "basketball_reference/nba/streaks/{player_slug}/career_streaks.json"
+        completeness_threshold: 0.75
+        description: "Player streaks and game highs (1946-2025)"
+        estimated_records: 100000
+
+      advanced_box_scores_four_factors:
+        required: true
+        priority: "HIGH"
+        tier: 4
+        freshness_days: 30
+        path_patterns:
+          - "basketball_reference/nba/advanced_box/{season}/{game_id}/four_factors.json"
+        completeness_threshold: 0.90
+        description: "Advanced box scores with four factors (1996-2025)"
+        estimated_records: 40000
+
+      franchise_history_and_records:
+        required: true
+        priority: "HIGH"
+        tier: 4
+        freshness_days: 365
+        path_patterns:
+          - "basketball_reference/nba/franchises/{team}/franchise_history.json"
+        completeness_threshold: 0.95
+        description: "Franchise history for all NBA teams"
+        estimated_records: 10000
+
+      all_star_game_data:
+        required: true
+        priority: "HIGH"
+        tier: 4
+        freshness_days: 365
+        path_patterns:
+          - "basketball_reference/nba/all_star/{season}/allstar_game.json"
+        completeness_threshold: 0.95
+        description: "All-Star game data (1951-2025)"
+        estimated_records: 2000
+
+      # ========== TIER 5: NBA ADVANCED (MEDIUM) ==========
+      defensive_tracking_data:
+        required: false
+        priority: "MEDIUM"
+        tier: 5
+        freshness_days: 30
+        path_patterns:
+          - "basketball_reference/nba/defensive_tracking/{season}/defensive_stats.json"
+        completeness_threshold: 0.85
+        description: "Defensive tracking data (2013-2025)"
+        estimated_records: 6000
+
+      hustle_stats:
+        required: false
+        priority: "MEDIUM"
+        tier: 5
+        freshness_days: 30
+        path_patterns:
+          - "basketball_reference/nba/hustle_stats/{season}/hustle.json"
+        completeness_threshold: 0.85
+        description: "Hustle statistics (2016-2025)"
+        estimated_records: 4500
+
+      plus_minus_data_detailed:
+        required: false
+        priority: "MEDIUM"
+        tier: 5
+        freshness_days: 30
+        path_patterns:
+          - "basketball_reference/nba/plus_minus/{season}/{player_slug}/plus_minus.json"
+        completeness_threshold: 0.80
+        description: "Detailed plus/minus data (2000-2025)"
+        estimated_records: 40000
+
+      # ========== TIER 6: NBA COMPARATIVE (MEDIUM) ==========
+      similar_players_comparables:
+        required: false
+        priority: "MEDIUM"
+        tier: 6
+        freshness_days: 180
+        path_patterns:
+          - "basketball_reference/nba/similar_players/{player_slug}/comparables.json"
+        completeness_threshold: 0.70
+        description: "Similar player comparisons"
+        estimated_records: 50000
+
+      adjusted_shooting_stats_era_adjusted:
+        required: false
+        priority: "MEDIUM"
+        tier: 6
+        freshness_days: 180
+        path_patterns:
+          - "basketball_reference/nba/adjusted_stats/{player_slug}/era_adjusted.json"
+        completeness_threshold: 0.70
+        description: "Era-adjusted shooting statistics"
+        estimated_records: 5000
+
+      advanced_player_comparisons:
+        required: false
+        priority: "MEDIUM"
+        tier: 6
+        freshness_days: 180
+        path_patterns:
+          - "basketball_reference/nba/player_comparisons/{player1}_{player2}/comparison.json"
+        completeness_threshold: 0.60
+        description: "Advanced player-to-player comparisons"
+        estimated_records: 10000
+
+      projection_systems_carmelo_etc:
+        required: false
+        priority: "MEDIUM"
+        tier: 6
+        freshness_days: 90
+        path_patterns:
+          - "basketball_reference/nba/projections/{player_slug}/career_projections.json"
+        completeness_threshold: 0.70
+        description: "Player projection systems (CARMELO, etc.)"
+        estimated_records: 500
+
+      # ========== TIER 7: NBA SITUATIONAL (MEDIUM) ==========
+      clutch_statistics:
+        required: false
+        priority: "MEDIUM"
+        tier: 7
+        freshness_days: 30
+        path_patterns:
+          - "basketball_reference/nba/clutch_stats/{player_slug}/{season}/clutch.json"
+        completeness_threshold: 0.75
+        description: "Clutch performance statistics (2000-2025)"
+        estimated_records: 25000
+
+      rest_and_fatigue_analysis:
+        required: false
+        priority: "MEDIUM"
+        tier: 7
+        freshness_days: 90
+        path_patterns:
+          - "basketball_reference/nba/rest_analysis/{season}/{team}/rest_data.json"
+        completeness_threshold: 0.70
+        description: "Rest and fatigue analysis (1946-2025)"
+        estimated_records: 60000
+
+      travel_and_timezone_impact:
+        required: false
+        priority: "MEDIUM"
+        tier: 7
+        freshness_days: 90
+        path_patterns:
+          - "basketball_reference/nba/travel_data/{season}/{team}/travel.json"
+        completeness_threshold: 0.70
+        description: "Travel and timezone impact (1946-2025)"
+        estimated_records: 60000
+
+      strength_of_schedule:
+        required: false
+        priority: "MEDIUM"
+        tier: 7
+        freshness_days: 90
+        path_patterns:
+          - "basketball_reference/nba/strength_of_schedule/{season}/sos.json"
+        completeness_threshold: 0.75
+        description: "Strength of schedule calculations (1946-2025)"
+        estimated_records: 2000
+
+      # ========== TIER 8: NBA COMPLETE (LOW) ==========
+      referee_data:
+        required: false
+        priority: "LOW"
+        tier: 8
+        freshness_days: 180
+        path_patterns:
+          - "basketball_reference/nba/referees/{season}/{game_id}/ref_assignment.json"
+        completeness_threshold: 0.65
+        description: "Referee assignments and data (1988-2025)"
+        estimated_records: 40000
+
+      transactions_trades_waivers_signings:
+        required: false
+        priority: "LOW"
+        tier: 8
+        freshness_days: 180
+        path_patterns:
+          - "basketball_reference/nba/transactions/{season}/transactions.json"
+        completeness_threshold: 0.70
+        description: "Player transactions (1946-2025)"
+        estimated_records: 10000
+
+      miscellaneous_records_and_milestones:
+        required: false
+        priority: "LOW"
+        tier: 8
+        freshness_days: 365
+        path_patterns:
+          - "basketball_reference/nba/records/all_records.json"
+        completeness_threshold: 0.80
+        description: "Miscellaneous records and milestones"
+        estimated_records: 1000
+
+      # ========== TIER 9: HISTORICAL LEAGUES (LOW) ==========
+      aba_complete_data_1967_1976:
+        required: false
+        priority: "LOW"
+        tier: 9
+        freshness_days: 730  # Biennial
+        path_patterns:
+          - "basketball_reference/aba/{season}/season_stats.json"
+        completeness_threshold: 0.85
+        description: "Complete ABA data (1967-1976)"
+        estimated_records: 10000
+
+      baa_complete_data_1946_1949:
+        required: false
+        priority: "LOW"
+        tier: 9
+        freshness_days: 730
+        path_patterns:
+          - "basketball_reference/baa/{season}/season_stats.json"
+        completeness_threshold: 0.85
+        description: "Complete BAA data (1946-1949)"
+        estimated_records: 300
+
+      early_nba_data_1949_1952_pre_shot_clock:
+        required: false
+        priority: "LOW"
+        tier: 9
+        freshness_days: 730
+        path_patterns:
+          - "basketball_reference/nba/early_nba/{season}/season_stats.json"
+        completeness_threshold: 0.85
+        description: "Early NBA data pre-shot clock (1949-1952)"
+        estimated_records: 400
+
+      # ========== TIER 11: G LEAGUE COMPLETE (EXECUTE) ==========
+      g_league_season_standings_2002_2025:
+        required: true
+        priority: "EXECUTE"
+        tier: 11
+        freshness_days: 30
+        path_patterns:
+          - "basketball_reference/gleague/standings/{season}/standings.json"
+        completeness_threshold: 0.95
+        description: "G League season standings (2002-2025)"
+        estimated_records: 450
+
+      g_league_player_statistics_2002_2025:
+        required: true
+        priority: "EXECUTE"
+        tier: 11
+        freshness_days: 30
+        path_patterns:
+          - "basketball_reference/gleague/season_stats/{season}/player_stats.json"
+        completeness_threshold: 0.95
+        description: "G League player statistics (2002-2025)"
+        estimated_records: 15000
+
+      g_league_team_rosters_2002_2025:
+        required: true
+        priority: "EXECUTE"
+        tier: 11
+        freshness_days: 30
+        path_patterns:
+          - "basketball_reference/gleague/rosters/{season}/{team}/roster.json"
+        completeness_threshold: 0.90
+        description: "G League team rosters (2002-2025)"
+        estimated_records: 450
+
+      g_league_game_logs_2002_2025:
+        required: false
+        priority: "EXECUTE"
+        tier: 11
+        freshness_days: 30
+        path_patterns:
+          - "basketball_reference/gleague/game_logs/{player_slug}/{season}/gamelog.json"
+        completeness_threshold: 0.70
+        description: "G League player game logs (2002-2025, selective)"
+        estimated_records: 10000
+
+      g_league_daily_scores_2002_2025:
+        required: true
+        priority: "EXECUTE"
+        tier: 11
+        freshness_days: 7
+        path_patterns:
+          - "basketball_reference/gleague/daily_scores/{season}/games.json"
+        completeness_threshold: 0.95
+        description: "G League daily scores (2002-2025)"
+        estimated_records: 5000
+
+      g_league_awards_2002_2025:
+        required: true
+        priority: "EXECUTE"
+        tier: 11
+        freshness_days: 365
+        path_patterns:
+          - "basketball_reference/gleague/awards/{award_type}/all_years.json"
+        completeness_threshold: 0.90
+        description: "G League awards (2002-2025)"
+        estimated_records: 500
+
+      g_league_season_leaders_2002_2025:
+        required: true
+        priority: "EXECUTE"
+        tier: 11
+        freshness_days: 90
+        path_patterns:
+          - "basketball_reference/gleague/leaders/{season}/season_leaders.json"
+        completeness_threshold: 0.85
+        description: "G League season leaders (2002-2025)"
+        estimated_records: 2000
+
+      g_league_career_leaders_all_time:
+        required: true
+        priority: "EXECUTE"
+        tier: 11
+        freshness_days: 180
+        path_patterns:
+          - "basketball_reference/gleague/leaders/career/career_leaders.json"
+        completeness_threshold: 0.90
+        description: "G League all-time career leaders"
+        estimated_records: 500
+
+      g_league_top_performers_current_season:
+        required: false
+        priority: "EXECUTE"
+        tier: 11
+        freshness_days: 7
+        path_patterns:
+          - "basketball_reference/gleague/leaders/current/top_performers.json"
+        completeness_threshold: 0.75
+        description: "G League current season top performers"
+        estimated_records: 100
+
+      g_league_box_scores_2002_2025:
+        required: false
+        priority: "EXECUTE"
+        tier: 11
+        freshness_days: 30
+        path_patterns:
+          - "basketball_reference/gleague/box_scores/{season}/{game_id}/box_score.json"
+        completeness_threshold: 0.70
+        description: "G League box scores (2002-2025)"
+        estimated_records: 5000
+
+      # Legacy entry (kept for backward compatibility)
       player_advanced_totals:
         required: true
-        freshness_days: 365 # Annual data, updated yearly
+        freshness_days: 365
         path_patterns:
           - "basketball_reference/advanced_totals/{year}/player_advanced_totals.json"
-        completeness_threshold: 0.90 # 90% of years required
-        description: "Player advanced statistics totals by year (PER, WS, BPM, VORP)"
-        expected_years: 63 # 1962-2024
+        completeness_threshold: 0.90
+        description: "Player advanced statistics totals by year (PER, WS, BPM, VORP) - LEGACY"
+        expected_years: 63
 
   hoopr:
     # Play-by-play data in parquet format from Hoopr
@@ -224,10 +705,26 @@ reconciliation_config:
 
 # Metadata
 metadata:
-  phase: "2A-MVP-Refined"
-  focus: "Actual data sources: basketball_reference, hoopr, nba_api"
+  phase: "2A-MVP-BBRef-Enhanced"
+  focus: "All 43 Basketball Reference data types integrated for ADCE autonomous collection"
+  basketball_reference_data_types: 43
+  basketball_reference_tiers: "1-11 (NBA, G League, ABA, BAA)"
+  collection_priority_order:
+    - "Phase 1: NBA Modern (Tiers 1-4, 16 types, 3-4 weeks)"
+    - "Phase 2: NBA Advanced (Tiers 5-8, 14 types, 2-3 weeks)"
+    - "Phase 3: Historical Leagues (Tier 9, 3 types, 1 week)"
+    - "Phase 4: G League (Tier 11, 10 types, 1 week)"
+  not_implemented:
+    - "Tier 10 (WNBA): 16 types - Future expansion"
+    - "Tier 12 (International): 40 types - Future expansion"
+    - "Tier 13 (NCAA): 10 types - Future expansion"
   next_phase: "2B - Full implementation with automation"
   created_by: "claude_code_agent"
+  last_update: "2025-10-25"
   refinement_date: "2025-10-22"
+  bbref_integration_date: "2025-10-25"
   based_on_scan: "2025-10-22 19:49 UTC (10% sample, 27s scan)"
   documentation: "reports/reconciliation_engine_phase2a_complete.md"
+  bbref_catalog: "config/basketball_reference_data_types_catalog.json"
+  bbref_scrapers: "config/basketball_reference_scrapers.yaml"
+  bbref_deployment: "BASKETBALL_REFERENCE_ADCE_DEPLOYMENT.md"
