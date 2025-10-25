@@ -1,135 +1,300 @@
 #!/usr/bin/env python3
 """
-Implementation: Implement Data Collection Pipeline with Dispatcher and Crawlers
+Implementation: Dispatcher Pipeline for Data Collection (rec_044)
+
+Implements Phase 0.13: Data Collection Pipeline with Dispatcher and Crawlers
+
+This implementation creates a modular data collection pipeline that uses a dispatcher
+to route data to specific crawlers based on the data source. This facilitates the
+integration of new data sources and maintains a standardized data format.
 
 Recommendation ID: rec_044
 Source: LLM Engineers Handbook
 Priority: IMPORTANT
+Phase: 0.13
 
-Description:
-Create a modular data collection pipeline that uses a dispatcher to route data to specific crawlers based on the data source. This facilitates the integration of new data sources and maintains a standardized data format.
+Architecture:
+- Dispatcher class routes tasks to appropriate scrapers
+- Registry pattern for scraper management
+- Factory pattern for scraper instantiation
+- ETL pattern: Extract (scrape) → Transform (parse) → Load (S3/PostgreSQL)
 
-Expected Impact:
-Modular and extensible data collection pipeline, simplified integration of new data sources, and consistent data format.
+Usage:
+    from implement_rec_044 import DispatcherPipeline
+
+    # Initialize pipeline
+    pipeline = DispatcherPipeline()
+    await pipeline.setup()
+
+    # Dispatch tasks
+    result = await pipeline.dispatch_task("espn", "scrape", {"days_back": 7})
+
+    # Cleanup
+    await pipeline.cleanup()
+
 """
 
+import asyncio
 import logging
-from typing import Dict, Any, Optional
+import sys
+from pathlib import Path
+from typing import Dict, Any, Optional, List
+
+# Add project root to path for imports
+# From docs/phases/phase_0/0.13_dispatcher_pipeline/ go up 4 levels to project root
+current_file = Path(__file__).resolve()
+project_root = current_file.parent.parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+# Import our dispatcher implementation
+from scripts.etl.data_dispatcher import (
+    DataCollectionDispatcher,
+    ScraperTask,
+    TaskPriority,
+    create_task,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class ImplementDataCollectionPipelineWithDispatcherAndCrawlers:
+class DispatcherPipeline:
     """
-    Implement Data Collection Pipeline with Dispatcher and Crawlers.
+    Implementation of Phase 0.13: Dispatcher Pipeline
 
-    Based on recommendation from: LLM Engineers Handbook
+    Provides a unified interface for dispatching data collection tasks across
+    multiple NBA data sources (ESPN, NBA API, Basketball Reference, hoopR, etc.)
     """
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """
-        Initialize Implement Data Collection Pipeline with Dispatcher and Crawlers implementation.
+        Initialize Dispatcher Pipeline.
 
         Args:
-            config: Configuration dictionary
+            config: Configuration dictionary (optional)
         """
         self.config = config or {}
+        self.dispatcher: Optional[DataCollectionDispatcher] = None
         self.initialized = False
         logger.info(f"Initialized {self.__class__.__name__}")
 
-    def setup(self) -> Dict[str, Any]:
+    async def setup(self) -> Dict[str, Any]:
         """
-        Set up the implementation.
+        Set up the dispatcher pipeline.
 
         Returns:
             Setup results
         """
-        logger.info("Setting up implementation...")
+        logger.info("Setting up dispatcher pipeline...")
 
-        # TODO: Implement setup logic
-        # - Initialize resources
-        # - Validate configuration
-        # - Prepare dependencies
+        try:
+            # Initialize data collection dispatcher
+            config_file = self.config.get("config_file")
+            self.dispatcher = DataCollectionDispatcher(config_file=config_file)
 
-        self.initialized = True
-        logger.info("✅ Setup complete")
+            # Get available sources
+            sources = self.dispatcher.get_available_sources()
+            logger.info(f"Dispatcher initialized with {len(sources)} data sources")
+            logger.info(f"Available sources: {', '.join(sources)}")
 
-        return {"success": True, "message": "Setup completed successfully"}
+            self.initialized = True
+            logger.info("✅ Setup complete")
 
-    def execute(self) -> Dict[str, Any]:
+            return {
+                "success": True,
+                "message": "Dispatcher pipeline setup complete",
+                "sources": sources,
+            }
+
+        except Exception as e:
+            error_msg = f"Setup failed: {str(e)}"
+            logger.error(error_msg)
+            return {"success": False, "message": error_msg}
+
+    async def dispatch_task(
+        self,
+        source: str,
+        operation: str = "scrape",
+        params: Optional[Dict[str, Any]] = None,
+        priority: TaskPriority = TaskPriority.NORMAL,
+    ) -> ScraperTask:
         """
-        Execute the main implementation.
+        Dispatch a single data collection task.
+
+        Args:
+            source: Data source (espn, nba_api, basketball_reference, etc.)
+            operation: Operation to perform (scrape, scrape_date, etc.)
+            params: Parameters for the operation
+            priority: Task priority level
 
         Returns:
-            Execution results
+            Completed task with results
+
+        Raises:
+            RuntimeError: If dispatcher not initialized
         """
-        if not self.initialized:
-            raise RuntimeError("Must call setup() before execute()")
+        if not self.initialized or not self.dispatcher:
+            raise RuntimeError("Must call setup() before dispatching tasks")
 
-        logger.info("Executing implementation...")
+        logger.info(f"Dispatching task: {source}.{operation}")
 
-        # TODO: Implement core logic
-        # Implementation steps:
-        # Step 1: Design the dispatcher class with a registry of crawlers.
-        # Step 2: Implement crawler classes for each NBA data source (e.g., NBA API, ESPN API).
-        # Step 3: Use a base crawler class to implement the basic interface for scraping data and save to database
-        # Step 4: Implement the data parsing logic within each crawler.
-        # Step 5: Add the ETL data to a database.
+        # Create task
+        task = create_task(source, operation, params, priority)
 
-        logger.info("✅ Execution complete")
+        # Dispatch task
+        result_task = await self.dispatcher.dispatch(task)
 
-        return {"success": True, "message": "Execution completed successfully"}
+        return result_task
+
+    async def dispatch_batch(
+        self, tasks_config: List[Dict[str, Any]]
+    ) -> List[ScraperTask]:
+        """
+        Dispatch multiple tasks concurrently.
+
+        Args:
+            tasks_config: List of task configurations, each with:
+                - source: Data source
+                - operation: Operation name
+                - params: Parameters dict
+                - priority: Task priority (optional)
+
+        Returns:
+            List of completed tasks
+        """
+        if not self.initialized or not self.dispatcher:
+            raise RuntimeError("Must call setup() before dispatching tasks")
+
+        logger.info(f"Dispatching batch of {len(tasks_config)} tasks")
+
+        # Create tasks
+        tasks = []
+        for task_cfg in tasks_config:
+            task = create_task(
+                source=task_cfg["source"],
+                operation=task_cfg.get("operation", "scrape"),
+                params=task_cfg.get("params", {}),
+                priority=task_cfg.get("priority", TaskPriority.NORMAL),
+            )
+            tasks.append(task)
+
+        # Dispatch all tasks concurrently
+        results = await self.dispatcher.dispatch_batch(tasks)
+
+        return results
+
+    def get_available_sources(self) -> List[str]:
+        """Get list of available data sources"""
+        if not self.dispatcher:
+            return []
+        return self.dispatcher.get_available_sources()
+
+    def get_stats(self) -> Dict[str, Any]:
+        """Get dispatcher statistics"""
+        if not self.dispatcher:
+            return {}
+        return self.dispatcher.get_stats()
 
     def validate(self) -> bool:
         """
-        Validate the implementation results.
+        Validate the dispatcher pipeline.
 
         Returns:
             True if validation passes
         """
-        logger.info("Validating implementation...")
+        logger.info("Validating dispatcher pipeline...")
 
-        # TODO: Implement validation logic
-        # - Verify outputs
-        # - Check data quality
-        # - Validate integration points
+        if not self.initialized:
+            logger.error("Pipeline not initialized")
+            return False
 
-        logger.info("✅ Validation complete")
+        if not self.dispatcher:
+            logger.error("Dispatcher not created")
+            return False
+
+        # Check that at least one scraper is registered
+        sources = self.get_available_sources()
+        if not sources:
+            logger.error("No scrapers registered")
+            return False
+
+        logger.info(f"✅ Validation complete ({len(sources)} sources available)")
         return True
 
-    def cleanup(self):
-        """Clean up resources."""
-        logger.info("Cleaning up resources...")
-        # TODO: Implement cleanup logic
+    async def cleanup(self):
+        """Clean up resources"""
+        logger.info("Cleaning up dispatcher pipeline...")
+
+        if self.dispatcher:
+            await self.dispatcher.cleanup()
+
         self.initialized = False
+        logger.info("✅ Cleanup complete")
 
 
-def main():
-    """Main execution function."""
-    print(f"=" * 80)
-    print(f"Implement Data Collection Pipeline with Dispatcher and Crawlers")
-    print(f"=" * 80)
+async def main():
+    """Main execution function"""
+    print("=" * 80)
+    print("Phase 0.13: Dispatcher Pipeline Implementation (rec_044)")
+    print("=" * 80)
 
-    # Initialize
-    impl = ImplementDataCollectionPipelineWithDispatcherAndCrawlers()
+    # Initialize pipeline
+    pipeline = DispatcherPipeline()
 
     # Setup
-    setup_result = impl.setup()
+    setup_result = await pipeline.setup()
     print(f"\nSetup: {setup_result['message']}")
 
-    # Execute
-    exec_result = impl.execute()
-    print(f"Execution: {exec_result['message']}")
+    if setup_result["success"]:
+        print(f"Available sources: {', '.join(setup_result['sources'])}")
+
+        # Example: Dispatch sample tasks (dry run - won't actually scrape)
+        print("\nExample: Creating sample tasks (dry run)")
+
+        # Get available sources
+        sources = pipeline.get_available_sources()
+
+        if sources:
+            # Create one example task per available source
+            tasks_config = []
+            for source in sources:
+                tasks_config.append(
+                    {
+                        "source": source,
+                        "operation": "scrape",
+                        "params": {},
+                        "priority": TaskPriority.NORMAL,
+                    }
+                )
+
+            print(f"Created {len(tasks_config)} example tasks")
+
+            # Note: Actual dispatching commented out to avoid running scrapers
+            # Uncomment below to actually run scrapers:
+            # results = await pipeline.dispatch_batch(tasks_config)
+            # for task in results:
+            #     print(f"  - {task.source}: {task.status.value}")
 
     # Validate
-    is_valid = impl.validate()
-    print(f"Validation: {'✅ Passed' if is_valid else '❌ Failed'}")
+    is_valid = pipeline.validate()
+    print(f"\nValidation: {'✅ Passed' if is_valid else '❌ Failed'}")
+
+    # Show statistics
+    stats = pipeline.get_stats()
+    print(f"\nStatistics:")
+    print(f"  Tasks dispatched: {stats.get('tasks_dispatched', 0)}")
+    print(f"  Tasks completed: {stats.get('tasks_completed', 0)}")
+    print(f"  Success rate: {stats.get('success_rate', 0):.1%}")
 
     # Cleanup
-    impl.cleanup()
-    print(f"\n✅ Implementation complete!")
+    await pipeline.cleanup()
+
+    print(f"\n✅ Phase 0.13 implementation complete!")
+    print("\nNext steps:")
+    print("  1. Integrate with ADCE autonomous loop")
+    print("  2. Add DIMS tracking for dispatcher operations")
+    print("  3. Create comprehensive tests")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
