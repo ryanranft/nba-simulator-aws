@@ -18,6 +18,7 @@ import sys
 import unittest
 import tempfile
 import json
+import subprocess
 from pathlib import Path
 from unittest.mock import Mock, MagicMock, patch, mock_open
 from datetime import datetime
@@ -44,7 +45,14 @@ class TestAutonomousLoopInitialization(unittest.TestCase):
     def test_initialization_with_custom_config(self):
         """Test initialization with custom config file."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            f.write("enabled: true\nreconciliation_interval_hours: 2\n")
+            f.write(
+                "enabled: true\n"
+                "reconciliation_interval_hours: 2\n"
+                "min_tasks_to_trigger: 1\n"
+                "max_orchestrator_runtime_minutes: 120\n"
+                "task_queue_file: inventory/gaps.json\n"
+                "health_check_port: 8080\n"
+            )
             config_path = f.name
 
         try:
@@ -146,9 +154,12 @@ class TestTaskQueueMonitoring(unittest.TestCase):
             "tasks": ["task1", "task2", "task3", "task4", "task5"],
         }
 
+        # Mock Path.exists() for both initialization and task queue check
+        with patch.object(Path, "exists", return_value=False):
+            loop = AutonomousLoop(dry_run=True)
+
         with patch.object(Path, "exists", return_value=True):
             with patch("builtins.open", mock_open(read_data=json.dumps(queue_data))):
-                loop = AutonomousLoop(dry_run=True)
                 count = loop._check_task_queue()
                 self.assertEqual(count, 5)
 
@@ -156,17 +167,23 @@ class TestTaskQueueMonitoring(unittest.TestCase):
         """Test checking empty task queue."""
         queue_data = {"total_tasks": 0, "tasks": []}
 
+        # Mock Path.exists() for both initialization and task queue check
+        with patch.object(Path, "exists", return_value=False):
+            loop = AutonomousLoop(dry_run=True)
+
         with patch.object(Path, "exists", return_value=True):
             with patch("builtins.open", mock_open(read_data=json.dumps(queue_data))):
-                loop = AutonomousLoop(dry_run=True)
                 count = loop._check_task_queue()
                 self.assertEqual(count, 0)
 
     def test_check_task_queue_invalid_json(self):
         """Test checking task queue with invalid JSON."""
+        # Mock Path.exists() for both initialization and task queue check
+        with patch.object(Path, "exists", return_value=False):
+            loop = AutonomousLoop(dry_run=True)
+
         with patch.object(Path, "exists", return_value=True):
             with patch("builtins.open", mock_open(read_data="invalid json")):
-                loop = AutonomousLoop(dry_run=True)
                 count = loop._check_task_queue()
                 self.assertEqual(count, 0)
 
@@ -318,7 +335,9 @@ class TestLifecycleManagement(unittest.TestCase):
             # Create mock process that doesn't terminate
             mock_process = Mock()
             mock_process.poll.return_value = None  # Running
-            mock_process.wait.side_effect = Exception("Timeout")  # Simulate timeout
+            mock_process.wait.side_effect = subprocess.TimeoutExpired(
+                "wait", timeout=10
+            )  # Simulate timeout
             loop.reconciliation_daemon = mock_process
 
             loop._shutdown()
