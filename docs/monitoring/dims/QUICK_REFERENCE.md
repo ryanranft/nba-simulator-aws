@@ -79,7 +79,7 @@ dims_cli.py snapshot                          # Create daily snapshot
 | **s3_storage** | total_objects, total_size_gb, hoopr_files | Volatile |
 | **prediction_system** | total_lines, 7 script line counts | Stable |
 | **plus_minus_system** | total_lines, python_lines, sql_lines, docs_lines | Stable |
-| **code_base** | python_files, ml_scripts, phase_9_scripts, test_files | Volatile |
+| **code_base** | python_files, ml_scripts, phase_2_scripts, test_files | Volatile |
 | **documentation** | markdown_files, total_size_mb | Volatile |
 | **git** | book_recommendation_commits | Stable |
 | **workflows** | total | Stable |

@@ -546,7 +546,7 @@ CREATE TABLE player_id_mapping (
 - [ ] Validation against known baselines (DATA_SOURCE_BASELINES.md)
 - **Target:** >95% test coverage, all baselines verified
 
-### Phase 6: Video Integration (2026)
+### Phase 0.0.0019/0.0.0020/0.0.0021: Video Integration (2026)
 - [ ] NBA Live API integrated (millisecond precision)
 - [ ] Video frame mapping system built
 - [ ] Coordinate tracking data ingested (SportVU, Second Spectrum)

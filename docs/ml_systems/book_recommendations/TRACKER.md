@@ -33,7 +33,7 @@ This tracker monitors the implementation progress of 200+ recommendations from 2
 | **Phase 3** (Database) | 2 | 0 | 0 | 0 | 0% |
 | **Phase 4** (Simulation) | 6 | 0 | 0 | 0 | 0% |
 | **Phase 5** (ML Models) | 145 | 2 | 0 | 0 | 0% |
-| **Phase 6** (Enhancements) | 39 | 0 | 0 | 0 | 0% |
+| **Phase 0.0.0019/0.0.0020/0.0.0021** (Enhancements) | 39 | 0 | 0 | 0 | 0% |
 | **Phase 0.0022** (Data Audit) | 32 | 0 | 0 | 0 | 0% |
 | **Phase 2** (PBP Processing) | 11 | 0 | 0 | 0 | 0% |
 

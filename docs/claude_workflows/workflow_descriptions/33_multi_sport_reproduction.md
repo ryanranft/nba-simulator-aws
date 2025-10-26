@@ -473,7 +473,7 @@ psql -h <endpoint> -U postgres -d <sport>_simulator -f scripts/sql/<sport>_schem
 
 ---
 
-## Phase 6: Testing & Validation
+## Phase 0.0.0019/0.0.0020/0.0.0021: Testing & Validation
 
 ### Step 1: Test ETL Pipeline
 

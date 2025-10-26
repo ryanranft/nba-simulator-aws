@@ -18,7 +18,7 @@ This workflow consolidates the complete process for validating and marking a pha
 - #57 (Phase-README Alignment) - Now Phase 5 of this workflow
 
 **References workflow:**
-- #56 (DIMS Management) - Used in Phase 6, but also standalone
+- #56 (DIMS Management) - Used in Phase 0.0.0019/0.0.0020/0.0.0021, but also standalone
 
 ---
 
@@ -609,7 +609,7 @@ ls ../../../../PROGRESS.md  # Should exist
 
 ---
 
-### Phase 6: DIMS Integration
+### Phase 0.0.0019/0.0.0020/0.0.0021: DIMS Integration
 
 **Purpose:** Integrate dynamic metrics tracking (Workflow #56)
 
@@ -866,7 +866,7 @@ ls validators/phases/phase_N/validate_N_M_feature.py
 **This workflow orchestrates:**
 - **Workflow #52:** Phase Index Management (Phase 7)
 - **Workflow #53:** Test & Validator Organization (Phase 3)
-- **Workflow #56:** DIMS Management (Phase 6)
+- **Workflow #56:** DIMS Management (Phase 0.0.0019/0.0.0020/0.0.0021)
 - **Workflow #57:** Phase-README Alignment (Phase 5)
 
 **This workflow is called by:**

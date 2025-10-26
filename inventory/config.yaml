@@ -259,7 +259,7 @@ metrics:
       parse_type: "integer"
       category: "volatile"
 
-    phase_9_scripts:
+    phase_2_scripts:
       command: "find scripts/pbp_to_boxscore -name '*.py' -type f 2>/dev/null | wc -l | tr -d ' '"
       parse_type: "integer"
       category: "volatile"

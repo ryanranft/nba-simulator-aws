@@ -273,7 +273,7 @@ After batch processing completes:
 - [ ] Validation rate > 95%
 - [ ] Database indexes created (for performance)
 - [ ] Views working (test `phase9.latest_snapshots`)
-- [ ] Documentation updated (PROGRESS.md, phase 9 docs)
+- [ ] Documentation updated (PROGRESS.md, Phase 2.2.0000/2.2.0001/2.2.0002/2.2.0003/2.2.0004/2.2.0005/2.2.0006/2.2.0007/2.2.0008 docs)
 
 ---
 
@@ -388,8 +388,8 @@ Once Phase 2 is complete, quarter box scores enable:
 ## Related Documentation
 
 - **Phase 2 Index:** `docs/phases/PHASE_9_INDEX.md`
-- **System Architecture:** `docs/phases/phase_9/9.0000_system_architecture.md`
-- **ESPN Processor:** `docs/phases/phase_9/9.0001_espn_processor.md`
+- **System Architecture:** `docs/phases/phase_2/9.0000_system_architecture.md`
+- **ESPN Processor:** `docs/phases/phase_2/9.0001_espn_processor.md`
 - **Database Schema:** `sql/phase9_box_score_snapshots.sql`
 
 ---

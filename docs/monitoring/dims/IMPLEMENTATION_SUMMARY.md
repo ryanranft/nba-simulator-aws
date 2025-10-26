@@ -250,7 +250,7 @@ Default TTL (hours):  24
 ### Code Base (4 metrics)
 - `python_files`: 1,252 files
 - `ml_scripts`: 56 files
-- `phase_9_scripts`: 40 files
+- `phase_2_scripts`: 40 files
 - `test_files`: 496 files
 
 ### Documentation (2 metrics)

@@ -463,7 +463,7 @@ def run(self, start_season="2020-21", end_season="2024-25"):
 
 ---
 
-### Phase 6: Basketball Reference (13-tier expansion)
+### Phase 0.0.0019/0.0.0020/0.0.0021: Basketball Reference (13-tier expansion)
 **Priority**: High (most comprehensive)
 **Files to Enhance**:
 - `scripts/etl/scrape_basketball_reference_full.py`
@@ -639,7 +639,7 @@ Game Advanced (1,230 games × 3 endpoints):
 
 ### Short-Term
 1. Enhance Phase 5 (Matchups & Defense) using template
-2. Enhance Phase 6 (Basketball Reference expansion)
+2. Enhance Phase 0.0.0019/0.0.0020/0.0.0021 (Basketball Reference expansion)
 3. Enhance Phase 7 (ESPN expansion)
 4. Enhance Phase 0.0022 (Kaggle historical)
 

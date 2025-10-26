@@ -1,0 +1,294 @@
+# PRMS Configuration
+# Path Reference Management System - Automated path validation and correction
+# Version: 1.0.0
+# Created: 2025-10-26
+
+version: "1.0.0"
+
+# Path patterns to detect
+patterns:
+  # Phase directory references
+  phase_directories:
+    - "docs/phases/phase_{N}/"
+    - "docs/phases/phase_{N}/{N}.{M}_*/"
+    - "tests/phases/phase_{N}/"
+    - "validators/phases/phase_{N}/"
+
+  # Phase text references (in prose)
+  phase_prose:
+    - "Phase {N}"
+    - "phase {N}"
+    - "Phase {N}.{M}"
+    - "phase {N}.{M}"
+    - "Sub-Phase {N}.{M}"
+    - "sub-phase {N}.{M}"
+
+  # Phase code references (in Python/YAML)
+  phase_code:
+    - "phase_{N}"
+    - "phase_{N}.{M}"
+    - "phase_{N}_{M}"
+    - "PHASE_{N}"
+
+  # File name patterns
+  file_names:
+    - "phase_{N}_*.py"
+    - "phase_{N}_*.md"
+    - "test_{N}_{MMMM}.py"
+    - "validate_{N}_{MMMM}.py"
+    - "{N}.{MMMM}_*.md"
+
+# Classification rules - determines which references to update
+classification:
+  # ALWAYS UPDATE - Active code and documentation
+  always_update:
+    paths:
+      - "docs/*.md"
+      - "docs/phases/**/*.md"
+      - "docs/claude_workflows/**/*.md"
+      - "docs/data_collection/**/*.md"
+      - "docs/ml_systems/**/*.md"
+      - "docs/monitoring/**/*.md"
+      - "scripts/**/*.py"
+      - "config/*.yaml"
+      - "config/*.yml"
+      - "tests/**/*.py"
+      - "validators/**/*.py"
+      - "inventory/config.yaml"
+      - "inventory/metrics.yaml"
+
+    # Exclude these even if they match above patterns
+    exclude:
+      - "docs/archive/**"
+      - "docs/migrations/**"
+      - "docs/adr/**"
+      - ".git/**"
+
+  # ALWAYS SKIP - Historical documentation and archives
+  always_skip:
+    paths:
+      - "docs/archive/**"
+      - "docs/phases/archive/**"  # Archived phase indexes (historical documentation)
+      - "docs/migrations/**"  # Migration guides document OLD format
+      - "docs/adr/**"  # ADRs document decision history
+      - ".git/**"
+      - "inventory/historical/**"  # Historical snapshots
+      - "**/*.backup"
+      - "**/*.bak"
+      - "**/archive_*"
+
+    # Specific files to skip
+    files:
+      - "docs/TEST_VALIDATOR_MIGRATION_GUIDE.md"  # Documents old format
+      - "docs/migrations/ADR-010-MIGRATION-GUIDE.md"  # Migration history
+
+  # MANUAL REVIEW - Context-dependent references
+  manual_review:
+    # Patterns that might be workflow names, not phase references
+    patterns:
+      - "phase_{N}_dims_integration"  # Workflow step name
+      - "phase_{N}_index_update"  # Workflow step name
+      - "phase_{N}_final_validation"  # Workflow step name
+      - "phase_{N}_completion"  # Workflow step name
+
+    # Files that need careful review
+    files:
+      - "scripts/automation/validate_phase.py"
+      - "scripts/maintenance/*migration*.py"
+      - "scripts/maintenance/*refactor*.py"
+
+# Phase mappings from reorganizations
+mappings:
+  # October 2025 Phase Reorganization
+  # Old Phase 0.0.0019/0.0.0020/0.0.0021 (Optional Enhancements) → Phase 0 sub-phases
+  phase_0:
+    new_phase: "0"
+    sub_phase_map:
+      "6.0": "0.0019"  # Testing/CI/CD
+      "6.1": "0.0020"  # Monitoring
+      "6.2": "0.0021"  # Documentation
+
+    # Directory mappings
+    directories:
+      "docs/phases/phase_0/": "docs/phases/phase_0/0.0019_*/"
+      "tests/phases/phase_0/": "tests/phases/phase_0/"
+      "validators/phases/phase_0/": "validators/phases/phase_0/"
+
+  # Old Phase 0.0.0022/0.0.0022 (Data Audit) → Phase 0.0022
+  phase_0:
+    new_phase: "0"
+    sub_phase_map:
+      "8.0": "0.0022"  # Data Inventory & Gap Analysis
+      "8.1": "0.0022"  # Deep Content Analysis (merged)
+
+    directories:
+      "docs/phases/phase_0/": "docs/phases/phase_0/0.0022_*/"
+      "tests/phases/phase_0/": "tests/phases/phase_0/"
+      "validators/phases/phase_0/": "validators/phases/phase_0/"
+
+  # Old Phase 2.2.0000/2.2.0001/2.2.0002/2.2.0003/2.2.0004/2.2.0005/2.2.0006/2.2.0007/2.2.0008 (PBP to Box Score) → Phase 2
+  phase_2:
+    new_phase: "2"
+    sub_phase_map:
+      "9.0": "2.0000"
+      "9.1": "2.0001"
+      "9.2": "2.0002"
+      "9.3": "2.0003"
+      "9.4": "2.0004"
+      "9.5": "2.0005"
+      "9.6": "2.0006"
+      "9.7": "2.0007"
+      "9.8": "2.0008"
+
+    directories:
+      "docs/phases/phase_2/": "docs/phases/phase_2/"
+      "tests/phases/phase_2/": "tests/phases/phase_2/"
+      "validators/phases/phase_2/": "validators/phases/phase_2/"
+
+    # Special handling for phase_2 scripts
+    special_cases:
+      "phase_2_scripts": "phase_2_scripts"
+      "phase_2_master_agent": "phase_2_master_agent"
+      "phase_9_2_hoopr_agent": "phase_2_hoopr_agent"
+
+# Scanning settings
+scan:
+  # File extensions to scan
+  extensions:
+    - ".py"
+    - ".md"
+    - ".yaml"
+    - ".yml"
+    - ".txt"
+    - ".sh"
+
+  # Directories to scan
+  directories:
+    - "docs/"
+    - "scripts/"
+    - "tests/"
+    - "validators/"
+    - "config/"
+    - "inventory/"
+    - "notebooks/"
+
+  # Directories to exclude from scanning
+  exclude_dirs:
+    - ".git"
+    - "__pycache__"
+    - ".pytest_cache"
+    - "node_modules"
+    - "venv"
+    - "env"
+    - "data"
+    - "synthesis_output"
+
+  # Maximum file size to scan (in bytes, 5MB)
+  max_file_size: 5242880
+
+  # Enable parallel scanning
+  parallel: true
+  max_workers: 4
+
+# Validation settings
+validation:
+  # Check if referenced paths actually exist
+  verify_paths_exist: true
+
+  # Verify file references point to actual files
+  verify_files_exist: true
+
+  # Check for broken symlinks
+  check_symlinks: true
+
+# Fix settings
+fix:
+  # Create backup before fixing
+  create_backup: true
+  backup_suffix: ".prms_backup"
+
+  # Maximum files to fix in one operation (safety limit)
+  max_files_per_run: 100
+
+  # Require user confirmation for fixes
+  require_confirmation: true
+
+  # Automatically create git commit after fixes
+  auto_commit: false
+  commit_message_template: |
+    refactor: PRMS auto-fix path references
+
+    Updated {count} path references across {file_count} files.
+
+    Changes:
+    {changes_summary}
+
+    Generated by PRMS v{version}
+
+# Reporting settings
+report:
+  # Output directory for reports
+  output_dir: "inventory/outputs/prms/"
+
+  # Report formats
+  formats:
+    - "markdown"
+    - "json"
+    - "html"
+
+  # Report templates
+  templates:
+    markdown: "prms_audit_report.md"
+    json: "prms_audit_report.json"
+    html: "prms_audit_report.html"
+
+  # Include detailed context in reports
+  include_context: true
+  context_lines: 3  # Lines before/after match
+
+  # Group by file type
+  group_by_file_type: true
+
+# Confidence scoring
+confidence:
+  # Confidence thresholds for auto-fix
+  auto_fix_threshold: 0.8  # Only fix if confidence >= 80%
+
+  # Factors that increase confidence
+  high_confidence_indicators:
+    - "Path contains phase number in directory structure"
+    - "Reference in active documentation"
+    - "Consistent with ADR-010 or Phase Reorganization"
+    - "File in always_update list"
+
+  # Factors that decrease confidence
+  low_confidence_indicators:
+    - "Reference might be workflow step name"
+    - "File in manual_review list"
+    - "Ambiguous context"
+    - "Multiple possible interpretations"
+
+# Logging settings
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: "inventory/outputs/prms/prms.log"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+
+# Integration settings
+integration:
+  # Enable pre-commit hook
+  pre_commit_hook: true
+
+  # Run at session start
+  session_start_check: true
+  session_start_command: "validate"
+
+  # Run at session end
+  session_end_check: true
+  session_end_command: "verify --update"
+
+  # Integration with DIMS
+  dims_integration: true
+  dims_metric_name: "path_references_valid"

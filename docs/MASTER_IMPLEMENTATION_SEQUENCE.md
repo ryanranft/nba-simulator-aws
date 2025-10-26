@@ -395,7 +395,7 @@ This document provides the definitive 1-270 numerical implementation sequence fo
 ### Phase 5 Recommendations (171-220)
 *[Additional ML features - largest group]*
 
-### Phase 6 Recommendations (221-240)
+### Phase 0.0.0019/0.0.0020/0.0.0021 Recommendations (221-240)
 *[Business integration]*
 
 ### Phase 0.0022 Recommendations (241-260)

@@ -335,7 +335,7 @@ head -20 /tmp/basketball_reference_incremental/schedules_2023.json
 
 ---
 
-### Phase 6: Document Results
+### Phase 0.0.0019/0.0.0020/0.0.0021: Document Results
 
 **Update PROGRESS.md**
 

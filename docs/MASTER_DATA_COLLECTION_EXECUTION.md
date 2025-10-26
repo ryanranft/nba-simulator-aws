@@ -170,7 +170,7 @@ nohup python scripts/etl/scrape_nba_api_matchups_defense.py \
 
 ---
 
-### Phase 6: Basketball Reference Workaround (Priority 6)
+### Phase 0.0.0019/0.0.0020/0.0.0021: Basketball Reference Workaround (Priority 6)
 **Impact:** MEDIUM (47 features)
 **Runtime:** 8-12 hours
 **Challenge:** 403 Forbidden errors
@@ -352,7 +352,7 @@ nohup python scripts/etl/scrape_nba_api_matchups_defense.py ... &
 
 **Day 1-2:**
 ```bash
-# Fix and launch Phase 6 (Basketball Reference) - 8-12 hours
+# Fix and launch Phase 0.0.0019/0.0.0020/0.0.0021 (Basketball Reference) - 8-12 hours
 python scripts/etl/scrape_basketball_reference_fixed.py --test-mode
 # If successful:
 nohup python scripts/etl/scrape_basketball_reference_fixed.py ... &

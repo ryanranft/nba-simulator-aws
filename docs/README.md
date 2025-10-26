@@ -258,7 +258,7 @@ This index helps Claude Code and developers find the right documentation efficie
 ### Enhanced Phase Organization
 
 **Phase-Specific Enhancements:**
-- **docs/phases/phase_9/9.0000_plus_minus/** - Plus/Minus analysis system (7 files)
+- **docs/phases/phase_2/9.0000_plus_minus/** - Plus/Minus analysis system (7 files)
   - 26 ML features for lineup efficiency and player impact
   - Production-ready implementation
 
@@ -316,7 +316,7 @@ This index helps Claude Code and developers find the right documentation efficie
 - **Created 8 new directories** for specialized systems:
   - monitoring/dims/, ml_systems/book_recommendations/, data_collection/scrapers/
   - features/ (shot_charts, box_scores, statistics)
-  - archive/superseded_documentation/, phase_9/9.0000_plus_minus/
+  - archive/superseded_documentation/, phase_2/9.0000_plus_minus/
   - phase_0/0.0001_basketball_reference/documentation/
 - **Created 14 README navigation files** for improved discoverability
 - **Phase 5 cleanup: 11 → 3 essential files** (moved summaries to subdirectories)

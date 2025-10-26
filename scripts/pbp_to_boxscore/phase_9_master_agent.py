@@ -50,7 +50,7 @@ class Phase9MasterAgent:
     - Betting Integration (9.8)
     """
 
-    def __init__(self, output_dir="/tmp/phase_9_master"):
+    def __init__(self, output_dir="/tmp/phase_2_master"):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -1460,7 +1460,7 @@ if __name__ == "__main__":
         }
 
         # Save report
-        report_file = self.output_dir / "phase_9_completion_report.json"
+        report_file = self.output_dir / "phase_2_completion_report.json"
         with open(report_file, "w") as f:
             json.dump(report, f, indent=2)
 

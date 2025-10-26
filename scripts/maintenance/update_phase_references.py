@@ -69,13 +69,13 @@ def format_phase_5(match):
 
 
 def format_phase_8(match):
-    """Convert Phase 0.0022.X to Phase 8.000X"""
+    """Convert Phase 0.0022.X to Phase 0.0.0022/0.0.0022.000X"""
     num = int(match.group(1))
     return f"Phase 0.0022.{num:04d}"
 
 
 def format_phase_9(match):
-    """Convert Phase 2.X to Phase 9.000X"""
+    """Convert Phase 2.X to Phase 2.2.0000/2.2.0001/2.2.0002/2.2.0003/2.2.0004/2.2.0005/2.2.0006/2.2.0007/2.2.0008.000X"""
     num = int(match.group(1))
     return f"Phase 2.{num:04d}"
 
@@ -93,15 +93,15 @@ def format_path_phase_5(match):
 
 
 def format_path_phase_8(match):
-    """Convert phase_8/8.X_ to phase_8/8.000X_"""
+    """Convert phase_0/8.X_ to phase_0/8.000X_"""
     num = int(match.group(1))
-    return f"phase_8/8.{num:04d}_"
+    return f"phase_0/8.{num:04d}_"
 
 
 def format_path_phase_9(match):
-    """Convert phase_9/9.X_ to phase_9/9.000X_"""
+    """Convert phase_2/9.X_ to phase_2/9.000X_"""
     num = int(match.group(1))
-    return f"phase_9/9.{num:04d}_"
+    return f"phase_2/9.{num:04d}_"
 
 
 def format_test_0(match):
@@ -133,12 +133,12 @@ PATTERNS.extend(
         (
             re.compile(r"\bPhase 8\.(\d{1,2})\b"),
             format_phase_8,
-            "Prose: Phase 0.0022.X → Phase 8.000X",
+            "Prose: Phase 0.0022.X → Phase 0.0.0022/0.0.0022.000X",
         ),
         (
             re.compile(r"\bPhase 9\.(\d{1,2})\b"),
             format_phase_9,
-            "Prose: Phase 2.X → Phase 9.000X",
+            "Prose: Phase 2.X → Phase 2.2.0000/2.2.0001/2.2.0002/2.2.0003/2.2.0004/2.2.0005/2.2.0006/2.2.0007/2.2.0008.000X",
         ),
     ]
 )
@@ -157,14 +157,14 @@ PATTERNS.extend(
             "Path: phase_5/5.X_ → phase_5/5.000X_",
         ),
         (
-            re.compile(r"phase_8/8\.(\d{1,2})_"),
+            re.compile(r"phase_0/8\.(\d{1,2})_"),
             format_path_phase_8,
-            "Path: phase_8/8.X_ → phase_8/8.000X_",
+            "Path: phase_0/8.X_ → phase_0/8.000X_",
         ),
         (
-            re.compile(r"phase_9/9\.(\d{1,2})_"),
+            re.compile(r"phase_2/9\.(\d{1,2})_"),
             format_path_phase_9,
-            "Path: phase_9/9.X_ → phase_9/9.000X_",
+            "Path: phase_2/9.X_ → phase_2/9.000X_",
         ),
     ]
 )
