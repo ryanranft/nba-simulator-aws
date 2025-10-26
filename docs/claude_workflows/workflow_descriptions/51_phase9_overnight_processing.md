@@ -1,4 +1,4 @@
-# Workflow #51: Phase 9 Overnight Batch Processing
+# Workflow #51: Phase 2 Overnight Batch Processing
 
 **Purpose:** Process ESPN play-by-play data into box score snapshots overnight
 **Category:** Data Processing
@@ -11,7 +11,7 @@
 
 ## Overview
 
-Phase 9 converts raw play-by-play data into granular box score snapshots for temporal queries. This workflow handles overnight batch processing of 44,826 ESPN games.
+Phase 2 converts raw play-by-play data into granular box score snapshots for temporal queries. This workflow handles overnight batch processing of 44,826 ESPN games.
 
 **Key Capabilities:**
 - Generate box score snapshots after each play-by-play event
@@ -367,7 +367,7 @@ done
 
 ## Integration with Betting Odds (Phase 7)
 
-Once Phase 9 is complete, quarter box scores enable:
+Once Phase 2 is complete, quarter box scores enable:
 
 1. **Quarter-by-quarter predictions**
    - Predict Q1, Q2, Q3, Q4 outcomes independently
@@ -387,7 +387,7 @@ Once Phase 9 is complete, quarter box scores enable:
 
 ## Related Documentation
 
-- **Phase 9 Index:** `docs/phases/PHASE_9_INDEX.md`
+- **Phase 2 Index:** `docs/phases/PHASE_9_INDEX.md`
 - **System Architecture:** `docs/phases/phase_9/9.0000_system_architecture.md`
 - **ESPN Processor:** `docs/phases/phase_9/9.0001_espn_processor.md`
 - **Database Schema:** `sql/phase9_box_score_snapshots.sql`

@@ -102,6 +102,6 @@ If issues occur:
 
 ## See Also
 
-- [Phase 8 Overview](/Users/ryanranft/nba-simulator-aws/docs/phases/phase_8/)
+- [Phase 0.0022 Overview](/Users/ryanranft/nba-simulator-aws/docs/phases/phase_8/)
 - [Master Recommendations](/Users/ryanranft/nba-mcp-synthesis/analysis_results/master_recommendations.json)
 - [Book Analysis Results](/Users/ryanranft/nba-mcp-synthesis/analysis_results/)

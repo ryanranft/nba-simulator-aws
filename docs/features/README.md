@@ -46,7 +46,7 @@ Advanced NBA statistical metrics:
 
 **Return to:** [Main Documentation Index](../README.md)
 **Related:**
-- [Phase 9: Data Extraction](../phases/PHASE_9_INDEX.md)
+- [Phase 2: Data Extraction](../phases/PHASE_9_INDEX.md)
 - [Shot Chart System](shot_charts/)
 - [Box Score Systems](box_scores/)
 - [Statistics](statistics/)

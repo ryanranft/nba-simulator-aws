@@ -296,7 +296,7 @@ class AutonomousPhaseCompletionAgent:
                     }
                 )
 
-        # If still no matches, try pattern 3 (Phase 9 format: | 9.0: Name | Status | ...)
+        # If still no matches, try pattern 3 (Phase 2 format: | 9.0: Name | Status | ...)
         if not sub_phases:
             pattern3 = re.compile(r"\|\s*(\d+\.\d+):\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|")
 

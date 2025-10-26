@@ -229,7 +229,7 @@ echo "Error rate: $errors errors in $total requests ($(echo "scale=2; $errors*10
 
 ---
 
-## Phase 9 Batch Processing (ESPN)
+## Phase 2 Batch Processing (ESPN)
 
 **Monitor command:**
 ```bash

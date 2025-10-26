@@ -1,11 +1,11 @@
 # Phase 2: Play-by-Play to Box Score Generation
 
-**Version:** 2.0 (Promoted from Phase 9)
+**Version:** 2.0 (Promoted from Phase 2)
 **Status:** ⏸️ PENDING
 **Priority:** ⭐ CRITICAL (Core Functionality)
 **Timeline:** 12 weeks (3 months)
 **Cost Impact:** +$0.80-1.30/month
-**Migrated From:** Phase 9 (October 25, 2025 - Comprehensive Phase Reorganization)
+**Migrated From:** Phase 2 (October 25, 2025 - Comprehensive Phase Reorganization)
 
 ---
 
@@ -21,7 +21,7 @@ Generate granular box score snapshots from play-by-play (PBP) data to enable tem
 4. **Advanced Metrics**: Platform to add metrics not in original data
 5. **ML Enhancement**: More accurate predictions with granular state data
 
-**Why this is Phase 2, not Phase 9:**
+**Why this is Phase 2, not Phase 2:**
 - **Enables ALL downstream analysis** - Without box score snapshots, temporal queries impossible
 - **Core to project vision** - "Query stats at any exact moment" requires this
 - **Prerequisite for ML** - Phase 5 models need temporal features
@@ -392,12 +392,12 @@ Phase 2 provides the Q3-ending snapshot (actual state) and Q4 snapshots (validat
 
 | Date | Version | Changes | Author |
 |------|---------|---------|--------|
-| 2025-10-11 | 1.0 | Initial Phase 9 index created from external plan | Claude |
-| 2025-10-25 | 2.0 | Promoted to Phase 2 (from Phase 9) during comprehensive reorganization | Claude |
+| 2025-10-11 | 1.0 | Initial Phase 2 index created from external plan | Claude |
+| 2025-10-25 | 2.0 | Promoted to Phase 2 (from Phase 2) during comprehensive reorganization | Claude |
 
 ---
 
-**Last Updated:** October 25, 2025 (Promoted from Phase 9)
+**Last Updated:** October 25, 2025 (Promoted from Phase 2)
 **Status:** ⏸️ PENDING - Ready for implementation
 **Migrated By:** Comprehensive Phase Reorganization (ADR-010)
 **Next Action:** Review plan, create sub-phase files, begin implementation

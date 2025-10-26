@@ -57,7 +57,7 @@
 
 **User Approved:** October 25, 2025
 **Execution Timing:** AFTER Workflow #58 completes
-**Scope:** Integrate Phases 6 & 8 into Phase 0, promote Phase 9 to Phase 2, defer Phase 2 (Glue)
+**Scope:** Integrate Phases 6 & 8 into Phase 0, promote Phase 2 to Phase 2, defer Phase 2 (Glue)
 
 ### Phase Changes Summary
 
@@ -65,8 +65,8 @@
 |--------------|--------|-------------|-----------|
 | **Phase 6** (Optional Enhancements) | **INTEGRATE** | 0.0019-0.21 | Testing/CI/CD are foundational, not enhancements |
 | **Phase 7** (Betting Odds) | **KEEP SEPARATE** | Phase 7 (unchanged) | Optional domain-specific feature |
-| **Phase 8** (Data Audit) | **INTEGRATE** | 0.0022 | Audit should happen during collection, not after |
-| **Phase 9** (PBP to Box Score) | **PROMOTE** | Phase 2 | Core functionality for temporal queries |
+| **Phase 0.0022** (Data Audit) | **INTEGRATE** | 0.0022 | Audit should happen during collection, not after |
+| **Phase 2** (PBP to Box Score) | **PROMOTE** | Phase 2 | Core functionality for temporal queries |
 | **Phase 2** (AWS Glue ETL) | **DEFER/DEMOTE** | Phase 6 or defer | Python ETL working fine, Glue adds cost without benefit |
 
 ### New Phase Structure (7 phases instead of 9)
@@ -89,7 +89,7 @@
   - Developer guides
   - Architecture Decision Records (ADRs)
 
-- **0.22: Data Inventory & Gap Analysis** (from Phase 8)
+- **0.22: Data Inventory & Gap Analysis** (from Phase 0.0022)
   - Recursive data discovery
   - Multi-source reconciliation
   - Master inventory document
@@ -97,7 +97,7 @@
 #### Phase 1: Multi-Source Data Integration
 **Status:** Keep as-is - no changes needed
 
-#### Phase 2: Play-by-Play to Box Score Generation (promoted from Phase 9)
+#### Phase 2: Play-by-Play to Box Score Generation (promoted from Phase 2)
 **Purpose:** Generate temporal box score snapshots
 **Sub-phases:** 9 sub-phases (2.1-2.9)
 **Timeline:** 12 weeks
@@ -119,8 +119,8 @@
 #### Phase 7: Betting Odds Integration
 **Status:** Keep as-is - correctly positioned as optional enhancement
 
-#### ~~Phase 8~~ (DELETED - integrated into 0.0022)
-#### ~~Phase 9~~ (DELETED - promoted to Phase 2)
+#### ~~Phase 0.0022~~ (DELETED - integrated into 0.0022)
+#### ~~Phase 2~~ (DELETED - promoted to Phase 2)
 
 ### Reorganization Implementation Steps
 
@@ -133,7 +133,7 @@ When executing the reorganization (AFTER Workflow #58):
 
 2. **Create new PHASE_2_INDEX.md**
    - Replace current Phase 2 (Glue) content
-   - Import Phase 9 (PBP to Box Score) content
+   - Import Phase 2 (PBP to Box Score) content
    - Update all 9 sub-phase references (2.1-2.9)
 
 3. **Archive old phase indexes**
@@ -157,7 +157,7 @@ When executing the reorganization (AFTER Workflow #58):
 ✅ **Logical progression:** Collect → Audit → Transform → Store → Analyze → Model
 ✅ **Infrastructure first:** Testing/monitoring from day 1
 ✅ **Eliminates "enhancement" phases:** Everything is core
-✅ **Clearer priorities:** Box score generation is Phase 2, not Phase 9
+✅ **Clearer priorities:** Box score generation is Phase 2, not Phase 2
 ✅ **Simpler structure:** 7 focused phases instead of 9 scattered phases
 ✅ **Better for documentation:** Each phase has clear purpose
 ✅ **Easier to understand:** New contributors see logical flow
@@ -187,7 +187,7 @@ When executing the reorganization (AFTER Workflow #58):
    - 📋 **Phase 5:** README Alignment - Verify Phase 0 READMEs align with main README vision
    - 📋 **Phase 6:** DIMS Integration - Verify metrics current in `inventory/metrics.yaml`
    - 📋 **Phase 7:** Phase Index Update - Mark Phase 0 ✅ COMPLETE in PHASE_0_INDEX.md
-   - 📋 **Phase 8:** Final Validation - Comprehensive check
+   - 📋 **Phase 0.0022:** Final Validation - Comprehensive check
 
 3. **Validators to run:**
    - 0.0001: Basketball Reference (15 validators)

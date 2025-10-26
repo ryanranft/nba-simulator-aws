@@ -350,7 +350,7 @@ grep -i "error\|failed" /tmp/bbref_comprehensive_overnight.log | tail -20
 
 ---
 
-## Phase 9 Batch Processing (ESPN Play-by-Play to Box Score)
+## Phase 2 Batch Processing (ESPN Play-by-Play to Box Score)
 
 **Check command:**
 ```bash

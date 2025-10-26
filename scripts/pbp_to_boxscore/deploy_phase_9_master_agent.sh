@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Phase 9 Master Completion Agent Deployment Script
-# Automatically completes all remaining Phase 9 sub-phases (9.3-9.8)
+# Phase 2 Master Completion Agent Deployment Script
+# Automatically completes all remaining Phase 2 sub-phases (9.3-9.8)
 
 # Configuration
-AGENT_NAME="Phase 9 Master Completion Agent"
+AGENT_NAME="Phase 2 Master Completion Agent"
 SCRIPT_PATH="scripts/pbp_to_boxscore/phase_9_master_agent.py"
 LOG_FILE="logs/phase_9_master_agent.log"
 OUT_FILE="logs/phase_9_master_agent.out"
@@ -79,7 +79,7 @@ start_agent() {
             echo -e "\033[0;34m[INFO]\033[0m Log file: $(pwd)/$LOG_FILE"
             echo -e "\033[0;34m[INFO]\033[0m Standard output: $(pwd)/$OUT_FILE"
             echo ""
-            echo -e "\033[0;36m[INFO]\033[0m This agent will complete all remaining Phase 9 sub-phases:"
+            echo -e "\033[0;36m[INFO]\033[0m This agent will complete all remaining Phase 2 sub-phases:"
             echo -e "\033[0;36m[INFO]\033[0m   • 9.3: NBA API Processor (1995-2006)"
             echo -e "\033[0;36m[INFO]\033[0m   • 9.4: Kaggle Processor (1946-2020)"
             echo -e "\033[0;36m[INFO]\033[0m   • 9.5: Storage System (RDS + S3 Parquet + local cache)"
@@ -174,7 +174,7 @@ monitor_agent() {
 
 # Function to show completion report
 show_report() {
-    echo -e "\033[0;34m[INFO]\033[0m Showing Phase 9 completion report..."
+    echo -e "\033[0;34m[INFO]\033[0m Showing Phase 2 completion report..."
 
     if [ -f "$OUTPUT_DIR/phase_9_completion_report.json" ]; then
         echo -e "\033[0;32m[SUCCESS]\033[0m Completion report found!"
@@ -223,7 +223,7 @@ except Exception as e:
 
 # Function to clean up
 cleanup() {
-    echo -e "\033[0;34m[INFO]\033[0m Cleaning up Phase 9 Master Agent..."
+    echo -e "\033[0;34m[INFO]\033[0m Cleaning up Phase 2 Master Agent..."
 
     # Stop agent if running
     if is_running; then
@@ -271,13 +271,13 @@ case "$1" in
         cleanup
         ;;
     *)
-        echo "Phase 9 Master Completion Agent"
+        echo "Phase 2 Master Completion Agent"
         echo "================================"
         echo ""
         echo "Usage: $0 {start|stop|restart|status|monitor|report|cleanup}"
         echo ""
         echo "Commands:"
-        echo "  start    - Start the Phase 9 Master Completion Agent"
+        echo "  start    - Start the Phase 2 Master Completion Agent"
         echo "  stop     - Stop the running agent"
         echo "  restart  - Restart the agent"
         echo "  status   - Check agent status and show progress"
@@ -285,7 +285,7 @@ case "$1" in
         echo "  report   - Show completion report"
         echo "  cleanup  - Clean up agent files"
         echo ""
-        echo "This agent will automatically complete all remaining Phase 9 sub-phases:"
+        echo "This agent will automatically complete all remaining Phase 2 sub-phases:"
         echo "  • 9.3: NBA API Processor (1995-2006)"
         echo "  • 9.4: Kaggle Processor (1946-2020)"
         echo "  • 9.5: Storage System (RDS + S3 Parquet + local cache)"

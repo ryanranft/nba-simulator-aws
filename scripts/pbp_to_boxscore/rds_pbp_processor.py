@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-RDS Play-by-Play Processor - Generate Phase 9 Snapshots from PostgreSQL
+RDS Play-by-Play Processor - Generate Phase 2 Snapshots from PostgreSQL
 
 Purpose: Process play-by-play data from RDS PostgreSQL to generate box score snapshots
 Database: RDS PostgreSQL (nba_simulator)
@@ -83,7 +83,7 @@ logger = logging.getLogger(__name__)
 
 class RDSPBPProcessor:
     """
-    Main processor for generating Phase 9 snapshots from RDS play-by-play data.
+    Main processor for generating Phase 2 snapshots from RDS play-by-play data.
 
     Coordinates PlayTextParser and GameStateTracker to create box score snapshots.
     """

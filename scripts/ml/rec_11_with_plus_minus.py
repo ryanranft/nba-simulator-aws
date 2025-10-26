@@ -5,7 +5,7 @@ Enhanced Advanced Feature Engineering Pipeline with Plus/Minus Integration
 Recommendation ID: rec_11 (enhanced)
 Priority: CRITICAL (#2 in master sequence)
 Enhancement: Plus/Minus Features Integration (October 19, 2025)
-Dependencies: rec_22 (Panel Data), Plus/Minus Tables (Phase 9)
+Dependencies: rec_22 (Panel Data), Plus/Minus Tables (Phase 2)
 
 Description:
 Advanced feature engineering pipeline that now includes 100+ lineup and player

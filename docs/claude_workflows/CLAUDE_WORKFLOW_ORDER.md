@@ -311,7 +311,7 @@ claude_workflows/workflow_descriptions/24_aws_resource_setup.md
     - **Gap detection:** Identifies missing files and sync issues
   - **Modes:** `standard`, `--update-docs`, `--quiet`, `--skip-s3`
   - **Integration:** Post-scrape hook automatically calls audit
-  - **Related phase:** [Phase 8: Data Audit & Inventory](../phases/PHASE_8_INDEX.md)
+  - **Related phase:** [Phase 0.0022: Data Audit & Inventory](../phases/PHASE_8_INDEX.md)
 
 ---
 

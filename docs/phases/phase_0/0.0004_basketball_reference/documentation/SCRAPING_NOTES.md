@@ -120,7 +120,7 @@ For critical missing data only:
 ### Immediate (Now)
 1. ✅ Use existing comprehensive scraper for available data types
 2. ✅ Leverage already-collected ESPN/hoopR/NBA API data
-3. ✅ Begin Phase 9 (PBP to Box Score) with existing data
+3. ✅ Begin Phase 2 (PBP to Box Score) with existing data
 
 ### Short-term (1-2 weeks)
 1. Implement proxy rotation for Tier 1 scraper
@@ -175,13 +175,13 @@ For critical missing data only:
 ### Wait and Use Existing Data
 - **Cost:** $0
 - **Time:** 0 hours
-- **Benefit:** Begin Phase 9 immediately with existing data
+- **Benefit:** Begin Phase 2 immediately with existing data
 - **Risk:** None
 
 ### Recommendation
-**Start Phase 9 with existing data.** We have comprehensive PBP data from ESPN and hoopR. The Tier 1 data is supplementary, not critical.
+**Start Phase 2 with existing data.** We have comprehensive PBP data from ESPN and hoopR. The Tier 1 data is supplementary, not critical.
 
-**Defer Tier 1 scraper** until Phase 9 is operational and we can assess if the additional granularity is worth the anti-blocking investment.
+**Defer Tier 1 scraper** until Phase 2 is operational and we can assess if the additional granularity is worth the anti-blocking investment.
 
 ---
 
@@ -211,7 +211,7 @@ For critical missing data only:
 
 **User Decision Required:**
 
-**Option A:** Use existing data, begin Phase 9 immediately
+**Option A:** Use existing data, begin Phase 2 immediately
 - Fastest path to value
 - Zero cost
 - No blocking issues
@@ -224,7 +224,7 @@ For critical missing data only:
 - Some blocking risk remains
 
 **Option C:** Hybrid approach
-- Begin Phase 9 with existing data
+- Begin Phase 2 with existing data
 - Implement proxy service in parallel
 - Add Tier 1 data when available
 - Best of both worlds

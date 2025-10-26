@@ -222,7 +222,7 @@ nohup python scripts/etl/scrape_basketball_reference_additional.py \
 
 ---
 
-### Phase 8: ESPN Additional Endpoints (Priority 8)
+### Phase 0.0022: ESPN Additional Endpoints (Priority 8)
 **Impact:** LOW (10-15 features)
 **Runtime:** 2-3 hours
 
@@ -250,7 +250,7 @@ nohup python scripts/etl/scrape_espn_additional.py \
 
 ## Part B: Historical Era Collection (1946-1992)
 
-### Phase 9: Historical Box Scores (1946-1992)
+### Phase 2: Historical Box Scores (1946-1992)
 **Impact:** HIGH - Complete temporal coverage
 **Runtime:** 15-20 hours
 **Sources:** Basketball Reference + Kaggle validation
@@ -366,13 +366,13 @@ nohup python scripts/etl/scrape_basketball_reference_additional.py ... &
 
 **Day 4:**
 ```bash
-# Launch Phase 8 (ESPN Additional) - 2-3 hours
+# Launch Phase 0.0022 (ESPN Additional) - 2-3 hours
 nohup python scripts/etl/scrape_espn_additional.py ... &
 ```
 
 **Day 5-7:**
 ```bash
-# Launch Phase 9 (Historical Collection) - 15-20 hours
+# Launch Phase 2 (Historical Collection) - 15-20 hours
 nohup python scripts/etl/scrape_historical_1946_1992.py ... &
 
 # Launch Phase 10 (Kaggle Integration) - 2-3 hours
@@ -492,7 +492,7 @@ pkill -f "scripts/etl/"
 ✅ No blocking/rate limit issues
 ✅ Data validated and uploaded to S3
 
-### Phase 9-10 Complete When:
+### Phase 2-10 Complete When:
 ✅ Historical games (1946-1992) collected
 ✅ Kaggle data integrated
 ✅ Cross-source validation complete

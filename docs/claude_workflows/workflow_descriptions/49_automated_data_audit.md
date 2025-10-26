@@ -1,6 +1,6 @@
 # Workflow #42: Automated Data Audit
 
-**Related Phase:** [Phase 8: Data Audit & Inventory](../../phases/PHASE_8_INDEX.md)
+**Related Phase:** [Phase 0.0022: Data Audit & Inventory](../../phases/PHASE_8_INDEX.md)
 **Automation Level:** HIGH (runs automatically after scraping or on schedule)
 **Time Required:** 2-5 minutes
 **Cost:** $0 (local analysis only, minimal S3 GET requests)
@@ -401,7 +401,7 @@ bash scripts/audit/run_data_audit.sh --skip-s3
 
 ## Related Documentation
 
-- **Phase 8:** [Data Audit & Inventory](../../phases/PHASE_8_INDEX.md)
+- **Phase 0.0022:** [Data Audit & Inventory](../../phases/PHASE_8_INDEX.md)
 - **Sub-8.0000:** [Recursive Data Discovery](../../phases/phase_8/8.0000_recursive_data_discovery.md)
 - **Sub-8.0001:** [Deep Content Analysis](../../phases/phase_8/8.0001_deep_content_analysis.md)
 - **Master Inventory:** [MASTER_DATA_INVENTORY.md](../../MASTER_DATA_INVENTORY.md)

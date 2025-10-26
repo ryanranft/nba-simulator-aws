@@ -133,7 +133,7 @@ Data Sources → S3 Data Lake → RDS PostgreSQL → Temporal Queries
 
 ### In Progress Phases (🔄)
 
-#### Phase 9: Play-by-Play to Box Score Generation
+#### Phase 2: Play-by-Play to Box Score Generation
 
 **Overall Status:** 8 sub-phases defined, 2 complete, 1 in progress (60%)
 
@@ -209,7 +209,7 @@ Data Sources → S3 Data Lake → RDS PostgreSQL → Temporal Queries
 - **Timeline:** 6-8 hours
 - **Cost:** +$0-10/month
 
-#### Phase 9 Remaining Sub-phases
+#### Phase 2 Remaining Sub-phases
 
 ##### 9.3: NBA API Processor (⏸️ PENDING)
 - Historical data (1995-2006)
@@ -273,7 +273,7 @@ Data Sources → S3 Data Lake → RDS PostgreSQL → Temporal Queries
 
 ## Section C: Remaining Work Inventory
 
-### Workstream 1: Complete Phase 9 Snapshot Generation (4-6 hours)
+### Workstream 1: Complete Phase 2 Snapshot Generation (4-6 hours)
 
 **Priority:** IMMEDIATE / CRITICAL
 **Dependencies:** None (can start immediately)
@@ -323,7 +323,7 @@ Data Sources → S3 Data Lake → RDS PostgreSQL → Temporal Queries
 - ✅ Data stored in RDS and S3
 - ✅ Verification against actual box scores 99%+ accuracy
 
-### Workstream 2: Phase 9 Additional Processors (8-10 weeks)
+### Workstream 2: Phase 2 Additional Processors (8-10 weeks)
 
 **Priority:** HIGH (sequenced after Workstream 1)
 **Dependencies:** 9.0-9.2 complete (✅), Workstream 1 complete
@@ -516,7 +516,7 @@ Data Sources → S3 Data Lake → RDS PostgreSQL → Temporal Queries
 - `teams`: 87 rows
 - `players`: ~5,000 rows
 
-**Phase 9 Tables (NEW):**
+**Phase 2 Tables (NEW):**
 - `game_state_snapshots`: ~6.4M rows projected (436 snapshots × 14,798 games)
 - `player_snapshot_stats`: ~43M rows projected (6-7 players × 436 × 14,798)
 - `quarter_box_scores`: ~236K rows (4 quarters × 2 teams × 29,596 game-teams)
@@ -550,7 +550,7 @@ Data Sources → S3 Data Lake → RDS PostgreSQL → Temporal Queries
 ### Code Base Structure
 
 **Key Directories:**
-- `/scripts/pbp_to_boxscore/` - Phase 9 snapshot generation (1,900 lines)
+- `/scripts/pbp_to_boxscore/` - Phase 2 snapshot generation (1,900 lines)
 - `/scripts/ml/` - ML models and feature engineering (14,000+ lines)
 - `/scripts/etl/` - Data extraction and loading
 - `/scripts/analysis/` - Data quality validation
@@ -624,7 +624,7 @@ Data Sources → S3 Data Lake → RDS PostgreSQL → Temporal Queries
 **Timeline:** 6-8 weeks
 **Effort:** 100-150 hours
 
-✅ **All Phase 9 Sub-phases Complete**
+✅ **All Phase 2 Sub-phases Complete**
 - 9.0-9.8 all complete
 - ESPN, hoopR, NBA API, Kaggle processors operational
 - Storage system optimized
@@ -961,8 +961,8 @@ Week 3: Workstream 1 Scaling + Workstream 2A + Workstream 3 Tier 1
    - Parallel work identified
 
 3. DETAILED_WORKSTREAM_PLANS.md (20-40 pages)
-   - Workstream 1: Complete Phase 9 Snapshot Generation
-   - Workstream 2: Phase 9 Additional Processors
+   - Workstream 1: Complete Phase 2 Snapshot Generation
+   - Workstream 2: Phase 2 Additional Processors
    - Workstream 3: Basketball Reference Expansion
    - Workstream 4: Multi-Source Integration
    - Each with full task breakdowns as specified above
@@ -1003,7 +1003,7 @@ For the MCP's context, the following files contain additional details:
 - `CLAUDE.md` - Project instructions and navigation
 - `docs/README.md` - Documentation index
 
-**Phase 9 Documentation:**
+**Phase 2 Documentation:**
 - `docs/phases/PHASE_9_INDEX.md` - Phase overview
 - `docs/phases/phase_9/9.0000_system_architecture.md` - System design
 - `docs/phases/phase_9/9.0001_espn_processor.md` - ESPN processor details

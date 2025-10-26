@@ -483,7 +483,7 @@ def run(self, start_season="2020-21", end_season="2024-25"):
 
 ---
 
-### Phase 8: Historical Kaggle (Pre-2020 expansion)
+### Phase 0.0022: Historical Kaggle (Pre-2020 expansion)
 **Priority**: Low (historical only)
 **Files to Enhance**:
 - `scripts/etl/process_kaggle_historical.py`
@@ -641,7 +641,7 @@ Game Advanced (1,230 games × 3 endpoints):
 1. Enhance Phase 5 (Matchups & Defense) using template
 2. Enhance Phase 6 (Basketball Reference expansion)
 3. Enhance Phase 7 (ESPN expansion)
-4. Enhance Phase 8 (Kaggle historical)
+4. Enhance Phase 0.0022 (Kaggle historical)
 
 ### Long-Term
 1. Integrate all scraped data into master database

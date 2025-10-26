@@ -46,14 +46,14 @@ This document lists all files that provide context for the temporal data build i
 - Contains reproduction steps and fix strategies
 - Critical for understanding current state
 
-### Phase 9 Overview
+### Phase 2 Overview
 
 | File | Lines | Purpose | Key Information |
 |------|-------|---------|-----------------|
-| **docs/phases/PHASE_9_INDEX.md** | ~321 | Phase 9 master index | 8 sub-phases, timeline, success criteria |
+| **docs/phases/PHASE_9_INDEX.md** | ~321 | Phase 2 master index | 8 sub-phases, timeline, success criteria |
 
 **Why This Matters:**
-- Phase 9 is the primary focus (snapshot generation)
+- Phase 2 is the primary focus (snapshot generation)
 - Contains overview of all 8 sub-phases
 - Success criteria and cost estimates
 
@@ -61,7 +61,7 @@ This document lists all files that provide context for the temporal data build i
 
 ## Tier 2: Should-Read Files (Important Details)
 
-### Phase 9 Sub-Phase Documentation
+### Phase 2 Sub-Phase Documentation
 
 | File | Lines | Purpose | Status |
 |------|-------|---------|--------|
@@ -124,7 +124,7 @@ This document lists all files that provide context for the temporal data build i
 
 ### Implementation Code
 
-**Phase 9 Snapshot Generation (Workstream 1):**
+**Phase 2 Snapshot Generation (Workstream 1):**
 ```
 scripts/pbp_to_boxscore/
 ├── play_text_parser.py              (800 lines) - Parses NBA play text
@@ -134,7 +134,7 @@ scripts/pbp_to_boxscore/
 └── base_processor.py                (514 lines) - Abstract base class
 ```
 
-**Phase 9 Database Schema:**
+**Phase 2 Database Schema:**
 ```
 sql/
 ├── phase9_box_score_snapshots.sql   (510 lines) - Main schema
@@ -215,7 +215,7 @@ scripts/ml/
 
 ## Quick Navigation by Workstream
 
-### Workstream 1: Complete Phase 9 Snapshot Generation
+### Workstream 1: Complete Phase 2 Snapshot Generation
 
 **Must Read:**
 - docs/OPTION_2A_STATUS.md (current state)
@@ -230,7 +230,7 @@ scripts/ml/
 **Schema:**
 - sql/phase9_box_score_snapshots.sql
 
-### Workstream 2: Phase 9 Additional Processors
+### Workstream 2: Phase 2 Additional Processors
 
 **Must Read:**
 - docs/phases/PHASE_9_INDEX.md
@@ -280,7 +280,7 @@ scripts/ml/
 
 2. **Then Read** (30 minutes):
    - docs/phases/PHASE_9_INDEX.md
-   - All Phase 9 sub-phase files (9.0-9.8)
+   - All Phase 2 sub-phase files (9.0-9.8)
    - docs/phases/phase_0/0.0001_basketball_reference/README.md
 
 3. **Deep Dive As Needed** (reference):
@@ -302,7 +302,7 @@ scripts/ml/
 ### Small (<200 lines) - Read Freely
 - docs/README.md (~100 lines)
 - docs/EMERGENCY_RECOVERY.md (~100 lines)
-- Phase 9 sub-phase files (~84-100 lines each)
+- Phase 2 sub-phase files (~84-100 lines each)
 
 ### Medium (200-500 lines) - Read When Needed
 - CLAUDE.md (~395 lines)
