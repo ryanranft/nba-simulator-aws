@@ -1,6 +1,6 @@
 metadata:
   version: 1.0.0
-  last_updated: '2025-10-26T12:42:10.007207Z'
+  last_updated: '2025-10-26T16:35:36.417580Z'
   last_verified: '2025-10-21T19:00:00Z'
   verified_by: manual_verification
   system: DIMS v1.0.0
@@ -121,8 +121,8 @@ code_base:
     cache_expires: null
 documentation:
   markdown_files:
-    value: 1758
-    last_verified: '2025-10-26T12:42:09.802028Z'
+    value: 1760
+    last_verified: '2025-10-26T13:15:36.253496Z'
     verification_method: automated
     cached: false
     cache_expires: null
