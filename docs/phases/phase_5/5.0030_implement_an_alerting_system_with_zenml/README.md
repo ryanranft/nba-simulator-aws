@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.30_implement_an_alerting_system_with_zenml
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0030_implement_an_alerting_system_with_zenml
 python test_rec_052.py -v
 ```
 

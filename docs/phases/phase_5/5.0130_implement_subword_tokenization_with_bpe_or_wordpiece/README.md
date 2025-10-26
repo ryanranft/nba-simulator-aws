@@ -122,7 +122,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.130_implement_subword_tokenization_with_bpe_or_wordpiece
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0130_implement_subword_tokenization_with_bpe_or_wordpiece
 python test_rec_172.py -v
 ```
 

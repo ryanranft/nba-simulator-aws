@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.23_implement_filtered_vector_search
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0023_implement_filtered_vector_search
 python test_rec_037.py -v
 ```
 

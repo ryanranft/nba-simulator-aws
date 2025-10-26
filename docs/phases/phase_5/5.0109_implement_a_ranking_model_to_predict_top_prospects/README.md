@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.109_implement_a_ranking_model_to_predict_top_prospects
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0109_implement_a_ranking_model_to_predict_top_prospects
 python test_rec_144.py -v
 ```
 

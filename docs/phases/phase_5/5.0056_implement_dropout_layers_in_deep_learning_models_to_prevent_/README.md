@@ -118,7 +118,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.56_implement_dropout_layers_in_deep_learning_models_to_prevent_
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0056_implement_dropout_layers_in_deep_learning_models_to_prevent_
 python test_rec_084.py -v
 ```
 

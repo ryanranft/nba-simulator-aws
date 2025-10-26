@@ -122,7 +122,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.46_implement_k-means_clustering_for_player_performance_segmenta
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0046_implement_k-means_clustering_for_player_performance_segmenta
 python test_rec_071.py -v
 ```
 

@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.132_implement_parallel_token_processing_and_kv_cache
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0132_implement_parallel_token_processing_and_kv_cache
 python test_rec_174.py -v
 ```
 

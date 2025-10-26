@@ -119,7 +119,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.131_use_token_embeddings_as_input_to_language_models
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0131_use_token_embeddings_as_input_to_language_models
 python test_rec_173.py -v
 ```
 

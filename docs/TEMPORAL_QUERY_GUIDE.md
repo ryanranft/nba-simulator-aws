@@ -984,7 +984,7 @@ WHERE
 - See `docs/phases/PHASE_3_DATABASE.md` Sub-Phase 3.5 for database setup
 - See `docs/adr/009-temporal-panel-data-architecture.md` for architecture details
 - See `docs/phases/PHASE_4_SIMULATION_ENGINE.md` Sub-Phase 4.5 for temporal simulation
-- See `docs/phases/PHASE_5_MACHINE_LEARNING.md` Sub-Phase 5.5 for temporal ML features
+- See `docs/phases/PHASE_5_MACHINE_LEARNING.md` Sub-Phase 5.0005 for temporal ML features
 
 **For testing:**
 - Create validation test suite (see `docs/phases/PHASE_3_DATABASE.md`)

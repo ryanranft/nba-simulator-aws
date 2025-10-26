@@ -278,7 +278,7 @@ Monitors all 80-100 features for drift:
 
 ```bash
 # Run comprehensive test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.1_feature_engineering
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0001_feature_engineering
 python test_rec_11.py -v
 
 # Expected: All tests passing, ~20 second execution time

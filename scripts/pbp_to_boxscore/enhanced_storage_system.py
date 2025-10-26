@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Enhanced Phase 9.5: Storage System
+Enhanced Phase 9.0005: Storage System
 
 Implements multi-tier storage system with enhanced features:
 - RDS PostgreSQL for structured queries with connection pooling
@@ -248,7 +248,9 @@ class EnhancedBoxScoreStorageSystem:
                     return
 
                 with open(cache_file, "rb") as f:
-                    self.cache = pickle.load(f)  # nosec B301 - Loading from trusted local cache only
+                    self.cache = pickle.load(
+                        f
+                    )  # nosec B301 - Loading from trusted local cache only
                 logger.info(f"✅ Loaded {len(self.cache)} items from cache")
             else:
                 logger.info("No existing cache found, starting fresh")

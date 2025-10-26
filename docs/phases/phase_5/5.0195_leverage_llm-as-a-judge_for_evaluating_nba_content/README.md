@@ -122,7 +122,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.26_leverage_llm-as-a-judge_for_evaluating_nba_content
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0026_leverage_llm-as-a-judge_for_evaluating_nba_content
 python test_rec_046.py -v
 ```
 

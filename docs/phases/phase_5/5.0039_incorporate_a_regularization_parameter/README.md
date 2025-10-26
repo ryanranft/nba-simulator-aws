@@ -118,7 +118,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.39_incorporate_a_regularization_parameter
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0039_incorporate_a_regularization_parameter
 python test_rec_063.py -v
 ```
 

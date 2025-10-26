@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.104_implement_counterfactual_evaluation_to_reduce_action_bias_in
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0104_implement_counterfactual_evaluation_to_reduce_action_bias_in
 python test_rec_139.py -v
 ```
 

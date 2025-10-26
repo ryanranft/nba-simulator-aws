@@ -26,13 +26,13 @@ sys.path.insert(
     0,
     os.path.join(
         os.path.dirname(__file__),
-        "../../docs/phases/phase_8/8.1_statistical_frameworks",
+        "../../docs/phases/phase_8/8.0001_statistical_frameworks",
     ),
 )
 sys.path.insert(
     0,
     os.path.join(
-        os.path.dirname(__file__), "../../docs/phases/phase_8/8.2_data_analysis"
+        os.path.dirname(__file__), "../../docs/phases/phase_8/8.0002_data_analysis"
     ),
 )
 

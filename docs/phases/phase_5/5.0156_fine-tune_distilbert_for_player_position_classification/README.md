@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.156_fine-tune_distilbert_for_player_position_classification
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0156_fine-tune_distilbert_for_player_position_classification
 python test_rec_204.py -v
 ```
 

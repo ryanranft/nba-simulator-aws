@@ -4,7 +4,7 @@ Query Understanding Module for RAG+LLM System
 Analyzes user queries to extract intent, entities, and temporal context.
 Enables intelligent context retrieval and response generation.
 
-Part of Phase 0.12: RAG + LLM Integration (rec_188)
+Part of Phase 0.0012: RAG + LLM Integration (rec_188)
 """
 
 import re

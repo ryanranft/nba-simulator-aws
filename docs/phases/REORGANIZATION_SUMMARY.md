@@ -11,10 +11,10 @@
 
 | Old Location | New Location | Status |
 |--------------|--------------|--------|
-| `phase_0/rec_11_feature_engineering/` | `phase_5/5.1_feature_engineering/` | ✅ Complete |
-| `phase_0/ml_systems_1_model_versioning/` | `phase_5/5.2_model_versioning/` (renamed from `5.2_model_management`) | ✅ Complete |
-| `phase_0/ml_systems_2_drift_detection/` | `phase_5/5.19_drift_detection/` | ✅ Complete |
-| `phase_0/rec_22_panel_data/` | `phase_5/5.20_panel_data/` | ✅ Complete |
+| `phase_0/rec_11_feature_engineering/` | `phase_5/5.0001_feature_engineering/` | ✅ Complete |
+| `phase_0/ml_systems_1_model_versioning/` | `phase_5/5.0002_model_versioning/` (renamed from `5.2_model_management`) | ✅ Complete |
+| `phase_0/ml_systems_2_drift_detection/` | `phase_5/5.0019_drift_detection/` | ✅ Complete |
+| `phase_0/rec_22_panel_data/` | `phase_5/5.0020_panel_data/` | ✅ Complete |
 
 ---
 
@@ -164,10 +164,10 @@ phase_5/
 cd /Users/ryanranft/nba-simulator-aws
 python -c "
 import sys
-sys.path.insert(0, 'docs/phases/phase_5/5.1_feature_engineering')
-sys.path.insert(0, 'docs/phases/phase_5/5.20_panel_data')
-sys.path.insert(0, 'docs/phases/phase_5/5.2_model_versioning')
-sys.path.insert(0, 'docs/phases/phase_5/5.19_drift_detection')
+sys.path.insert(0, 'docs/phases/phase_5/5.0001_feature_engineering')
+sys.path.insert(0, 'docs/phases/phase_5/5.0020_panel_data')
+sys.path.insert(0, 'docs/phases/phase_5/5.0002_model_versioning')
+sys.path.insert(0, 'docs/phases/phase_5/5.0019_drift_detection')
 
 from implement_rec_22 import PanelDataProcessingSystem
 from implement_rec_11 import AdvancedFeatureEngineeringPipeline
@@ -202,10 +202,10 @@ print('✅ All 4 modules imported successfully from phase_5 locations')
 - `docs/phases/phase_0/TESTING_SUMMARY_ML_SYSTEMS.md` → `docs/phases/phase_5/`
 
 ### Restored Files (4 files)
-- `docs/phases/phase_5/5.2_model_versioning/implement_ml_systems_1.py` (restored from git history)
-- `docs/phases/phase_5/5.2_model_versioning/test_ml_systems_1.py` (restored from git history)
-- `docs/phases/phase_5/5.19_drift_detection/implement_ml_systems_2.py` (restored from git history)
-- `docs/phases/phase_5/5.19_drift_detection/test_ml_systems_2.py` (restored from git history)
+- `docs/phases/phase_5/5.0002_model_versioning/implement_ml_systems_1.py` (restored from git history)
+- `docs/phases/phase_5/5.0002_model_versioning/test_ml_systems_1.py` (restored from git history)
+- `docs/phases/phase_5/5.0019_drift_detection/implement_ml_systems_2.py` (restored from git history)
+- `docs/phases/phase_5/5.0019_drift_detection/test_ml_systems_2.py` (restored from git history)
 
 **Total:** 14 file changes ready for commit
 

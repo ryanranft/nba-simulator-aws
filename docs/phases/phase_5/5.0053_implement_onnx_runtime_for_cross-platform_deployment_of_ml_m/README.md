@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.53_implement_onnx_runtime_for_cross-platform_deployment_of_ml_m
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0053_implement_onnx_runtime_for_cross-platform_deployment_of_ml_m
 python test_rec_081.py -v
 ```
 

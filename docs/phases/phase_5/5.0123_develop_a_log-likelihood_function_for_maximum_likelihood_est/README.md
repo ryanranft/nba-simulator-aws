@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.123_develop_a_log-likelihood_function_for_maximum_likelihood_est
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0123_develop_a_log-likelihood_function_for_maximum_likelihood_est
 python test_rec_164.py -v
 ```
 

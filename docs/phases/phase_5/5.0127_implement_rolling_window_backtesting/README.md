@@ -122,7 +122,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.127_implement_rolling_window_backtesting
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0127_implement_rolling_window_backtesting
 python test_rec_169.py -v
 ```
 

@@ -96,7 +96,7 @@ docs/phases/
 **Special structures (multi-tier projects):**
 - Format: `N.M_project_name/` subdirectory
 - Contains: README.md (tier index) + individual tier files
-- Example: `phase_0/0.1_basketball_reference/`
+- Example: `phase_0/0.0001_basketball_reference/`
 
 ---
 
@@ -309,7 +309,7 @@ Add to phase's sub-phase list:
 ###Where to Put Tests & Validators
 
 **Tests:** `tests/phases/phase_N/test_N_M_name.py`
-- Example: `tests/phases/phase_0/test_0_1_initial_data_collection.py`
+- Example: `tests/phases/phase_0/test_0_0001_initial_data_collection.py`
 - Run via: `pytest tests/phases/phase_N/test_N_M_name.py -v`
 
 **Validators:** `validators/phases/phase_N/validate_N_M_feature.py`

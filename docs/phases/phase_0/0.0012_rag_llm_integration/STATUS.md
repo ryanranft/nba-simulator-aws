@@ -1,4 +1,4 @@
-# Phase 0.12: RAG + LLM Integration - Status
+# Phase 0.0012: RAG + LLM Integration - Status
 
 **Implementation ID:** rec_188
 **Status:** ✅ **COMPLETE**
@@ -9,7 +9,7 @@
 
 ## Implementation Summary
 
-Phase 0.12 is now fully implemented with production-ready RAG+LLM natural language query system for NBA temporal data.
+Phase 0.0012 is now fully implemented with production-ready RAG+LLM natural language query system for NBA temporal data.
 
 ### Files Created (7 files, ~3,200 lines)
 
@@ -22,7 +22,7 @@ Phase 0.12 is now fully implemented with production-ready RAG+LLM natural langua
 **Application Layer:**
 5. `scripts/0_12/main.py` - 342 lines - Complete CLI (query, interactive, metrics modes)
 6. `config/rag_llm_config.yaml` - 151 lines - Full configuration
-7. `tests/phases/phase_0/test_0_12.py` - 86 lines - Comprehensive test suite
+7. `tests/phases/phase_0/test_0_0012.py` - 86 lines - Comprehensive test suite
 
 **Total:** 2,412 lines of production code
 
@@ -30,7 +30,7 @@ Phase 0.12 is now fully implemented with production-ready RAG+LLM natural langua
 
 ## Test Results
 
-**Test File:** `tests/phases/phase_0/test_0_12.py`
+**Test File:** `tests/phases/phase_0/test_0_0012.py`
 
 ### Test Coverage
 - ✅ Query understanding (intent classification, entity extraction)
@@ -40,7 +40,7 @@ Phase 0.12 is now fully implemented with production-ready RAG+LLM natural langua
 
 **Run tests:**
 ```bash
-pytest tests/phases/phase_0/test_0_12.py -v
+pytest tests/phases/phase_0/test_0_0012.py -v
 ```
 
 ---
@@ -133,8 +133,8 @@ python scripts/0_12/main.py metrics
 - OpenAI API key (GPT-4 or GPT-3.5-turbo)
 
 ### Prerequisites
-- ✅ Phase 0.10: PostgreSQL JSONB Storage
-- ✅ Phase 0.11: RAG Pipeline with pgvector
+- ✅ Phase 0.0010: PostgreSQL JSONB Storage
+- ✅ Phase 0.0011: RAG Pipeline with pgvector
 
 ---
 
@@ -207,9 +207,9 @@ llm.save_metrics("metrics/rag_llm_metrics.json")
 
 ## Documentation
 
-- **README:** `docs/phases/phase_0/0.12_rag_llm_integration/README.md`
+- **README:** `docs/phases/phase_0/0.0012_rag_llm_integration/README.md`
 - **Config:** `config/rag_llm_config.yaml`
-- **Tests:** `tests/phases/phase_0/test_0_12.py`
+- **Tests:** `tests/phases/phase_0/test_0_0012.py`
 - **Validator:** `validators/phases/phase_0/validate_0_12.py`
 
 ---

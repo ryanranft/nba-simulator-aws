@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_8/8.1_implement_conjugate_priors_for_faster_posterior_updates_in_r
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_8/8.0001_implement_conjugate_priors_for_faster_posterior_updates_in_r
 python test_rec_029.py -v
 ```
 

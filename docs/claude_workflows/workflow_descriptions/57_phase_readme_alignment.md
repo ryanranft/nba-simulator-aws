@@ -113,7 +113,7 @@ Add a "How This Phase Enables the Vision" section that explains:
 
 **Example:**
 ```markdown
-## How Phase 0.1 Data Enables the Simulation Vision
+## How Phase 0.0001 Data Enables the Simulation Vision
 
 This phase collects the foundational temporal data that powers the **hybrid econometric + nonparametric simulation system** described in the [main README](../../../README.md#simulation-methodology).
 
@@ -167,7 +167,7 @@ From this data, we build empirical distributions:
 **Test links:**
 ```bash
 # From the phase README directory, verify links resolve
-cd docs/phases/phase_0/0.1_initial_data_collection
+cd docs/phases/phase_0/0.0001_initial_data_collection
 ls ../../../README.md  # Should exist
 ```
 
@@ -252,16 +252,16 @@ ls ../../../README.md  # Should exist
 
 ### Scenario 3: User Highlights Phase README Inconsistency
 
-**Situation:** User says "Phase 0.1 README temporal precision is outdated with main README"
+**Situation:** User says "Phase 0.0001 README temporal precision is outdated with main README"
 
 **Steps:**
 1. Read main README temporal precision section
-2. Read Phase 0.1 README temporal precision section
+2. Read Phase 0.0001 README temporal precision section
 3. Identify specific misalignments:
    - Wrong date ranges?
    - Incorrect precision capabilities?
    - Missing simulation methodology?
-4. Update Phase 0.1 README to match main README
+4. Update Phase 0.0001 README to match main README
 5. Check if other phases have same issue
 6. Create Workflow #57 validation as future prevention
 
@@ -326,12 +326,12 @@ ls ../../../README.md  # Should exist
 
 **Solution:**
 1. Determine correct relative path:
-   - From `docs/phases/phase_0/0.1_initial_data_collection/README.md`
+   - From `docs/phases/phase_0/0.0001_initial_data_collection/README.md`
    - To `README.md`
    - Path: `../../../README.md`
 2. Test link works:
    ```bash
-   cd docs/phases/phase_0/0.1_initial_data_collection
+   cd docs/phases/phase_0/0.0001_initial_data_collection
    ls ../../../README.md  # Should exist
    ```
 3. Fix all similar links
@@ -372,7 +372,7 @@ python scripts/maintenance/validate_phase_readme.py --diff
 
 **Output:**
 ```
-Phase 0.1 README Validation:
+Phase 0.0001 README Validation:
 ✅ Temporal precision aligns with main README
 ✅ DIMS integration present
 ✅ Vision alignment section exists

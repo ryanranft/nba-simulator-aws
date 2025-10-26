@@ -31,7 +31,7 @@ This index helps Claude Code and developers find the right documentation efficie
 ### Phase Implementation
 - **docs/phases/phase_0/PHASE_0_INDEX.md** - Data Foundation & Infrastructure (🔄 IN PROGRESS 17/20 complete)
   - Includes: Data collection, Testing, Monitoring, Documentation, Data Audit
-  - **NEW:** [Phase 0.18: Autonomous Data Collection](phases/phase_0/0.18_autonomous_data_collection/README.md) - 24/7 self-healing system
+  - **NEW:** [Phase 0.0018: Autonomous Data Collection](phases/phase_0/0.0018_autonomous_data_collection/README.md) - 24/7 self-healing system
 - **docs/phases/PHASE_1_INDEX.md** - Multi-source integration (⏸️ Pending)
 - **docs/phases/PHASE_2_INDEX.md** - Play-by-Play to Box Score (⏸️ Pending, 9 sub-phases, ~12 weeks)
 - **docs/phases/PHASE_3_INDEX.md** - RDS setup (✅ Complete)
@@ -258,11 +258,11 @@ This index helps Claude Code and developers find the right documentation efficie
 ### Enhanced Phase Organization
 
 **Phase-Specific Enhancements:**
-- **docs/phases/phase_9/9.0_plus_minus/** - Plus/Minus analysis system (7 files)
+- **docs/phases/phase_9/9.0000_plus_minus/** - Plus/Minus analysis system (7 files)
   - 26 ML features for lineup efficiency and player impact
   - Production-ready implementation
 
-- **docs/phases/phase_0/0.1_basketball_reference/documentation/** - Technical documentation (7 files)
+- **docs/phases/phase_0/0.0001_basketball_reference/documentation/** - Technical documentation (7 files)
   - Box score system, PBP discovery, scraping notes
   - Comparison analysis, test plans, workflow integration
 
@@ -316,8 +316,8 @@ This index helps Claude Code and developers find the right documentation efficie
 - **Created 8 new directories** for specialized systems:
   - monitoring/dims/, ml_systems/book_recommendations/, data_collection/scrapers/
   - features/ (shot_charts, box_scores, statistics)
-  - archive/superseded_documentation/, phase_9/9.0_plus_minus/
-  - phase_0/0.1_basketball_reference/documentation/
+  - archive/superseded_documentation/, phase_9/9.0000_plus_minus/
+  - phase_0/0.0001_basketball_reference/documentation/
 - **Created 14 README navigation files** for improved discoverability
 - **Phase 5 cleanup: 11 → 3 essential files** (moved summaries to subdirectories)
 - **Archived 17 superseded files** from Oct 2-19, 2025

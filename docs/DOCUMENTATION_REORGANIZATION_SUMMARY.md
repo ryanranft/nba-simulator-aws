@@ -34,23 +34,23 @@ Complete reorganization of NBA Temporal Panel Data System documentation, reducin
 
 ### Priority 2: Plus/Minus Documentation (6 files + 1 README)
 
-**Target:** `docs/phases/phase_9/9.0_plus_minus/`
+**Target:** `docs/phases/phase_9/9.0000_plus_minus/`
 
 **Files Moved:**
-1. `PLUS_MINUS_IMPLEMENTATION_SUMMARY.md` → `phase_9/9.0_plus_minus/IMPLEMENTATION_SUMMARY.md`
-2. `PLUS_MINUS_ML_INTEGRATION.md` → `phase_9/9.0_plus_minus/ML_INTEGRATION.md`
-3. `PLUS_MINUS_OPTIMIZATION_SUMMARY.md` → `phase_9/9.0_plus_minus/OPTIMIZATION_SUMMARY.md`
-4. `PLUS_MINUS_RDS_DEPLOYMENT_SUCCESS.md` → `phase_9/9.0_plus_minus/RDS_DEPLOYMENT_SUCCESS.md`
-5. `REC_11_PLUS_MINUS_COMPLETION_SUMMARY.md` → `phase_9/9.0_plus_minus/REC_11_COMPLETION_SUMMARY.md`
-6. `REC_11_PLUS_MINUS_INTEGRATION.md` → `phase_9/9.0_plus_minus/REC_11_INTEGRATION.md`
+1. `PLUS_MINUS_IMPLEMENTATION_SUMMARY.md` → `phase_9/9.0000_plus_minus/IMPLEMENTATION_SUMMARY.md`
+2. `PLUS_MINUS_ML_INTEGRATION.md` → `phase_9/9.0000_plus_minus/ML_INTEGRATION.md`
+3. `PLUS_MINUS_OPTIMIZATION_SUMMARY.md` → `phase_9/9.0000_plus_minus/OPTIMIZATION_SUMMARY.md`
+4. `PLUS_MINUS_RDS_DEPLOYMENT_SUCCESS.md` → `phase_9/9.0000_plus_minus/RDS_DEPLOYMENT_SUCCESS.md`
+5. `REC_11_PLUS_MINUS_COMPLETION_SUMMARY.md` → `phase_9/9.0000_plus_minus/REC_11_COMPLETION_SUMMARY.md`
+6. `REC_11_PLUS_MINUS_INTEGRATION.md` → `phase_9/9.0000_plus_minus/REC_11_INTEGRATION.md`
 
-**README Created:** `phase_9/9.0_plus_minus/README.md` - Plus/Minus system overview
+**README Created:** `phase_9/9.0000_plus_minus/README.md` - Plus/Minus system overview
 
 ---
 
 ### Priority 3: Basketball Reference Documentation (7 files + updated README)
 
-**Target:** `docs/phases/phase_0/0.1_basketball_reference/documentation/`
+**Target:** `docs/phases/phase_0/0.0001_basketball_reference/documentation/`
 
 **Files Moved:**
 1. `BASKETBALL_REFERENCE_BOX_SCORE_SYSTEM.md` → `0.1_basketball_reference/documentation/BOX_SCORE_SYSTEM.md`
@@ -182,10 +182,10 @@ docs/
 ### DIMS → monitoring/dims/
 - All DIMS_*.md files → monitoring/dims/*.md
 
-### Plus/Minus → phase_9/9.0_plus_minus/
-- All PLUS_MINUS_*.md and REC_11_PLUS_MINUS_*.md → phase_9/9.0_plus_minus/*.md
+### Plus/Minus → phase_9/9.0000_plus_minus/
+- All PLUS_MINUS_*.md and REC_11_PLUS_MINUS_*.md → phase_9/9.0000_plus_minus/*.md
 
-### Basketball Reference → phase_0/0.1_basketball_reference/documentation/
+### Basketball Reference → phase_0/0.0001_basketball_reference/documentation/
 - All BASKETBALL_REFERENCE_*.md and OVERNIGHT_WORKFLOW_*.md → 0.1_basketball_reference/documentation/*.md
 
 ### Scrapers → data_collection/scrapers/
@@ -206,7 +206,7 @@ docs/
 
 **Files Updated:**
 - `PROGRESS.md` - Updated Plus/Minus and Book Recommendations paths
-- `docs/phases/phase_0/0.1_basketball_reference/README.md` - Added documentation/ section
+- `docs/phases/phase_0/0.0001_basketball_reference/README.md` - Added documentation/ section
 
 **No broken links** - All internal references validated
 

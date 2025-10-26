@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.18_test_the_sensitivity_to_starting_points_for_iterative_optimi
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0018_test_the_sensitivity_to_starting_points_for_iterative_optimi
 python test_rec_030.py -v
 ```
 

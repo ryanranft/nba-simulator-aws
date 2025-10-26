@@ -151,7 +151,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.1_store_raw_data_in_a_nosql_database
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.0001_store_raw_data_in_a_nosql_database
 python test_rec_033.py -v
 ```
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Validate Phase 0.2: hoopR Data Collection
+Validate Phase 0.0002: hoopR Data Collection
 
 Description: Validates hoopR R package data collection including S3 storage,
 RDS table creation, data completeness, and cross-source validation.
@@ -19,7 +19,7 @@ from pathlib import Path
 
 
 class Phase02HooprValidator:
-    """Validates hoopR data collection for Phase 0.2."""
+    """Validates hoopR data collection for Phase 0.0002."""
 
     def __init__(self, verbose: bool = False):
         self.verbose = verbose
@@ -424,7 +424,7 @@ class Phase02HooprValidator:
     def run_all_validations(self) -> Tuple[bool, Dict]:
         """Run all validations and return results."""
         print(f"\n{'='*60}")
-        print(f"Phase 0.2: hoopR Data Collection Validation")
+        print(f"Phase 0.0002: hoopR Data Collection Validation")
         print(f"{'='*60}\n")
 
         results = {
@@ -477,7 +477,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Validate Phase 0.2 hoopR data collection"
+        description="Validate Phase 0.0002 hoopR data collection"
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     args = parser.parse_args()

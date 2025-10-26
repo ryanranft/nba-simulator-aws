@@ -122,7 +122,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.4_perform_extensive_error_analysis_on_outputs_to_reduce_halluc
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.0004_perform_extensive_error_analysis_on_outputs_to_reduce_halluc
 python test_rec_093.py -v
 ```
 

@@ -122,7 +122,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.33_use_pca_for_dimensionality_reduction_of_player_statistics
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0033_use_pca_for_dimensionality_reduction_of_player_statistics
 python test_rec_056.py -v
 ```
 

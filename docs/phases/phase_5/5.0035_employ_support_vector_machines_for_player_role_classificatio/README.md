@@ -123,7 +123,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.35_employ_support_vector_machines_for_player_role_classificatio
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0035_employ_support_vector_machines_for_player_role_classificatio
 python test_rec_058.py -v
 ```
 

@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.73_compare_the_use_of_recurrent_and_attentional_models
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0073_compare_the_use_of_recurrent_and_attentional_models
 python test_rec_103.py -v
 ```
 

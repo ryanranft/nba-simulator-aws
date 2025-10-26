@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Basketball Reference Tier 1: NBA High Value Data
-Phase 0.1 - Tier 1 of 13-tier expansion
+Phase 0.0001 - Tier 1 of 13-tier expansion
 
 Collects the 5 highest-value NBA data types with immediate ML and simulation utility:
 1. Player Game Logs - Game-by-game performance tracking

@@ -228,7 +228,7 @@ Total Recommendations: 214
 ls docs/phases/phase_5/
 
 # View specific recommendation
-cat docs/phases/phase_5/5.1_hyperparameter_optimization/README.md
+cat docs/phases/phase_5/5.0001_hyperparameter_optimization/README.md
 ```
 
 ---

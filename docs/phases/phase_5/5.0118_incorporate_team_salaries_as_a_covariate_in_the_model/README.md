@@ -123,7 +123,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.118_incorporate_team_salaries_as_a_covariate_in_the_model
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0118_incorporate_team_salaries_as_a_covariate_in_the_model
 python test_rec_157.py -v
 ```
 

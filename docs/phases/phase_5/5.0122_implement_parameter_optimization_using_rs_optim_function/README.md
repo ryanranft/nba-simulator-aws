@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.122_implement_parameter_optimization_using_rs_optim_function
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0122_implement_parameter_optimization_using_rs_optim_function
 python test_rec_163.py -v
 ```
 

@@ -118,7 +118,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.58_use_the_early_stopping_callback_to_optimize_training_time
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0058_use_the_early_stopping_callback_to_optimize_training_time
 python test_rec_086.py -v
 ```
 

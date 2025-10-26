@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.49_utilize_precision_and_recall_for_evaluating_player_performan
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0049_utilize_precision_and_recall_for_evaluating_player_performan
 python test_rec_074.py -v
 ```
 

@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.71_implement_a_diffusion_model_for_more_complex_game-state_gene
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0071_implement_a_diffusion_model_for_more_complex_game-state_gene
 python test_rec_101.py -v
 ```
 

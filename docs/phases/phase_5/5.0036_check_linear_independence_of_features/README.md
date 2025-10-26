@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.36_check_linear_independence_of_features
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0036_check_linear_independence_of_features
 python test_rec_059.py -v
 ```
 

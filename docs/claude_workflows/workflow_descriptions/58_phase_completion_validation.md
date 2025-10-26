@@ -46,8 +46,8 @@ This workflow consolidates the complete process for validating and marking a pha
 #### Step 1.1: Read Phase README
 
 ```bash
-# Example: Validating Phase 0.2
-cat docs/phases/phase_0/0.2_hoopr_data_collection/README.md
+# Example: Validating Phase 0.0002
+cat docs/phases/phase_0/0.0002_hoopr_data_collection/README.md
 ```
 
 **What to look for:**
@@ -635,7 +635,7 @@ python scripts/monitoring/dims_cli.py verify --category documentation
 ```markdown
 **Historical milestones:**
 - **[Date] (Phase N.M [Event]):** [Baseline metric]
-- **Example:** Oct 2024 (Phase 0.1 Initial Upload): 146,115 files, 119 GB
+- **Example:** Oct 2024 (Phase 0.0001 Initial Upload): 146,115 files, 119 GB
 ```
 
 #### Step 6.3: Reference inventory/metrics.yaml
@@ -751,7 +751,7 @@ find docs/phases/phase_N/ -name "*.py"
 
 ## Common Scenarios
 
-### Scenario 1: Data Collection Phase (e.g., Phase 0.1, 0.2)
+### Scenario 1: Data Collection Phase (e.g., Phase 0.0001, 0.2)
 
 **Validators needed:**
 - S3 bucket configuration

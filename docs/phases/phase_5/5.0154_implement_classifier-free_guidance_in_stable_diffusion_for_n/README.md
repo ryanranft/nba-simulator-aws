@@ -123,7 +123,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.154_implement_classifier-free_guidance_in_stable_diffusion_for_n
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0154_implement_classifier-free_guidance_in_stable_diffusion_for_n
 python test_rec_202.py -v
 ```
 

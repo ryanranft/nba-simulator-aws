@@ -119,7 +119,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.167_use_attention_mechanisms
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0167_use_attention_mechanisms
 python test_rec_215.py -v
 ```
 

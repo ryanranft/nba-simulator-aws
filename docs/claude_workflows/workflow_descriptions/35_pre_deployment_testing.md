@@ -383,7 +383,7 @@ echo "t2.small: ~$15/month (production)"
 
 **Before running SageMaker ML training**
 
-### Phase 5.1: Feature Engineering Validation
+### Phase 5.0001: Feature Engineering Validation
 
 #### Test 1: Feature Data Quality
 ```python
@@ -438,7 +438,7 @@ def test_training_data_sufficient():
     conn.close()
 ```
 
-### Phase 5.2: Model Training Test
+### Phase 5.0002: Model Training Test
 
 #### Test 3: Sample Model Training
 ```python
@@ -468,7 +468,7 @@ def test_model_training_smoke_test():
     print(f"Model trained successfully, sample prediction: {prediction[0]}")
 ```
 
-### Phase 5.3: Pre-SageMaker Launch Checklist
+### Phase 5.0003: Pre-SageMaker Launch Checklist
 
 **Before starting SageMaker training:**
 

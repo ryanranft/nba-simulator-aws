@@ -122,7 +122,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.22_implement_full_fine-tuning_lora_and_qlora_techniques
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0022_implement_full_fine-tuning_lora_and_qlora_techniques
 python test_rec_036.py -v
 ```
 

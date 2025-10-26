@@ -118,7 +118,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.168_model_with_gaussian_distributions
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0168_model_with_gaussian_distributions
 python test_rec_216.py -v
 ```
 

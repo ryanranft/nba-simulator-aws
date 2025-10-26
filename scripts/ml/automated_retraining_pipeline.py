@@ -48,6 +48,7 @@ import time
 try:
     import mlflow
     from mlflow.tracking import MlflowClient
+
     MLFLOW_AVAILABLE = True
 except ImportError:
     MLFLOW_AVAILABLE = False
@@ -57,8 +58,7 @@ except ImportError:
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -81,22 +81,34 @@ class AutomatedRetrainingPipeline:
         self.config = config or {}
 
         # MLflow configuration
-        self.mlflow_tracking_uri = self.config.get('mlflow_tracking_uri', 'file:///tmp/mlruns')
-        self.experiment_name = self.config.get('experiment_name', 'nba-panel-data-predictions')
+        self.mlflow_tracking_uri = self.config.get(
+            "mlflow_tracking_uri", "file:///tmp/mlruns"
+        )
+        self.experiment_name = self.config.get(
+            "experiment_name", "nba-panel-data-predictions"
+        )
 
         # Retraining thresholds
         self.thresholds = {
-            'drift_threshold': self.config.get('drift_threshold', 0.2),  # PSI > 0.2 triggers
-            'accuracy_drop_threshold': self.config.get('accuracy_drop', 0.03),  # 3% accuracy drop
-            'min_improvement': self.config.get('min_improvement', 0.01),  # 1% minimum improvement
-            'max_days_since_train': self.config.get('max_days', 7),  # Retrain weekly
+            "drift_threshold": self.config.get(
+                "drift_threshold", 0.2
+            ),  # PSI > 0.2 triggers
+            "accuracy_drop_threshold": self.config.get(
+                "accuracy_drop", 0.03
+            ),  # 3% accuracy drop
+            "min_improvement": self.config.get(
+                "min_improvement", 0.01
+            ),  # 1% minimum improvement
+            "max_days_since_train": self.config.get("max_days", 7),  # Retrain weekly
         }
 
         # Model storage
-        self.model_registry_name = self.config.get('model_registry', 'nba-game-predictor')
+        self.model_registry_name = self.config.get(
+            "model_registry", "nba-game-predictor"
+        )
 
         # Data paths
-        self.data_path = self.config.get('data_path', '/tmp/nba_training_data.csv')
+        self.data_path = self.config.get("data_path", "/tmp/nba_training_data.csv")
 
         # State tracking
         self.last_check_time = None
@@ -148,9 +160,13 @@ class AutomatedRetrainingPipeline:
         try:
             # Import drift detector from power directory with period in name using importlib
             import importlib.util
+
             spec_ml_systems_2 = importlib.util.spec_from_file_location(
                 "implement_ml_systems_2",
-                os.path.join(os.path.dirname(__file__), "../../docs/phases/phase_5/5.19_drift_detection/implement_ml_systems_2.py")
+                os.path.join(
+                    os.path.dirname(__file__),
+                    "../../docs/phases/phase_5/5.0019_drift_detection/implement_ml_systems_2.py",
+                ),
             )
             implement_ml_systems_2 = importlib.util.module_from_spec(spec_ml_systems_2)
             spec_ml_systems_2.loader.exec_module(implement_ml_systems_2)
@@ -171,8 +187,11 @@ class AutomatedRetrainingPipeline:
             # Simulated check for now
             drift_score = 0.15  # Would come from actual drift detector
 
-            if drift_score > self.thresholds['drift_threshold']:
-                return True, f"PSI score {drift_score:.3f} > threshold {self.thresholds['drift_threshold']}"
+            if drift_score > self.thresholds["drift_threshold"]:
+                return (
+                    True,
+                    f"PSI score {drift_score:.3f} > threshold {self.thresholds['drift_threshold']}",
+                )
 
             return False, f"Drift score {drift_score:.3f} within limits"
 
@@ -203,12 +222,15 @@ class AutomatedRetrainingPipeline:
             # 3. Compare accuracy drop
 
             baseline_accuracy = 0.68  # Would come from production model metadata
-            current_accuracy = 0.64   # Would come from recent evaluation
+            current_accuracy = 0.64  # Would come from recent evaluation
 
             accuracy_drop = baseline_accuracy - current_accuracy
 
-            if accuracy_drop > self.thresholds['accuracy_drop_threshold']:
-                return True, f"Accuracy dropped {accuracy_drop:.1%} (baseline: {baseline_accuracy:.1%}, current: {current_accuracy:.1%})"
+            if accuracy_drop > self.thresholds["accuracy_drop_threshold"]:
+                return (
+                    True,
+                    f"Accuracy dropped {accuracy_drop:.1%} (baseline: {baseline_accuracy:.1%}, current: {current_accuracy:.1%})",
+                )
 
             return False, f"Performance stable (drop: {accuracy_drop:.1%})"
 
@@ -236,10 +258,16 @@ class AutomatedRetrainingPipeline:
             # Simulated for now
             days_since_train = 3  # Would come from MLflow metadata
 
-            if days_since_train >= self.thresholds['max_days_since_train']:
-                return True, f"{days_since_train} days since last training (max: {self.thresholds['max_days_since_train']})"
+            if days_since_train >= self.thresholds["max_days_since_train"]:
+                return (
+                    True,
+                    f"{days_since_train} days since last training (max: {self.thresholds['max_days_since_train']})",
+                )
 
-            return False, f"Last trained {days_since_train} days ago (within {self.thresholds['max_days_since_train']} day schedule)"
+            return (
+                False,
+                f"Last trained {days_since_train} days ago (within {self.thresholds['max_days_since_train']} day schedule)",
+            )
 
         except Exception as e:
             logger.warning(f"Schedule check failed: {e}")
@@ -252,7 +280,9 @@ class AutomatedRetrainingPipeline:
                 return None
 
             # Get latest production model
-            models = self.client.search_registered_models(f"name='{self.model_registry_name}'")
+            models = self.client.search_registered_models(
+                f"name='{self.model_registry_name}'"
+            )
             if not models:
                 return None
 
@@ -261,10 +291,10 @@ class AutomatedRetrainingPipeline:
                 for version in model.latest_versions:
                     if version.current_stage == "Production":
                         return {
-                            'name': model.name,
-                            'version': version.version,
-                            'run_id': version.run_id,
-                            'stage': version.current_stage,
+                            "name": model.name,
+                            "version": version.version,
+                            "run_id": version.run_id,
+                            "stage": version.current_stage,
                         }
 
             return None
@@ -295,7 +325,7 @@ class AutomatedRetrainingPipeline:
 
         if self.retraining_in_progress:
             logger.warning("Retraining already in progress")
-            return {'success': False, 'error': 'Retraining in progress'}
+            return {"success": False, "error": "Retraining in progress"}
 
         self.retraining_in_progress = True
         start_time = datetime.now()
@@ -324,21 +354,23 @@ class AutomatedRetrainingPipeline:
             # Step 5: Promote if better
             if should_promote:
                 logger.info("Promoting new model to production...")
-                promotion_result = self._promote_to_production(new_models, evaluation_results)
+                promotion_result = self._promote_to_production(
+                    new_models, evaluation_results
+                )
             else:
                 logger.info("New model not promoted - no significant improvement")
-                promotion_result = {'promoted': False, 'reason': comparison}
+                promotion_result = {"promoted": False, "reason": comparison}
 
             # Compile results
             results = {
-                'success': True,
-                'timestamp': datetime.now().isoformat(),
-                'reason': reason,
-                'duration_seconds': (datetime.now() - start_time).total_seconds(),
-                'models_trained': len(new_models),
-                'evaluation': evaluation_results,
-                'comparison': comparison,
-                'promotion': promotion_result,
+                "success": True,
+                "timestamp": datetime.now().isoformat(),
+                "reason": reason,
+                "duration_seconds": (datetime.now() - start_time).total_seconds(),
+                "models_trained": len(new_models),
+                "evaluation": evaluation_results,
+                "comparison": comparison,
+                "promotion": promotion_result,
             }
 
             logger.info(f"Retraining completed in {results['duration_seconds']:.1f}s")
@@ -349,10 +381,10 @@ class AutomatedRetrainingPipeline:
         except Exception as e:
             logger.error(f"Retraining failed: {e}")
             return {
-                'success': False,
-                'error': str(e),
-                'timestamp': datetime.now().isoformat(),
-                'duration_seconds': (datetime.now() - start_time).total_seconds(),
+                "success": False,
+                "error": str(e),
+                "timestamp": datetime.now().isoformat(),
+                "duration_seconds": (datetime.now() - start_time).total_seconds(),
             }
 
         finally:
@@ -370,11 +402,13 @@ class AutomatedRetrainingPipeline:
             logger.info(f"Loading data from {self.data_path}")
 
             # Simulated data load
-            return pd.DataFrame({
-                'feature1': np.random.rand(1000),
-                'feature2': np.random.rand(1000),
-                'target': np.random.randint(0, 2, 1000),
-            })
+            return pd.DataFrame(
+                {
+                    "feature1": np.random.rand(1000),
+                    "feature2": np.random.rand(1000),
+                    "target": np.random.randint(0, 2, 1000),
+                }
+            )
 
         except Exception as e:
             logger.error(f"Data loading failed: {e}")
@@ -392,8 +426,8 @@ class AutomatedRetrainingPipeline:
 
             # Simulated training
             models = [
-                {'name': 'LogisticRegression', 'accuracy': 0.69, 'model_object': None},
-                {'name': 'RandomForest', 'accuracy': 0.71, 'model_object': None},
+                {"name": "LogisticRegression", "accuracy": 0.69, "model_object": None},
+                {"name": "RandomForest", "accuracy": 0.71, "model_object": None},
             ]
 
             return models
@@ -402,21 +436,22 @@ class AutomatedRetrainingPipeline:
             logger.error(f"Model training failed: {e}")
             return []
 
-    def _evaluate_models(self, models: List[Dict[str, Any]], data: pd.DataFrame) -> Dict[str, Any]:
+    def _evaluate_models(
+        self, models: List[Dict[str, Any]], data: pd.DataFrame
+    ) -> Dict[str, Any]:
         """Evaluate trained models"""
         try:
             logger.info("Evaluating models...")
 
             # Find best model
-            best_model = max(models, key=lambda m: m['accuracy'])
+            best_model = max(models, key=lambda m: m["accuracy"])
 
             return {
-                'best_model_name': best_model['name'],
-                'best_accuracy': best_model['accuracy'],
-                'all_models': [{
-                    'name': m['name'],
-                    'accuracy': m['accuracy']
-                } for m in models]
+                "best_model_name": best_model["name"],
+                "best_accuracy": best_model["accuracy"],
+                "all_models": [
+                    {"name": m["name"], "accuracy": m["accuracy"]} for m in models
+                ],
             }
 
         except Exception as e:
@@ -432,25 +467,32 @@ class AutomatedRetrainingPipeline:
 
             # In production, get actual production model accuracy
             production_accuracy = 0.68  # Simulated
-            new_accuracy = evaluation.get('best_accuracy', 0.0)
+            new_accuracy = evaluation.get("best_accuracy", 0.0)
 
             improvement = new_accuracy - production_accuracy
 
-            if improvement >= self.thresholds['min_improvement']:
-                return True, f"Improvement: {improvement:.1%} (new: {new_accuracy:.1%}, prod: {production_accuracy:.1%})"
+            if improvement >= self.thresholds["min_improvement"]:
+                return (
+                    True,
+                    f"Improvement: {improvement:.1%} (new: {new_accuracy:.1%}, prod: {production_accuracy:.1%})",
+                )
             else:
-                return False, f"Insufficient improvement: {improvement:.1%} < {self.thresholds['min_improvement']:.1%}"
+                return (
+                    False,
+                    f"Insufficient improvement: {improvement:.1%} < {self.thresholds['min_improvement']:.1%}",
+                )
 
         except Exception as e:
             logger.error(f"Model comparison failed: {e}")
             return False, f"Comparison failed: {e}"
 
-    def _promote_to_production(self, models: List[Dict[str, Any]],
-                                evaluation: Dict[str, Any]) -> Dict[str, Any]:
+    def _promote_to_production(
+        self, models: List[Dict[str, Any]], evaluation: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Promote new model to production in MLflow"""
         try:
             if not MLFLOW_AVAILABLE:
-                return {'promoted': False, 'reason': 'MLflow unavailable'}
+                return {"promoted": False, "reason": "MLflow unavailable"}
 
             # In production:
             # 1. Register new model in MLflow
@@ -462,15 +504,15 @@ class AutomatedRetrainingPipeline:
             logger.info("Promoting model to production...")
 
             return {
-                'promoted': True,
-                'new_model': evaluation.get('best_model_name'),
-                'new_accuracy': evaluation.get('best_accuracy'),
-                'timestamp': datetime.now().isoformat(),
+                "promoted": True,
+                "new_model": evaluation.get("best_model_name"),
+                "new_accuracy": evaluation.get("best_accuracy"),
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:
             logger.error(f"Model promotion failed: {e}")
-            return {'promoted': False, 'error': str(e)}
+            return {"promoted": False, "error": str(e)}
 
     def run_daemon(self, check_interval: int = 3600):
         """
@@ -479,7 +521,9 @@ class AutomatedRetrainingPipeline:
         Args:
             check_interval: Seconds between checks (default: 1 hour)
         """
-        logger.info(f"Starting automated retraining daemon (check interval: {check_interval}s)")
+        logger.info(
+            f"Starting automated retraining daemon (check interval: {check_interval}s)"
+        )
 
         try:
             while True:
@@ -492,7 +536,7 @@ class AutomatedRetrainingPipeline:
                     logger.info(f"Retraining triggered: {reason}")
                     results = self.retrain_model(reason=reason)
 
-                    if results.get('success'):
+                    if results.get("success"):
                         logger.info("✅ Retraining successful")
                     else:
                         logger.error(f"❌ Retraining failed: {results.get('error')}")
@@ -514,43 +558,38 @@ class AutomatedRetrainingPipeline:
 def main():
     """Main entry point"""
     parser = argparse.ArgumentParser(
-        description='NBA Automated Retraining Pipeline (rec_4)'
+        description="NBA Automated Retraining Pipeline (rec_4)"
     )
     parser.add_argument(
-        '--mode',
-        choices=['check', 'retrain', 'daemon'],
-        default='check',
-        help='Operation mode: check triggers, force retrain, or run daemon'
+        "--mode",
+        choices=["check", "retrain", "daemon"],
+        default="check",
+        help="Operation mode: check triggers, force retrain, or run daemon",
     )
     parser.add_argument(
-        '--interval',
+        "--interval",
         type=int,
         default=3600,
-        help='Check interval in seconds for daemon mode (default: 3600 = 1 hour)'
+        help="Check interval in seconds for daemon mode (default: 3600 = 1 hour)",
     )
     parser.add_argument(
-        '--force',
-        action='store_true',
-        help='Force retraining regardless of triggers'
+        "--force", action="store_true", help="Force retraining regardless of triggers"
     )
-    parser.add_argument(
-        '--config',
-        help='Path to configuration JSON file'
-    )
+    parser.add_argument("--config", help="Path to configuration JSON file")
 
     args = parser.parse_args()
 
     # Load config
     config = {}
     if args.config and os.path.exists(args.config):
-        with open(args.config, 'r') as f:
+        with open(args.config, "r") as f:
             config = json.load(f)
 
     # Initialize pipeline
     pipeline = AutomatedRetrainingPipeline(config=config)
 
     # Execute based on mode
-    if args.mode == 'check':
+    if args.mode == "check":
         logger.info("=" * 80)
         logger.info("RETRAINING CHECK MODE")
         logger.info("=" * 80)
@@ -566,7 +605,7 @@ def main():
         else:
             sys.exit(0)
 
-    elif args.mode == 'retrain':
+    elif args.mode == "retrain":
         logger.info("=" * 80)
         logger.info("MANUAL RETRAINING MODE")
         logger.info("=" * 80)
@@ -588,12 +627,12 @@ def main():
         print(json.dumps(results, indent=2, default=str))
         print("=" * 80)
 
-        if results.get('success'):
+        if results.get("success"):
             sys.exit(0)
         else:
             sys.exit(1)
 
-    elif args.mode == 'daemon':
+    elif args.mode == "daemon":
         logger.info("=" * 80)
         logger.info("DAEMON MODE")
         logger.info("=" * 80)
@@ -603,5 +642,5 @@ def main():
         pipeline.run_daemon(check_interval=args.interval)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

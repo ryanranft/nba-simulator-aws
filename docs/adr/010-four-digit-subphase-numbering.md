@@ -27,7 +27,7 @@ The project uses a hierarchical phase/sub-phase organization system to manage co
 
 3. **Reference Confusion:**
    - Documentation references to `0.1` could mean sub-phase 1 or 10
-   - Test file `test_0_1.py` vs `test_0_10.py` - unclear at a glance
+   - Test file `test_0_0001.py` vs `test_0_0010.py` - unclear at a glance
    - Validator naming similarly ambiguous
 
 ### Constraints

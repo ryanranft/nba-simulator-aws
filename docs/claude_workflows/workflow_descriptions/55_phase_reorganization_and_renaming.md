@@ -373,7 +373,7 @@ git commit -m "refactor: Migrate Phase 0.X tests and validators
 
 ```bash
 # 1. Rename directory
-mv docs/phases/phase_0/0.8_old_security/ docs/phases/phase_0/0.8_security_implementation/
+mv docs/phases/phase_0/0.0008_old_security/ docs/phases/phase_0/0.0008_security_implementation/
 
 # 2. Update phase index
 # (Edit PHASE_0_INDEX.md with new name)
@@ -391,9 +391,9 @@ git commit -m "refactor: Rename 0.8_old_security to 0.8_security_implementation"
 
 **Example:** Book recommendation implementations moving from Phase 0 to Phase 5
 
-1. Move directories: `phase_0/rec_11/` → `phase_5/5.1_feature_engineering/`
+1. Move directories: `phase_0/rec_11/` → `phase_5/5.0001_feature_engineering/`
 2. Update all phase indexes (PHASE_0_INDEX.md and PHASE_5_INDEX.md)
-3. Find all references to `phase_0/rec_11` and update to `phase_5/5.1_feature_engineering`
+3. Find all references to `phase_0/rec_11` and update to `phase_5/5.0001_feature_engineering`
 4. Update navigation links in related sub-phases
 5. Add migration notes to both phase indexes
 
@@ -429,7 +429,7 @@ git commit -m "docs: Remove duplicate PHASE_X_INDEX.md, consolidate in phase_X/"
 mkdir -p docs/phases/phase_0/archive/mongodb_superseded/
 
 # 2. Move old implementations with SUPERSEDED suffix
-mv docs/phases/phase_0/0.1_nosql_mongodb/ \
+mv docs/phases/phase_0/0.0001_nosql_mongodb/ \
    docs/phases/phase_0/archive/mongodb_superseded/0.1_nosql_mongodb_SUPERSEDED/
 
 # 3. Update archived README with supersession notice

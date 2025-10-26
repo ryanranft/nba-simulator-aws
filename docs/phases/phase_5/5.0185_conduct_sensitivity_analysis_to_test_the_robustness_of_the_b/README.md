@@ -123,7 +123,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.16_conduct_sensitivity_analysis_to_test_the_robustness_of_the_b
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0016_conduct_sensitivity_analysis_to_test_the_robustness_of_the_b
 python test_rec_027.py -v
 ```
 

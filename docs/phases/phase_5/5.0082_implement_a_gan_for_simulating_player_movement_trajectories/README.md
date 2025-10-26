@@ -123,7 +123,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.82_implement_a_gan_for_simulating_player_movement_trajectories
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0082_implement_a_gan_for_simulating_player_movement_trajectories
 python test_rec_112.py -v
 ```
 

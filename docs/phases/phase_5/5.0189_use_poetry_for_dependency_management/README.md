@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.20_use_poetry_for_dependency_management
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0020_use_poetry_for_dependency_management
 python test_rec_032.py -v
 ```
 

@@ -119,7 +119,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.44_implement_monitoring_and_alerting_for_machine_learning_model
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0044_implement_monitoring_and_alerting_for_machine_learning_model
 python test_rec_069.py -v
 ```
 

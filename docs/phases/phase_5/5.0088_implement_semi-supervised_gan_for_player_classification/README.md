@@ -122,7 +122,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.88_implement_semi-supervised_gan_for_player_classification
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0088_implement_semi-supervised_gan_for_player_classification
 python test_rec_118.py -v
 ```
 

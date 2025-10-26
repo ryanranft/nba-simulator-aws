@@ -118,7 +118,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_9/9.2_evaluate_the_goodness_of_fit_of_the_mcmc_chain_using_gbr_dia
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_9/9.0002_evaluate_the_goodness_of_fit_of_the_mcmc_chain_using_gbr_dia
 python test_rec_019.py -v
 ```
 

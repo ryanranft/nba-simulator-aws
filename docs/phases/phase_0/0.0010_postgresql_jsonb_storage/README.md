@@ -441,7 +441,7 @@ migration:
 **Prerequisites:**
 - PostgreSQL RDS instance running (already provisioned)
 - PostgreSQL 13+ with JSONB support
-- S3 data available (Phase 0.0-0.5 complete)
+- S3 data available (Phase 0.0000-0.5 complete)
 
 **Enables:**
 - [0.8: RAG Pipeline with pgvector](../0.8_rag_pipeline_pgvector/README.md)
@@ -603,7 +603,7 @@ def migrate_from_mongodb():
 
 ## Temporal Integration (Added October 25, 2025)
 
-Phase 0.10 now includes **temporal query integration** - the ability to join JSONB raw data with temporal snapshots to answer the core project vision:
+Phase 0.0010 now includes **temporal query integration** - the ability to join JSONB raw data with temporal snapshots to answer the core project vision:
 
 > **"What were Kobe Bryant's career statistics at exactly 7:02:34.56 PM CT on June 19, 2016?"**
 
@@ -761,7 +761,7 @@ SELECT * FROM raw_data.temporal_data_availability;
    - Materialized views for performance
    - Helper views and refresh functions
 
-3. `tests/phases/phase_0/test_0_10_temporal.py` (~680 lines)
+3. `tests/phases/phase_0/test_0_0010_temporal.py` (~680 lines)
    - Comprehensive test suite (30+ tests)
    - Unit, integration, performance, validation tests
 
@@ -776,13 +776,13 @@ SELECT * FROM raw_data.temporal_data_availability;
 
 ```bash
 # Run temporal integration tests
-pytest tests/phases/phase_0/test_0_10_temporal.py -v
+pytest tests/phases/phase_0/test_0_0010_temporal.py -v
 
 # Run specific test class
-pytest tests/phases/phase_0/test_0_10_temporal.py::TestTemporalQueries -v
+pytest tests/phases/phase_0/test_0_0010_temporal.py::TestTemporalQueries -v
 
 # Run with coverage
-pytest tests/phases/phase_0/test_0_10_temporal.py --cov=scripts.0_10.temporal_queries
+pytest tests/phases/phase_0/test_0_0010_temporal.py --cov=scripts.0_10.temporal_queries
 ```
 
 **Expected Results:**
@@ -922,7 +922,7 @@ Using database queries, simulations adapt in real-time:
 ## Navigation
 
 **Return to:** [Phase 0: Data Collection](../../PHASE_0_INDEX.md)
-**Prerequisites:** Phase 0.1-0.6 (Data Collection complete)
+**Prerequisites:** Phase 0.0001-0.6 (Data Collection complete)
 **Next Steps:** [0.8: RAG Pipeline with pgvector](../0.8_rag_pipeline_pgvector/README.md)
 
 ---

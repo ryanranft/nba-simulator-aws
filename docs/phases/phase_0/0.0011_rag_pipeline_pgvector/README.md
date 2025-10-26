@@ -221,7 +221,7 @@ python scripts/0_11/main.py stats
    - init, embed, search, compare, stats commands
    - Unified workflow
 
-10. `tests/phases/phase_0/test_0_11.py` (331 lines)
+10. `tests/phases/phase_0/test_0_0011.py` (331 lines)
     - 30+ comprehensive tests
     - Mocked OpenAI API calls
     - Schema validation
@@ -683,13 +683,13 @@ pgvector:
 **Run all tests:**
 ```bash
 # Run comprehensive test suite (30+ tests)
-pytest tests/phases/phase_0/test_0_11.py -v
+pytest tests/phases/phase_0/test_0_0011.py -v
 
 # Run with coverage
-pytest tests/phases/phase_0/test_0_11.py --cov=scripts.0_11 -v
+pytest tests/phases/phase_0/test_0_0011.py --cov=scripts.0_11 -v
 
 # Run specific test class
-pytest tests/phases/phase_0/test_0_11.py::TestVectorSearch -v
+pytest tests/phases/phase_0/test_0_0011.py::TestVectorSearch -v
 ```
 
 **Test Coverage:**
@@ -752,7 +752,7 @@ python validators/phases/phase_0/validate_0_11.py --verbose
 
 **Expected Output:**
 ```
-=== Phase 0.11: RAG Pipeline Validation ===
+=== Phase 0.0011: RAG Pipeline Validation ===
 ✓ pgvector extension: INSTALLED (version 0.5.1)
 ✓ Tables: 4/4 exist with correct schema
 ✓ HNSW indexes: 4/4 created and operational
@@ -762,7 +762,7 @@ python validators/phases/phase_0/validate_0_11.py --verbose
 ✓ End-to-end pipeline: SUCCESS
 
 OVERALL: 7/7 checks passed (100%)
-Phase 0.11 is PRODUCTION READY
+Phase 0.0011 is PRODUCTION READY
 ```
 
 ### Manual Testing Examples

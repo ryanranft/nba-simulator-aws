@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.87_utilize_tensorflow_hub_for_rapid_prototyping_with_pretrained
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0087_utilize_tensorflow_hub_for_rapid_prototyping_with_pretrained
 python test_rec_117.py -v
 ```
 

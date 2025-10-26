@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.61_implement_batch_normalization
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0061_implement_batch_normalization
 python test_rec_090.py -v
 ```
 

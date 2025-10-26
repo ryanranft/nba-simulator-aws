@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.133_utilize_sentence_transformers_for_supervised_classification
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0133_utilize_sentence_transformers_for_supervised_classification
 python test_rec_175.py -v
 ```
 

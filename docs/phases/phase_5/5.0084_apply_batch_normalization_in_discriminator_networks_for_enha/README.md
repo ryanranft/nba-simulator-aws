@@ -119,7 +119,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.84_apply_batch_normalization_in_discriminator_networks_for_enha
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0084_apply_batch_normalization_in_discriminator_networks_for_enha
 python test_rec_114.py -v
 ```
 

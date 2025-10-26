@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.100_implement_feature_importance_analysis_to_identify_predictive
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0100_implement_feature_importance_analysis_to_identify_predictive
 python test_rec_135.py -v
 ```
 

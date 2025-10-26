@@ -118,7 +118,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.157_use_traininghistory_callback_for_better_model_insight
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0157_use_traininghistory_callback_for_better_model_insight
 python test_rec_205.py -v
 ```
 

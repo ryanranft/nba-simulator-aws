@@ -119,7 +119,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.149_track_toxicity_to_maintain_integrity
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0149_track_toxicity_to_maintain_integrity
 python test_rec_197.py -v
 ```
 

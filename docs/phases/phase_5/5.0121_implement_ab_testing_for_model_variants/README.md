@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.121_implement_ab_testing_for_model_variants
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0121_implement_ab_testing_for_model_variants
 python test_rec_162.py -v
 ```
 

@@ -402,7 +402,7 @@ ORDER BY MIN(season);
 ## Related Documentation
 
 - Database Schema: `sql/basketball_reference_boxscores_schema.sql`
-- Aggregate Stats (current): `docs/phases/phase_0/0.1_basketball_reference/`
+- Aggregate Stats (current): `docs/phases/phase_0/0.0001_basketball_reference/`
 - Overnight Workflow: `docs/OVERNIGHT_3_SOURCE_VALIDATION.md`
 - Data Collection Inventory: `docs/DATA_COLLECTION_INVENTORY.md`
 

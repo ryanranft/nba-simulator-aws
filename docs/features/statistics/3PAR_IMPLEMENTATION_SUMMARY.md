@@ -75,7 +75,7 @@ def three_point_attempt_rate(fg3a, fga):
 
 ### 3. Documentation Updates
 
-**File:** `docs/phases/phase_0/0.1_basketball_reference/documentation/COMPARISON.md`
+**File:** `docs/phases/phase_0/0.0001_basketball_reference/documentation/COMPARISON.md`
 
 **Changes:**
 - Updated 3PAr status: ❌ Missing → ✅ Have it
@@ -164,7 +164,7 @@ Jrue Holiday           12   54.5   54.5   45.5   13.7    3.00
 - [x] Implement calculation method in AdvancedStatsCalculator
 - [x] Update demo to display 3PAr
 - [x] Test with realistic NBA data
-- [x] Update docs/phases/phase_0/0.1_basketball_reference/documentation/COMPARISON.md
+- [x] Update docs/phases/phase_0/0.0001_basketball_reference/documentation/COMPARISON.md
 - [x] Update ADVANCED_STATISTICS_GUIDE.md
 - [x] Verify output matches Basketball Reference formula
 - [x] Create implementation summary document

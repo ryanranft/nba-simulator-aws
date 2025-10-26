@@ -492,8 +492,8 @@ Before:
 After (October 2025):
 - PROGRESS.md (391 lines) - master index only
 - docs/phases/phase_0/PHASE_0_INDEX.md (150 lines) - phase overview + sub-phase table
-- docs/phases/phase_0/0.0_initial_data_collection.md (300 lines)
-- docs/phases/phase_0/0.1_basketball_reference/ (13-tier structure)
+- docs/phases/phase_0/0.0000_initial_data_collection.md (300 lines)
+- docs/phases/phase_0/0.0001_basketball_reference/ (13-tier structure)
 - docs/phases/PHASE_1_INDEX.md through PHASE_7_INDEX.md
 - [etc.]
 

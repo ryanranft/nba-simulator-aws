@@ -119,7 +119,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.129_document_the_codebase_thoroughly
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0129_document_the_codebase_thoroughly
 python test_rec_171.py -v
 ```
 

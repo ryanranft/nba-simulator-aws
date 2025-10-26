@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.62_leverage_the_keras_functional_api
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0062_leverage_the_keras_functional_api
 python test_rec_091.py -v
 ```
 

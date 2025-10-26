@@ -37,8 +37,8 @@ nba-simulator-aws/
 │   ├── phases/                     # Phase validation tests ⭐
 │   │   ├── phase_0/
 │   │   │   ├── conftest.py         # Phase 0 shared fixtures
-│   │   │   ├── test_0_1_initial_data_collection.py
-│   │   │   ├── test_0_2_hoopr_data.py
+│   │   │   ├── test_0_0001_initial_data_collection.py
+│   │   │   ├── test_0_0002_hoopr_data.py
 │   │   │   └── ...
 │   │   ├── phase_1/
 │   │   ├── phase_2/
@@ -79,7 +79,7 @@ nba-simulator-aws/
 **Format:** `test_N_M_descriptive_name.py`
 
 **Examples:**
-- `test_0_1_initial_data_collection.py` (Phase 0, Sub-phase 1)
+- `test_0_0001_initial_data_collection.py` (Phase 0, Sub-phase 1)
 - `test_1_2_data_quality_checks.py` (Phase 1, Sub-phase 2)
 - `test_3_0_database_setup.py` (Phase 3, Sub-phase 0)
 
@@ -128,8 +128,8 @@ class TestUploadCompleteness:
 - Regression testing
 - Part of CI/CD test phase
 
-**Example:** `test_0_1_initial_data_collection.py`
-- Runs via pytest: `pytest tests/phases/phase_0/test_0_1_initial_data_collection.py`
+**Example:** `test_0_0001_initial_data_collection.py`
+- Runs via pytest: `pytest tests/phases/phase_0/test_0_0001_initial_data_collection.py`
 - Uses pytest fixtures and markers
 - Generates test reports
 - Integration with test frameworks
@@ -145,7 +145,7 @@ class TestUploadCompleteness:
 ```bash
 # Determine phase and sub-phase numbers
 # Example: Phase 0, Sub-phase 1
-touch tests/phases/phase_0/test_0_1_initial_data_collection.py
+touch tests/phases/phase_0/test_0_0001_initial_data_collection.py
 ```
 
 ### Step 2: Add Imports
@@ -269,7 +269,7 @@ if __name__ == '__main__':
 ### Run Validators
 
 ```bash
-# Phase 0.1 validators
+# Phase 0.0001 validators
 python validators/phases/phase_0/validate_0_1_s3_bucket_config.py
 python validators/phases/phase_0/validate_0_1_upload_completeness.py
 ```
@@ -277,11 +277,11 @@ python validators/phases/phase_0/validate_0_1_upload_completeness.py
 ### Run Tests
 
 ```bash
-# All Phase 0.1 tests
-pytest tests/phases/phase_0/test_0_1_initial_data_collection.py -v
+# All Phase 0.0001 tests
+pytest tests/phases/phase_0/test_0_0001_initial_data_collection.py -v
 
 # Fast tests only
-pytest tests/phases/phase_0/test_0_1_initial_data_collection.py -v -m "not slow"
+pytest tests/phases/phase_0/test_0_0001_initial_data_collection.py -v -m "not slow"
 ```
 ```
 

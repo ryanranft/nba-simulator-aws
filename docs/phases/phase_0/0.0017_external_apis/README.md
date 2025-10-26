@@ -241,7 +241,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.8_enhance_the_system_by_using_external_apis
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.0008_enhance_the_system_by_using_external_apis
 python test_rec_191.py -v
 ```
 

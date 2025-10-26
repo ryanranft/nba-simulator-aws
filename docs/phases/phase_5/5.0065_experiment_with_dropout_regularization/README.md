@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.65_experiment_with_dropout_regularization
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0065_experiment_with_dropout_regularization
 python test_rec_095.py -v
 ```
 

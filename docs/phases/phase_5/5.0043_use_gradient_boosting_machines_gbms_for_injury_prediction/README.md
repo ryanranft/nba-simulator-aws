@@ -122,7 +122,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.43_use_gradient_boosting_machines_gbms_for_injury_prediction
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0043_use_gradient_boosting_machines_gbms_for_injury_prediction
 python test_rec_067.py -v
 ```
 

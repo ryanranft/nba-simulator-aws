@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.85_implement_gradient_penalty_for_wasserstein_gan_wgan-gp
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0085_implement_gradient_penalty_for_wasserstein_gan_wgan-gp
 python test_rec_115.py -v
 ```
 

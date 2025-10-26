@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.136_add_context_to_chatbot
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0136_add_context_to_chatbot
 python test_rec_178.py -v
 ```
 

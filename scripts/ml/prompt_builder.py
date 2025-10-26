@@ -4,7 +4,7 @@ Prompt Builder Module with Token Optimization
 Builds optimized prompts for LLM with context assembly and token management.
 Implements intent-specific instructions and token-efficient formatting.
 
-Part of Phase 0.12: RAG + LLM Integration (rec_188)
+Part of Phase 0.0012: RAG + LLM Integration (rec_188)
 """
 
 import json

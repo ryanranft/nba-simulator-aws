@@ -1,4 +1,4 @@
-# Phase 5.5: Automated Feature Selection
+# Phase 5.0005: Automated Feature Selection
 
 **Status:** ✅ COMPLETE
 **Implementation:** `scripts/ml/feature_selection.py` (668 lines)
@@ -109,8 +109,8 @@ selector.export_results(
 
 - **Workflow #13** - Model Testing
 - **Workflow #41** - Testing Framework
-- **Phase 5.1** - Hyperparameter Optimization (optimize after selection)
-- **Phase 5.2** - Model Interpretation (validate selections)
+- **Phase 5.0001** - Hyperparameter Optimization (optimize after selection)
+- **Phase 5.0002** - Model Interpretation (validate selections)
 
 ---
 
@@ -160,5 +160,5 @@ for i, feature in enumerate(result.selected_features[:10], 1):
 ## See Also
 
 - **USAGE_GUIDE.md** - Detailed API reference
-- **Phase 5.1** - Hyperparameter Optimization
-- **Phase 5.2** - Model Interpretation
+- **Phase 5.0001** - Hyperparameter Optimization
+- **Phase 5.0002** - Model Interpretation

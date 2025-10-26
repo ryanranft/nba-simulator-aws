@@ -118,7 +118,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.54_employ_flask_to_create_an_api_for_game_outcome_prediction
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0054_employ_flask_to_create_an_api_for_game_outcome_prediction
 python test_rec_082.py -v
 ```
 

@@ -119,7 +119,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.158_use_lora_adapters_for_specialized_video_generation
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0158_use_lora_adapters_for_specialized_video_generation
 python test_rec_206.py -v
 ```
 

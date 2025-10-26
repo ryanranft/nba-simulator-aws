@@ -124,7 +124,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.83_implement_a_dcgan_to_synthesize_basketball_court_scenarios
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0083_implement_a_dcgan_to_synthesize_basketball_court_scenarios
 python test_rec_113.py -v
 ```
 

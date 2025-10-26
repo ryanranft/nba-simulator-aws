@@ -118,7 +118,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.138_combine_several_chains
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0138_combine_several_chains
 python test_rec_181.py -v
 ```
 

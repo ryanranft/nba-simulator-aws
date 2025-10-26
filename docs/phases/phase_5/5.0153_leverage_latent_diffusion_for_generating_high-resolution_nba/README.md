@@ -123,7 +123,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.153_leverage_latent_diffusion_for_generating_high-resolution_nba
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0153_leverage_latent_diffusion_for_generating_high-resolution_nba
 python test_rec_201.py -v
 ```
 

@@ -124,7 +124,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.92_implement_an_anomaly_detection_system_with_vaes_and_gans
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0092_implement_an_anomaly_detection_system_with_vaes_and_gans
 python test_rec_123.py -v
 ```
 

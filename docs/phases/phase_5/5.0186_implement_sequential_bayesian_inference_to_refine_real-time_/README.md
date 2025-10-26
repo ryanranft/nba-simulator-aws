@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.17_implement_sequential_bayesian_inference_to_refine_real-time_
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0017_implement_sequential_bayesian_inference_to_refine_real-time_
 python test_rec_028.py -v
 ```
 

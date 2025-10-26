@@ -101,7 +101,7 @@ This phase has 13 recommendations from technical book analysis:
 
 ---
 
-## Sub-Phase 5.0: ML Model Pipeline
+## Sub-Phase 5.0000: ML Model Pipeline
 
 **Status:** ✅ COMPLETE (October 3, 2025)
 
@@ -127,7 +127,7 @@ This phase has 13 recommendations from technical book analysis:
 
 **Best Model:** XGBoost with 75% accuracy (vs 63% baseline)
 
-**See:** [Sub-Phase 5.0 Details](phase_5/5.0_machine_learning_models.md)
+**See:** [Sub-Phase 5.0000 Details](phase_5/5.0000_machine_learning_models.md)
 
 ---
 
@@ -258,7 +258,7 @@ features = [
 
 ## Key Workflows
 
-**For Sub-Phase 5.0:**
+**For Sub-Phase 5.0000:**
 - Workflow #13: Testing Framework
 - Workflow #5: Task Execution
 - Workflow #2: Command Logging

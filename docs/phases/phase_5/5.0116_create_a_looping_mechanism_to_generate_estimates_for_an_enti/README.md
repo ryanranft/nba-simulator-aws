@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.116_create_a_looping_mechanism_to_generate_estimates_for_an_enti
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0116_create_a_looping_mechanism_to_generate_estimates_for_an_enti
 python test_rec_154.py -v
 ```
 

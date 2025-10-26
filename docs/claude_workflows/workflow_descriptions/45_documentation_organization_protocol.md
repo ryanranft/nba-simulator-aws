@@ -105,7 +105,7 @@ docs/
 ### Level 1: PROGRESS.md (1-2 lines per item)
 
 ```markdown
-- ⏸️ [Basketball Reference - All Basketball](docs/phases/phase_0/0.1_basketball_reference/README.md) - 13 tiers, 234 types
+- ⏸️ [Basketball Reference - All Basketball](docs/phases/phase_0/0.0001_basketball_reference/README.md) - 13 tiers, 234 types
   - ⏸️ Tier 1: NBA High Value (5 types, 15-20h)
   - ⏸️ Tier 10: WNBA (16 types, 15-20h)
 ```
@@ -528,7 +528,7 @@ Remaining: 16,900 lines (85%)
 
 **Structure created:**
 ```
-docs/phases/phase_0/0.1_basketball_reference/
+docs/phases/phase_0/0.0001_basketball_reference/
 ├── README.md (500 lines) - Tier index
 ├── QUICK_REFERENCE.md (650 lines) - 13 tier cards × 50 lines
 ├── TIER_01_NBA_HIGH_VALUE.md (400 lines)

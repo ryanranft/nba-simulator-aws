@@ -152,7 +152,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.2_implement_a_rag_feature_pipeline
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.0002_implement_a_rag_feature_pipeline
 python test_rec_034.py -v
 ```
 

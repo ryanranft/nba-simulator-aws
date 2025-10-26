@@ -24,7 +24,7 @@ Phase 0 establishes the complete data collection infrastructure for the NBA temp
 
 **Future Sports Platforms:** Other sports will be built as **separate projects** in separate directories, using this NBA infrastructure as a template/foundation.
 
-**Phase 0.5 & 0.6:** These are **NOT** reserved for other sports. They were permanently superseded by PostgreSQL implementations (see "Architecture Notes → Missing Sub-Phases" section below).
+**Phase 0.0005 & 0.6:** These are **NOT** reserved for other sports. They were permanently superseded by PostgreSQL implementations (see "Architecture Notes → Missing Sub-Phases" section below).
 
 ---
 
@@ -87,19 +87,19 @@ python scripts/monitoring/dims_cli.py verify --category s3_storage
 - ✅ Multi-source integration complete (October 9, 2025)
 - ✅ Autonomous operation achieved (October 22, 2025)
 - ✅ Test/validator reorganization (October 23, 2025)
-- ✅ Phase 0.2 validated via Workflow #58 (October 23, 2025) - 100% test pass rate (27/27 checks)
-- ✅ Phase 0.3 validated via Workflow #58 (October 23, 2025) - 100% test pass rate (26/26 checks)
+- ✅ Phase 0.0002 validated via Workflow #58 (October 23, 2025) - 100% test pass rate (27/27 checks)
+- ✅ Phase 0.0003 validated via Workflow #58 (October 23, 2025) - 100% test pass rate (26/26 checks)
   - **Discovery:** Database massively expanded from 26K games (2004-2020) to 66K games (1946-2023, 13.6M play-by-play events)
-- ✅ Phase 0.4 ADCE integration complete (October 25, 2025) - 100% test pass rate (9/9 comprehensive tests)
+- ✅ Phase 0.0004 ADCE integration complete (October 25, 2025) - 100% test pass rate (9/9 comprehensive tests)
   - **Basketball Reference:** 444 existing files + 43 data types configured for autonomous collection
   - **Scope:** NBA (Tiers 1-9, 33 types) + G League (Tier 11, 10 types)
   - **Priority order:** NBA Modern → NBA Advanced → Historical (ABA/BAA) → G League
   - **Timeline:** 6-9 weeks autonomous 24/7 collection
-- ✅ Phase 0.7 validated via Workflow #58 (October 23, 2025) - 100% test pass rate (29/29 checks)
+- ✅ Phase 0.0007 validated via Workflow #58 (October 23, 2025) - 100% test pass rate (29/29 checks)
   - **Odds API integration:** Autonomous odds-api scraper, 5 database tables, 10+ bookmakers, real-time betting market data
-- ✅ Phase 0.10 & 0.11 completed (October 25, 2025) - PostgreSQL JSONB + RAG Pipeline with pgvector
-  - **Phase 0.10:** 2,573 lines production code, 27/30 tests passing (90%), temporal query integration
-  - **Phase 0.11:** 3,584 lines production code, 19/24 tests passing (79%), OpenAI embeddings, HNSW vector search
+- ✅ Phase 0.0010 & 0.11 completed (October 25, 2025) - PostgreSQL JSONB + RAG Pipeline with pgvector
+  - **Phase 0.0010:** 2,573 lines production code, 27/30 tests passing (90%), temporal query integration
+  - **Phase 0.0011:** 3,584 lines production code, 19/24 tests passing (79%), OpenAI embeddings, HNSW vector search
   - **Combined:** ~6,157 lines of production code for unified PostgreSQL data/vector storage
 
 ---
@@ -129,7 +129,7 @@ python scripts/monitoring/dims_cli.py verify --category s3_storage
 See `archive/mongodb_superseded/` for historical context.
 
 ### Autonomous Operation (ADCE)
-Phase 0.18 represents the **culmination** of Phase 0's data collection efforts:
+Phase 0.0018 represents the **culmination** of Phase 0's data collection efforts:
 - **Zero manual intervention** for ongoing data updates
 - **Automatic gap detection** via S3 inventory reconciliation
 - **Priority-based task execution** via orchestrator
@@ -196,7 +196,7 @@ Using this phase's data, simulations can adapt to:
 
 ### Test Files
 Located in `tests/phases/phase_0/`:
-- `test_0_1_initial_data_collection.py` - Phase 0.1 comprehensive tests
+- `test_0_0001_initial_data_collection.py` - Phase 0.0001 comprehensive tests
 - More tests being migrated (see [TEST_VALIDATOR_MIGRATION_GUIDE.md](../../TEST_VALIDATOR_MIGRATION_GUIDE.md))
 
 ### Validators
@@ -221,7 +221,7 @@ pytest tests/phases/phase_0/ -v
 
 ## Next Steps
 
-1. ✅ **Complete Phase 0.4** (Basketball Reference) - 43 data types configured for ADCE (October 25, 2025)
+1. ✅ **Complete Phase 0.0004** (Basketball Reference) - 43 data types configured for ADCE (October 25, 2025)
    - Priority order: NBA Modern (Tiers 1-4) → NBA Advanced (Tiers 5-8) → Historical (Tier 9) → G League (Tier 11)
    - Future expansion: WNBA (Tier 10), International (Tier 12), NCAA (Tier 13)
 2. **Begin autonomous collection** - Deploy ADCE to collect 43 Basketball Reference data types

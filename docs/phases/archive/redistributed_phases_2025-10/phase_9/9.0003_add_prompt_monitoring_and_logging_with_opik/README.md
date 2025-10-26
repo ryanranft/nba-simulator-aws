@@ -123,7 +123,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_9/9.3_add_prompt_monitoring_and_logging_with_opik
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_9/9.0003_add_prompt_monitoring_and_logging_with_opik
 python test_rec_051.py -v
 ```
 

@@ -119,7 +119,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.107_build_system-level_checks_for_action_outputs
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0107_build_system-level_checks_for_action_outputs
 python test_rec_142.py -v
 ```
 

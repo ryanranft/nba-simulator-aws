@@ -1,4 +1,4 @@
-# Sub-Phase 9.0: Plus/Minus System
+# Sub-Phase 9.0000: Plus/Minus System
 
 **Parent Phase:** [Phase 9: Data Extraction & Play-by-Play Processing](../PHASE_9_INDEX.md)
 
@@ -278,7 +278,7 @@ features = extractor.extract_features(game_id='0021500001')
 ## Prerequisites
 
 **Required:**
-- Phase 9.3: Snapshot generation system
+- Phase 9.0003: Snapshot generation system
 - `game_state_snapshots` table populated
 - `player_snapshot_stats` table populated
 
@@ -290,8 +290,8 @@ features = extractor.extract_features(game_id='0021500001')
 
 ## Integrates With
 
-- **Phase 5.1:** Feature Engineering (rec_11) - 171 total features
-- **Phase 9.3:** Snapshot generation - Source data
+- **Phase 5.0001:** Feature Engineering (rec_11) - 171 total features
+- **Phase 9.0003:** Snapshot generation - Source data
 - **Phase 3:** ML Models - 26 new features for training
 - **Phase 6:** Deployment - Production-ready feature extraction
 
@@ -372,8 +372,8 @@ Using this phase's capabilities, simulations adapt to:
 ## Navigation
 
 **Return to:** [Phase 9 Index](../PHASE_9_INDEX.md)
-**Prerequisites:** [Phase 9.3: Snapshot Generation](../9.3_nba_api_processor.md)
-**Integrates with:** [Phase 5.1: Feature Engineering](../../phase_5/5.1_feature_engineering/README.md)
+**Prerequisites:** [Phase 9.0003: Snapshot Generation](../9.3_nba_api_processor.md)
+**Integrates with:** [Phase 5.0001: Feature Engineering](../../phase_5/5.0001_feature_engineering/README.md)
 **Related:** [ML Integration Guide](ML_INTEGRATION.md)
 
 ---

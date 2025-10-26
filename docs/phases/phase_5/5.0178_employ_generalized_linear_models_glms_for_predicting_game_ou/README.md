@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.9_employ_generalized_linear_models_glms_for_predicting_game_ou
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0009_employ_generalized_linear_models_glms_for_predicting_game_ou
 python test_rec_014.py -v
 ```
 

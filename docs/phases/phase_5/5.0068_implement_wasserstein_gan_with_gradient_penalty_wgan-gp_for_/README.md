@@ -124,7 +124,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.68_implement_wasserstein_gan_with_gradient_penalty_wgan-gp_for_
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0068_implement_wasserstein_gan_with_gradient_penalty_wgan-gp_for_
 python test_rec_098.py -v
 ```
 

@@ -122,7 +122,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.7_implement_test_suites_for_trained_models
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0007_implement_test_suites_for_trained_models
 python test_rec_011.py -v
 ```
 

@@ -124,7 +124,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.80_evaluate_gan_performance_with_fréchet_inception_distance_fid
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0080_evaluate_gan_performance_with_fréchet_inception_distance_fid
 python test_rec_110.py -v
 ```
 

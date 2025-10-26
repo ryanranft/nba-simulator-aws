@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Validate Phase 0.7: Odds API Data Integration
+Validate Phase 0.0007: Odds API Data Integration
 
 Description: Validates betting odds data integration from odds-api scraper,
 including database schema, reference data, data quality, and integration capability.
@@ -26,7 +26,7 @@ load_dotenv("/Users/ryanranft/nba-sim-credentials.env")
 
 
 class Phase07OddsAPIValidator:
-    """Validates betting odds data integration for Phase 0.7."""
+    """Validates betting odds data integration for Phase 0.0007."""
 
     def __init__(self, verbose: bool = False):
         self.verbose = verbose
@@ -420,7 +420,7 @@ class Phase07OddsAPIValidator:
         print()
 
         if failed == 0:
-            print("✅ Phase 0.7 validation PASSED")
+            print("✅ Phase 0.0007 validation PASSED")
             print()
             print(
                 "Note: odds-api scraper runs separately at /Users/ryanranft/odds-api/"
@@ -430,7 +430,7 @@ class Phase07OddsAPIValidator:
             )
             return passed, failed
         else:
-            print("❌ Phase 0.7 validation FAILED")
+            print("❌ Phase 0.0007 validation FAILED")
             return passed, failed
 
 
@@ -439,7 +439,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Validate Phase 0.7: Odds API Data Integration"
+        description="Validate Phase 0.0007: Odds API Data Integration"
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     args = parser.parse_args()

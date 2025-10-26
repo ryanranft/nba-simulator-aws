@@ -148,7 +148,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.6_combine_retrieval-augmented_generation_rag_and_the_llm
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.0006_combine_retrieval-augmented_generation_rag_and_the_llm
 python test_rec_188.py -v
 ```
 

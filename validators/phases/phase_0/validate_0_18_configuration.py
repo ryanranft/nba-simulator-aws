@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Validate Phase 0.18 - Configuration Files
+Validate Phase 0.0018 - Configuration Files
 
 Validates YAML configuration files for ADCE autonomous system.
 
@@ -270,7 +270,7 @@ class ConfigurationValidator:
     def run_all_validations(self) -> Tuple[bool, Dict]:
         """Run all configuration validations."""
         print(f"\n{'='*60}")
-        print(f"Phase 0.18: Configuration Validation")
+        print(f"Phase 0.0018: Configuration Validation")
         print(f"{'='*60}\n")
 
         results = {
@@ -316,7 +316,7 @@ class ConfigurationValidator:
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Validate Phase 0.18 Configuration")
+    parser = argparse.ArgumentParser(description="Validate Phase 0.0018 Configuration")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     args = parser.parse_args()
 

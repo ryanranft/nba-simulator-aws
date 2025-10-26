@@ -43,13 +43,13 @@ Autonomous implementation of recommendations from leading ML/AI technical books,
 
 **Phase 5 ML Implementations:**
 - [Phase 5 Index](../phases/PHASE_5_INDEX.md) - 26 ML sub-phases
-- [5.1: Feature Engineering](../phases/phase_5/5.1_feature_engineering/) - Advanced temporal features
-- [5.2: Model Versioning](../phases/phase_5/5.2_model_versioning/) - MLflow integration
-- [5.19: Drift Detection](../phases/phase_5/5.19_drift_detection/) - Data drift monitoring
-- [5.20: Panel Data](../phases/phase_5/5.20_panel_data/) - Temporal panel data processing
+- [5.1: Feature Engineering](../phases/phase_5/5.0001_feature_engineering/) - Advanced temporal features
+- [5.2: Model Versioning](../phases/phase_5/5.0002_model_versioning/) - MLflow integration
+- [5.19: Drift Detection](../phases/phase_5/5.0019_drift_detection/) - Data drift monitoring
+- [5.20: Panel Data](../phases/phase_5/5.0020_panel_data/) - Temporal panel data processing
 
 **Phase 9 ML Integration:**
-- [9.0: Plus/Minus System](../phases/phase_9/9.0_plus_minus/) - 26 ML features
+- [9.0: Plus/Minus System](../phases/phase_9/9.0000_plus_minus/) - 26 ML features
 
 ---
 

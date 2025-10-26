@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.76_use_a_text_vector_encoding_on_descriptions_and_compare
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0076_use_a_text_vector_encoding_on_descriptions_and_compare
 python test_rec_106.py -v
 ```
 

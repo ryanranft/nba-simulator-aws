@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_8/8.3_implement_a_real-time_fraud_detection_model_for_nba_ticket_p
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_8/8.0003_implement_a_real-time_fraud_detection_model_for_nba_ticket_p
 python test_rec_147.py -v
 ```
 

@@ -192,104 +192,104 @@ This index tracks implementation of recommendations from machine learning and st
 **Total Lines:** ~14,000 lines of production code + ~10,000 lines of documentation
 
 ### 5.1: Feature Engineering ✅
-**Location:** `/docs/phases/phase_5/5.1_feature_engineering/`
+**Location:** `/docs/phases/phase_5/5.0001_feature_engineering/`
 **Implementation:** Feature transformation pipeline
 **Impact:** Temporal feature extraction and engineering
 
 ### 5.2: Model Management ✅
-**Location:** `/docs/phases/phase_5/5.2_model_management/`
+**Location:** `/docs/phases/phase_5/5.0002_model_management/`
 **Implementation:** Model lifecycle management
 **Impact:** Version control and deployment workflows
 
 ### 5.3: Model Operations ✅
-**Location:** `/docs/phases/phase_5/5.3_model_operations/`
+**Location:** `/docs/phases/phase_5/5.0003_model_operations/`
 **Implementation:** MLOps infrastructure
 **Impact:** Production monitoring and maintenance
 
 ### 5.4: Model Analysis ✅
-**Location:** `/docs/phases/phase_5/5.4_model_analysis/`
+**Location:** `/docs/phases/phase_5/5.0004_model_analysis/`
 **Implementation:** Performance analysis tools
 **Impact:** Model quality assessment
 
 ### 5.5: Experimentation ✅
-**Location:** `/docs/phases/phase_5/5.5_experimentation/`
+**Location:** `/docs/phases/phase_5/5.0005_experimentation/`
 **Implementation:** A/B testing framework
 **Impact:** Systematic model comparison
 
 ### 5.6: Hyperparameter Optimization ✅
-**Location:** `/docs/phases/phase_5/5.6_hyperparameter_optimization/`
+**Location:** `/docs/phases/phase_5/5.0006_hyperparameter_optimization/`
 **Implementation:** `/scripts/ml/hyperparameter_tuning.py` (623 lines)
 **Methods:** Grid Search, Random Search, Bayesian Optimization
 **Impact:** Systematic parameter tuning for all models
 
 ### 5.7: Model Interpretation ✅
-**Location:** `/docs/phases/phase_5/5.7_model_interpretation/`
+**Location:** `/docs/phases/phase_5/5.0007_model_interpretation/`
 **Implementation:** `/scripts/ml/model_interpretation.py` (619 lines)
 **Methods:** SHAP values, feature importance, decision paths
 **Impact:** Stakeholder communication and model transparency
 
 ### 5.8: Feature Store ✅
-**Location:** `/docs/phases/phase_5/5.8_feature_store/`
+**Location:** `/docs/phases/phase_5/5.0008_feature_store/`
 **Implementation:** `/scripts/ml/feature_store.py` (588 lines)
 **Features:** Centralized feature management, versioning, metadata
 **Impact:** Consistent features across training/serving
 
 ### 5.9: Automated Retraining ✅
-**Location:** `/docs/phases/phase_5/5.9_automated_retraining/`
+**Location:** `/docs/phases/phase_5/5.0009_automated_retraining/`
 **Implementation:** `/scripts/ml/automated_retraining.py` (640 lines)
 **Trigger:** Drift detection from ml_systems_2
 **Impact:** Self-healing ML pipeline
 
 ### 5.10: Feature Selection ✅
-**Location:** `/docs/phases/phase_5/5.10_feature_selection/`
+**Location:** `/docs/phases/phase_5/5.0010_feature_selection/`
 **Implementation:** `/scripts/ml/feature_selection.py` (668 lines)
 **Methods:** 8 methods (variance, correlation, MI, Lasso, tree, RFE, stability, consensus)
 **Impact:** Dimensionality reduction from 944 features
 
 ### 5.11: Ensemble Learning ✅
-**Location:** `/docs/phases/phase_5/5.11_ensemble_learning/`
+**Location:** `/docs/phases/phase_5/5.0011_ensemble_learning/`
 **Implementation:** `/scripts/ml/ensemble_learning.py` (619 lines)
 **Methods:** Voting, averaging, stacking, bagging, boosting
 **Impact:** Improved accuracy through model combination
 
 ### 5.12: Learning Curves ✅
-**Location:** `/docs/phases/phase_5/5.12_learning_curves/`
+**Location:** `/docs/phases/phase_5/5.0012_learning_curves/`
 **Implementation:** `/scripts/ml/learning_curves.py` (580 lines)
 **Analysis:** Bias/variance diagnosis, sample size estimation
 **Impact:** Data collection guidance
 
 ### 5.13: Model Calibration ✅
-**Location:** `/docs/phases/phase_5/5.13_model_calibration/`
+**Location:** `/docs/phases/phase_5/5.0013_model_calibration/`
 **Implementation:** `/scripts/ml/model_calibration.py` (607 lines)
 **Methods:** Platt scaling, isotonic regression, temperature scaling
 **Impact:** Reliable probability estimates
 
 ### 5.14: Cross-Validation Strategies ✅
-**Location:** `/docs/phases/phase_5/5.14_cross_validation/`
+**Location:** `/docs/phases/phase_5/5.0014_cross_validation/`
 **Implementation:** `/scripts/ml/cross_validation_strategies.py` (557 lines)
 **Methods:** Time series, blocked, group K-fold, stratified, LOGO
 **Impact:** Robust performance estimation
 
 ### 5.15: Model Comparison ✅
-**Location:** `/docs/phases/phase_5/5.15_model_comparison/`
+**Location:** `/docs/phases/phase_5/5.0015_model_comparison/`
 **Implementation:** `/scripts/ml/model_comparison.py` (646 lines)
 **Tests:** Paired t-test, Wilcoxon, McNemar, benchmarking
 **Impact:** Statistical model selection
 
 ### 5.16: Error Analysis ✅
-**Location:** `/docs/phases/phase_5/5.16_error_analysis/`
+**Location:** `/docs/phases/phase_5/5.0016_error_analysis/`
 **Implementation:** `/scripts/ml/error_analysis.py` (700 lines)
 **Analysis:** Pattern detection, segmentation, recommendations
 **Impact:** Systematic improvement identification
 
 ### 5.17: Model Explainability ✅
-**Location:** `/docs/phases/phase_5/5.17_model_explainability/`
+**Location:** `/docs/phases/phase_5/5.0017_model_explainability/`
 **Implementation:** `/scripts/ml/model_explainability.py` (541 lines)
 **Methods:** Permutation importance, LIME, interactions, PD plots
 **Impact:** Model interpretability and trust
 
 ### 5.18: Performance Profiling ✅
-**Location:** `/docs/phases/phase_5/5.18_performance_profiling/`
+**Location:** `/docs/phases/phase_5/5.0018_performance_profiling/`
 **Implementation:** `/scripts/ml/performance_profiling.py` (589 lines)
 **Metrics:** Memory, time, throughput, bottleneck identification
 **Impact:** Production optimization
@@ -407,24 +407,24 @@ phase_X/rec_NAME/
 ### Phase 5 ML Frameworks (18)
 | ID | Name | Status | Location |
 |----|------|--------|----------|
-| **5.1** | Feature Engineering | ✅ | phase_5/5.1_feature_engineering/ |
-| **5.2** | Model Management | ✅ | phase_5/5.2_model_management/ |
-| **5.3** | Model Operations | ✅ | phase_5/5.3_model_operations/ |
-| **5.4** | Model Analysis | ✅ | phase_5/5.4_model_analysis/ |
-| **5.5** | Experimentation | ✅ | phase_5/5.5_experimentation/ |
-| **5.6** | Hyperparameter Optimization | ✅ | phase_5/5.6_hyperparameter_optimization/ |
-| **5.7** | Model Interpretation | ✅ | phase_5/5.7_model_interpretation/ |
-| **5.8** | Feature Store | ✅ | phase_5/5.8_feature_store/ |
-| **5.9** | Automated Retraining | ✅ | phase_5/5.9_automated_retraining/ |
-| **5.10** | Feature Selection | ✅ | phase_5/5.10_feature_selection/ |
-| **5.11** | Ensemble Learning | ✅ | phase_5/5.11_ensemble_learning/ |
-| **5.12** | Learning Curves | ✅ | phase_5/5.12_learning_curves/ |
-| **5.13** | Model Calibration | ✅ | phase_5/5.13_model_calibration/ |
-| **5.14** | Cross-Validation | ✅ | phase_5/5.14_cross_validation/ |
-| **5.15** | Model Comparison | ✅ | phase_5/5.15_model_comparison/ |
-| **5.16** | Error Analysis | ✅ | phase_5/5.16_error_analysis/ |
-| **5.17** | Model Explainability | ✅ | phase_5/5.17_model_explainability/ |
-| **5.18** | Performance Profiling | ✅ | phase_5/5.18_performance_profiling/ |
+| **5.1** | Feature Engineering | ✅ | phase_5/5.0001_feature_engineering/ |
+| **5.2** | Model Management | ✅ | phase_5/5.0002_model_management/ |
+| **5.3** | Model Operations | ✅ | phase_5/5.0003_model_operations/ |
+| **5.4** | Model Analysis | ✅ | phase_5/5.0004_model_analysis/ |
+| **5.5** | Experimentation | ✅ | phase_5/5.0005_experimentation/ |
+| **5.6** | Hyperparameter Optimization | ✅ | phase_5/5.0006_hyperparameter_optimization/ |
+| **5.7** | Model Interpretation | ✅ | phase_5/5.0007_model_interpretation/ |
+| **5.8** | Feature Store | ✅ | phase_5/5.0008_feature_store/ |
+| **5.9** | Automated Retraining | ✅ | phase_5/5.0009_automated_retraining/ |
+| **5.10** | Feature Selection | ✅ | phase_5/5.0010_feature_selection/ |
+| **5.11** | Ensemble Learning | ✅ | phase_5/5.0011_ensemble_learning/ |
+| **5.12** | Learning Curves | ✅ | phase_5/5.0012_learning_curves/ |
+| **5.13** | Model Calibration | ✅ | phase_5/5.0013_model_calibration/ |
+| **5.14** | Cross-Validation | ✅ | phase_5/5.0014_cross_validation/ |
+| **5.15** | Model Comparison | ✅ | phase_5/5.0015_model_comparison/ |
+| **5.16** | Error Analysis | ✅ | phase_5/5.0016_error_analysis/ |
+| **5.17** | Model Explainability | ✅ | phase_5/5.0017_model_explainability/ |
+| **5.18** | Performance Profiling | ✅ | phase_5/5.0018_performance_profiling/ |
 
 ---
 

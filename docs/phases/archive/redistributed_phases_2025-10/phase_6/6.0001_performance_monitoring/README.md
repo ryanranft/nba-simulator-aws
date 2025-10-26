@@ -107,9 +107,9 @@ This directory contains **6 monitoring & dashboard implementations**:
 
 **Integrates with:**
 - [Phase 5: Machine Learning Pipeline](../../phase_5/PHASE_5_INDEX.md)
-- [5.21: Model Performance Tracking](../../phase_5/5.21_model_performance_tracking/)
-- [5.22: A/B Testing](../../phase_5/5.22_ab_testing/)
-- [5.26: Feedback Loop](../../phase_5/5.26_feedback_loop/)
+- [5.21: Model Performance Tracking](../../phase_5/5.0021_model_performance_tracking/)
+- [5.22: A/B Testing](../../phase_5/5.0022_ab_testing/)
+- [5.26: Feedback Loop](../../phase_5/5.0026_feedback_loop/)
 
 **Provides:**
 - Dashboard web applications
@@ -122,7 +122,7 @@ This directory contains **6 monitoring & dashboard implementations**:
 ## Related Documentation
 
 - **[Phase 6 Index](../PHASE_6_INDEX.md)** - Parent phase overview
-- **[5.21: Performance Tracking](../../phase_5/5.21_model_performance_tracking/)** - Backend metrics
+- **[5.21: Performance Tracking](../../phase_5/5.0021_model_performance_tracking/)** - Backend metrics
 - **Implementation files** - See individual Python files
 
 ---
@@ -131,7 +131,7 @@ This directory contains **6 monitoring & dashboard implementations**:
 
 **Return to:** [Phase 6: Optional Enhancements](../PHASE_6_INDEX.md)
 **Prerequisites:** [Phase 5: Machine Learning](../../phase_5/PHASE_5_INDEX.md)
-**Integrates with:** [5.21: Performance Tracking](../../phase_5/5.21_model_performance_tracking/)
+**Integrates with:** [5.21: Performance Tracking](../../phase_5/5.0021_model_performance_tracking/)
 
 ---
 

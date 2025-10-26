@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.144_utilize_hybrid_searches
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0144_utilize_hybrid_searches
 python test_rec_187.py -v
 ```
 

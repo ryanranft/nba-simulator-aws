@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.134_fine-tune_generative_models_with_human_preferences
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0134_fine-tune_generative_models_with_human_preferences
 python test_rec_176.py -v
 ```
 

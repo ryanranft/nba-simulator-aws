@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.50_implement_one-hot_encoding_for_categorical_features_team_pos
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0050_implement_one-hot_encoding_for_categorical_features_team_pos
 python test_rec_075.py -v
 ```
 

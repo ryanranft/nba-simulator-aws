@@ -118,7 +118,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.40_model_player_activity_using_state-space_models
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0040_model_player_activity_using_state-space_models
 python test_rec_064.py -v
 ```
 

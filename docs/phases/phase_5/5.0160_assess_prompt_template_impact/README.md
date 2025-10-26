@@ -119,7 +119,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.160_assess_prompt_template_impact
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0160_assess_prompt_template_impact
 python test_rec_208.py -v
 ```
 

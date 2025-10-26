@@ -1,4 +1,4 @@
-# Phase 5.4: Automated Retraining
+# Phase 5.0004: Automated Retraining
 
 **Status:** ✅ COMPLETE
 **Implementation:** `scripts/ml/automated_retraining.py` (640 lines)
@@ -82,8 +82,8 @@ if drift_detected.should_retrain:
 
 - **Workflow #13** - Model Testing
 - **Workflow #41** - Testing Framework
-- **Phase 5.3** - Feature Store (versioned features)
-- **Phase 5.10** - Model Comparison (validate retraining)
+- **Phase 5.0003** - Feature Store (versioned features)
+- **Phase 5.0010** - Model Comparison (validate retraining)
 
 ---
 
@@ -125,5 +125,5 @@ if is_new_season(today):
 ## See Also
 
 - **USAGE_GUIDE.md** - Detailed API reference
-- **Phase 5.3** - Feature Store
-- **Phase 5.10** - Model Comparison
+- **Phase 5.0003** - Feature Store
+- **Phase 5.0010** - Model Comparison

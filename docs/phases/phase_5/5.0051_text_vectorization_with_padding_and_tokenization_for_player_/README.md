@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.51_text_vectorization_with_padding_and_tokenization_for_player_
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0051_text_vectorization_with_padding_and_tokenization_for_player_
 python test_rec_076.py -v
 ```
 

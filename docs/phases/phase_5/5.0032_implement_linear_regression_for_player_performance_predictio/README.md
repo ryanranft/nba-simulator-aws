@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.32_implement_linear_regression_for_player_performance_predictio
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0032_implement_linear_regression_for_player_performance_predictio
 python test_rec_055.py -v
 ```
 

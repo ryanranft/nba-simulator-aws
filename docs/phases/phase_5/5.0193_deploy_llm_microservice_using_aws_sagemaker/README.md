@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.24_deploy_llm_microservice_using_aws_sagemaker
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0024_deploy_llm_microservice_using_aws_sagemaker
 python test_rec_038.py -v
 ```
 

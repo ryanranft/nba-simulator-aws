@@ -269,7 +269,7 @@ def box_plus_minus_simple(player_stats, team_stats, league_avg_pace=100.0):
 - Added `box_plus_minus` to player and team tables
 
 ### 3. Documentation
-**File:** `docs/phases/phase_0/0.1_basketball_reference/documentation/COMPARISON.md`
+**File:** `docs/phases/phase_0/0.0001_basketball_reference/documentation/COMPARISON.md`
 
 - Updated coverage from 12/16 to 16/16
 - Changed all missing stats to ✅ Implemented

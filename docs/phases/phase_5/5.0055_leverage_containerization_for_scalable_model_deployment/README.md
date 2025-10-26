@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.55_leverage_containerization_for_scalable_model_deployment
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0055_leverage_containerization_for_scalable_model_deployment
 python test_rec_083.py -v
 ```
 

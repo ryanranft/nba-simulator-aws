@@ -80,8 +80,8 @@ Modular and extensible data collection pipeline, simplified integration of new d
 |------|--------|---------|-------|
 | **implement_rec_044.py** | ✅ Complete | Main implementation wrapper | 299 |
 | **../../../scripts/etl/data_dispatcher.py** | ✅ Complete | Core dispatcher implementation | 589 |
-| **../../../tests/phases/phase_0/test_0_13_rec_044.py** | ✅ Complete | Unit test suite (43 tests) | 569 |
-| **../../../tests/phases/phase_0/test_0_13.py** | ✅ Complete | Integration test suite (21 tests) | 507 |
+| **../../../tests/phases/phase_0/test_0_0013_rec_044.py** | ✅ Complete | Unit test suite (43 tests) | 569 |
+| **../../../tests/phases/phase_0/test_0_0013.py** | ✅ Complete | Integration test suite (21 tests) | 507 |
 | README.md | ✅ Complete | Documentation | - |
 | STATUS.md | ✅ Complete | This file | - |
 | RECOMMENDATIONS_FROM_BOOKS.md | ✅ Complete | Source references | - |
@@ -110,8 +110,8 @@ Modular and extensible data collection pipeline, simplified integration of new d
 - ✅ Total implementation: 888 lines of production code
 
 **Test Coverage:**
-- ✅ Unit tests: 43 tests, 100% pass rate (test_0_13_rec_044.py, 569 lines)
-- ✅ Integration tests: 21 tests, 100% pass rate (test_0_13.py, 507 lines)
+- ✅ Unit tests: 43 tests, 100% pass rate (test_0_0013_rec_044.py, 569 lines)
+- ✅ Integration tests: 21 tests, 100% pass rate (test_0_0013.py, 507 lines)
 - ✅ Total tests: 64 tests, 0 failures
 
 **Features Implemented:**

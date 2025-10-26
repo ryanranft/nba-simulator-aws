@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.91_utilize_a_relativistic_discriminator_for_enhanced_training_s
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0091_utilize_a_relativistic_discriminator_for_enhanced_training_s
 python test_rec_122.py -v
 ```
 

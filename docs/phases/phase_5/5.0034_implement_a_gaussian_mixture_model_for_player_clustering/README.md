@@ -122,7 +122,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.34_implement_a_gaussian_mixture_model_for_player_clustering
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0034_implement_a_gaussian_mixture_model_for_player_clustering
 python test_rec_057.py -v
 ```
 

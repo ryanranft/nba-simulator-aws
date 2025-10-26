@@ -123,7 +123,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.3_implement_data_collection_pipeline_with_dispatcher_and_crawl
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.0003_implement_data_collection_pipeline_with_dispatcher_and_crawl
 python test_rec_044.py -v
 ```
 

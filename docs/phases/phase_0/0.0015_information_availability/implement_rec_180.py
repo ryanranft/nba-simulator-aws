@@ -12,9 +12,9 @@ have important information, then they can be easily accessed. Using semantic sea
 this system would allow information to be easily available for LLM to use.
 
 This implementation integrates with:
-- Phase 0.10: PostgreSQL JSONB Storage
-- Phase 0.11: RAG Pipeline with pgvector
-- Phase 0.12: RAG + LLM Integration
+- Phase 0.0010: PostgreSQL JSONB Storage
+- Phase 0.0011: RAG Pipeline with pgvector
+- Phase 0.0012: RAG + LLM Integration
 
 Expected Impact:
 Enables LLMs to use information that it might not know of through:
@@ -87,7 +87,7 @@ class ExternalResourceConnector:
     """
     Connects to external NBA data sources (PostgreSQL JSONB storage).
 
-    Integrates with Phase 0.10 PostgreSQL infrastructure to query
+    Integrates with Phase 0.0010 PostgreSQL infrastructure to query
     structured NBA data stored in JSONB columns.
     """
 
@@ -136,7 +136,7 @@ class ExternalResourceConnector:
             raise RuntimeError("Must call connect() before querying")
 
         # Build query based on entity type
-        # Note: This assumes tables exist from Phase 0.10
+        # Note: This assumes tables exist from Phase 0.0010
         query_map = {
             "player": "SELECT player_id, data FROM nba_players_jsonb WHERE data IS NOT NULL",
             "game": "SELECT game_id, data FROM nba_games_jsonb WHERE data IS NOT NULL",
@@ -182,7 +182,7 @@ class SemanticSearchEngine:
     """
     Semantic search using pgvector integration.
 
-    Integrates with Phase 0.11 RAG Pipeline to perform vector similarity
+    Integrates with Phase 0.0011 RAG Pipeline to perform vector similarity
     searches over embedded NBA data.
     """
 
@@ -420,7 +420,7 @@ class LLMQueryHandler:
     """
     Handles LLM queries and follow-up question generation.
 
-    Integrates with Phase 0.12 RAG + LLM interface for natural language
+    Integrates with Phase 0.0012 RAG + LLM interface for natural language
     query processing.
     """
 
@@ -535,10 +535,10 @@ class IncreaseInformationAvailability:
     Main orchestration class for information availability system.
 
     Coordinates all components:
-    - ExternalResourceConnector (Phase 0.10 integration)
-    - SemanticSearchEngine (Phase 0.11 integration)
+    - ExternalResourceConnector (Phase 0.0010 integration)
+    - SemanticSearchEngine (Phase 0.0011 integration)
     - InformationRetriever
-    - LLMQueryHandler (Phase 0.12 integration)
+    - LLMQueryHandler (Phase 0.0012 integration)
 
     Provides unified API for enabling LLM access to external NBA information.
     """
@@ -723,7 +723,7 @@ class IncreaseInformationAvailability:
 def main():
     """Main execution function with example usage"""
     print("=" * 80)
-    print("Phase 0.15: Increase Information Availability")
+    print("Phase 0.0015: Increase Information Availability")
     print("=" * 80)
     print()
 

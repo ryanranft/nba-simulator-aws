@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.31_apply_the_chain_rule_correctly_during_backpropagation
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0031_apply_the_chain_rule_correctly_during_backpropagation
 python test_rec_054.py -v
 ```
 

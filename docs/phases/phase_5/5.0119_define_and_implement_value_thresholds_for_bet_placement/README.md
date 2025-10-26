@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.119_define_and_implement_value_thresholds_for_bet_placement
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0119_define_and_implement_value_thresholds_for_bet_placement
 python test_rec_158.py -v
 ```
 

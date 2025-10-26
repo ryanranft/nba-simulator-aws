@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.4_utilize_onnx_for_model_interoperability
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0004_utilize_onnx_for_model_interoperability
 python test_rec_008.py -v
 ```
 

@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.13_utilize_permutation_tests_to_validate_player_impact_on_team_
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0013_utilize_permutation_tests_to_validate_player_impact_on_team_
 python test_rec_023.py -v
 ```
 

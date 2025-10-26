@@ -123,7 +123,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.52_apply_pca_for_anomaly_detection_of_player_performance
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0052_apply_pca_for_anomaly_detection_of_player_performance
 python test_rec_080.py -v
 ```
 

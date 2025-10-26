@@ -116,8 +116,8 @@ This directory contains **4 business metrics implementations**:
 
 **Integrates with:**
 - [Phase 5: Machine Learning Pipeline](../../phase_5/PHASE_5_INDEX.md)
-- [5.21: Model Performance Tracking](../../phase_5/5.21_model_performance_tracking/)
-- [5.22: A/B Testing](../../phase_5/5.22_ab_testing/)
+- [5.21: Model Performance Tracking](../../phase_5/5.0021_model_performance_tracking/)
+- [5.22: A/B Testing](../../phase_5/5.0022_ab_testing/)
 - [6.1: Performance Monitoring](../6.0001_performance_monitoring/)
 - [Phase 7: Betting Odds Integration](../../phase_7/PHASE_7_INDEX.md)
 
@@ -174,7 +174,7 @@ This directory contains **4 business metrics implementations**:
 
 - **[Phase 6 Index](../PHASE_6_INDEX.md)** - Parent phase overview
 - **[Phase 7: Betting Integration](../../phase_7/PHASE_7_INDEX.md)** - Betting odds
-- **[5.22: A/B Testing](../../phase_5/5.22_ab_testing/)** - Business impact testing
+- **[5.22: A/B Testing](../../phase_5/5.0022_ab_testing/)** - Business impact testing
 - **Implementation files** - See individual Python files
 
 ---

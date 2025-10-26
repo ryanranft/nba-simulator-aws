@@ -123,7 +123,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.6_secure_mlops_workflows_with_key_management_services
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0006_secure_mlops_workflows_with_key_management_services
 python test_rec_010.py -v
 ```
 

@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.94_implement_initial_heuristics-based_prototype_for_nba_player_
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0094_implement_initial_heuristics-based_prototype_for_nba_player_
 python test_rec_125.py -v
 ```
 

@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.137_implement_a_two-pass_process_to_improve_search_quality
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0137_implement_a_two-pass_process_to_improve_search_quality
 python test_rec_179.py -v
 ```
 

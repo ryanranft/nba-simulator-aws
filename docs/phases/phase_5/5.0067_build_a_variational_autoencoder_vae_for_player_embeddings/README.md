@@ -124,7 +124,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.67_build_a_variational_autoencoder_vae_for_player_embeddings
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0067_build_a_variational_autoencoder_vae_for_player_embeddings
 python test_rec_097.py -v
 ```
 

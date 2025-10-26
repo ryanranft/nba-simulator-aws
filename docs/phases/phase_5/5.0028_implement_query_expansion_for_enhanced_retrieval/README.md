@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.28_implement_query_expansion_for_enhanced_retrieval
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0028_implement_query_expansion_for_enhanced_retrieval
 python test_rec_048.py -v
 ```
 

@@ -1,4 +1,4 @@
-# Phase 5.7: Learning Curves
+# Phase 5.0007: Learning Curves
 
 **Status:** ✅ COMPLETE
 **Implementation:** `scripts/ml/learning_curves.py` (580 lines)
@@ -73,8 +73,8 @@ print(f"Estimated samples needed for {target_score:.2f} score: {estimated_sample
 
 ## Workflow References
 
-- **Phase 5.1** - Hyperparameter Optimization
-- **Phase 5.10** - Model Comparison
+- **Phase 5.0001** - Hyperparameter Optimization
+- **Phase 5.0010** - Model Comparison
 
 ---
 

@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.140_implement_zero-shot_classification_with_cosine_similarity
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0140_implement_zero-shot_classification_with_cosine_similarity
 python test_rec_183.py -v
 ```
 

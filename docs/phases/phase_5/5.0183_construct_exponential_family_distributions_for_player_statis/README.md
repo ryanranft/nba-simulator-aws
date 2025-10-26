@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.14_construct_exponential_family_distributions_for_player_statis
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0014_construct_exponential_family_distributions_for_player_statis
 python test_rec_024.py -v
 ```
 

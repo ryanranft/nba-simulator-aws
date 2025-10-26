@@ -1,4 +1,4 @@
-# Phase 5.6: Ensemble Learning
+# Phase 5.0006: Ensemble Learning
 
 **Status:** ✅ COMPLETE
 **Implementation:** `scripts/ml/ensemble_learning.py` (619 lines)
@@ -87,13 +87,13 @@ print(f"Ensemble AUC: {auc:.4f}")
 
 ## Workflow References
 
-- **Phase 5.1** - Hyperparameter Optimization (optimize base models first)
-- **Phase 5.10** - Model Comparison (compare ensemble vs base models)
+- **Phase 5.0001** - Hyperparameter Optimization (optimize base models first)
+- **Phase 5.0010** - Model Comparison (compare ensemble vs base models)
 
 ---
 
 ## See Also
 
 - **USAGE_GUIDE.md** - Detailed API reference
-- **Phase 5.1** - Hyperparameter Optimization
-- **Phase 5.10** - Model Comparison
+- **Phase 5.0001** - Hyperparameter Optimization
+- **Phase 5.0010** - Model Comparison

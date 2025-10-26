@@ -13,9 +13,9 @@ execution strategies. Supports sequential, parallel, conditional, and fallback s
 patterns to improve information retrieval from multiple systems.
 
 Architecture:
-- Phase 0.10: PostgreSQL JSONB Storage
-- Phase 0.11: RAG Pipeline with pgvector
-- Phase 0.15: Information Availability (SemanticSearchEngine)
+- Phase 0.0010: PostgreSQL JSONB Storage
+- Phase 0.0011: RAG Pipeline with pgvector
+- Phase 0.0015: Information Availability (SemanticSearchEngine)
 
 Key Capabilities:
 - Sequential search (search A first, then B using A's results)
@@ -37,7 +37,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
-# Add parent directory to path for Phase 0.15 integration
+# Add parent directory to path for Phase 0.0015 integration
 sys.path.insert(0, str(Path(__file__).parent.parent / "0.15_information_availability"))
 
 try:
@@ -337,7 +337,7 @@ class SearchOrchestrator:
     Orchestrates searches across multiple sources with different execution strategies.
 
     Supports parallel, conditional, and fallback search patterns. Integrates with
-    Phase 0.15's SemanticSearchEngine for vector searches and Phase 0.10's
+    Phase 0.0015's SemanticSearchEngine for vector searches and Phase 0.0010's
     PostgreSQL JSONB for structured queries.
     """
 
@@ -348,7 +348,7 @@ class SearchOrchestrator:
         Initialize SearchOrchestrator.
 
         Args:
-            search_engine: SemanticSearchEngine instance (Phase 0.15)
+            search_engine: SemanticSearchEngine instance (Phase 0.0015)
             config: SearchConfig instance
         """
         self.search_engine = search_engine
@@ -381,7 +381,7 @@ class SearchOrchestrator:
             logger.info(f"Executing {source} search for query: '{query}'")
 
             if source == "semantic" and self.search_engine:
-                # Use Phase 0.15 SemanticSearchEngine for vector search
+                # Use Phase 0.0015 SemanticSearchEngine for vector search
                 results = self.search_engine.search(
                     query=query,
                     top_k=options.get("top_k", 10) if options else 10,
@@ -391,7 +391,7 @@ class SearchOrchestrator:
                 return results
 
             elif source == "jsonb":
-                # Mock JSONB search (would integrate with Phase 0.10 in production)
+                # Mock JSONB search (would integrate with Phase 0.0010 in production)
                 logger.info("JSONB search (mock implementation)")
                 return []
 
@@ -594,7 +594,7 @@ class SequentialSearchPipeline:
         Initialize SequentialSearchPipeline.
 
         Args:
-            search_engine: SemanticSearchEngine instance (Phase 0.15)
+            search_engine: SemanticSearchEngine instance (Phase 0.0015)
         """
         self.search_engine = search_engine
         self.aggregator = ResultAggregator()
@@ -657,9 +657,9 @@ class RobustArchitecture:
     Main orchestration class for robust multi-source search architecture.
 
     Integrates:
-    - Phase 0.10: PostgreSQL JSONB Storage
-    - Phase 0.11: RAG Pipeline with pgvector
-    - Phase 0.15: Information Availability (SemanticSearchEngine)
+    - Phase 0.0010: PostgreSQL JSONB Storage
+    - Phase 0.0011: RAG Pipeline with pgvector
+    - Phase 0.0015: Information Availability (SemanticSearchEngine)
 
     Provides flexible search orchestration with multiple execution strategies.
     """
@@ -711,7 +711,7 @@ class RobustArchitecture:
             # Validate configuration
             self.search_config.validate()
 
-            # Initialize search engine (Phase 0.15 integration)
+            # Initialize search engine (Phase 0.0015 integration)
             # In production, this would connect to actual SemanticSearchEngine
             # For now, use mock implementation
             self.search_engine = None  # Will be mocked in tests
@@ -882,7 +882,7 @@ class RobustArchitecture:
 def main():
     """Main execution function with examples."""
     print("=" * 80)
-    print("Phase 0.16: Robust Architecture for Multi-Source Search")
+    print("Phase 0.0016: Robust Architecture for Multi-Source Search")
     print("=" * 80)
 
     # Example 1: Parallel Search (Default)

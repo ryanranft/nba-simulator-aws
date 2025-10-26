@@ -105,7 +105,7 @@ This subdirectory contains recommendations from technical book analysis focused 
 4. **Phase 4:** Research Paper Generation (Nice-to-Have)
 
 **Total Estimated Effort:** 3-4 weeks
-**Dependencies:** Phase 8.1-8.3 completion
+**Dependencies:** Phase 8.0001-8.3 completion
 
 
 

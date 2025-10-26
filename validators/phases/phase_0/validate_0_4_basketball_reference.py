@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Phase 0.4 Validator: Basketball Reference Data Collection
+Phase 0.0004 Validator: Basketball Reference Data Collection
 
-Validates Phase 0.4 (Basketball Reference) completeness and quality.
+Validates Phase 0.0004 (Basketball Reference) completeness and quality.
 
 Validation Checks:
 - S3 bucket exists and is accessible
@@ -37,7 +37,7 @@ sys.path.insert(0, str(project_root))
 
 
 class BasketballReferenceValidator:
-    """Validator for Phase 0.4: Basketball Reference Data Collection"""
+    """Validator for Phase 0.0004: Basketball Reference Data Collection"""
 
     # Expected data categories in S3
     EXPECTED_CATEGORIES = [
@@ -414,7 +414,7 @@ class BasketballReferenceValidator:
             Tuple of (all_passed, results_dict)
         """
         print(f"\n{'=' * 60}")
-        print(f"Phase 0.4: Basketball Reference Validation")
+        print(f"Phase 0.0004: Basketball Reference Validation")
         print(f"{'=' * 60}\n")
 
         results = {
@@ -458,7 +458,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Validate Phase 0.4 Basketball Reference data collection"
+        description="Validate Phase 0.0004 Basketball Reference data collection"
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     args = parser.parse_args()

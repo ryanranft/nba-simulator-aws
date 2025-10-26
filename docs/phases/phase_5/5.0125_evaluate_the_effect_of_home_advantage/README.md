@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.125_evaluate_the_effect_of_home_advantage
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0125_evaluate_the_effect_of_home_advantage
 python test_rec_167.py -v
 ```
 

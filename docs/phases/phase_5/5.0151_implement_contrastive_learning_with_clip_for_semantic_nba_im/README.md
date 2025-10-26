@@ -122,7 +122,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.151_implement_contrastive_learning_with_clip_for_semantic_nba_im
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0151_implement_contrastive_learning_with_clip_for_semantic_nba_im
 python test_rec_199.py -v
 ```
 

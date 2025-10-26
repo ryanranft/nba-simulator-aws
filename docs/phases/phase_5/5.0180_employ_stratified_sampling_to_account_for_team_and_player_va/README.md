@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.11_employ_stratified_sampling_to_account_for_team_and_player_va
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0011_employ_stratified_sampling_to_account_for_team_and_player_va
 python test_rec_021.py -v
 ```
 

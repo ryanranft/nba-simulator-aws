@@ -122,7 +122,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.152_experiment_with_different_noise_schedules_in_diffusion_model
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0152_experiment_with_different_noise_schedules_in_diffusion_model
 python test_rec_200.py -v
 ```
 

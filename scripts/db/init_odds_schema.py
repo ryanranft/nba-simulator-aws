@@ -327,7 +327,7 @@ def main():
             print("Next steps:")
             print("  1. Run odds-api scraper: python scripts/run_scraper.py")
             print("  2. Verify data collection")
-            print("  3. Create Phase 0.7 validator")
+            print("  3. Create Phase 0.0007 validator")
             return 0
         else:
             print("⚠️  Verification failed - check output above")

@@ -123,7 +123,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.2_automate_model_retraining_with_ml_pipelines
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0002_automate_model_retraining_with_ml_pipelines
 python test_rec_005.py -v
 ```
 

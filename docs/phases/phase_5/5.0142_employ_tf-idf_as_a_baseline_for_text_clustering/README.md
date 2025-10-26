@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.142_employ_tf-idf_as_a_baseline_for_text_clustering
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0142_employ_tf-idf_as_a_baseline_for_text_clustering
 python test_rec_185.py -v
 ```
 

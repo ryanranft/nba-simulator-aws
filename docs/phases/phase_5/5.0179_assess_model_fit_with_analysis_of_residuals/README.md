@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.10_assess_model_fit_with_analysis_of_residuals
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0010_assess_model_fit_with_analysis_of_residuals
 python test_rec_015.py -v
 ```
 

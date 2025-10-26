@@ -119,7 +119,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.59_integrate_ml_model_evaluation_into_the_cicd_pipeline_for_aut
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0059_integrate_ml_model_evaluation_into_the_cicd_pipeline_for_aut
 python test_rec_087.py -v
 ```
 

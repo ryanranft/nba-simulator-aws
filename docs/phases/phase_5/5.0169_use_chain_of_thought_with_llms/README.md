@@ -119,7 +119,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.169_use_chain_of_thought_with_llms
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0169_use_chain_of_thought_with_llms
 python test_rec_218.py -v
 ```
 

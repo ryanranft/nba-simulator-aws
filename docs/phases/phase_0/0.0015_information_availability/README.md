@@ -63,14 +63,14 @@ if setup_result['success']:
 
 ### System Components
 
-**Phase 0.15** consists of 5 integrated components that work together to provide LLMs with external information access:
+**Phase 0.0015** consists of 5 integrated components that work together to provide LLMs with external information access:
 
-1. **ExternalResourceConnector** - Connects to PostgreSQL JSONB storage (Phase 0.10)
+1. **ExternalResourceConnector** - Connects to PostgreSQL JSONB storage (Phase 0.0010)
    - Manages database connections with pgvector support
    - Queries structured NBA data from JSONB columns
    - Handles connection pooling and error recovery
 
-2. **SemanticSearchEngine** - Performs vector similarity search (Phase 0.11)
+2. **SemanticSearchEngine** - Performs vector similarity search (Phase 0.0011)
    - Generates embeddings using OpenAI API
    - Executes pgvector similarity searches
    - Supports multi-source queries across entity types
@@ -80,7 +80,7 @@ if setup_result['success']:
    - Manages token budgets (respects context window limits)
    - Estimates token usage for cost optimization
 
-4. **LLMQueryHandler** - Processes queries and generates follow-ups (Phase 0.12)
+4. **LLMQueryHandler** - Processes queries and generates follow-ups (Phase 0.0012)
    - Integrates with LLM APIs for natural language processing
    - Detects when follow-up questions are needed
    - Generates contextual follow-up suggestions
@@ -117,7 +117,7 @@ Final Response with metadata
 | File | Lines | Purpose |
 |------|-------|---------|
 | **implement_rec_180.py** | 750 | Main implementation (5 classes) |
-| **test_0_15_rec_180.py** | 1,092 | Comprehensive test suite (59 tests) |
+| **test_0_0015_rec_180.py** | 1,092 | Comprehensive test suite (59 tests) |
 | **STATUS.md** | - | Implementation status and metrics |
 | **RECOMMENDATIONS_FROM_BOOKS.md** | - | Source book recommendations |
 | **README.md** | - | This file (usage guide) |
@@ -165,9 +165,9 @@ system = IncreaseInformationAvailability(config=config)
 ## Dependencies
 
 **Required Prerequisites (✅ All Complete):**
-- ✅ Phase 0.10: PostgreSQL JSONB Storage
-- ✅ Phase 0.11: RAG Pipeline with pgvector (similarity search)
-- ✅ Phase 0.12: RAG + LLM Integration (LLM interface)
+- ✅ Phase 0.0010: PostgreSQL JSONB Storage
+- ✅ Phase 0.0011: RAG Pipeline with pgvector (similarity search)
+- ✅ Phase 0.0012: RAG + LLM Integration (LLM interface)
 
 **Python Dependencies:**
 - `psycopg2` - PostgreSQL database connectivity
@@ -296,7 +296,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.5_increase_information_availability
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.0005_increase_information_availability
 python test_rec_180.py -v
 ```
 

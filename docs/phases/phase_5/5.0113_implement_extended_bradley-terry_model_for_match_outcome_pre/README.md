@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.113_implement_extended_bradley-terry_model_for_match_outcome_pre
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0113_implement_extended_bradley-terry_model_for_match_outcome_pre
 python test_rec_149.py -v
 ```
 

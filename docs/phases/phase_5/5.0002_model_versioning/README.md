@@ -207,7 +207,7 @@ predictions = model.predict(new_game_data)
 
 ```bash
 # Run tests
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.2_model_versioning
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0002_model_versioning
 python -m pytest test_ml_systems_1.py -v
 
 # Or check integration

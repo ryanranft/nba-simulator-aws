@@ -33,7 +33,7 @@ Establish comprehensive monitoring and observability infrastructure to track sys
 
 ## Current Monitoring State
 
-**Existing Infrastructure (from Phase 0.1-0.18):**
+**Existing Infrastructure (from Phase 0.0001-0.18):**
 - DIMS (Data Inventory Management System) - `inventory/metrics.yaml`
 - DIMS CLI - `scripts/monitoring/dims_cli.py verify`
 - Scraper monitoring - `scripts/monitoring/monitor_scrapers_inline.sh`
@@ -602,8 +602,8 @@ def upload_to_s3(file_path, bucket, key):
 
 **Before starting Phase 0.0020:**
 - [x] AWS CloudWatch access configured
-- [x] DIMS system operational (Phase 0.16+)
-- [x] ADCE operational (Phase 0.18)
+- [x] DIMS system operational (Phase 0.0016+)
+- [x] ADCE operational (Phase 0.0018)
 - [ ] Email for SNS notifications
 - [ ] Cost Explorer API enabled
 

@@ -1,4 +1,4 @@
-# Phase 5.10: Model Comparison & Benchmarking
+# Phase 5.0010: Model Comparison & Benchmarking
 
 **Status:** ✅ COMPLETE
 **Implementation:** `scripts/ml/model_comparison.py` (646 lines)
@@ -178,9 +178,9 @@ else:
 
 - **Workflow #13** - Model Testing
 - **Workflow #41** - Testing Framework
-- **Phase 5.1** - Hyperparameter Optimization (compare optimized models)
-- **Phase 5.6** - Ensemble Learning (compare ensemble vs base models)
-- **Phase 5.9** - Cross-Validation Strategies (use appropriate CV)
+- **Phase 5.0001** - Hyperparameter Optimization (compare optimized models)
+- **Phase 5.0006** - Ensemble Learning (compare ensemble vs base models)
+- **Phase 5.0009** - Cross-Validation Strategies (use appropriate CV)
 
 ---
 
@@ -309,7 +309,7 @@ print(f"P-value: {result.p_value:.6f}")
 
 **Solutions:**
 - Try more diverse model types (linear, tree-based, neural networks)
-- Improve feature engineering (Phase 5.5)
+- Improve feature engineering (Phase 5.0005)
 - Collect additional data sources
 
 ### Issue: Test selection unclear
@@ -355,7 +355,7 @@ comparator.export_benchmark(
 ## See Also
 
 - **USAGE_GUIDE.md** - Detailed API reference and advanced examples
-- **Phase 5.1** - Hyperparameter Optimization (optimize before comparing)
-- **Phase 5.6** - Ensemble Learning (compare ensembles)
-- **Phase 5.9** - Cross-Validation Strategies (proper CV for fair comparison)
-- **Phase 5.11** - Error Analysis (understand why one model outperforms another)
+- **Phase 5.0001** - Hyperparameter Optimization (optimize before comparing)
+- **Phase 5.0006** - Ensemble Learning (compare ensembles)
+- **Phase 5.0009** - Cross-Validation Strategies (proper CV for fair comparison)
+- **Phase 5.0011** - Error Analysis (understand why one model outperforms another)

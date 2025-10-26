@@ -2,7 +2,7 @@
 """
 Implementation: Dispatcher Pipeline for Data Collection (rec_044)
 
-Implements Phase 0.13: Data Collection Pipeline with Dispatcher and Crawlers
+Implements Phase 0.0013: Data Collection Pipeline with Dispatcher and Crawlers
 
 This implementation creates a modular data collection pipeline that uses a dispatcher
 to route data to specific crawlers based on the data source. This facilitates the
@@ -41,7 +41,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional, List
 
 # Add project root to path for imports
-# From docs/phases/phase_0/0.13_dispatcher_pipeline/ go up 4 levels to project root
+# From docs/phases/phase_0/0.0013_dispatcher_pipeline/ go up 4 levels to project root
 current_file = Path(__file__).resolve()
 project_root = current_file.parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
@@ -60,7 +60,7 @@ logger = logging.getLogger(__name__)
 
 class DispatcherPipeline:
     """
-    Implementation of Phase 0.13: Dispatcher Pipeline
+    Implementation of Phase 0.0013: Dispatcher Pipeline
 
     Provides a unified interface for dispatching data collection tasks across
     multiple NBA data sources (ESPN, NBA API, Basketball Reference, hoopR, etc.)
@@ -235,7 +235,7 @@ class DispatcherPipeline:
 async def main():
     """Main execution function"""
     print("=" * 80)
-    print("Phase 0.13: Dispatcher Pipeline Implementation (rec_044)")
+    print("Phase 0.0013: Dispatcher Pipeline Implementation (rec_044)")
     print("=" * 80)
 
     # Initialize pipeline
@@ -289,7 +289,7 @@ async def main():
     # Cleanup
     await pipeline.cleanup()
 
-    print(f"\n✅ Phase 0.13 implementation complete!")
+    print(f"\n✅ Phase 0.0013 implementation complete!")
     print("\nNext steps:")
     print("  1. Integrate with ADCE autonomous loop")
     print("  2. Add DIMS tracking for dispatcher operations")

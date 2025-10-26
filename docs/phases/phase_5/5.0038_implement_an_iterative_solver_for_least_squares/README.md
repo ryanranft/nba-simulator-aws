@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.38_implement_an_iterative_solver_for_least_squares
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0038_implement_an_iterative_solver_for_least_squares
 python test_rec_061.py -v
 ```
 

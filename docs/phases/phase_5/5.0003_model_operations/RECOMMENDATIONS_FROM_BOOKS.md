@@ -85,7 +85,7 @@ This subdirectory contains recommendations from technical book analysis focused 
 3. **Phase 3:** A/B Testing Framework (Important)
 
 **Total Estimated Effort:** 3-4 weeks
-**Dependencies:** Phase 2 (Data Pipeline) and Phase 5.2 (Model Management) completion
+**Dependencies:** Phase 2 (Data Pipeline) and Phase 5.0002 (Model Management) completion
 
 
 

@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.93_utilize_object-oriented_programming_for_managing_cyclegan_co
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0093_utilize_object-oriented_programming_for_managing_cyclegan_co
 python test_rec_124.py -v
 ```
 

@@ -119,7 +119,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.145_develop_special_tokenizers
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0145_develop_special_tokenizers
 python test_rec_190.py -v
 ```
 

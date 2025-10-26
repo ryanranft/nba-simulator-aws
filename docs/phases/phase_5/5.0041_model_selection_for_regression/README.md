@@ -119,7 +119,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.41_model_selection_for_regression
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0041_model_selection_for_regression
 python test_rec_065.py -v
 ```
 
