@@ -23,16 +23,31 @@ Better access to different pieces of information. LLMs do not know everything, a
 ## Quick Start
 
 ```python
-from implement_rec_191 import ImplementEnhanceTheSystemByUsingExternalApis
+from implement_rec_191 import ExternalAPIManager, APIEndpoint, PermissionLevel
 
-# Initialize implementation
-impl = ImplementEnhanceTheSystemByUsingExternalApis()
-impl.setup()
+# Initialize manager
+manager = ExternalAPIManager()
+manager.setup()
 
-# Execute implementation
-results = impl.execute()
+# Register user with API key
+manager.security.register_api_key("your_api_key", "user123", PermissionLevel.READ)
 
-print(f"Implementation complete: {results}")
+# Make secure API call
+response = manager.call_api(
+    endpoint=APIEndpoint.NBA_STATS_PLAYBYPLAY,
+    params={"GameID": "0022100001"},
+    user_id="user123"
+)
+
+print(f"API Response: {response}")
+
+# Get usage statistics
+stats = manager.get_usage_stats("user123")
+print(f"Usage Stats: {stats}")
+
+# Get performance metrics
+metrics = manager.get_endpoint_metrics()
+print(f"Metrics: {metrics}")
 ```
 
 ---
@@ -93,15 +108,123 @@ impl = ImplementEnhanceTheSystemByUsingExternalApis(config=config)
 
 ## Usage Examples
 
-### Example 1: Basic Usage
+### Example 1: Basic NBA Stats API Call
 
 ```python
-# Basic implementation
-from implement_rec_191 import ImplementEnhanceTheSystemByUsingExternalApis
+from implement_rec_191 import ExternalAPIManager, APIEndpoint, PermissionLevel
 
-impl = ImplementEnhanceTheSystemByUsingExternalApis()
-impl.setup()
-results = impl.execute()
+# Initialize and setup
+manager = ExternalAPIManager()
+manager.setup()
+
+# Register user
+manager.security.register_api_key("nba_key_123", "analyst1", PermissionLevel.READ)
+
+# Fetch play-by-play data
+response = manager.call_api(
+    endpoint=APIEndpoint.NBA_STATS_PLAYBYPLAY,
+    params={"GameID": "0022100001", "StartPeriod": "1", "EndPeriod": "4"},
+    user_id="analyst1"
+)
+
+print(f"✅ Data retrieved: {response['status_code']}")
+```
+
+### Example 2: Custom API Configuration
+
+```python
+from implement_rec_191 import APIConfig, APIEndpoint, ExternalAPIManager
+
+# Create custom configuration
+custom_config = APIConfig(
+    endpoint=APIEndpoint.WEATHER_CURRENT,
+    rate_limit_per_minute=30,
+    timeout_seconds=15,
+    max_retries=5,
+    api_key="weather_api_key"
+)
+
+# Register custom endpoint
+manager = ExternalAPIManager()
+manager.setup()
+manager.register_endpoint(APIEndpoint.WEATHER_CURRENT, custom_config)
+
+# Use custom endpoint
+response = manager.call_api(
+    endpoint=APIEndpoint.WEATHER_CURRENT,
+    params={"q": "Los Angeles", "appid": "weather_api_key"},
+    user_id="system"
+)
+```
+
+### Example 3: Monitoring and Alerts
+
+```python
+# Make multiple API calls
+for game_id in game_ids:
+    try:
+        response = manager.call_api(
+            endpoint=APIEndpoint.NBA_STATS_BOXSCORE,
+            params={"GameID": game_id},
+            user_id="analyst1"
+        )
+    except Exception as e:
+        print(f"Error for game {game_id}: {e}")
+
+# Check metrics
+metrics = manager.get_endpoint_metrics(APIEndpoint.NBA_STATS_BOXSCORE.name)
+print(f"Success Rate: {metrics['success_rate']:.1%}")
+print(f"Avg Latency: {metrics['avg_latency_ms']:.0f}ms")
+
+# Check for alerts
+alerts = manager.get_alerts()
+if alerts:
+    print(f"⚠️ {len(alerts)} alerts triggered:")
+    for alert in alerts:
+        print(f"  - {alert['type']}: {alert['message']}")
+```
+
+### Example 4: Rate Limiting and Permissions
+
+```python
+# Register different user types
+manager.security.register_api_key("read_key", "viewer", PermissionLevel.READ)
+manager.security.register_api_key("write_key", "editor", PermissionLevel.WRITE)
+manager.security.register_api_key("admin_key", "admin", PermissionLevel.ADMIN)
+
+# Try to make request (rate limit enforced automatically)
+try:
+    response = manager.call_api(
+        endpoint=APIEndpoint.NBA_STATS_SCOREBOARD,
+        user_id="viewer"
+    )
+    print("✅ Request successful")
+except PermissionError as e:
+    print(f"❌ Rate limit exceeded: {e}")
+
+# Get usage statistics
+stats = manager.get_usage_stats("viewer")
+print(f"Today's usage: {stats['today_usage']} requests")
+```
+
+### Example 5: Response Validation
+
+```python
+# Register custom validation schema
+schema = {
+    "required_fields": ["resultSets"],
+    "field_types": {"resultSets": "list"},
+    "field_ranges": {}
+}
+manager.validator.register_schema("NBA_STATS_CUSTOM", schema)
+
+# Make validated request
+response = manager.call_api(
+    endpoint=APIEndpoint.NBA_STATS_PLAYBYPLAY,
+    user_id="analyst1"
+)
+# Response is automatically validated against schema
+# Raises ValueError if validation fails
 ```
 
 ---
