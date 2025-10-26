@@ -32,26 +32,26 @@ Phase 0 establishes the complete data collection infrastructure for the NBA temp
 
 | # | Sub-Phase | Status | Priority | Completed | Description |
 |---|-----------|--------|----------|-----------|-------------|
-| **0.1** | [Initial Data Collection](0.1_initial_data_collection/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 23, 2025 | ESPN data upload (172,719 files, 118GB) |
-| **0.2** | [hoopR Data Collection](0.2_hoopr_data_collection/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 9, 2025 (Validated: Oct 23, 2025) | hoopR package data (410 files, 8.2GB) |
-| **0.3** | [Kaggle Historical Database](0.3_kaggle_historical_database/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Pre-project (Validated: Oct 23, 2025) | Historical database (66K games, 1946-2023, EXPANDED) |
-| **0.4** | [Basketball Reference](0.4_basketball_reference/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Oct 25, 2025 (ADCE Integration) | Basketball Reference ADCE Integration (444 files + 43 data types configured, NBA + G League) |
-| **0.7** | [Odds API Data](0.7_odds_api_data/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Oct 23, 2025 (Validated) | Betting odds integration (odds-api scraper, 5 tables, 10+ bookmakers) |
-| **0.8** | [Security Implementation](0.8_security_implementation/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 23, 2025 | 13 security variations (rec_034-047) |
-| **0.9** | [Data Extraction](0.9_data_extraction/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 23-24, 2025 | **Full validation complete: 93.1% success** (160,609/172,433 files, 100/100 quality, all schemas working) |
-| **0.10** | [PostgreSQL JSONB Storage](0.10_postgresql_jsonb_storage/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 25, 2025 | JSONB columns for flexible schema (rec_033) - Deployed & Tested |
-| **0.11** | [RAG Pipeline with pgvector](0.11_rag_pipeline_pgvector/README.md) | ✅ COMPLETE ✓ | 🟡 MEDIUM | Oct 25, 2025 | Vector embeddings for RAG (rec_034) - 3,584 lines, 19/24 tests passing |
-| **0.12** | [RAG + LLM Integration](0.12_rag_llm_integration/README.md) | ✅ COMPLETE ✓ | 🟡 MEDIUM | Oct 25, 2025 | Natural language query interface - 2,412 lines, 7 files (rec_188) |
-| **0.13** | [Dispatcher Pipeline](0.13_dispatcher_pipeline/README.md) | ✅ COMPLETE ✓ | 🟡 IMPORTANT | Oct 23, 2025 | Modular data collection routing (rec_044/190) |
-| **0.14** | [Error Analysis](0.14_error_analysis/README.md) | ✅ COMPLETE ✓ | 🟡 IMPORTANT | Oct 23, 2025 | Reduce hallucinations in outputs (rec_192) |
-| **0.15** | [Information Availability](0.15_information_availability/README.md) | ✅ COMPLETE ✓ | 🟡 MEDIUM | Oct 23, 2025 | Increase data accessibility (rec_193) |
-| **0.16** | [Robust Architecture](0.16_robust_architecture/README.md) | ✅ COMPLETE ✓ | 🟡 IMPORTANT | Oct 23, 2025 | Multi-source search system (rec_189) |
-| **0.17** | [External APIs](0.17_external_apis/README.md) | ✅ COMPLETE ✓ | 🟡 MEDIUM | Oct 23, 2025 | Enhanced external API integration (rec_194) |
-| **0.18** | **[Autonomous Data Collection (ADCE)](0.18_autonomous_data_collection/README.md)** | ✅ **COMPLETE** | ⭐ **CRITICAL** | **Oct 22, 2025** | **24/7 autonomous gap detection & filling** |
-| **0.19** | [Testing Infrastructure & CI/CD](0.0019_testing_infrastructure_ci_cd/README.md) | ⏸️ PENDING | ⭐ CRITICAL | - | pytest framework, GitHub Actions, pre-commit hooks (from Phase 6.0) |
-| **0.20** | [Monitoring & Observability](0.0020_monitoring_observability/README.md) | ⏸️ PENDING | 🟡 IMPORTANT | - | CloudWatch metrics/alarms, performance monitoring, cost tracking (from Phase 6.1) |
-| **0.21** | [Documentation & API Standards](0.0021_documentation_api_standards/README.md) | ⏸️ PENDING | 🟡 MEDIUM | - | API documentation (Swagger), developer guides, ADRs (from Phase 6.2) |
-| **0.22** | [Data Inventory & Gap Analysis](0.0022_data_inventory_gap_analysis/README.md) | ✅ COMPLETE ✓ | 🟡 IMPORTANT | Oct 11, 2025 | Recursive data discovery, multi-source reconciliation, master inventory (from Phase 8) |
+| **0.0001** | [Initial Data Collection](0.0001_initial_data_collection/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 23, 2025 | ESPN data upload (172,719 files, 118GB) |
+| **0.0002** | [hoopR Data Collection](0.0002_hoopr_data_collection/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 9, 2025 (Validated: Oct 23, 2025) | hoopR package data (410 files, 8.2GB) |
+| **0.0003** | [Kaggle Historical Database](0.0003_kaggle_historical_database/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Pre-project (Validated: Oct 23, 2025) | Historical database (66K games, 1946-2023, EXPANDED) |
+| **0.0004** | [Basketball Reference](0.0004_basketball_reference/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Oct 25, 2025 (ADCE Integration) | Basketball Reference ADCE Integration (444 files + 43 data types configured, NBA + G League) |
+| **0.0007** | [Odds API Data](0.0007_odds_api_data/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Oct 23, 2025 (Validated) | Betting odds integration (odds-api scraper, 5 tables, 10+ bookmakers) |
+| **0.0008** | [Security Implementation](0.0008_security_implementation/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 23, 2025 | 13 security variations (rec_034-047) |
+| **0.0009** | [Data Extraction](0.0009_data_extraction/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 23-24, 2025 | **Full validation complete: 93.1% success** (160,609/172,433 files, 100/100 quality, all schemas working) |
+| **0.0010** | [PostgreSQL JSONB Storage](0.0010_postgresql_jsonb_storage/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 25, 2025 | JSONB columns for flexible schema (rec_033) - Deployed & Tested |
+| **0.0011** | [RAG Pipeline with pgvector](0.0011_rag_pipeline_pgvector/README.md) | ✅ COMPLETE ✓ | 🟡 MEDIUM | Oct 25, 2025 | Vector embeddings for RAG (rec_034) - 3,584 lines, 19/24 tests passing |
+| **0.0012** | [RAG + LLM Integration](0.0012_rag_llm_integration/README.md) | ✅ COMPLETE ✓ | 🟡 MEDIUM | Oct 25, 2025 | Natural language query interface - 2,412 lines, 7 files (rec_188) |
+| **0.0013** | [Dispatcher Pipeline](0.0013_dispatcher_pipeline/README.md) | ✅ COMPLETE ✓ | 🟡 IMPORTANT | Oct 23, 2025 | Modular data collection routing (rec_044/190) |
+| **0.0014** | [Error Analysis](0.0014_error_analysis/README.md) | ✅ COMPLETE ✓ | 🟡 IMPORTANT | Oct 23, 2025 | Reduce hallucinations in outputs (rec_192) |
+| **0.0015** | [Information Availability](0.0015_information_availability/README.md) | ✅ COMPLETE ✓ | 🟡 MEDIUM | Oct 23, 2025 | Increase data accessibility (rec_193) |
+| **0.0016** | [Robust Architecture](0.0016_robust_architecture/README.md) | ✅ COMPLETE ✓ | 🟡 IMPORTANT | Oct 23, 2025 | Multi-source search system (rec_189) |
+| **0.0017** | [External APIs](0.0017_external_apis/README.md) | ✅ COMPLETE ✓ | 🟡 MEDIUM | Oct 23, 2025 | Enhanced external API integration (rec_194) |
+| **0.0018** | **[Autonomous Data Collection (ADCE)](0.0018_autonomous_data_collection/README.md)** | ✅ **COMPLETE** | ⭐ **CRITICAL** | **Oct 22, 2025** | **24/7 autonomous gap detection & filling** |
+| **0.0019** | [Testing Infrastructure & CI/CD](0.0019_testing_infrastructure_ci_cd/README.md) | ⏸️ PENDING | ⭐ CRITICAL | - | pytest framework, GitHub Actions, pre-commit hooks (from Phase 6.0) |
+| **0.0020** | [Monitoring & Observability](0.0020_monitoring_observability/README.md) | ⏸️ PENDING | 🟡 IMPORTANT | - | CloudWatch metrics/alarms, performance monitoring, cost tracking (from Phase 6.1) |
+| **0.0021** | [Documentation & API Standards](0.0021_documentation_api_standards/README.md) | ⏸️ PENDING | 🟡 MEDIUM | - | API documentation (Swagger), developer guides, ADRs (from Phase 6.2) |
+| **0.0022** | [Data Inventory & Gap Analysis](0.0022_data_inventory_gap_analysis/README.md) | ✅ COMPLETE ✓ | 🟡 IMPORTANT | Oct 11, 2025 | Recursive data discovery, multi-source reconciliation, master inventory (from Phase 8) |
 
 ---
 
