@@ -40,3 +40,10 @@ repos:
         language: script
         pass_filenames: false
         always_run: true
+
+      - id: validate-phase-numbering
+        name: Validate 4-digit phase numbering (ADR-010)
+        entry: scripts/maintenance/validate_phase_numbering.sh
+        language: script
+        files: '^(docs/phases/|tests/phases/|validators/phases/)'
+        pass_filenames: false
