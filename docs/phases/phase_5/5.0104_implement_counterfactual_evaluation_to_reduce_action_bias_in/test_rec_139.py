@@ -12,7 +12,9 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from implement_rec_139 import ImplementCounterfactualEvaluationToReduceActionBiasInRecommenderSystems
+from implement_rec_139 import (
+    ImplementCounterfactualEvaluationToReduceActionBiasInRecommenderSystems,
+)
 
 
 class TestRec139(unittest.TestCase):
@@ -20,11 +22,13 @@ class TestRec139(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.impl = ImplementCounterfactualEvaluationToReduceActionBiasInRecommenderSystems()
+        self.impl = (
+            ImplementCounterfactualEvaluationToReduceActionBiasInRecommenderSystems()
+        )
 
     def tearDown(self):
         """Clean up after tests."""
-        if hasattr(self.impl, 'cleanup'):
+        if hasattr(self.impl, "cleanup"):
             self.impl.cleanup()
 
     def test_initialization(self):
@@ -35,7 +39,7 @@ class TestRec139(unittest.TestCase):
     def test_setup(self):
         """Test setup method."""
         result = self.impl.setup()
-        self.assertTrue(result['success'])
+        self.assertTrue(result["success"])
         self.assertTrue(self.impl.initialized)
 
     def test_execute_without_setup(self):
@@ -47,7 +51,7 @@ class TestRec139(unittest.TestCase):
         """Test successful execution."""
         self.impl.setup()
         result = self.impl.execute()
-        self.assertTrue(result['success'])
+        self.assertTrue(result["success"])
 
     def test_validate(self):
         """Test validation method."""

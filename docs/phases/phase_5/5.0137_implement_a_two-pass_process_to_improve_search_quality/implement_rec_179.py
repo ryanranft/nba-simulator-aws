@@ -46,19 +46,16 @@ class ImplementATwopassProcessToImproveSearchQuality:
             Setup results
         """
         logger.info("Setting up implementation...")
-        
+
         # TODO: Implement setup logic
         # - Initialize resources
         # - Validate configuration
         # - Prepare dependencies
-        
+
         self.initialized = True
         logger.info("✅ Setup complete")
-        
-        return {
-            "success": True,
-            "message": "Setup completed successfully"
-        }
+
+        return {"success": True, "message": "Setup completed successfully"}
 
     def execute(self) -> Dict[str, Any]:
         """
@@ -69,21 +66,18 @@ class ImplementATwopassProcessToImproveSearchQuality:
         """
         if not self.initialized:
             raise RuntimeError("Must call setup() before execute()")
-        
+
         logger.info("Executing implementation...")
-        
+
         # TODO: Implement core logic
         # Implementation steps:
         # Step 1: Make sure the pipeline works.
         # Step 2: Develop a method to reorder the responses with the LLM
         # Step 3: Report on the results of both types of searches
-        
+
         logger.info("✅ Execution complete")
-        
-        return {
-            "success": True,
-            "message": "Execution completed successfully"
-        }
+
+        return {"success": True, "message": "Execution completed successfully"}
 
     def validate(self) -> bool:
         """
@@ -93,12 +87,12 @@ class ImplementATwopassProcessToImproveSearchQuality:
             True if validation passes
         """
         logger.info("Validating implementation...")
-        
+
         # TODO: Implement validation logic
         # - Verify outputs
         # - Check data quality
         # - Validate integration points
-        
+
         logger.info("✅ Validation complete")
         return True
 
@@ -114,22 +108,22 @@ def main():
     print(f"=" * 80)
     print(f"Implement a Two-Pass Process to Improve Search Quality")
     print(f"=" * 80)
-    
+
     # Initialize
     impl = ImplementATwopassProcessToImproveSearchQuality()
-    
+
     # Setup
     setup_result = impl.setup()
     print(f"\nSetup: {setup_result['message']}")
-    
+
     # Execute
     exec_result = impl.execute()
     print(f"Execution: {exec_result['message']}")
-    
+
     # Validate
     is_valid = impl.validate()
     print(f"Validation: {'✅ Passed' if is_valid else '❌ Failed'}")
-    
+
     # Cleanup
     impl.cleanup()
     print(f"\n✅ Implementation complete!")

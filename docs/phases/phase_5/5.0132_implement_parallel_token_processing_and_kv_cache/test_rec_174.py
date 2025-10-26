@@ -24,7 +24,7 @@ class TestRec174(unittest.TestCase):
 
     def tearDown(self):
         """Clean up after tests."""
-        if hasattr(self.impl, 'cleanup'):
+        if hasattr(self.impl, "cleanup"):
             self.impl.cleanup()
 
     def test_initialization(self):
@@ -35,7 +35,7 @@ class TestRec174(unittest.TestCase):
     def test_setup(self):
         """Test setup method."""
         result = self.impl.setup()
-        self.assertTrue(result['success'])
+        self.assertTrue(result["success"])
         self.assertTrue(self.impl.initialized)
 
     def test_execute_without_setup(self):
@@ -47,7 +47,7 @@ class TestRec174(unittest.TestCase):
         """Test successful execution."""
         self.impl.setup()
         result = self.impl.execute()
-        self.assertTrue(result['success'])
+        self.assertTrue(result["success"])
 
     def test_validate(self):
         """Test validation method."""

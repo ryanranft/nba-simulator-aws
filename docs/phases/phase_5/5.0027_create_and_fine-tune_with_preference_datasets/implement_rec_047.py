@@ -46,19 +46,16 @@ class CreateAndFinetuneWithPreferenceDatasets:
             Setup results
         """
         logger.info("Setting up implementation...")
-        
+
         # TODO: Implement setup logic
         # - Initialize resources
         # - Validate configuration
         # - Prepare dependencies
-        
+
         self.initialized = True
         logger.info("✅ Setup complete")
-        
-        return {
-            "success": True,
-            "message": "Setup completed successfully"
-        }
+
+        return {"success": True, "message": "Setup completed successfully"}
 
     def execute(self) -> Dict[str, Any]:
         """
@@ -69,22 +66,19 @@ class CreateAndFinetuneWithPreferenceDatasets:
         """
         if not self.initialized:
             raise RuntimeError("Must call setup() before execute()")
-        
+
         logger.info("Executing implementation...")
-        
+
         # TODO: Implement core logic
         # Implementation steps:
         # Step 1: Generate a preference dataset with chosen and rejected responses.
         # Step 2: Implement DPO with a specific reward model (e.g., ArmoRM-Llama3-8B-v0.1).
         # Step 3: Apply the DPO to a smaller task (e.g., generate SQL from natural language).
         # Step 4: Assess the output in terms of reasoning, verbosity, and likelihood to match preferences.
-        
+
         logger.info("✅ Execution complete")
-        
-        return {
-            "success": True,
-            "message": "Execution completed successfully"
-        }
+
+        return {"success": True, "message": "Execution completed successfully"}
 
     def validate(self) -> bool:
         """
@@ -94,12 +88,12 @@ class CreateAndFinetuneWithPreferenceDatasets:
             True if validation passes
         """
         logger.info("Validating implementation...")
-        
+
         # TODO: Implement validation logic
         # - Verify outputs
         # - Check data quality
         # - Validate integration points
-        
+
         logger.info("✅ Validation complete")
         return True
 
@@ -115,22 +109,22 @@ def main():
     print(f"=" * 80)
     print(f"Create and Fine-Tune with Preference Datasets")
     print(f"=" * 80)
-    
+
     # Initialize
     impl = CreateAndFinetuneWithPreferenceDatasets()
-    
+
     # Setup
     setup_result = impl.setup()
     print(f"\nSetup: {setup_result['message']}")
-    
+
     # Execute
     exec_result = impl.execute()
     print(f"Execution: {exec_result['message']}")
-    
+
     # Validate
     is_valid = impl.validate()
     print(f"Validation: {'✅ Passed' if is_valid else '❌ Failed'}")
-    
+
     # Cleanup
     impl.cleanup()
     print(f"\n✅ Implementation complete!")

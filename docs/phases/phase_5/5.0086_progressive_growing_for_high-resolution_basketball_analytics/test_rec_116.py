@@ -12,7 +12,9 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from implement_rec_116 import ProgressiveGrowingForHighresolutionBasketballAnalyticsVisualizations
+from implement_rec_116 import (
+    ProgressiveGrowingForHighresolutionBasketballAnalyticsVisualizations,
+)
 
 
 class TestRec116(unittest.TestCase):
@@ -20,11 +22,13 @@ class TestRec116(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.impl = ProgressiveGrowingForHighresolutionBasketballAnalyticsVisualizations()
+        self.impl = (
+            ProgressiveGrowingForHighresolutionBasketballAnalyticsVisualizations()
+        )
 
     def tearDown(self):
         """Clean up after tests."""
-        if hasattr(self.impl, 'cleanup'):
+        if hasattr(self.impl, "cleanup"):
             self.impl.cleanup()
 
     def test_initialization(self):
@@ -35,7 +39,7 @@ class TestRec116(unittest.TestCase):
     def test_setup(self):
         """Test setup method."""
         result = self.impl.setup()
-        self.assertTrue(result['success'])
+        self.assertTrue(result["success"])
         self.assertTrue(self.impl.initialized)
 
     def test_execute_without_setup(self):
@@ -47,7 +51,7 @@ class TestRec116(unittest.TestCase):
         """Test successful execution."""
         self.impl.setup()
         result = self.impl.execute()
-        self.assertTrue(result['success'])
+        self.assertTrue(result["success"])
 
     def test_validate(self):
         """Test validation method."""

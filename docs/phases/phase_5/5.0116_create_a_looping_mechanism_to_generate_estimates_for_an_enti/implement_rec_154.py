@@ -46,19 +46,16 @@ class CreateALoopingMechanismToGenerateEstimatesForAnEntireSeason:
             Setup results
         """
         logger.info("Setting up implementation...")
-        
+
         # TODO: Implement setup logic
         # - Initialize resources
         # - Validate configuration
         # - Prepare dependencies
-        
+
         self.initialized = True
         logger.info("✅ Setup complete")
-        
-        return {
-            "success": True,
-            "message": "Setup completed successfully"
-        }
+
+        return {"success": True, "message": "Setup completed successfully"}
 
     def execute(self) -> Dict[str, Any]:
         """
@@ -69,22 +66,19 @@ class CreateALoopingMechanismToGenerateEstimatesForAnEntireSeason:
         """
         if not self.initialized:
             raise RuntimeError("Must call setup() before execute()")
-        
+
         logger.info("Executing implementation...")
-        
+
         # TODO: Implement core logic
         # Implementation steps:
         # Step 1: Create a loop in R to iterate over all dates in a season, excluding the first one.
         # Step 2: For each date, base the forecast of upcoming fixtures on the results leading up to the fixtures on that date.
         # Step 3: Store the generated estimates in a data structure.
         # Step 4: Write the estimates to a .csv file for analysis and reporting.
-        
+
         logger.info("✅ Execution complete")
-        
-        return {
-            "success": True,
-            "message": "Execution completed successfully"
-        }
+
+        return {"success": True, "message": "Execution completed successfully"}
 
     def validate(self) -> bool:
         """
@@ -94,12 +88,12 @@ class CreateALoopingMechanismToGenerateEstimatesForAnEntireSeason:
             True if validation passes
         """
         logger.info("Validating implementation...")
-        
+
         # TODO: Implement validation logic
         # - Verify outputs
         # - Check data quality
         # - Validate integration points
-        
+
         logger.info("✅ Validation complete")
         return True
 
@@ -115,22 +109,22 @@ def main():
     print(f"=" * 80)
     print(f"Create a Looping Mechanism to Generate Estimates for an Entire Season")
     print(f"=" * 80)
-    
+
     # Initialize
     impl = CreateALoopingMechanismToGenerateEstimatesForAnEntireSeason()
-    
+
     # Setup
     setup_result = impl.setup()
     print(f"\nSetup: {setup_result['message']}")
-    
+
     # Execute
     exec_result = impl.execute()
     print(f"Execution: {exec_result['message']}")
-    
+
     # Validate
     is_valid = impl.validate()
     print(f"Validation: {'✅ Passed' if is_valid else '❌ Failed'}")
-    
+
     # Cleanup
     impl.cleanup()
     print(f"\n✅ Implementation complete!")
