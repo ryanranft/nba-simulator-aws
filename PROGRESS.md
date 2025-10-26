@@ -645,5 +645,15 @@ Developer: Ryan Ranft
 GitHub: https://github.com/ryanranft
 Project: https://github.com/ryanranft/nba-simulator-aws
 
-Last Updated: 2025-10-24
+Last Updated: 2025-10-26
 Version: Phase 0 Complete - Data Extraction Validated (93.1% success, 160K+ files)
+
+## Recent Updates
+
+**2025-10-26:** ✅ **ADR-010 Implementation Complete** - 4-Digit Sub-Phase Numbering System
+- Implemented 4-digit sub-phase format (N.MMMM) for Phase 0 & 5
+- Added pre-commit hook automation for validation
+- Created templates for future phases
+- All documentation updated (CLAUDE.md, QUICKSTART.md, phase indexes)
+- See `docs/adr/010-four-digit-subphase-numbering.md` for full details
+- Archived tracking system: `docs/archive/refactoring/adr-010-tracking-2025-10-26/`
