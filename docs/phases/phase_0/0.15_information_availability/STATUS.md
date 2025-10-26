@@ -130,4 +130,4 @@ Enables LLMs to use information that it might not know of.
 - ✅ Tests passing: October 25, 2025 (59/59 tests, 100% pass rate)
 - ✅ Integration validated: All dependencies (0.10, 0.11, 0.12) working
 - ✅ Production-ready: Full error handling, logging, and documentation
-- ⏸️ Committed: Pending git commits (in progress)
+- ✅ Committed: 3 commits pushed to origin/main (ca697e0, 2f69117, d01a13e)
