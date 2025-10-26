@@ -92,12 +92,16 @@ class PRMSConfig:
     def _setup_logging(self):
         """Setup logging based on config."""
         log_config = self.config.get("logging", {})
-        log_file = PROJECT_ROOT / log_config.get("file", "inventory/outputs/prms/prms.log")
+        log_file = PROJECT_ROOT / log_config.get(
+            "file", "inventory/outputs/prms/prms.log"
+        )
         log_file.parent.mkdir(parents=True, exist_ok=True)
 
         logging.basicConfig(
             level=getattr(logging, log_config.get("level", "INFO")),
-            format=log_config.get("format", "%(asctime)s - %(levelname)s - %(message)s"),
+            format=log_config.get(
+                "format", "%(asctime)s - %(levelname)s - %(message)s"
+            ),
             handlers=[
                 logging.FileHandler(log_file),
                 logging.StreamHandler(sys.stdout),
@@ -227,7 +231,9 @@ class PathReferenceScanner:
         patterns = {}
 
         # Phase directory patterns
-        patterns["phase_dir"] = re.compile(r"(docs|tests|validators)/phases/phase_([6-9])/")
+        patterns["phase_dir"] = re.compile(
+            r"(docs|tests|validators)/phases/phase_([6-9])/"
+        )
 
         # Phase prose references
         patterns["phase_prose"] = re.compile(r"\b(P|p)hase\s+([6-9])\b")
@@ -384,7 +390,9 @@ class PathReferenceClassifier:
             # Prose reference: "Phase 0.0.0019/0.0.0020/0.0.0021" → "Phase 0.0019/0.0020/0.0021"
             sub_phases = mapping.get("sub_phase_map", {})
             if sub_phases:
-                sub_phase_list = "/".join(f"{new_phase}.{sp}" for sp in sub_phases.values())
+                sub_phase_list = "/".join(
+                    f"{new_phase}.{sp}" for sp in sub_phases.values()
+                )
                 return f"Phase {sub_phase_list}"
             else:
                 return f"Phase {new_phase}"
@@ -395,7 +403,9 @@ class PathReferenceClassifier:
 
         elif "phase_2_scripts" in ref.pattern:
             # Special case
-            return mapping.get("special_cases", {}).get("phase_2_scripts", "phase_2_scripts")
+            return mapping.get("special_cases", {}).get(
+                "phase_2_scripts", "phase_2_scripts"
+            )
 
         elif "phase_2_agent" in ref.pattern:
             # Special case for agents
@@ -413,7 +423,9 @@ class PathReferenceClassifier:
             return match.group(1)
         return None
 
-    def _get_classification_summary(self, references: List[PathReference]) -> Dict[str, int]:
+    def _get_classification_summary(
+        self, references: List[PathReference]
+    ) -> Dict[str, int]:
         """Get summary of classifications."""
         summary = defaultdict(int)
         for ref in references:
@@ -490,7 +502,9 @@ class PathReferenceFixer:
             if self._fix_file(file_path, refs):
                 fixes_count += len(refs)
 
-        self.logger.info(f"Applied {fixes_count} fixes across {len(refs_by_file)} files")
+        self.logger.info(
+            f"Applied {fixes_count} fixes across {len(refs_by_file)} files"
+        )
         return fixes_count
 
     def _fix_file(self, file_path: str, refs: List[PathReference]) -> bool:
@@ -504,7 +518,9 @@ class PathReferenceFixer:
 
             # Create backup if configured
             if self.config.get("fix.create_backup", True) and not self.dry_run:
-                backup_path = str(full_path) + self.config.get("fix.backup_suffix", ".prms_backup")
+                backup_path = str(full_path) + self.config.get(
+                    "fix.backup_suffix", ".prms_backup"
+                )
                 with open(backup_path, "w", encoding="utf-8") as f:
                     f.writelines(lines)
 
@@ -553,7 +569,9 @@ class PathReferenceReporter:
 
     def generate_reports(self, references: List[PathReference]):
         """Generate all configured report formats."""
-        output_dir = PROJECT_ROOT / self.config.get("report.output_dir", "inventory/outputs/prms/")
+        output_dir = PROJECT_ROOT / self.config.get(
+            "report.output_dir", "inventory/outputs/prms/"
+        )
         output_dir.mkdir(parents=True, exist_ok=True)
 
         formats = self.config.get("report.formats", ["markdown", "json"])
@@ -566,7 +584,9 @@ class PathReferenceReporter:
             elif fmt == "html":
                 self._generate_html_report(references, output_dir)
 
-    def _generate_markdown_report(self, references: List[PathReference], output_dir: Path):
+    def _generate_markdown_report(
+        self, references: List[PathReference], output_dir: Path
+    ):
         """Generate Markdown report."""
         report_path = output_dir / "prms_audit_report.md"
         self.logger.info(f"Generating Markdown report: {report_path}")
@@ -647,7 +667,9 @@ class PathReferenceReporter:
             files_skipped = set(ref.file_path for ref in skipped)
             for file in sorted(files_skipped):
                 count = sum(1 for ref in skipped if ref.file_path == file)
-                reason = next((ref.reason for ref in skipped if ref.file_path == file), "N/A")
+                reason = next(
+                    (ref.reason for ref in skipped if ref.file_path == file), "N/A"
+                )
                 lines.append(f"- `{file}` ({count} refs) - {reason}")
             lines.append("")
 
@@ -768,23 +790,40 @@ def main():
 
     # Scan command
     scan_parser = subparsers.add_parser("scan", help="Scan for path references")
-    scan_parser.add_argument("--classify", action="store_true", help="Also classify references")
-    scan_parser.add_argument("--report", action="store_true", help="Also generate report")
+    scan_parser.add_argument(
+        "--classify", action="store_true", help="Also classify references"
+    )
+    scan_parser.add_argument(
+        "--report", action="store_true", help="Also generate report"
+    )
 
     # Classify command
-    classify_parser = subparsers.add_parser("classify", help="Classify scanned references")
+    classify_parser = subparsers.add_parser(
+        "classify", help="Classify scanned references"
+    )
 
     # Validate command
     validate_parser = subparsers.add_parser("validate", help="Validate path references")
 
     # Fix command
     fix_parser = subparsers.add_parser("fix", help="Fix path references")
-    fix_parser.add_argument("--dry-run", action="store_true", help="Show what would be fixed without making changes")
-    fix_parser.add_argument("--yes", action="store_true", help="Skip confirmation prompt")
+    fix_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be fixed without making changes",
+    )
+    fix_parser.add_argument(
+        "--yes", action="store_true", help="Skip confirmation prompt"
+    )
 
     # Report command
     report_parser = subparsers.add_parser("report", help="Generate audit report")
-    report_parser.add_argument("--format", choices=["markdown", "json", "html", "all"], default="all", help="Report format")
+    report_parser.add_argument(
+        "--format",
+        choices=["markdown", "json", "html", "all"],
+        default="all",
+        help="Report format",
+    )
 
     # Check command
     check_parser = subparsers.add_parser("check", help="Check specific file")
@@ -806,7 +845,9 @@ def main():
         references = scanner.scan()
 
         # Save to JSON
-        output_dir = PROJECT_ROOT / config.get("report.output_dir", "inventory/outputs/prms/")
+        output_dir = PROJECT_ROOT / config.get(
+            "report.output_dir", "inventory/outputs/prms/"
+        )
         output_dir.mkdir(parents=True, exist_ok=True)
         refs_file = output_dir / "path_references.json"
 
@@ -847,7 +888,11 @@ def main():
 
     elif args.command == "classify":
         # Load previous scan
-        refs_file = PROJECT_ROOT / config.get("report.output_dir", "inventory/outputs/prms/") / "path_references.json"
+        refs_file = (
+            PROJECT_ROOT
+            / config.get("report.output_dir", "inventory/outputs/prms/")
+            / "path_references.json"
+        )
         if not refs_file.exists():
             print(f"❌ No scan data found. Run 'prms_cli.py scan' first.")
             sys.exit(1)
@@ -887,7 +932,11 @@ def main():
 
     elif args.command == "validate":
         # Load scan
-        refs_file = PROJECT_ROOT / config.get("report.output_dir", "inventory/outputs/prms/") / "path_references.json"
+        refs_file = (
+            PROJECT_ROOT
+            / config.get("report.output_dir", "inventory/outputs/prms/")
+            / "path_references.json"
+        )
         if not refs_file.exists():
             print(f"❌ No scan data found. Run 'prms_cli.py scan' first.")
             sys.exit(1)
@@ -915,7 +964,11 @@ def main():
 
     elif args.command == "fix":
         # Load scan
-        refs_file = PROJECT_ROOT / config.get("report.output_dir", "inventory/outputs/prms/") / "path_references.json"
+        refs_file = (
+            PROJECT_ROOT
+            / config.get("report.output_dir", "inventory/outputs/prms/")
+            / "path_references.json"
+        )
         if not refs_file.exists():
             print(f"❌ No scan data found. Run 'prms_cli.py scan --classify' first.")
             sys.exit(1)
@@ -942,7 +995,9 @@ def main():
         fixable = sum(
             1
             for r in references
-            if r.category == "MUST_UPDATE" and r.confidence >= auto_fix_threshold and r.suggested_fix
+            if r.category == "MUST_UPDATE"
+            and r.confidence >= auto_fix_threshold
+            and r.suggested_fix
         )
 
         print(f"Found {fixable} references that can be auto-fixed.")
@@ -963,7 +1018,11 @@ def main():
 
     elif args.command == "report":
         # Load scan
-        refs_file = PROJECT_ROOT / config.get("report.output_dir", "inventory/outputs/prms/") / "path_references.json"
+        refs_file = (
+            PROJECT_ROOT
+            / config.get("report.output_dir", "inventory/outputs/prms/")
+            / "path_references.json"
+        )
         if not refs_file.exists():
             print(f"❌ No scan data found. Run 'prms_cli.py scan --classify' first.")
             sys.exit(1)
