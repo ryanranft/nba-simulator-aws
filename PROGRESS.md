@@ -424,7 +424,7 @@ Data:
 
 
 Cost Estimates
-PhaseMonthly CostOne-Time SetupPhase 0 (S3)$2.74CompletePhase 2 (Glue)+$13~6-8 hours devPhase 3 (RDS)+$29~2-3 hours setupPhase 4 (EC2)+$5-15~1 week devPhase 5 (SageMaker)+$50~2-3 weeks devTotal$95-130/month~1 month total dev
+PhaseMonthly CostOne-Time SetupPhase 0 (S3)$2.74CompletePhase 2 (PBP to Box Score)$0~12 weeks devPhase 3 (RDS)+$29~2-3 hours setupPhase 4 (EC2)+$5-15~1 week devPhase 5 (SageMaker)+$50~2-3 weeks devPhase 6 (Glue - Deferred)+$13DeferredTotal$82-117/month~1 month total dev
 Budget Target: $150/month (includes buffer)
 See PROGRESS.md for detailed phase-by-phase breakdown with time estimates.
 
@@ -504,7 +504,7 @@ Key Technologies
 AWS Services
 
 S3 - Raw data lake (146K files, 119 GB)
-Glue - Schema discovery and ETL (10% field extraction)
+Glue - Schema discovery and ETL (Phase 6 - deferred, Python ETL working)
 RDS PostgreSQL - Structured data storage (~12 GB)
 EC2 - Simulation compute (t3.medium or similar)
 SageMaker - ML model training and deployment
@@ -535,20 +535,19 @@ Data Pipeline Workflow
 1. Data Ingestion (Complete)
     146K JSON files → S3 bucket
 
-2. Schema Discovery (Pending)
-    AWS Glue Crawler → Data Catalog
+2. PBP to Box Score Generation (Pending - Phase 2)
+    Play-by-play events → Temporal box score snapshots
 
-3. ETL Processing (Pending)
-    Glue ETL job → Extract 10% fields → Parquet
+3. Data Loading (Pending)
+    Python ETL → RDS PostgreSQL
 
-4. Data Loading (Pending)
-    Parquet files → RDS PostgreSQL
-
-5. Simulation (Pending)
+4. Simulation (Pending)
     Python scripts on EC2 → Game outcomes
 
-6. ML Training (Pending)
+5. ML Training (Pending)
     SageMaker → Prediction models
+
+Note: AWS Glue (Phase 6) deferred - Python ETL working fine
 
 Project Structure
 nba-simulator-aws/
@@ -597,10 +596,10 @@ bash   bash scripts/shell/pre_push_inspector.sh full  # Complete inspection
 See QUICKSTART.md for complete workflow commands.
 
 Next Steps
-See PROGRESS.md for detailed implementation plan. Current priority:
+See PHASE_2_INDEX.md for detailed implementation plan. Current priority:
 
-Phase 2.1: Set up AWS Glue Crawler (~45 min, adds $1/month)
-Phase 2.2: Create Glue ETL job (~6-8 hrs dev, adds $13/month)
+Phase 1: Multi-Source Data Integration (⏸️ PENDING)
+Phase 2: Play-by-Play to Box Score Generation (⏸️ PENDING, 9 sub-phases, ~12 weeks)
 Phase 3: Provision RDS PostgreSQL (~2-3 hrs, adds $29/month)
 
 

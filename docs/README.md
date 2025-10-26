@@ -29,14 +29,15 @@ This index helps Claude Code and developers find the right documentation efficie
 - **PROGRESS.md** - Current phase status, session context, cost tracking
 
 ### Phase Implementation
-- **docs/phases/phase_0/PHASE_0_INDEX.md** - Data collection (🔄 IN PROGRESS 4/16 complete, **ADCE autonomous system** operational)
+- **docs/phases/phase_0/PHASE_0_INDEX.md** - Data Foundation & Infrastructure (🔄 IN PROGRESS 17/20 complete)
+  - Includes: Data collection, Testing, Monitoring, Documentation, Data Audit
   - **NEW:** [Phase 0.18: Autonomous Data Collection](phases/phase_0/0.18_autonomous_data_collection/README.md) - 24/7 self-healing system
 - **docs/phases/PHASE_1_INDEX.md** - Multi-source integration (⏸️ Pending)
-- **docs/phases/PHASE_2_INDEX.md** - ETL pipeline (✅ Complete)
+- **docs/phases/PHASE_2_INDEX.md** - Play-by-Play to Box Score (⏸️ Pending, 9 sub-phases, ~12 weeks)
 - **docs/phases/PHASE_3_INDEX.md** - RDS setup (✅ Complete)
 - **docs/phases/PHASE_4_INDEX.md** - Simulation (✅ Complete)
 - **docs/phases/PHASE_5_INDEX.md** - ML models (✅ Complete)
-- **docs/phases/PHASE_6_INDEX.md** - Advanced features (✅ Complete)
+- **docs/phases/PHASE_6_INDEX.md** - AWS Glue ETL (⏸️ Deferred - Python ETL working)
 - **docs/phases/PHASE_7_INDEX.md** - Betting odds (⏸️ Optional)
 
 ### Workflows
