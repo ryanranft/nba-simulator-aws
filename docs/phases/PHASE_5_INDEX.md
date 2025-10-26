@@ -70,12 +70,14 @@ Build machine learning pipeline for game outcome prediction and player performan
 | **5.25** | Realtime Prediction Engine | ✅ COMPLETE ✓ | ~4h | Oct 23, 2025 |
 | **5.26** | ML Feedback Loop | ✅ COMPLETE ✓ | ~3h | Oct 23, 2025 |
 
-**Total Sub-Phases:** 27 (1 initial + 26 ML frameworks and infrastructure)
+**Total Sub-Phases:** 195 (27 core ML frameworks + 168 book recommendations)
 **Note:** Phase 5 expanded through reorganization and book recommendations:
 - 5.1, 5.2 migrated from phase_0 (October 18, 2025)
 - 5.19, 5.20 migrated from phase_0 (October 18, 2025)
 - 5.21-5.26 added from autonomous book recommendations (October 19, 2025)
-**Total Implementation Time:** ~85 hours
+- 5.27-5.169: Book recommendations (implemented October 19, 2025)
+- **5.170-5.195:** Duplicate resolution (October 26, 2025) - Book recommendations originally numbered 5.1-5.26 renumbered to avoid conflicts with ML frameworks
+**Total Implementation Time:** ~85 hours (core frameworks)
 **Source:** MCP Book Recommendations + Econometric/ML technical books
 
 ---
