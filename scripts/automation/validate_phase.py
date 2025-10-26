@@ -16,10 +16,10 @@ for validating and completing any phase or sub-phase.
 8. Final Validation
 
 Usage:
-    python scripts/automation/validate_phase.py 0.1
-    python scripts/automation/validate_phase.py 0.1 --generate-only
-    python scripts/automation/validate_phase.py 0.1 --validate-only
-    python scripts/automation/validate_phase.py 0.1 --verbose
+    python scripts/automation/validate_phase.py 0.0001
+    python scripts/automation/validate_phase.py 0.0001 --generate-only
+    python scripts/automation/validate_phase.py 0.0001 --validate-only
+    python scripts/automation/validate_phase.py 0.0001 --verbose
 
 Author: Claude Code
 Created: October 23, 2025
@@ -42,7 +42,7 @@ class PhaseValidator:
         Initialize validator.
 
         Args:
-            sub_phase_id: Sub-phase ID (e.g., "0.1", "5.19")
+            sub_phase_id: Sub-phase ID (e.g., "0.0001", "5.0019")
             verbose: Enable verbose output
         """
         self.sub_phase_id = sub_phase_id
@@ -95,7 +95,7 @@ class PhaseValidator:
 
     def _find_sub_phase_readme(self) -> Optional[Path]:
         """Find the sub-phase README file."""
-        # Try power directory structure first (e.g., "0.1_initial_data_collection/README.md")
+        # Try power directory structure first (e.g., "0.0001_initial_data_collection/README.md")
         # Search for directories that start with the sub-phase ID
         for item in self.phase_dir.iterdir():
             if item.is_dir() and item.name.startswith(f"{self.sub_phase_id}_"):
@@ -103,7 +103,7 @@ class PhaseValidator:
                 if readme.exists():
                     return readme
 
-        # Try simple file (e.g., "0.1_initial_data_collection.md")
+        # Try simple file (e.g., "0.0001_initial_data_collection.md")
         for item in self.phase_dir.iterdir():
             if (
                 item.is_file()
@@ -612,15 +612,15 @@ def bucket_name():
         today = datetime.now().strftime("%b %d, %Y")
 
         # Pattern to match sub-phase row:
-        # | **0.8** | [Name](link) | 🔵 PLANNED | ⭐ PRIORITY | - |
+        # | **0.0008** | [Name](link) | 🔵 PLANNED | ⭐ PRIORITY | - |
         # or
-        # | **0.8** | [Name](link) | ⏸️ PENDING | ⭐ PRIORITY | - |
+        # | **0.0008** | [Name](link) | ⏸️ PENDING | ⭐ PRIORITY | - |
         # or
-        # | **0.8** | [Name](link) | ✅ COMPLETE | ⭐ PRIORITY | Date |
+        # | **0.0008** | [Name](link) | ✅ COMPLETE | ⭐ PRIORITY | Date |
         sub_phase_pattern = rf"(\|\s*\*\*{re.escape(self.sub_phase_id)}\*\*\s*\|[^|]+\|)\s*([^|]+?)\s*(\|[^|]+\|)\s*([^|]+?)\s*(\|)"
 
         def replace_status(match):
-            # match.group(1) = "| **0.8** | [Name](link) |"
+            # match.group(1) = "| **0.0008** | [Name](link) |"
             # match.group(2) = current status (🔵 PLANNED or ⏸️ PENDING or ✅ COMPLETE)
             # match.group(3) = "| ⭐ PRIORITY |"
             # match.group(4) = current date or "-"
@@ -730,7 +730,7 @@ def bucket_name():
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Validate phase using Workflow #58")
-    parser.add_argument("sub_phase_id", help="Sub-phase ID (e.g., 0.1, 5.19)")
+    parser.add_argument("sub_phase_id", help="Sub-phase ID (e.g., 0.0001, 5.0019)")
     parser.add_argument(
         "--generate-only", action="store_true", help="Only generate tests/validators"
     )

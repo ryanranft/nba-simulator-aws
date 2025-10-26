@@ -64,11 +64,20 @@ PROGRESS.md → PHASE_N_INDEX.md → phase_N/N.M_name.md → workflows → execu
 - PHASE_0_INDEX.md (initial complete, expansion ready - 4 sub-phases)
 - PHASE_1_INDEX.md through PHASE_7_INDEX.md (1-2 sub-phases each)
 
-**Sub-phase naming:** `N.M_name.md` OR `N.M_name/` (e.g., `0.0_initial_data_collection.md`, `1.1_multi_source_integration.md`)
+**Sub-phase naming:** `N.MMMM_name.md` OR `N.MMMM_name/` (4-digit zero-padded format per ADR-010)
+
+**Examples:**
+- `0.0001_initial_data_collection.md`
+- `1.0001_multi_source_integration.md`
+- `5.0121_implement_ab_testing/`
+
+**Format:** `N.MMMM` where MMMM is 0001-9999 (4 digits, zero-padded)
+
+**Rationale:** Eliminates filesystem sorting ambiguity, supports up to 9,999 sub-phases per phase, prevents confusion between single/double-digit numbers. See `docs/adr/010-four-digit-subphase-numbering.md` for details.
 
 **Power Directory Structure:**
 
-**Standard:** All complex sub-phases MUST use power directory structure: `N.M_name/`
+**Standard:** All complex sub-phases MUST use power directory structure: `N.MMMM_name/`
 
 **Required Files:**
 - **README.md** - Main entry point (REQUIRED for all power directories)
@@ -91,21 +100,21 @@ PROGRESS.md → PHASE_N_INDEX.md → phase_N/N.M_name.md → workflows → execu
 - Implementations from book recommendations (rec_N, ml_systems_N)
 - Any sub-phase with >500 lines of implementation code
 
-**Reference Example:** `docs/phases/phase_0/0.1_basketball_reference/README.md` (canonical example)
+**Reference Example:** `docs/phases/phase_0/0.0001_basketball_reference/README.md` (canonical example)
 
 **Recent Power Directories (October 2025):**
-- `phase_0/0.1_basketball_reference/` (13-tier structure, 234 data types)
-- `phase_0/0.4_security_implementation/` (13 security variations)
-- `phase_0/0.5_data_extraction/` (structured data output)
-- `phase_5/5.1_feature_engineering/` (rec_11 - 80+ temporal features)
-- `phase_5/5.2_model_versioning/` (ml_systems_1 - MLflow integration)
-- `phase_5/5.19_drift_detection/` (ml_systems_2 - data drift detection)
-- `phase_5/5.20_panel_data/` (rec_22 - temporal panel data system)
+- `phase_0/0.0001_basketball_reference/` (13-tier structure, 234 data types)
+- `phase_0/0.0004_security_implementation/` (13 security variations)
+- `phase_0/0.0005_data_extraction/` (structured data output)
+- `phase_5/5.0001_feature_engineering/` (rec_11 - 80+ temporal features)
+- `phase_5/5.0002_model_versioning/` (ml_systems_1 - MLflow integration)
+- `phase_5/5.0019_drift_detection/` (ml_systems_2 - data drift detection)
+- `phase_5/5.0020_panel_data/` (rec_22 - temporal panel data system)
 
 **Benefits:** 64% reduction in PROGRESS.md size, 78% reduction in phase navigation context, 96% context available for work, consistent navigation patterns
 
 **⚠️ CRITICAL - Project Scope:**
-This project is **NBA-only**. Phase 0.5 & 0.6 are **NOT** awaiting NCAA/International data - they were permanently superseded by PostgreSQL implementations (0.10/0.11). **Never suggest** filling these with non-NBA data. Other sports will be built as **separate projects** in separate directories using this NBA infrastructure as a template.
+This project is **NBA-only**. Phase 0.0005 & 0.0006 are **NOT** awaiting NCAA/International data - they were permanently superseded by PostgreSQL implementations (0.0010/0.0011). **Never suggest** filling these with non-NBA data. Other sports will be built as **separate projects** in separate directories using this NBA infrastructure as a template.
 
 ---
 
@@ -114,36 +123,36 @@ This project is **NBA-only**. Phase 0.5 & 0.6 are **NOT** awaiting NCAA/Internat
 **✅ Implemented October 2025** - Phase 5 enhanced with 13 specialized ML frameworks (Block 2, Recommendations #14-25)
 
 **Phase 5 Structure:**
-- **PHASE_5_INDEX.md** - Phase overview with 14 sub-phases (5.0 + 5.1-5.13)
-- **phase_5/5.0_machine_learning_models.md** - Initial ML pipeline
-- **phase_5/5.{1-13}_*/README.md** - 13 ML framework subdirectories with comprehensive guides
+- **PHASE_5_INDEX.md** - Phase overview with 14 sub-phases (5.0000 + 5.0001-5.0013)
+- **phase_5/5.0000_machine_learning_models.md** - Initial ML pipeline
+- **phase_5/5.{0001-0013}_*/README.md** - 13 ML framework subdirectories with comprehensive guides
 
 **Framework Categories:**
-1. **Optimization & Tuning:** Hyperparameter Optimization (5.1), Learning Curves (5.7), Performance Profiling (5.13)
-2. **Interpretability:** Model Interpretation (5.2), Model Explainability (5.12)
-3. **Data Management:** Feature Store (5.3), Feature Selection (5.5)
-4. **MLOps:** Automated Retraining (5.4), Model Comparison (5.10)
-5. **Model Enhancement:** Ensemble Learning (5.6), Model Calibration (5.8)
-6. **Validation:** Cross-Validation Strategies (5.9), Error Analysis (5.11)
+1. **Optimization & Tuning:** Hyperparameter Optimization (5.0001), Learning Curves (5.0007), Performance Profiling (5.0013)
+2. **Interpretability:** Model Interpretation (5.0002), Model Explainability (5.0012)
+3. **Data Management:** Feature Store (5.0003), Feature Selection (5.0005)
+4. **MLOps:** Automated Retraining (5.0004), Model Comparison (5.0010)
+5. **Model Enhancement:** Ensemble Learning (5.0006), Model Calibration (5.0008)
+6. **Validation:** Cross-Validation Strategies (5.0009), Error Analysis (5.0011)
 
 **When to use ML frameworks:**
-- **5.1 (Hyperparameter Optimization)** - Before production deployment, when model plateaus
-- **5.2 (Model Interpretation)** - Debugging predictions, validating features
-- **5.3 (Feature Store)** - Multiple models share features, production deployment
-- **5.4 (Automated Retraining)** - Production models, drift detection needed
-- **5.5 (Feature Selection)** - High-dimensional data (>100 features), overfitting issues
-- **5.6 (Ensemble Learning)** - Multiple strong models available, need stability
-- **5.7 (Learning Curves)** - Diagnosing overfitting/underfitting, planning data collection
-- **5.8 (Model Calibration)** - Need probability estimates, betting applications
-- **5.9 (Cross-Validation)** - **ALWAYS use time series CV for NBA temporal data**
-- **5.10 (Model Comparison)** - Selecting best model, A/B testing, validation
-- **5.11 (Error Analysis)** - Model underperforming, systematic errors detected
-- **5.12 (Model Explainability)** - Stakeholder communication, regulatory compliance
-- **5.13 (Performance Profiling)** - Production deployment, latency/memory optimization
+- **5.0001 (Hyperparameter Optimization)** - Before production deployment, when model plateaus
+- **5.0002 (Model Interpretation)** - Debugging predictions, validating features
+- **5.0003 (Feature Store)** - Multiple models share features, production deployment
+- **5.0004 (Automated Retraining)** - Production models, drift detection needed
+- **5.0005 (Feature Selection)** - High-dimensional data (>100 features), overfitting issues
+- **5.0006 (Ensemble Learning)** - Multiple strong models available, need stability
+- **5.0007 (Learning Curves)** - Diagnosing overfitting/underfitting, planning data collection
+- **5.0008 (Model Calibration)** - Need probability estimates, betting applications
+- **5.0009 (Cross-Validation)** - **ALWAYS use time series CV for NBA temporal data**
+- **5.0010 (Model Comparison)** - Selecting best model, A/B testing, validation
+- **5.0011 (Error Analysis)** - Model underperforming, systematic errors detected
+- **5.0012 (Model Explainability)** - Stakeholder communication, regulatory compliance
+- **5.0013 (Performance Profiling)** - Production deployment, latency/memory optimization
 
 **Navigation pattern:**
 ```
-PROGRESS.md → PHASE_5_INDEX.md → phase_5/5.X_name/README.md → Execute framework
+PROGRESS.md → PHASE_5_INDEX.md → phase_5/5.XXXX_name/README.md → Execute framework
 ```
 
 **Each framework README includes:**

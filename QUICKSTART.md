@@ -59,7 +59,7 @@ python scripts/autonomous/autonomous_cli.py stop
 ```
 
 **Full Documentation:** [Autonomous Operation Guide](docs/AUTONOMOUS_OPERATION.md)
-**Phase Documentation:** [Phase 0.9: ADCE](docs/phases/phase_0/0.9_autonomous_data_collection/README.md)
+**Phase Documentation:** [Phase 0.0009: ADCE](docs/phases/phase_0/0.0009_autonomous_data_collection/README.md)
 
 ---
 
@@ -304,9 +304,9 @@ git push origin main
 **Current Phase:** Phase 0 Complete (Data Collection), All 6 core phases complete
 
 **Next Tasks:**
-1. Set up AWS Glue Crawler (45 min) - See PROGRESS.md Phase 2.1
-2. Provision RDS PostgreSQL (2-3 hrs) - See PROGRESS.md Phase 3.1
-3. Create Glue ETL job (6-8 hrs) - See PROGRESS.md Phase 2.2
+1. Set up AWS Glue Crawler (45 min) - See PROGRESS.md Phase 2.0001
+2. Provision RDS PostgreSQL (2-3 hrs) - See PROGRESS.md Phase 3.0001
+3. Create Glue ETL job (6-8 hrs) - See PROGRESS.md Phase 2.0002
 
 **Detailed plan:** See `PROGRESS.md`
 
