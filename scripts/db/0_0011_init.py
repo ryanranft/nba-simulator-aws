@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 0.0011: RAG Pipeline Database Initialization
+0.0011: RAG Pipeline Database Initialization
 
 Purpose: Initialize pgvector extension and RAG schema in PostgreSQL
 Created: October 25, 2025
@@ -293,7 +293,7 @@ class RAGDatabaseInitializer:
             verify_only: If True, only verify installation without making changes
         """
         print("=" * 70)
-        print("Phase 0.0011: RAG Pipeline Database Initialization")
+        print("0.0011: RAG Pipeline Database Initialization")
         print("=" * 70)
         print()
 

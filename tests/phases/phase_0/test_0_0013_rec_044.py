@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite: Phase 0.0013 - Dispatcher Pipeline (rec_044)
+Test Suite: 0.0013 - Dispatcher Pipeline (rec_044)
 
 Comprehensive tests for:
 - ScraperTask creation and state transitions
@@ -35,7 +35,7 @@ from scripts.etl.data_dispatcher import (
 )
 
 # Import implementation wrapper
-impl_path = project_root / "docs" / "phases" / "phase_0" / "0.13_dispatcher_pipeline"
+impl_path = project_root / "docs" / "phases" / "phase_0" / "0.0013_dispatcher_pipeline"
 sys.path.insert(0, str(impl_path))
 
 from implement_rec_044 import DispatcherPipeline

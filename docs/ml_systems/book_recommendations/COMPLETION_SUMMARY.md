@@ -234,16 +234,16 @@ The deployment guide estimated 2-4 weeks based on **manual implementation time**
 ```
 /Users/ryanranft/nba-simulator-aws/docs/phases/
 ├── phase_0/
-│   ├── 0.1_store_raw_data_in_a_nosql_database/
+│   ├── 0.0001_store_raw_data_in_a_nosql_database/
 │   │   ├── README.md
 │   │   ├── STATUS.md
 │   │   ├── IMPLEMENTATION_GUIDE.md
 │   │   ├── RECOMMENDATIONS_FROM_BOOKS.md
 │   │   ├── implement_rec_033.py
 │   │   └── test_rec_033.py
-│   ├── 0.2_implement_a_rag_feature_pipeline/
-│   ├── 0.3_implement_data_collection_pipeline_with_dispatcher/
-│   └── 0.4_perform_extensive_error_analysis/
+│   ├── 0.0002_implement_a_rag_feature_pipeline/
+│   ├── 0.0003_implement_data_collection_pipeline_with_dispatcher/
+│   └── 0.0004_perform_extensive_error_analysis/
 ├── phase_1/ (7 recommendations)
 ├── phase_2/ (2 recommendations)
 ├── phase_3/ (4 recommendations)

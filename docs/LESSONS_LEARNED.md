@@ -35,7 +35,7 @@
 ### Issue #10: Not All Files Contain Usable Game Data (29% Empty)
 
 **Date Discovered:** 2025-10-01
-**Phase:** Phase 2.2 - ETL Planning
+**Phase:** 2.0002 - ETL Planning
 **Severity:** HIGH - Affects ETL efficiency and cost
 
 #### Problem Description
@@ -188,7 +188,7 @@ cat data/nba_pbp/131105001.json | python -m json.tool | grep -A 5 "playGrps"
 - **Valid file:** `data/nba_pbp/401307856.json` (1.0 MB, 468 plays)
 - **Empty file:** `data/nba_pbp/131105001.json` (718 KB, 0 plays)
 - **Analysis script:** `scripts/analysis/check_data_availability.py`
-- **Related:** ADR-002 (10% field extraction), Phase 2.2 (Custom ETL)
+- **Related:** ADR-002 (10% field extraction), 2.0002 (Custom ETL)
 
 ---
 
@@ -197,7 +197,7 @@ cat data/nba_pbp/131105001.json | python -m json.tool | grep -A 5 "playGrps"
 ### Issue #11: Glue Crawlers Fail on ESPN JSON Data (All File Counts)
 
 **Date Discovered:** 2025-10-01
-**Phase:** Phase 2.1 - AWS Glue Crawler
+**Phase:** 2.0001 - AWS Glue Crawler
 **Severity:** CRITICAL - Blocks automated schema discovery
 **Status:** Glue Crawler approach ABANDONED
 
@@ -270,7 +270,7 @@ ESPN JSON files are **extremely large and deeply nested**:
 - We only need 10% of fields (Glue would catalog 100%)
 
 **Better approach:**
-- **Phase 2.2 Custom PySpark ETL** with hardcoded schema
+- **2.0002 Custom PySpark ETL** with hardcoded schema
 - Extract only needed fields (10% extraction per ADR-002)
 - Use **game ID pattern** to partition by year (user discovered pattern)
 - Process year-by-year for better memory management
@@ -332,22 +332,22 @@ ESPN JSON files are **extremely large and deeply nested**:
 
 #### Resolution
 
-**Phase 2.1 Status:** ❌ FAILED - SKIPPING GLUE CRAWLERS ENTIRELY
+**2.0001 Status:** ❌ FAILED - SKIPPING GLUE CRAWLERS ENTIRELY
 
 **Next Steps:**
-1. Mark Phase 2.1 as SKIPPED in PROGRESS.md
-2. Update Phase 2.2 ETL plan with:
+1. Mark 2.0001 as SKIPPED in PROGRESS.md
+2. Update 2.0002 ETL plan with:
    - Hardcoded schema (from manual analysis in DATA_STRUCTURE_GUIDE.md)
    - Game ID decoder function (year extraction)
    - Year-based partitioning strategy
-3. Proceed directly to Phase 2.2 Custom PySpark ETL
+3. Proceed directly to 2.0002 Custom PySpark ETL
 
 ---
 
 ### Issue #1: OutOfMemoryError with Large Datasets (146K+ files) [SUPERSEDED BY ISSUE #11]
 
 **Date Encountered:** 2025-10-01
-**Phase:** Phase 2.1 - AWS Glue Crawler Setup
+**Phase:** 2.0001 - AWS Glue Crawler Setup
 **Severity:** CRITICAL - Blocks schema discovery
 
 #### Problem Description
@@ -394,7 +394,7 @@ aws glue get-crawler --name nba-data-crawler --query 'Crawler.LastCrawl.ErrorMes
 #### Impact
 
 - Cannot automatically discover JSON schema
-- Blocks Phase 2.2 (Glue ETL Job) if following original plan
+- Blocks 2.0002 (Glue ETL Job) if following original plan
 - Must manually define table schemas OR skip crawler entirely
 
 #### Solutions Attempted
@@ -412,7 +412,7 @@ aws glue get-crawler --name nba-data-crawler --query 'Crawler.LastCrawl.ErrorMes
 - **Verdict:** Too slow, adds complexity and cost
 
 **✅ Option 3: Skip Glue Crawler Entirely (RECOMMENDED)**
-- **Approach:** Proceed directly to Phase 2.2, write custom PySpark ETL code
+- **Approach:** Proceed directly to 2.0002, write custom PySpark ETL code
 - **Rationale:**
   1. Avoids OOM issue completely
   2. Gives precise control over field extraction (matches ADR-002: 10% extraction)
@@ -423,13 +423,13 @@ aws glue get-crawler --name nba-data-crawler --query 'Crawler.LastCrawl.ErrorMes
 
 #### Final Decision
 
-**Skip AWS Glue Crawler entirely.** Proceed directly to Phase 2.2 (Glue ETL Job) where we write custom PySpark code to:
+**Skip AWS Glue Crawler entirely.** Proceed directly to 2.0002 (Glue ETL Job) where we write custom PySpark code to:
 1. Manually define source schemas
 2. Extract only the 10% of fields we need
 3. Transform and load into RDS
 
 **Documented in:**
-- `PROGRESS.md` - Phase 2.1 status updated to ❌ FAILED - SKIPPING
+- `PROGRESS.md` - 2.0001 status updated to ❌ FAILED - SKIPPING
 - `docs/REPRODUCTION_GUIDE.md` - Section "Glue Crawler Out of Memory Error"
 - ADR-008 (to be created) - Skip Glue Crawler for Large Datasets
 
@@ -477,7 +477,7 @@ aws glue delete-crawler --name nba-data-crawler
 ### Issue #2: Password Special Character Restrictions
 
 **Date Encountered:** 2025-10-01
-**Phase:** Phase 3.1 - RDS PostgreSQL Setup
+**Phase:** 3.0001 - RDS PostgreSQL Setup
 **Severity:** MEDIUM - Delays instance creation
 
 #### Problem Description
@@ -526,7 +526,7 @@ Changed password to: `[REDACTED]` (removed `@` character, used valid special cha
 ### Issue #3: FreeTierRestrictionError - db.t3.small Not Available
 
 **Date Encountered:** 2025-10-01
-**Phase:** Phase 3.1 - RDS PostgreSQL Setup
+**Phase:** 3.0001 - RDS PostgreSQL Setup
 **Severity:** MEDIUM - Requires instance class change
 
 #### Problem Description
@@ -607,7 +607,7 @@ Else:
 ### Issue #4: PostgreSQL Version 15.6 Not Found
 
 **Date Encountered:** 2025-10-01
-**Phase:** Phase 3.1 - RDS PostgreSQL Setup
+**Phase:** 3.0001 - RDS PostgreSQL Setup
 **Severity:** LOW - Easy fix
 
 #### Problem Description
@@ -681,7 +681,7 @@ aws rds describe-db-engine-versions --engine mariadb --engine-version 10.11 \
 ### Issue #5: AWS CLI `--description` Parameter Not Supported
 
 **Date Encountered:** 2025-10-01
-**Phase:** Phase 3.1 - RDS Security Group Setup
+**Phase:** 3.0001 - RDS Security Group Setup
 **Severity:** LOW - Cosmetic issue
 
 #### Problem Description
@@ -831,11 +831,11 @@ echo "✅ RDS instance available at: $ENDPOINT"
 | Resource | When Created | Monthly Cost | Can Be Stopped? |
 |----------|--------------|--------------|-----------------|
 | S3 Bucket | Phase 0 | $2.74 | ❌ No (storage) |
-| Glue Database | Phase 2.1 | $0 | N/A (metadata) |
-| IAM Role | Phase 2.1 | $0 | N/A |
-| Glue Crawler | Phase 2.1 | $0 (failed) | N/A |
-| Security Group | Phase 3.1 | $0 | N/A |
-| RDS db.t3.small | Phase 3.1 | $29 | ⚠️ Can stop (7 days max) |
+| Glue Database | 2.0001 | $0 | N/A (metadata) |
+| IAM Role | 2.0001 | $0 | N/A |
+| Glue Crawler | 2.0001 | $0 (failed) | N/A |
+| Security Group | 3.0001 | $0 | N/A |
+| RDS db.t3.small | 3.0001 | $29 | ⚠️ Can stop (7 days max) |
 
 **Cost Checkpoints:**
 ```bash
@@ -1009,4 +1009,4 @@ aws logs tail /aws-glue/crawlers --log-stream-names <crawler-name> --since 3h
 **Time Saved for Future Sports:** ~2 hours per sport
 
 **Last Updated:** 2025-10-01
-**Next Update:** After completing Phase 3.1 or encountering new errors
+**Next Update:** After completing 3.0001 or encountering new errors

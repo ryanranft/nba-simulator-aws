@@ -1,7 +1,7 @@
-# Phase 0.9 Completion Checklist
+# 0.0009 Completion Checklist
 
 **Generated:** October 24, 2025
-**Purpose:** Step-by-step checklist for completing Phase 0.9 after validation finishes
+**Purpose:** Step-by-step checklist for completing 0.0009 after validation finishes
 **Validation Status:** Running (99% success rate, ~20 minutes remaining)
 
 ---
@@ -16,7 +16,7 @@
 
 **Command to check progress:**
 ```bash
-tail -100 /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.9_data_extraction/full_validation_run.log
+tail -100 /Users/ryanranft/nba-simulator-aws/docs/phases/phase_0/0.0009_data_extraction/full_validation_run.log
 ```
 
 ---
@@ -69,7 +69,7 @@ throughput = total_files / duration_sec
 
 ## Step 2: Update STATUS.md (10 minutes)
 
-**File:** `docs/phases/phase_0/0.9_data_extraction/STATUS.md`
+**File:** `docs/phases/phase_0/0.0009_data_extraction/STATUS.md`
 **Template:** `STATUS_UPDATE_TEMPLATE.md`
 
 ### 2.1 Replace Validation Results Section (Lines 75-134)
@@ -101,7 +101,7 @@ throughput = total_files / duration_sec
 - [ ] Mark "Full Dataset Validation Complete" as ✅
 - [ ] Add actual success rate achieved
 - [ ] Update short-term priorities based on results
-- [ ] Add Phase 1.0 integration prep tasks
+- [ ] Add 1.0000 integration prep tasks
 
 ### 2.5 Update Metrics Tracking Section
 
@@ -125,7 +125,7 @@ throughput = total_files / duration_sec
 
 ## Step 3: Update README.md (10 minutes)
 
-**File:** `docs/phases/phase_0/0.9_data_extraction/README.md`
+**File:** `docs/phases/phase_0/0.0009_data_extraction/README.md`
 
 ### 3.1 Add Validation Results Section
 
@@ -208,7 +208,7 @@ Update "Implementation Details" section:
 
 **File:** `docs/phases/PHASE_0_INDEX.md`
 
-### 4.1 Update Phase 0.9 Status Line
+### 4.1 Update 0.0009 Status Line
 
 **Before:**
 ```markdown
@@ -223,7 +223,7 @@ Update "Implementation Details" section:
 ### 4.2 Add Completion Notes
 
 ```markdown
-**Phase 0.9 Completed:** October 24, 2025
+**0.0009 Completed:** October 24, 2025
 - Full validation: 172,411 files, XX.X% success rate
 - All three adapters fixed and enhanced
 - Dual format support for ESPN data
@@ -244,11 +244,11 @@ Update "Implementation Details" section:
 
 **File:** `PROGRESS.md`
 
-### 5.1 Update Phase 0.9 Entry
+### 5.1 Update 0.0009 Entry
 
 **Update status line:**
 ```markdown
-- **Phase 0.9:** Data Extraction Framework
+- **0.0009:** Data Extraction Framework
   - **Status:** ✅ COMPLETE (October 24, 2025)
   - **Duration:** 2 days (Oct 23-24)
   - **Achievement:** XX.X% validation success on 172,411 files
@@ -258,19 +258,19 @@ Update "Implementation Details" section:
 
 ```markdown
 **Current Session Context:**
-- ✅ Completed Phase 0.9 full validation
+- ✅ Completed 0.0009 full validation
 - 172,411 files validated, XX.X% success
 - Fixed all three data source adapters
-- Ready to begin Phase 1.0 (Multi-Source Integration)
+- Ready to begin 1.0000 (Multi-Source Integration)
 ```
 
 ### 5.3 Checklist
 
-- [ ] Update Phase 0.9 status to ✅ COMPLETE
+- [ ] Update 0.0009 status to ✅ COMPLETE
 - [ ] Add completion date
 - [ ] Add final metrics
 - [ ] Update "Current Session Context"
-- [ ] Update "Next Planned Task" to Phase 1.0
+- [ ] Update "Next Planned Task" to 1.0000
 
 ---
 
@@ -309,7 +309,7 @@ Update "Implementation Details" section:
 - [ ] Update if misalignment found
 
 **Phase 6: DIMS Integration**
-- [ ] Update metrics.yaml with Phase 0.9 metrics
+- [ ] Update metrics.yaml with 0.0009 metrics
 - [ ] Run DIMS validation
 
 **Phase 7: Phase Index Update**
@@ -351,13 +351,13 @@ bash scripts/shell/pre_push_inspector.sh full
 ### 7.2 Stage Files
 
 ```bash
-git add docs/phases/phase_0/0.9_data_extraction/STATUS.md
-git add docs/phases/phase_0/0.9_data_extraction/README.md
-git add docs/phases/phase_0/0.9_data_extraction/validation_report_*.json
-git add docs/phases/phase_0/0.9_data_extraction/validation_report_*.html
-git add docs/phases/phase_0/0.9_data_extraction/validation_report_*.csv
-git add docs/phases/phase_0/0.9_data_extraction/data_source_adapters.py
-git add docs/phases/phase_0/0.9_data_extraction/implement_full_validation.py
+git add docs/phases/phase_0/0.0009_data_extraction/STATUS.md
+git add docs/phases/phase_0/0.0009_data_extraction/README.md
+git add docs/phases/phase_0/0.0009_data_extraction/validation_report_*.json
+git add docs/phases/phase_0/0.0009_data_extraction/validation_report_*.html
+git add docs/phases/phase_0/0.0009_data_extraction/validation_report_*.csv
+git add docs/phases/phase_0/0.0009_data_extraction/data_source_adapters.py
+git add docs/phases/phase_0/0.0009_data_extraction/implement_full_validation.py
 git add docs/phases/PHASE_0_INDEX.md
 git add PROGRESS.md
 git add inventory/metrics.yaml
@@ -367,9 +367,9 @@ git add inventory/metrics.yaml
 
 ```bash
 git commit -m "$(cat <<'EOF'
-feat: Complete Phase 0.9 data extraction validation
+feat: Complete 0.0009 data extraction validation
 
-Phase 0.9 Data Extraction Framework - COMPLETE
+0.0009 Data Extraction Framework - COMPLETE
 Duration: October 23-24, 2025 (2 days)
 
 Validation Results:
@@ -389,7 +389,7 @@ Major Fixes:
 Impact:
 - +XXX,XXX files successfully validated
 - All required schemas working (GAME, TEAM_STATS, PLAYER_STATS)
-- Ready for Phase 1.0 multi-source integration
+- Ready for 1.0000 multi-source integration
 
 Files:
 - data_source_adapters.py (540→610 lines)
@@ -416,12 +416,12 @@ EOF
 
 ## Step 8: Generate Final Summary Report (15 minutes)
 
-**File:** `docs/phases/phase_0/0.9_data_extraction/PHASE_0.9_COMPLETION_SUMMARY.md`
+**File:** `docs/phases/phase_0/0.0009_data_extraction/PHASE_0.9_COMPLETION_SUMMARY.md`
 
 ### 8.1 Content Sections
 
 ```markdown
-# Phase 0.9 Completion Summary
+# 0.0009 Completion Summary
 
 **Completed:** October 24, 2025
 **Duration:** 2 days (October 23-24)
@@ -484,7 +484,7 @@ EOF
 
 [5-7 key learnings]
 
-## Next Steps - Phase 1.0
+## Next Steps - 1.0000
 
 [Preview of multi-source integration]
 ```
@@ -524,11 +524,11 @@ EOF
 
 ```bash
 # Run phase tests
-python docs/phases/phase_0/0.9_data_extraction/test_consolidated_rec_64_1595.py
-python docs/phases/phase_0/0.9_data_extraction/test_real_data_extraction.py
+python docs/phases/phase_0/0.0009_data_extraction/test_consolidated_rec_64_1595.py
+python docs/phases/phase_0/0.0009_data_extraction/test_real_data_extraction.py
 
 # Quick smoke test
-python docs/phases/phase_0/0.9_data_extraction/quick_test_adapters.py
+python docs/phases/phase_0/0.0009_data_extraction/quick_test_adapters.py
 ```
 
 - [ ] test_consolidated_rec_64_1595.py passes (44 tests)
@@ -556,7 +556,7 @@ python docs/phases/phase_0/0.9_data_extraction/quick_test_adapters.py
 **Session End:** October 24, 2025
 
 **Accomplished:**
-- ✅ Completed Phase 0.9 full validation
+- ✅ Completed 0.0009 full validation
 - ✅ 172,411 files validated (XX.X% success)
 - ✅ Fixed all three data source adapters
 - ✅ Generated comprehensive reports
@@ -564,7 +564,7 @@ python docs/phases/phase_0/0.9_data_extraction/quick_test_adapters.py
 - ✅ Committed all changes
 
 **Next Session:**
-- Begin Phase 1.0: Multi-Source Integration
+- Begin 1.0000: Multi-Source Integration
 - Use validated data for cross-source alignment
 - Implement unified player/team ID mapping
 ```
@@ -573,7 +573,7 @@ python docs/phases/phase_0/0.9_data_extraction/quick_test_adapters.py
 
 ## Completion Criteria
 
-**Phase 0.9 is COMPLETE when:**
+**0.0009 is COMPLETE when:**
 
 - [x] Validation runs successfully on all 172,411 files
 - [ ] Success rate ≥ 90%
@@ -586,7 +586,7 @@ python docs/phases/phase_0/0.9_data_extraction/quick_test_adapters.py
 - [ ] All changes committed to git
 - [ ] Final summary report generated
 - [ ] All tests passing (100%)
-- [ ] Ready to begin Phase 1.0
+- [ ] Ready to begin 1.0000
 
 ---
 

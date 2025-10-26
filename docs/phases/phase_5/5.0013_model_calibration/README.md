@@ -1,4 +1,4 @@
-# Phase 5.0008: Model Calibration
+# 5.0008: Model Calibration
 
 **Status:** ✅ COMPLETE
 **Implementation:** `scripts/ml/model_calibration.py` (607 lines)
@@ -70,8 +70,8 @@ print(f"ECE: {calibration_report.expected_calibration_error:.4f}")
 
 ## Workflow References
 
-- **Phase 5.0001** - Hyperparameter Optimization (calibrate after optimization)
-- **Phase 5.0010** - Model Comparison
+- **5.0001** - Hyperparameter Optimization (calibrate after optimization)
+- **5.0010** - Model Comparison
 
 ---
 

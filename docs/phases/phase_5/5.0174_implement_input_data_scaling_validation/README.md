@@ -122,7 +122,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.5_implement_input_data_scaling_validation
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0005_implement_input_data_scaling_validation
 python test_rec_009.py -v
 ```
 

@@ -1,8 +1,8 @@
-# Phase 2.2: Glue ETL Job - Implementation Plan
+# 2.0002: Glue ETL Job - Implementation Plan
 
 **Created:** 2025-10-01
 **Status:** ⏸️ PENDING (Planning Complete, Ready to Implement)
-**Prerequisites:** ✅ Phase 3.1 Complete (RDS Available)
+**Prerequisites:** ✅ 3.0001 Complete (RDS Available)
 
 ---
 
@@ -592,11 +592,11 @@ ORDER BY year;
 
 ## Next Steps After Completion
 
-1. **Mark Phase 2.2 as ✅ COMPLETE in PROGRESS.md**
+1. **Mark 2.0002 as ✅ COMPLETE in PROGRESS.md**
 2. **Update cost estimates with actuals**
 3. **Document any issues in LESSONS_LEARNED.md**
 4. **Create ADR-008:** Skip Glue Crawler for Large Datasets
-5. **Proceed to Phase 4.1:** EC2 Simulation Engine setup
+5. **Proceed to 4.0001:** EC2 Simulation Engine setup
 
 ---
 
@@ -605,10 +605,10 @@ ORDER BY year;
 - **Data Structure Guide:** `docs/DATA_STRUCTURE_GUIDE.md`
 - **RDS Connection:** `docs/RDS_CONNECTION.md`
 - **Database Schema:** `sql/create_tables.sql`
-- **PROGRESS.md:** Phase 2.2 details
+- **PROGRESS.md:** 2.0002 details
 - **AWS Glue Documentation:** https://docs.aws.amazon.com/glue/
 
 ---
 
 **Last Updated:** 2025-10-01
-**Next Review:** When starting Phase 2.2 implementation
+**Next Review:** When starting 2.0002 implementation

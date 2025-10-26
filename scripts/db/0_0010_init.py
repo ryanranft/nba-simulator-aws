@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 0.0010: PostgreSQL JSONB Storage - Database Initialization
+0.0010: PostgreSQL JSONB Storage - Database Initialization
 
 Purpose: Initialize PostgreSQL database schema for JSONB storage
 Created: October 25, 2025
@@ -289,7 +289,7 @@ class DatabaseInitializer:
     def run_initialization(self, force: bool = False, check_only: bool = False) -> bool:
         """Run complete initialization process"""
         print("\n" + "=" * 70)
-        print("Phase 0.0010: PostgreSQL JSONB Storage - Database Initialization")
+        print("0.0010: PostgreSQL JSONB Storage - Database Initialization")
         print("=" * 70 + "\n")
 
         # Connect to database
@@ -359,7 +359,7 @@ class DatabaseInitializer:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Initialize PostgreSQL database for Phase 0.0010 JSONB storage"
+        description="Initialize PostgreSQL database for 0.0010 JSONB storage"
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     parser.add_argument(

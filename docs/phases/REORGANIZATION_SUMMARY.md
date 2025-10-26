@@ -12,7 +12,7 @@
 | Old Location | New Location | Status |
 |--------------|--------------|--------|
 | `phase_0/rec_11_feature_engineering/` | `phase_5/5.0001_feature_engineering/` | ✅ Complete |
-| `phase_0/ml_systems_1_model_versioning/` | `phase_5/5.0002_model_versioning/` (renamed from `5.2_model_management`) | ✅ Complete |
+| `phase_0/ml_systems_1_model_versioning/` | `phase_5/5.0002_model_versioning/` (renamed from `5.0002_model_management`) | ✅ Complete |
 | `phase_0/ml_systems_2_drift_detection/` | `phase_5/5.0019_drift_detection/` | ✅ Complete |
 | `phase_0/rec_22_panel_data/` | `phase_5/5.0020_panel_data/` | ✅ Complete |
 
@@ -20,7 +20,7 @@
 
 ## Power Directory Structure Applied
 
-All reorganized directories now follow the `0.1_basketball_reference/` power directory pattern:
+All reorganized directories now follow the `0.0001_basketball_reference/` power directory pattern:
 
 ### Structure Template:
 ```
@@ -72,10 +72,10 @@ from docs.phases.phase_5.5_2_model_versioning.implement_ml_systems_1 import MLfl
 ## Completed Tasks ✅
 
 ### Phase 1: Initial Reorganization (October 18, 2025)
-- [x] Reorganized 5.1_feature_engineering with proper README.md
-- [x] Reorganized and renamed 5.2_model_management → 5.2_model_versioning with README.md
-- [x] Created 5.19_drift_detection with README.md
-- [x] Created 5.20_panel_data with README.md
+- [x] Reorganized 5.0001_feature_engineering with proper README.md
+- [x] Reorganized and renamed 5.0002_model_management → 5.0002_model_versioning with README.md
+- [x] Created 5.0019_drift_detection with README.md
+- [x] Created 5.0020_panel_data with README.md
 - [x] Copied all implementation files to new locations
 - [x] Updated all import statements in scripts/ml/ (9 files)
 - [x] Verified imports work from new locations
@@ -90,10 +90,10 @@ from docs.phases.phase_5.5_2_model_versioning.implement_ml_systems_1 import MLfl
   - `TESTING_SUMMARY_ML_SYSTEMS.md`
 - [x] **Updated CLAUDE.md** - Added comprehensive power directory structure guidance
 - [x] **Restored missing ml_systems files** from git history:
-  - `implement_ml_systems_1.py` (578 lines) → 5.2_model_versioning/
-  - `implement_ml_systems_2.py` (688 lines) → 5.19_drift_detection/
-  - `test_ml_systems_1.py` → 5.2_model_versioning/
-  - `test_ml_systems_2.py` → 5.19_drift_detection/
+  - `implement_ml_systems_1.py` (578 lines) → 5.0002_model_versioning/
+  - `implement_ml_systems_2.py` (688 lines) → 5.0019_drift_detection/
+  - `test_ml_systems_1.py` → 5.0002_model_versioning/
+  - `test_ml_systems_2.py` → 5.0019_drift_detection/
 - [x] **Verified all imports** work from new phase_5 locations (4/4 modules)
 - [x] **Cleaned up old directories** - Already deleted in previous commit
 - [x] **Updated this file** to 100% complete status
@@ -104,25 +104,25 @@ from docs.phases.phase_5.5_2_model_versioning.implement_ml_systems_1 import MLfl
 
 ```
 phase_5/
-├── 5.0_machine_learning_models.md  # Initial ML pipeline
-├── 5.1_feature_engineering/        # ✅ NEW - rec_11
+├── 5.0000_machine_learning_models.md  # Initial ML pipeline
+├── 5.0001_feature_engineering/        # ✅ NEW - rec_11
 │   ├── README.md
 │   ├── implement_rec_11.py
 │   ├── test_rec_11.py
 │   └── STATUS.md
-├── 5.2_model_versioning/           # ✅ RENAMED from 5.2_model_management
+├── 5.0002_model_versioning/           # ✅ RENAMED from 5.0002_model_management
 │   ├── README.md
 │   ├── STATUS.md
 │   └── RECOMMENDATIONS_FROM_BOOKS.md
-├── 5.3_model_operations/           # (existing, untouched)
-├── 5.4_model_analysis/             # (existing, untouched)
-├── 5.5_experimentation/            # (existing, untouched)
+├── 5.0003_model_operations/           # (existing, untouched)
+├── 5.0004_model_analysis/             # (existing, untouched)
+├── 5.0005_experimentation/            # (existing, untouched)
 ├── 5.6-5.18.../                    # (existing book recommendations)
-├── 5.19_drift_detection/           # ✅ NEW - ml_systems_2
+├── 5.0019_drift_detection/           # ✅ NEW - ml_systems_2
 │   ├── README.md
 │   ├── STATUS.md
 │   └── RECOMMENDATIONS_FROM_BOOKS.md
-└── 5.20_panel_data/                # ✅ NEW - rec_22
+└── 5.0020_panel_data/                # ✅ NEW - rec_22
     ├── README.md
     ├── implement_rec_22.py
     ├── test_rec_22.py
@@ -133,24 +133,24 @@ phase_5/
 
 ## Integration Points Updated
 
-### 5.1_feature_engineering
-- **Requires:** 5.20_panel_data (rec_22)
+### 5.0001_feature_engineering
+- **Requires:** 5.0020_panel_data (rec_22)
 - **Enables:** All ML models with advanced temporal features
-- **Integrates with:** 5.2_model_versioning, 5.19_drift_detection
+- **Integrates with:** 5.0002_model_versioning, 5.0019_drift_detection
 
-### 5.2_model_versioning
-- **Requires:** 5.0_machine_learning_models
+### 5.0002_model_versioning
+- **Requires:** 5.0000_machine_learning_models
 - **Enables:** Version control for all models
-- **Integrates with:** 5.1_feature_engineering, 5.19_drift_detection
+- **Integrates with:** 5.0001_feature_engineering, 5.0019_drift_detection
 
-### 5.19_drift_detection
-- **Requires:** 5.1_feature_engineering
+### 5.0019_drift_detection
+- **Requires:** 5.0001_feature_engineering
 - **Enables:** Automated model retraining triggers
-- **Integrates with:** 5.2_model_versioning
+- **Integrates with:** 5.0002_model_versioning
 
-### 5.20_panel_data
+### 5.0020_panel_data
 - **Requires:** None (foundational)
-- **Enables:** 5.1_feature_engineering (CRITICAL dependency)
+- **Enables:** 5.0001_feature_engineering (CRITICAL dependency)
 - **Integrates with:** All temporal analytics
 
 ---
@@ -180,10 +180,10 @@ print('✅ All 4 modules imported successfully from phase_5 locations')
 **Result:** ✅ All imports working correctly (4/4 modules verified)
 
 **Class Names:**
-- `PanelDataProcessingSystem` from 5.20_panel_data
-- `AdvancedFeatureEngineeringPipeline` from 5.1_feature_engineering
-- `DataDriftDetection` from 5.19_drift_detection
-- `ModelVersioningWithMlflow` from 5.2_model_versioning
+- `PanelDataProcessingSystem` from 5.0020_panel_data
+- `AdvancedFeatureEngineeringPipeline` from 5.0001_feature_engineering
+- `DataDriftDetection` from 5.0019_drift_detection
+- `ModelVersioningWithMlflow` from 5.0002_model_versioning
 
 ---
 

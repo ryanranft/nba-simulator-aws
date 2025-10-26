@@ -38,7 +38,7 @@ Set up RDS PostgreSQL database with temporal indexing for millisecond-precision 
 
 ---
 
-## Sub-Phase 3.0: Database Infrastructure Setup
+## Sub-3.0000: Database Infrastructure Setup
 
 **Status:** ✅ COMPLETE (October 1, 2025)
 
@@ -63,7 +63,7 @@ Set up RDS PostgreSQL database with temporal indexing for millisecond-precision 
 - Support for millisecond-precision lookups
 - Cumulative aggregation optimized
 
-**See:** [Sub-Phase 3.0 Details](phase_3/3.0000_database_infrastructure.md)
+**See:** [Sub-3.0000 Details](phase_3/3.0000_database_infrastructure.md)
 
 ---
 
@@ -147,7 +147,7 @@ CREATE DATABASE mlb_temporal;
 
 ## Key Workflows
 
-**For Sub-Phase 3.0:**
+**For Sub-3.0000:**
 - Workflow #24: AWS Resource Setup
 - Workflow #18: Cost Management
 - Workflow #28: ADR Creation

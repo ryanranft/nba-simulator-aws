@@ -784,7 +784,7 @@ for chunk in chunked(urls, 1000):
 
 ## Related Documentation
 
-- **[Phase 0.9 Main README](../README.md)** - Data extraction overview
+- **[0.0009 Main README](../README.md)** - Data extraction overview
 - **[DATA_SOURCE_ADAPTERS.md](DATA_SOURCE_ADAPTERS.md)** - Adapter pattern for cross-source normalization
 - **[ORCHESTRATION.md](ORCHESTRATION.md)** - Task scheduling and orchestration
 - **[ESPN_EXTRACTION.md](ESPN_EXTRACTION.md)** - ESPN-specific extraction details

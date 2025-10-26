@@ -79,7 +79,7 @@ grep -A 20 "Glue Crawler" docs/LESSONS_LEARNED.md
 
 ## Critical Lessons By Phase
 
-### Phase 2.1: Glue Crawler Setup
+### 2.0001: Glue Crawler Setup
 
 **🚨 CRITICAL: Skip Glue Crawlers Entirely**
 
@@ -106,7 +106,7 @@ grep -A 20 "Glue Crawler" docs/LESSONS_LEARNED.md
 aws glue create-crawler --name <sport>-data-crawler ...
 
 # DO THIS INSTEAD:
-# Proceed directly to custom ETL script (Phase 2.2)
+# Proceed directly to custom ETL script (2.0002)
 ```
 
 **Saves:**
@@ -116,7 +116,7 @@ aws glue create-crawler --name <sport>-data-crawler ...
 
 ---
 
-### Phase 2.2: Data Quality Analysis
+### 2.0002: Data Quality Analysis
 
 **🚨 CRITICAL: Expect 20-40% Empty Files**
 
@@ -164,7 +164,7 @@ python scripts/analysis/check_data_availability.py
 
 ---
 
-### Phase 3.1: RDS Instance Creation
+### 3.0001: RDS Instance Creation
 
 **Issue #2: Password Character Restrictions**
 
@@ -239,7 +239,7 @@ aws rds describe-db-engine-versions \
 
 ---
 
-### Phase 3.1: Security Group Configuration
+### 3.0001: Security Group Configuration
 
 **Issue #7: Port 5432 Must Be Open**
 
@@ -429,17 +429,17 @@ aws ec2 authorize-security-group-ingress \
 
 ## Workflow Integration
 
-### Before Phase 2.1 (Glue Crawler):
+### Before 2.0001 (Glue Crawler):
 1. **Read:** LESSONS_LEARNED.md Issue #11
 2. **Decision:** Skip Glue Crawler entirely
-3. **Action:** Proceed directly to Phase 2.2 Custom ETL
+3. **Action:** Proceed directly to 2.0002 Custom ETL
 
-### Before Phase 2.2 (ETL Planning):
+### Before 2.0002 (ETL Planning):
 1. **Read:** LESSONS_LEARNED.md Issue #10
 2. **Action:** Run data quality analysis first
 3. **Plan:** Add pre-filter for empty files (save 30% compute)
 
-### Before Phase 3.1 (RDS Creation):
+### Before 3.0001 (RDS Creation):
 1. **Read:** LESSONS_LEARNED.md Issues #2-6
 2. **Check:** PostgreSQL version availability
 3. **Prepare:** Valid password (no @ / " symbols)

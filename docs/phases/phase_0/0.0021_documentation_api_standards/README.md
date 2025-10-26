@@ -1,10 +1,10 @@
-# Phase 0.0021: Documentation & API Standards
+# 0.0021: Documentation & API Standards
 
 **Parent Phase:** [Phase 0: Data Collection](../PHASE_0_INDEX.md)
 
 **Status:** ⏸️ PENDING
 **Priority:** 🟡 MEDIUM
-**Migrated From:** Phase 6.2 (Optional Enhancements)
+**Migrated From:** 6.0002 (Optional Enhancements)
 **Timeline:** 1-2 weeks
 **Cost Impact:** $0 (documentation tools free)
 
@@ -33,7 +33,7 @@ Establish comprehensive documentation standards and API specifications to enable
 
 ## Current Documentation State
 
-**Existing Documentation (from Phase 0.0001-0.18):**
+**Existing Documentation (from 0.0001-0.18):**
 - 1,720 markdown files (251 MB)
 - PROGRESS.md - Master project status
 - CLAUDE.md - AI assistant instructions
@@ -723,7 +723,7 @@ sphinx-autobuild docs/reference/source docs/reference/_build/html
 
 ## Prerequisites
 
-**Before starting Phase 0.0021:**
+**Before starting 0.0021:**
 - [x] Existing documentation (1,720 markdown files)
 - [x] ADR system initiated (ADR-010 exists)
 - [ ] APIs to document (may be minimal until Phase 3/4)
@@ -845,8 +845,8 @@ docs/reference/_build/html/             # Sphinx output (auto-generated)
 **Prerequisites:** None (foundational)
 
 **Integrates with:**
-- Phase 0.0019: Testing Infrastructure - Test documentation
-- Phase 0.0020: Monitoring & Observability - Monitoring runbooks
+- 0.0019: Testing Infrastructure - Test documentation
+- 0.0020: Monitoring & Observability - Monitoring runbooks
 - All phases - READMEs and documentation
 
 ---
@@ -879,6 +879,6 @@ Using this sub-phase's guides, simulations can:
 
 ---
 
-**Last Updated:** October 25, 2025 (Migrated from Phase 6.2)
+**Last Updated:** October 25, 2025 (Migrated from 6.0002)
 **Status:** ⏸️ PENDING - Ready for implementation
 **Migrated By:** Comprehensive Phase Reorganization (ADR-010)

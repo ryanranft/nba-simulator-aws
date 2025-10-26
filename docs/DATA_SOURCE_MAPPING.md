@@ -2,7 +2,7 @@
 
 **Created:** October 6, 2025
 **Purpose:** Map identifiers and data structures across all 5 data sources
-**Status:** Phase 1, Sub-Phase 1.6 (Verification Sources Setup)
+**Status:** Phase 1, Sub-1.0006 (Verification Sources Setup)
 
 ---
 

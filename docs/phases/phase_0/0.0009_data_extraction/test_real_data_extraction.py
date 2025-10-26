@@ -70,7 +70,7 @@ class TestRealDataExtraction(unittest.TestCase):
         cls.odds_adapter = OddsAPIAdapter()
 
         # Discover data files (relative to project root)
-        # Current file is: docs/phases/phase_0/0.9_data_extraction/test_real_data_extraction.py
+        # Current file is: docs/phases/phase_0/0.0009_data_extraction/test_real_data_extraction.py
         # Project root is 4 levels up
         current_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(

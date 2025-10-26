@@ -1,10 +1,10 @@
-# Phase 0.0020: Monitoring & Observability
+# 0.0020: Monitoring & Observability
 
 **Parent Phase:** [Phase 0: Data Collection](../PHASE_0_INDEX.md)
 
 **Status:** ⏸️ PENDING
 **Priority:** 🟡 IMPORTANT
-**Migrated From:** Phase 6.1 (Optional Enhancements)
+**Migrated From:** 6.0001 (Optional Enhancements)
 **Timeline:** 1-2 weeks
 **Cost Impact:** +$1.50-3.00/month (CloudWatch)
 
@@ -33,7 +33,7 @@ Establish comprehensive monitoring and observability infrastructure to track sys
 
 ## Current Monitoring State
 
-**Existing Infrastructure (from Phase 0.0001-0.18):**
+**Existing Infrastructure (from 0.0001-0.18):**
 - DIMS (Data Inventory Management System) - `inventory/metrics.yaml`
 - DIMS CLI - `scripts/monitoring/dims_cli.py verify`
 - Scraper monitoring - `scripts/monitoring/monitor_scrapers_inline.sh`
@@ -543,7 +543,7 @@ def upload_to_s3(file_path, bucket, key):
 - ✅ Automated anomaly detection
 - ✅ Cost optimization recommendations
 - ✅ Performance regression detection
-- ✅ Integration with Phase 0.0019 (CI/CD)
+- ✅ Integration with 0.0019 (CI/CD)
 
 ---
 
@@ -600,10 +600,10 @@ def upload_to_s3(file_path, bucket, key):
 
 ## Prerequisites
 
-**Before starting Phase 0.0020:**
+**Before starting 0.0020:**
 - [x] AWS CloudWatch access configured
-- [x] DIMS system operational (Phase 0.0016+)
-- [x] ADCE operational (Phase 0.0018)
+- [x] DIMS system operational (0.0016+)
+- [x] ADCE operational (0.0018)
 - [ ] Email for SNS notifications
 - [ ] Cost Explorer API enabled
 
@@ -621,7 +621,7 @@ def upload_to_s3(file_path, bucket, key):
 - Success rate tracking and trending
 - Queue depth monitoring for capacity planning
 
-### CI/CD (Phase 0.0019)
+### CI/CD (0.0019)
 - Test results published to CloudWatch
 - CI/CD pipeline duration tracking
 - Pre-commit hook performance profiling
@@ -719,9 +719,9 @@ docs/monitoring/COST_OPTIMIZATION.md               # Cost tracking guide
 **Prerequisites:** None (foundational)
 
 **Integrates with:**
-- Phase 0.0016: Robust Architecture - Multi-source monitoring
-- Phase 0.0018: Autonomous Data Collection - ADCE health tracking
-- Phase 0.0019: Testing Infrastructure & CI/CD - Test metrics publishing
+- 0.0016: Robust Architecture - Multi-source monitoring
+- 0.0018: Autonomous Data Collection - ADCE health tracking
+- 0.0019: Testing Infrastructure & CI/CD - Test metrics publishing
 
 ---
 
@@ -753,6 +753,6 @@ Using this sub-phase's observability, simulations can:
 
 ---
 
-**Last Updated:** October 25, 2025 (Migrated from Phase 6.1)
+**Last Updated:** October 25, 2025 (Migrated from 6.0001)
 **Status:** ⏸️ PENDING - Ready for implementation
 **Migrated By:** Comprehensive Phase Reorganization (ADR-010)

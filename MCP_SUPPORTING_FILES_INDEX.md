@@ -65,15 +65,15 @@ This document lists all files that provide context for the temporal data build i
 
 | File | Lines | Purpose | Status |
 |------|-------|---------|--------|
-| **docs/phases/phase_9/9.0_system_architecture.md** | ~84 | System design | ✅ Complete |
-| **docs/phases/phase_9/9.1_espn_processor.md** | TBD | ESPN processor spec | ✅ Complete |
-| **docs/phases/phase_9/9.2_hoopr_processor.md** | TBD | hoopR processor spec | ✅ Complete |
-| **docs/phases/phase_9/9.3_nba_api_processor.md** | ~100 | NBA API processor spec | ⏸️ Pending |
-| **docs/phases/phase_9/9.4_kaggle_processor.md** | ~74 | Kaggle processor spec | ⏸️ Pending |
-| **docs/phases/phase_9/9.5_storage_system.md** | ~84 | Storage architecture | ⏸️ Pending |
-| **docs/phases/phase_9/9.6_advanced_metrics.md** | ~74 | Advanced metrics layer | ⏸️ Pending |
-| **docs/phases/phase_9/9.7_ml_integration.md** | TBD | ML integration approach | ⏸️ Pending |
-| **docs/phases/phase_9/9.8_betting_integration.md** | TBD | Betting integration | ⏸️ Pending |
+| **docs/phases/phase_9/9.0000_system_architecture.md** | ~84 | System design | ✅ Complete |
+| **docs/phases/phase_9/9.0001_espn_processor.md** | TBD | ESPN processor spec | ✅ Complete |
+| **docs/phases/phase_9/9.0002_hoopr_processor.md** | TBD | hoopR processor spec | ✅ Complete |
+| **docs/phases/phase_9/9.0003_nba_api_processor.md** | ~100 | NBA API processor spec | ⏸️ Pending |
+| **docs/phases/phase_9/9.0004_kaggle_processor.md** | ~74 | Kaggle processor spec | ⏸️ Pending |
+| **docs/phases/phase_9/9.0005_storage_system.md** | ~84 | Storage architecture | ⏸️ Pending |
+| **docs/phases/phase_9/9.0006_advanced_metrics.md** | ~74 | Advanced metrics layer | ⏸️ Pending |
+| **docs/phases/phase_9/9.0007_ml_integration.md** | TBD | ML integration approach | ⏸️ Pending |
+| **docs/phases/phase_9/9.0008_betting_integration.md** | TBD | Betting integration | ⏸️ Pending |
 
 **Why These Matter:**
 - Each sub-phase has specific requirements
@@ -84,10 +84,10 @@ This document lists all files that provide context for the temporal data build i
 
 | File | Lines | Purpose | Key Information |
 |------|-------|---------|-----------------|
-| **docs/phases/phase_0/0.1_basketball_reference/README.md** | ~100 | Overview of 13 tiers | 234 data types, 140-197 hours, organization |
-| **docs/phases/phase_0/0.1_basketball_reference/TIER_1_NBA_HIGH_VALUE.md** | TBD | Tier 1 details | 5 data types, 150K records, 15-20 hours |
-| **docs/phases/phase_0/0.1_basketball_reference/TIER_2_NBA_STRATEGIC.md** | TBD | Tier 2 details | 4 data types, 200K records, 20-25 hours |
-| **docs/phases/phase_0/0.1_basketball_reference/IMPLEMENTATION_SUMMARY.md** | TBD | Technical approach | Scraping strategy, rate limiting, checkpointing |
+| **docs/phases/phase_0/0.0001_basketball_reference/README.md** | ~100 | Overview of 13 tiers | 234 data types, 140-197 hours, organization |
+| **docs/phases/phase_0/0.0001_basketball_reference/TIER_1_NBA_HIGH_VALUE.md** | TBD | Tier 1 details | 5 data types, 150K records, 15-20 hours |
+| **docs/phases/phase_0/0.0001_basketball_reference/TIER_2_NBA_STRATEGIC.md** | TBD | Tier 2 details | 4 data types, 200K records, 20-25 hours |
+| **docs/phases/phase_0/0.0001_basketball_reference/IMPLEMENTATION_SUMMARY.md** | TBD | Technical approach | Scraping strategy, rate limiting, checkpointing |
 
 **Why These Matter:**
 - Basketball Reference is Workstream 3 (140-197 hours of work)
@@ -99,7 +99,7 @@ This document lists all files that provide context for the temporal data build i
 | File | Lines | Purpose | Key Information |
 |------|-------|---------|-----------------|
 | **docs/phases/PHASE_1_INDEX.md** | ~150 | Phase 1 overview | Data quality and multi-source integration |
-| **docs/phases/phase_1/1.1_multi_source_integration.md** | TBD | Integration details | 209 features, conflict resolution, 28 hours |
+| **docs/phases/phase_1/1.0001_multi_source_integration.md** | TBD | Integration details | 209 features, conflict resolution, 28 hours |
 
 **Why These Matter:**
 - Workstream 4 depends on understanding multi-source integration strategy
@@ -115,7 +115,7 @@ This document lists all files that provide context for the temporal data build i
 
 **Why These Matter:**
 - Shows what ML capabilities already exist
-- Provides context for Phase 9.7 ML Integration
+- Provides context for 9.0007 ML Integration
 - Feature engineering patterns established
 
 ---
@@ -234,12 +234,12 @@ scripts/ml/
 
 **Must Read:**
 - docs/phases/PHASE_9_INDEX.md
-- docs/phases/phase_9/9.3_nba_api_processor.md
-- docs/phases/phase_9/9.4_kaggle_processor.md
-- docs/phases/phase_9/9.5_storage_system.md
-- docs/phases/phase_9/9.6_advanced_metrics.md
-- docs/phases/phase_9/9.7_ml_integration.md
-- docs/phases/phase_9/9.8_betting_integration.md
+- docs/phases/phase_9/9.0003_nba_api_processor.md
+- docs/phases/phase_9/9.0004_kaggle_processor.md
+- docs/phases/phase_9/9.0005_storage_system.md
+- docs/phases/phase_9/9.0006_advanced_metrics.md
+- docs/phases/phase_9/9.0007_ml_integration.md
+- docs/phases/phase_9/9.0008_betting_integration.md
 
 **Code References:**
 - scripts/pbp_to_boxscore/base_processor.py (abstract class to extend)
@@ -248,10 +248,10 @@ scripts/ml/
 ### Workstream 3: Basketball Reference Expansion
 
 **Must Read:**
-- docs/phases/phase_0/0.1_basketball_reference/README.md
-- docs/phases/phase_0/0.1_basketball_reference/TIER_1_NBA_HIGH_VALUE.md
-- docs/phases/phase_0/0.1_basketball_reference/TIER_2_NBA_STRATEGIC.md
-- docs/phases/phase_0/0.1_basketball_reference/IMPLEMENTATION_SUMMARY.md
+- docs/phases/phase_0/0.0001_basketball_reference/README.md
+- docs/phases/phase_0/0.0001_basketball_reference/TIER_1_NBA_HIGH_VALUE.md
+- docs/phases/phase_0/0.0001_basketball_reference/TIER_2_NBA_STRATEGIC.md
+- docs/phases/phase_0/0.0001_basketball_reference/IMPLEMENTATION_SUMMARY.md
 
 **Best Practices:**
 - docs/MCP_SCRAPING_RECOMMENDATIONS.md
@@ -260,7 +260,7 @@ scripts/ml/
 
 **Must Read:**
 - docs/phases/PHASE_1_INDEX.md
-- docs/phases/phase_1/1.1_multi_source_integration.md
+- docs/phases/phase_1/1.0001_multi_source_integration.md
 - docs/DATA_SOURCE_MAPPING.md
 
 **Code References:**
@@ -281,7 +281,7 @@ scripts/ml/
 2. **Then Read** (30 minutes):
    - docs/phases/PHASE_9_INDEX.md
    - All Phase 9 sub-phase files (9.0-9.8)
-   - docs/phases/phase_0/0.1_basketball_reference/README.md
+   - docs/phases/phase_0/0.0001_basketball_reference/README.md
 
 3. **Deep Dive As Needed** (reference):
    - Code files when understanding implementation details

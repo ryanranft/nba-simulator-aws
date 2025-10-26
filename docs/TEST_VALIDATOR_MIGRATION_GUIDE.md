@@ -1,7 +1,7 @@
 # Test & Validator Migration Guide
 
 **Date:** October 23, 2025
-**Status:** Phase 0.0001 Complete (Proof-of-Concept) | 481 Tests Remaining
+**Status:** 0.0001 Complete (Proof-of-Concept) | 481 Tests Remaining
 **Migration Type:** Reorganization (docs/ → tests/ and validators/)
 
 ---
@@ -18,7 +18,7 @@ This document tracks the migration of 482 test files and validators from `docs/p
 
 ### Completed ✅
 
-**Phase 0.0001:**
+**0.0001:**
 - ✅ Moved 2 validators to `validators/phases/phase_0/`
 - ✅ Moved 1 test file + conftest to `tests/phases/phase_0/`
 - ✅ All tests passing from new locations
@@ -135,7 +135,7 @@ Usage:
 
 - **Workflow #53:** Phase Test & Validator Organization (complete guide)
 - **Workflow #52:** Phase Index Management (updated with test/validator guidance)
-- **Proof-of-concept:** Phase 0.0001 (`tests/phases/phase_0/`, `validators/phases/phase_0/`)
+- **Proof-of-concept:** 0.0001 (`tests/phases/phase_0/`, `validators/phases/phase_0/`)
 
 ---
 

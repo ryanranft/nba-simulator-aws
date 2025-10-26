@@ -181,19 +181,19 @@ class ProgressSync:
             print("   ⏸️ Phase 1 (S3 Data Lake) not complete")
 
         if statuses["glue_crawler"] == "complete":
-            print("   ✅ Phase 2.1 (Glue Crawler) appears complete")
+            print("   ✅ 2.0001 (Glue Crawler) appears complete")
         else:
-            print("   ⏸️ Phase 2.1 (Glue Crawler) pending")
+            print("   ⏸️ 2.0001 (Glue Crawler) pending")
 
         if statuses["rds"] == "complete":
-            print("   ✅ Phase 3.1 (RDS Database) appears complete")
+            print("   ✅ 3.0001 (RDS Database) appears complete")
         else:
-            print("   ⏸️ Phase 3.1 (RDS Database) pending")
+            print("   ⏸️ 3.0001 (RDS Database) pending")
 
         if statuses["glue_etl"] == "complete":
-            print("   ✅ Phase 2.2 (Glue ETL Job) appears complete")
+            print("   ✅ 2.0002 (Glue ETL Job) appears complete")
         else:
-            print("   ⏸️ Phase 2.2 (Glue ETL Job) pending")
+            print("   ⏸️ 2.0002 (Glue ETL Job) pending")
 
         print()
 

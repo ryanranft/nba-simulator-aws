@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive Test Suite: External API Integration System (Phase 0.0017)
+Comprehensive Test Suite: External API Integration System (0.0017)
 
 Tests for rec_191 implementation covering:
 - APIConfig & APIEndpoint (10 tests)
@@ -731,7 +731,7 @@ def run_tests():
 
     # Print summary
     print("\n" + "=" * 80)
-    print("Test Summary - Phase 0.0017 External API Integration")
+    print("Test Summary - 0.0017 External API Integration")
     print("=" * 80)
     print(f"Tests Run: {result.testsRun}")
     print(f"Successes: {result.testsRun - len(result.failures) - len(result.errors)}")

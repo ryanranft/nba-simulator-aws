@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.146_filter_training_datasets
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0146_filter_training_datasets
 python test_rec_194.py -v
 ```
 

@@ -122,7 +122,7 @@ tail -f scripts/monitoring/logs/scraper_*.log
 **Data:** Player tracking, shot charts, advanced metrics
 
 ### Basketball Reference Scraper
-**See:** [Phase 0.1 Documentation](../../phases/phase_0/0.1_basketball_reference/)
+**See:** [0.0001 Documentation](../../phases/phase_0/0.0001_basketball_reference/)
 **Tiers:** 13 tiers, 234 data types
 **Estimated Time:** 140-197 hours
 **Status:** Ready to implement

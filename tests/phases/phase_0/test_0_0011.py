@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 0.0011: RAG Pipeline Tests
+0.0011: RAG Pipeline Tests
 
 Purpose: Comprehensive test suite for RAG pipeline with pgvector
 Created: October 25, 2025
@@ -32,7 +32,7 @@ def load_module(name, filepath):
     return module
 
 
-# Load Phase 0.0011 modules
+# Load 0.0011 modules
 db_init_module = load_module(
     "init_0_11", project_root / "scripts" / "db" / "0_11_init.py"
 )

@@ -229,5 +229,5 @@ for data_type in schedule pbp box_scores team_stats; do
 done
 
 echo ""
-echo "✅ Crawler execution complete! Ready for Phase 2.2 (Glue ETL)."
+echo "✅ Crawler execution complete! Ready for 2.0002 (Glue ETL)."
 echo ""

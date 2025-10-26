@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Phase 9.2 hoopR Processor Agent Deployment Script
+# 9.0002 hoopR Processor Agent Deployment Script
 # Cross-validation with ESPN data, process hoopR play-by-play
 
 set -e
@@ -83,7 +83,7 @@ check_prerequisites() {
 }
 
 start_agent() {
-    log_info "Starting Phase 9.2 hoopR Processor Agent..."
+    log_info "Starting 9.0002 hoopR Processor Agent..."
 
     # Check if agent is already running
     if [ -f "$PID_FILE" ]; then
@@ -106,7 +106,7 @@ start_agent() {
     # Save PID
     echo "$PID" > "$PID_FILE"
 
-    log_success "Phase 9.2 hoopR Processor Agent started (PID: $PID)"
+    log_success "9.0002 hoopR Processor Agent started (PID: $PID)"
     log_info "Output directory: $OUTPUT_DIR"
     log_info "Log file: $LOG_DIR/phase_9_2_hoopr_agent.log"
     log_info "Standard output: $LOG_DIR/phase_9_2_hoopr_agent.out"
@@ -123,7 +123,7 @@ start_agent() {
 }
 
 stop_agent() {
-    log_info "Stopping Phase 9.2 hoopR Processor Agent..."
+    log_info "Stopping 9.0002 hoopR Processor Agent..."
 
     if [ ! -f "$PID_FILE" ]; then
         log_warning "No PID file found - agent may not be running"
@@ -167,7 +167,7 @@ stop_agent() {
 }
 
 status_agent() {
-    log_info "Checking Phase 9.2 hoopR Processor Agent status..."
+    log_info "Checking 9.0002 hoopR Processor Agent status..."
 
     if [ ! -f "$PID_FILE" ]; then
         log_warning "No PID file found - agent is not running"
@@ -217,7 +217,7 @@ except Exception as e:
 }
 
 monitor_agent() {
-    log_info "Monitoring Phase 9.2 hoopR Processor Agent..."
+    log_info "Monitoring 9.0002 hoopR Processor Agent..."
 
     if [ ! -f "$PID_FILE" ]; then
         log_error "Agent is not running"
@@ -239,7 +239,7 @@ monitor_agent() {
 }
 
 show_help() {
-    echo "Phase 9.2 hoopR Processor Agent"
+    echo "9.0002 hoopR Processor Agent"
     echo ""
     echo "Usage: $0 {start|stop|status|monitor|restart|help}"
     echo ""

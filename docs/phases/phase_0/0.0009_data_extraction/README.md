@@ -10,7 +10,7 @@
 
 ## Overview
 
-**Phase 0.9 is the authoritative extraction documentation hub** covering all data extraction infrastructure across 100+ scripts, 6 data sources, async frameworks, autonomous agents, and orchestration systems.
+**0.0009 is the authoritative extraction documentation hub** covering all data extraction infrastructure across 100+ scripts, 6 data sources, async frameworks, autonomous agents, and orchestration systems.
 
 ### What This Phase Provides
 
@@ -179,7 +179,7 @@ python implement_full_validation.py --workers 20 --chunk-size 1000
 
 **Documentation:**
 - BASKETBALL_REFERENCE_EXTRACTION.md *(Planned)*
-- [Phase 0.4 Basketball Reference](../0.4_basketball_reference/README.md) - Complete 13-tier system
+- [0.0004 Basketball Reference](../0.4_basketball_reference/README.md) - Complete 13-tier system
 
 ---
 
@@ -350,7 +350,7 @@ python implement_full_validation.py --workers 20 --chunk-size 1000
 - 24/7 autonomous operation
 
 **Related Systems:**
-- **ADCE (Phase 0.18):** Autonomous Data Collection Ecosystem
+- **ADCE (0.0018):** Autonomous Data Collection Ecosystem
   - Unified scraper system (75/75 scrapers)
   - Reconciliation engine (AWS S3 Inventory)
   - Scraper orchestrator
@@ -634,7 +634,7 @@ response = s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix='espn/box_s
 
 ### ADCE (Autonomous Data Collection Ecosystem)
 
-**Phase 0.18:** Complete 24/7 autonomous collection system
+**0.0018:** Complete 24/7 autonomous collection system
 
 **Components:**
 1. **Unified Scraper System** (75/75 scrapers migrated to YAML)
@@ -657,7 +657,7 @@ print(f"Files collected today: {status.files_today}")
 print(f"Gaps detected: {status.gaps_detected}")
 ```
 
-**Documentation:** [Phase 0.18 ADCE](../0.18_autonomous_data_collection/README.md)
+**Documentation:** [0.0018 ADCE](../0.18_autonomous_data_collection/README.md)
 
 ---
 
@@ -954,8 +954,8 @@ Quality Score = (40% × Completeness) + (30% × Consistency) + (30% × Accuracy)
 ### Related Documentation
 
 - **[Phase 0 Index](../PHASE_0_INDEX.md)** - Parent phase overview
-- **[Phase 0.4 Basketball Reference](../0.4_basketball_reference/README.md)** - 13-tier BBRef system
-- **[Phase 0.18 ADCE](../0.18_autonomous_data_collection/README.md)** - Autonomous collection
+- **[0.0004 Basketball Reference](../0.4_basketball_reference/README.md)** - 13-tier BBRef system
+- **[0.0018 ADCE](../0.18_autonomous_data_collection/README.md)** - Autonomous collection
 - **[DATA_CATALOG.md](../../../DATA_CATALOG.md)** - Complete data source inventory
 - **[DATA_STRUCTURE_GUIDE.md](../../../DATA_STRUCTURE_GUIDE.md)** - S3 organization
 
@@ -1028,9 +1028,9 @@ This phase provides the **data extraction infrastructure** that powers the **hyb
 
 **Return to:** [Phase 0: Data Collection](../PHASE_0_INDEX.md)
 **Related Phases:**
-- [Phase 0.1: Initial Data Collection](../0.1_initial_data_collection/README.md) - ESPN data upload
-- [Phase 0.4: Basketball Reference](../0.4_basketball_reference/README.md) - 13-tier system
-- [Phase 0.18: ADCE](../0.18_autonomous_data_collection/README.md) - Autonomous collection
+- [0.0001: Initial Data Collection](../0.1_initial_data_collection/README.md) - ESPN data upload
+- [0.0004: Basketball Reference](../0.4_basketball_reference/README.md) - 13-tier system
+- [0.0018: ADCE](../0.18_autonomous_data_collection/README.md) - Autonomous collection
 - [Phase 1: Data Quality](../../phase_1/PHASE_1_INDEX.md) - Data validation & quality
 
 ---

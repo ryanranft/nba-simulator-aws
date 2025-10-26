@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite: Phase 0.0018 - ADCE Integration Tests
+Test Suite: 0.0018 - ADCE Integration Tests
 
 Integration tests for reconciliation, orchestration, and end-to-end autonomous operation.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite: Phase 0.0014 - Error Analysis & Hallucination Detection (rec_093)
+Test Suite: 0.0014 - Error Analysis & Hallucination Detection (rec_093)
 
 Comprehensive tests for:
 - NBAFactValidator (team, player, stat validation)
@@ -25,7 +25,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # Import implementation
-impl_path = project_root / "docs" / "phases" / "phase_0" / "0.14_error_analysis"
+impl_path = project_root / "docs" / "phases" / "phase_0" / "0.0014_error_analysis"
 sys.path.insert(0, str(impl_path))
 
 from implement_rec_093 import (

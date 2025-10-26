@@ -33,7 +33,7 @@ Get raw data from multiple sources into AWS S3 with temporal precision. This is 
 - Hybrid simulation methodology
 - Advanced modeling techniques (Bayesian updating, regime-switching, network effects)
 
-**Phase 0.1 role:** Collect the temporal raw data that makes this vision possible.
+**0.0001 role:** Collect the temporal raw data that makes this vision possible.
 
 **This phase includes:**
 - Local development environment setup
@@ -68,7 +68,7 @@ Get raw data from multiple sources into AWS S3 with temporal precision. This is 
 
 ---
 
-## How Phase 0.1 Data Enables the Simulation Vision
+## How 0.0001 Data Enables the Simulation Vision
 
 This phase collects the foundational temporal data that powers the **hybrid econometric + nonparametric simulation system** described in the [main README](../../../README.md#simulation-methodology).
 
@@ -125,8 +125,8 @@ This temporal data enables simulations that adapt to:
 **This documentation now uses ADCE (Autonomous Data Collection Ecosystem) for live data tracking.**
 
 Instead of hardcoded file counts, the validation scripts query S3 in real-time to show:
-- **Phase 0.1 Initial Upload Baseline** (October 2024)
-- **ADCE Autonomous Collection Additions** (Phase 0.9 onwards)
+- **0.0001 Initial Upload Baseline** (October 2024)
+- **ADCE Autonomous Collection Additions** (0.0009 onwards)
 - **Current Total with Growth Metrics**
 
 **To see current data state, run:**
@@ -154,7 +154,7 @@ s3_storage.hoopr_files: 96 (ADCE autonomous collection)
 ```
 
 **Historical milestones:**
-- **Oct 2024 (Phase 0.1 Initial Upload):** 146,115 files, 119 GB (ESPN historical)
+- **Oct 2024 (0.0001 Initial Upload):** 146,115 files, 119 GB (ESPN historical)
 - **Oct 2025 (ADCE Autonomous Collection):** +25,323 files (8 new data sources)
 
 **See:**
@@ -162,7 +162,7 @@ s3_storage.hoopr_files: 96 (ADCE autonomous collection)
 - `inventory/metrics.yaml` - Current metrics (auto-updated at session end)
 - `inventory/historical/` - Daily snapshots for trend analysis
 
-### ADCE Data Sources (Phase 0.9)
+### ADCE Data Sources (0.0009)
 
 The following data sources were added by ADCE autonomous collection:
 
@@ -199,7 +199,7 @@ Before starting this phase:
 
 ## Implementation Steps
 
-### Sub-Phase 0.1: Local Environment Setup
+### Sub-0.0001: Local Environment Setup
 
 **Status:** ✅ COMPLETE
 **Time Estimate:** 4 hours
@@ -253,7 +253,7 @@ git remote add origin git@github.com:username/nba-simulator-aws.git
 
 ---
 
-### Sub-Phase 0.2: S3 Bucket Creation
+### Sub-0.0002: S3 Bucket Creation
 
 **Status:** ✅ COMPLETE
 **Time Estimate:** 30 minutes
@@ -305,7 +305,7 @@ aws s3api get-public-access-block --bucket nba-sim-raw-data-lake
 
 ---
 
-### Sub-Phase 0.3: Initial Data Upload to S3
+### Sub-0.0003: Initial Data Upload to S3
 
 **Status:** ✅ COMPLETE
 **Time Estimate:** 1.5 days (overnight upload)
@@ -367,7 +367,7 @@ aws s3 sync /Users/ryanranft/0espn/data/nba/team_stats/ \
 
 ---
 
-### Sub-Phase 0.4: Verify Upload Completeness
+### Sub-0.0004: Verify Upload Completeness
 
 **Status:** ✅ COMPLETE
 **Time Estimate:** 30 minutes
@@ -422,7 +422,7 @@ python -m json.tool /tmp/test.json > /dev/null && echo "Valid JSON"
 
 **Time Period:** NBA games 1993-2025
 
-### Phase 0.1 Initial Upload (Baseline)
+### 0.0001 Initial Upload (Baseline)
 
 **File Breakdown:**
 - Schedule files: 11,633 (YYYYMMDD format)
@@ -448,7 +448,7 @@ python validators/phases/phase_0/validate_0_1_s3_bucket_config.py
 
 **Run tests:**
 ```bash
-# All Phase 0.1 tests
+# All 0.0001 tests
 pytest tests/phases/phase_0/test_0_1_initial_data_collection.py -v
 
 # Fast tests only (skip slow S3 scans)
@@ -459,7 +459,7 @@ pytest tests/phases/phase_0/test_0_1_initial_data_collection.py::TestS3BucketCon
 ```
 
 **Current data includes:**
-- Original Phase 0.1 data (preserved)
+- Original 0.0001 data (preserved)
 - ADCE autonomous collection (8 new sources)
 - Continuous growth from autonomous agents
 

@@ -3,7 +3,7 @@
 **Recommendation ID:** consolidated_variation_2_5656b4aa
 **Priority:** DATA
 **Phase:** 5
-**Subdirectory:** 5.5_experimentation
+**Subdirectory:** 5.0005_experimentation
 **Generated:** 2025-10-16T00:41:41.211601
 
 ---

@@ -122,7 +122,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.128_implement_a_system_to_handle_data_latency
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0128_implement_a_system_to_handle_data_latency
 python test_rec_170.py -v
 ```
 

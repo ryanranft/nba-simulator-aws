@@ -119,7 +119,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.163_ensure_homogenous_text_and_image_data
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0163_ensure_homogenous_text_and_image_data
 python test_rec_211.py -v
 ```
 

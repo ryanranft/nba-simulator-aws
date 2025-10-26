@@ -66,7 +66,9 @@ class EnhancedFeatureEngineeringPipeline:
         self.plus_minus_extractor = None
         self.feature_count = 0
         self.feature_catalog = []
-        logger.info("EnhancedFeatureEngineeringPipeline initialized (rec_11 + Plus/Minus)")
+        logger.info(
+            "EnhancedFeatureEngineeringPipeline initialized (rec_11 + Plus/Minus)"
+        )
 
     def _default_config(self) -> Dict[str, Any]:
         """Default configuration for enhanced feature engineering."""
@@ -75,7 +77,6 @@ class EnhancedFeatureEngineeringPipeline:
             "lag_periods": [1, 2, 3, 5, 10],  # games to lag
             "rolling_windows": [3, 5, 10, 20],  # game windows
             "trend_windows": [5, 10],  # for trend calculation
-
             # Feature categories to include
             "include_temporal": True,
             "include_cumulative": True,
@@ -83,18 +84,23 @@ class EnhancedFeatureEngineeringPipeline:
             "include_contextual": True,
             "include_derived": True,
             "include_plus_minus": True,  # ✨ NEW
-
             # Stat types to engineer
             "base_stats": [
-                "points", "rebounds", "assists", "fg_pct", "three_pct", "ft_pct",
-                "steals", "blocks", "turnovers", "minutes",
+                "points",
+                "rebounds",
+                "assists",
+                "fg_pct",
+                "three_pct",
+                "ft_pct",
+                "steals",
+                "blocks",
+                "turnovers",
+                "minutes",
             ],
-
             # Advanced metrics
             "calculate_efficiency": True,
             "calculate_usage": True,
             "calculate_pace_adjusted": True,
-
             # Plus/minus settings ✨ NEW
             "plus_minus_enabled": True,
             "plus_minus_cache_ttl": 3600,  # Cache features for 1 hour
@@ -113,7 +119,16 @@ class EnhancedFeatureEngineeringPipeline:
             # 1. Import panel data system from rec_22
             try:
                 # Try relative import from phase 5
-                sys.path.insert(0, str(project_root / "docs" / "phases" / "phase_5" / "5.1_feature_engineering"))
+                sys.path.insert(
+                    0,
+                    str(
+                        project_root
+                        / "docs"
+                        / "phases"
+                        / "phase_5"
+                        / "5.0001_feature_engineering"
+                    ),
+                )
                 from implement_rec_22 import PanelDataProcessingSystem
 
                 self.panel_data_system = PanelDataProcessingSystem()
@@ -127,7 +142,9 @@ class EnhancedFeatureEngineeringPipeline:
             # 2. Import plus/minus feature extractor ✨ NEW
             if self.config.get("plus_minus_enabled", True):
                 try:
-                    from scripts.ml.plus_minus_feature_extractor import PlusMinusFeatureExtractor
+                    from scripts.ml.plus_minus_feature_extractor import (
+                        PlusMinusFeatureExtractor,
+                    )
 
                     self.plus_minus_extractor = PlusMinusFeatureExtractor()
                     logger.info("✓ Plus/Minus feature extractor loaded")
@@ -173,12 +190,16 @@ class EnhancedFeatureEngineeringPipeline:
 
         # Check if game_id column exists
         if "game_id" not in df.columns:
-            logger.warning("No game_id column found, cannot extract plus/minus features")
+            logger.warning(
+                "No game_id column found, cannot extract plus/minus features"
+            )
             return df
 
         # Get unique games from the dataset
         unique_games = df["game_id"].unique()
-        logger.info(f"Extracting plus/minus features for {len(unique_games)} unique games...")
+        logger.info(
+            f"Extracting plus/minus features for {len(unique_games)} unique games..."
+        )
 
         # Extract features for each game
         plus_minus_features_list = []
@@ -192,7 +213,9 @@ class EnhancedFeatureEngineeringPipeline:
                 plus_minus_features_list.append(features)
 
             except Exception as e:
-                logger.warning(f"Failed to extract plus/minus features for game {game_id}: {e}")
+                logger.warning(
+                    f"Failed to extract plus/minus features for game {game_id}: {e}"
+                )
                 extraction_errors.append((game_id, str(e)))
 
         # If we extracted features for any games, merge them
@@ -206,10 +229,14 @@ class EnhancedFeatureEngineeringPipeline:
             features_added = feature_count_end - feature_count_start
 
             logger.info(f"✓ Added {features_added} plus/minus features")
-            logger.info(f"  - Successfully extracted for {len(plus_minus_features_list)}/{len(unique_games)} games")
+            logger.info(
+                f"  - Successfully extracted for {len(plus_minus_features_list)}/{len(unique_games)} games"
+            )
 
             if extraction_errors:
-                logger.warning(f"  - Failed to extract for {len(extraction_errors)} games")
+                logger.warning(
+                    f"  - Failed to extract for {len(extraction_errors)} games"
+                )
 
             self.feature_catalog.append(("plus_minus", features_added))
         else:
@@ -247,11 +274,16 @@ class EnhancedFeatureEngineeringPipeline:
             for stat in base_stats:
                 if stat in df.columns:
                     df = self.panel_data_system.generate_rolling_stats(
-                        df, variables=[stat], windows=rolling_windows, stats=["mean", "std"]
+                        df,
+                        variables=[stat],
+                        windows=rolling_windows,
+                        stats=["mean", "std"],
                     )
         else:
             # Simplified version without panel_data_system
-            logger.info("Using simplified temporal features (panel_data_system not available)")
+            logger.info(
+                "Using simplified temporal features (panel_data_system not available)"
+            )
 
             # Ensure data is sorted by player and game
             if "player_id" in df.columns and "game_number" in df.columns:
@@ -261,7 +293,9 @@ class EnhancedFeatureEngineeringPipeline:
                 for stat in base_stats:
                     if stat in df.columns:
                         for lag in lag_periods:
-                            df[f"{stat}_lag_{lag}"] = df.groupby("player_id")[stat].shift(lag)
+                            df[f"{stat}_lag_{lag}"] = df.groupby("player_id")[
+                                stat
+                            ].shift(lag)
 
                 # Simple rolling means
                 for stat in base_stats:
@@ -287,7 +321,10 @@ class EnhancedFeatureEngineeringPipeline:
                             # Calculate older window
                             if self.panel_data_system:
                                 df = self.panel_data_system.generate_rolling_stats(
-                                    df, variables=[stat], windows=[older_window], stats=["mean"]
+                                    df,
+                                    variables=[stat],
+                                    windows=[older_window],
+                                    stats=["mean"],
                                 )
                             else:
                                 df[older_col] = (
@@ -299,7 +336,9 @@ class EnhancedFeatureEngineeringPipeline:
 
                         # Trend = recent - older (positive = improving)
                         if older_col in df.columns:
-                            df[f"{stat}_trend_{window}"] = df[recent_col] - df[older_col]
+                            df[f"{stat}_trend_{window}"] = (
+                                df[recent_col] - df[older_col]
+                            )
 
         feature_count_end = len(df.columns)
         features_added = feature_count_end - feature_count_start
@@ -342,7 +381,9 @@ class EnhancedFeatureEngineeringPipeline:
         for stat in base_stats:
             cumulative_col = f"{stat}_cumulative"
             if cumulative_col in df.columns and "games_cumulative" in df.columns:
-                df[f"{stat}_career_avg"] = df[cumulative_col] / df["games_cumulative"].replace(0, 1)
+                df[f"{stat}_career_avg"] = df[cumulative_col] / df[
+                    "games_cumulative"
+                ].replace(0, 1)
 
         feature_count_end = len(df.columns)
         features_added = feature_count_end - feature_count_start
@@ -454,7 +495,8 @@ class EnhancedFeatureEngineeringPipeline:
             "player_id": np.repeat(range(1, num_players + 1), games_per_player),
             "game_id": game_ids * num_players,
             "game_number": np.tile(range(1, games_per_player + 1), num_players),
-            "game_date": pd.date_range("2015-10-27", periods=games_per_player).tolist() * num_players,
+            "game_date": pd.date_range("2015-10-27", periods=games_per_player).tolist()
+            * num_players,
             # Basic stats
             "points": np.random.poisson(20, total_rows),
             "rebounds": np.random.poisson(7, total_rows),
@@ -471,7 +513,9 @@ class EnhancedFeatureEngineeringPipeline:
 
         df = pd.DataFrame(data)
 
-        logger.info(f"Created demo data: {len(df)} observations, {len(df['player_id'].unique())} players")
+        logger.info(
+            f"Created demo data: {len(df)} observations, {len(df['player_id'].unique())} players"
+        )
         return df
 
     def cleanup(self):
@@ -505,10 +549,11 @@ def main():
     # Report results
     logger.info("\n" + "=" * 80)
     logger.info("Results:")
-    logger.info(json.dumps(
-        {k: v for k, v in results.items() if k not in ["panel_shape"]},
-        indent=2
-    ))
+    logger.info(
+        json.dumps(
+            {k: v for k, v in results.items() if k not in ["panel_shape"]}, indent=2
+        )
+    )
     logger.info("=" * 80)
 
     if results.get("success"):

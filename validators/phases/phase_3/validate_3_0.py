@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Validate Phase 3.0
+Validate 3.0000
 
 Auto-generated validator template.
 
@@ -16,7 +16,7 @@ from pathlib import Path
 
 
 class Phase30Validator:
-    """Validates Phase 3.0."""
+    """Validates 3.0000."""
 
     def __init__(self, verbose: bool = False):
         self.verbose = verbose
@@ -48,7 +48,7 @@ class Phase30Validator:
     def run_all_validations(self) -> Tuple[bool, Dict]:
         """Run all validations."""
         print(f"\n{'='*60}")
-        print(f"Phase 3.0 Validation")
+        print(f"3.0000 Validation")
         print(f"{'='*60}\n")
 
         results = {
@@ -84,7 +84,7 @@ class Phase30Validator:
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Validate Phase 3.0")
+    parser = argparse.ArgumentParser(description="Validate 3.0000")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     args = parser.parse_args()
 

@@ -1,5 +1,5 @@
 """
-Tests for Phase 0.0012: RAG + LLM Integration
+Tests for 0.0012: RAG + LLM Integration
 
 Tests query understanding, RAG retrieval, prompt building, and LLM integration.
 

@@ -2,7 +2,7 @@
 """
 Implementation: Dispatcher Pipeline for Data Collection (rec_044)
 
-Implements Phase 0.0013: Data Collection Pipeline with Dispatcher and Crawlers
+Implements 0.0013: Data Collection Pipeline with Dispatcher and Crawlers
 
 This implementation creates a modular data collection pipeline that uses a dispatcher
 to route data to specific crawlers based on the data source. This facilitates the
@@ -60,7 +60,7 @@ logger = logging.getLogger(__name__)
 
 class DispatcherPipeline:
     """
-    Implementation of Phase 0.0013: Dispatcher Pipeline
+    Implementation of 0.0013: Dispatcher Pipeline
 
     Provides a unified interface for dispatching data collection tasks across
     multiple NBA data sources (ESPN, NBA API, Basketball Reference, hoopR, etc.)
@@ -235,7 +235,7 @@ class DispatcherPipeline:
 async def main():
     """Main execution function"""
     print("=" * 80)
-    print("Phase 0.0013: Dispatcher Pipeline Implementation (rec_044)")
+    print("0.0013: Dispatcher Pipeline Implementation (rec_044)")
     print("=" * 80)
 
     # Initialize pipeline
@@ -289,7 +289,7 @@ async def main():
     # Cleanup
     await pipeline.cleanup()
 
-    print(f"\n✅ Phase 0.0013 implementation complete!")
+    print(f"\n✅ 0.0013 implementation complete!")
     print("\nNext steps:")
     print("  1. Integrate with ADCE autonomous loop")
     print("  2. Add DIMS tracking for dispatcher operations")

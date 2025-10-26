@@ -119,7 +119,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.166_generate_test_cases_that_represent_the_entire_dataset
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0166_generate_test_cases_that_represent_the_entire_dataset
 python test_rec_214.py -v
 ```
 

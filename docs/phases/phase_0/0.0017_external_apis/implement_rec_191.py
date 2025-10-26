@@ -1107,7 +1107,7 @@ class ExternalAPIManager:
 def main():
     """Main execution function."""
     print("=" * 80)
-    print("External API Integration System - Phase 0.0017")
+    print("External API Integration System - 0.0017")
     print("=" * 80)
 
     # Initialize manager

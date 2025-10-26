@@ -3,7 +3,7 @@
 **Recommendation ID:** consolidated_variation_6_623db90d
 **Priority:** DATA
 **Phase:** 5
-**Subdirectory:** 5.2_model_management
+**Subdirectory:** 5.0002_model_management
 **Generated:** 2025-10-16T00:41:41.213782
 
 ---

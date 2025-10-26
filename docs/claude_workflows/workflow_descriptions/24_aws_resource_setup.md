@@ -17,7 +17,7 @@
 9. **Update cost actuals** in PROGRESS.md
 10. **Run `make sync-progress`** to verify documentation matches reality
 
-### Phase 2: Year-Based ETL Pipeline Workflow (Phase 2.2)
+### Phase 2: Year-Based ETL Pipeline Workflow (2.0002)
 
 **Purpose:** Process 146K+ S3 files efficiently using year-based partitioning and crawlers
 
@@ -702,7 +702,7 @@ python scripts/etl/extract_schedule_local.py --year 1993
 
 **Workflow 1: After RDS Database Creation**
 ```bash
-# Step 1: Create RDS instance (PROGRESS.md Phase 2.1)
+# Step 1: Create RDS instance (PROGRESS.md 2.0001)
 make create-rds
 
 # Step 2: Create schema
@@ -2540,7 +2540,7 @@ Glue Tables Created:
   box_scores: 25 tables
   team_stats: 25 tables
 
-✅ Crawler execution complete! Ready for Phase 2.2 (Glue ETL).
+✅ Crawler execution complete! Ready for 2.0002 (Glue ETL).
 ```
 
 **Expected timeline:**
@@ -2679,7 +2679,7 @@ Summary:
     box_scores: 25
     team_stats: 25
 
-✅ Complete! Ready for Phase 2.2 (Glue ETL).
+✅ Complete! Ready for 2.0002 (Glue ETL).
 ```
 
 **Expected timeline:** ~12-16 hours (fully sequential)
@@ -2869,7 +2869,7 @@ ORDER BY year;
 
 ---
 
-### Phase 2.2 Complete Workflow Summary
+### 2.0002 Complete Workflow Summary
 
 **Sequential execution order:**
 
@@ -2921,7 +2921,7 @@ ORDER BY year;
 
 ### Phase 3: RDS PostgreSQL Setup
 
-**See PROGRESS.md Phase 3.1 (lines 606-743)**
+**See PROGRESS.md 3.0001 (lines 606-743)**
 
 1. **Create DB subnet group** (if not exists):
    ```bash
@@ -2995,7 +2995,7 @@ ORDER BY year;
 
 ### Phase 3: AWS Glue ETL Job Setup
 
-**See PROGRESS.md Phase 3.2 (lines 744-862)**
+**See PROGRESS.md 3.0002 (lines 744-862)**
 
 1. **Upload ETL script to S3**:
    ```bash

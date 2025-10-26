@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.63_inspect_and_interrogate_attention_to_predict_future_data_bas
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0063_inspect_and_interrogate_attention_to_predict_future_data_bas
 python test_rec_092.py -v
 ```
 

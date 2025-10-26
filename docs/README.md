@@ -31,7 +31,7 @@ This index helps Claude Code and developers find the right documentation efficie
 ### Phase Implementation
 - **docs/phases/phase_0/PHASE_0_INDEX.md** - Data Foundation & Infrastructure (🔄 IN PROGRESS 17/20 complete)
   - Includes: Data collection, Testing, Monitoring, Documentation, Data Audit
-  - **NEW:** [Phase 0.0018: Autonomous Data Collection](phases/phase_0/0.0018_autonomous_data_collection/README.md) - 24/7 self-healing system
+  - **NEW:** [0.0018: Autonomous Data Collection](phases/phase_0/0.0018_autonomous_data_collection/README.md) - 24/7 self-healing system
 - **docs/phases/PHASE_1_INDEX.md** - Multi-source integration (⏸️ Pending)
 - **docs/phases/PHASE_2_INDEX.md** - Play-by-Play to Box Score (⏸️ Pending, 9 sub-phases, ~12 weeks)
 - **docs/phases/PHASE_3_INDEX.md** - RDS setup (✅ Complete)
@@ -268,7 +268,7 @@ This index helps Claude Code and developers find the right documentation efficie
 
 **Phase 5 Cleanup:**
 - Reduced from 11 loose files to 3 essential files
-- Organized ML summaries into proper subdirectories (5.19_drift_detection, 5.2_model_versioning)
+- Organized ML summaries into proper subdirectories (5.0019_drift_detection, 5.0002_model_versioning)
 - Removed duplicate implementation guides
 
 ### Archive Structure
@@ -326,7 +326,7 @@ This index helps Claude Code and developers find the right documentation efficie
 **October 11, 2025 - Phase Index Reorganization:**
 - Created phase index system (PHASE_N_INDEX.md) with 4-level hierarchy
 - Reorganized phase files into subdirectories (phase_0/ through phase_7/)
-- Sub-phase naming: N.M_name.md (e.g., 0.0_initial_data_collection.md)
+- Sub-phase naming: N.M_name.md (e.g., 0.0000_initial_data_collection.md)
 - PROGRESS.md reduction: 1,094 → 391 lines (64% reduction)
 - CLAUDE.md reduction: 546 → 395 lines (28% reduction)
 - **Session start context reduced: 1,085 → 885 lines (18% additional reduction)**

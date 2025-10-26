@@ -24,7 +24,7 @@ Phase 0 establishes the complete data collection infrastructure for the NBA temp
 
 **Future Sports Platforms:** Other sports will be built as **separate projects** in separate directories, using this NBA infrastructure as a template/foundation.
 
-**Phase 0.0005 & 0.6:** These are **NOT** reserved for other sports. They were permanently superseded by PostgreSQL implementations (see "Architecture Notes → Missing Sub-Phases" section below).
+**0.0005 & 0.6:** These are **NOT** reserved for other sports. They were permanently superseded by PostgreSQL implementations (see "Architecture Notes → Missing Sub-Phases" section below).
 
 ---
 
@@ -48,9 +48,9 @@ Phase 0 establishes the complete data collection infrastructure for the NBA temp
 | **0.0016** | [Robust Architecture](0.0016_robust_architecture/README.md) | ✅ COMPLETE ✓ | 🟡 IMPORTANT | Oct 23, 2025 | Multi-source search system (rec_189) |
 | **0.0017** | [External APIs](0.0017_external_apis/README.md) | ✅ COMPLETE ✓ | 🟡 MEDIUM | Oct 23, 2025 | Enhanced external API integration (rec_194) |
 | **0.0018** | **[Autonomous Data Collection (ADCE)](0.0018_autonomous_data_collection/README.md)** | ✅ **COMPLETE** | ⭐ **CRITICAL** | **Oct 22, 2025** | **24/7 autonomous gap detection & filling** |
-| **0.0019** | [Testing Infrastructure & CI/CD](0.0019_testing_infrastructure_ci_cd/README.md) | ⏸️ PENDING | ⭐ CRITICAL | - | pytest framework, GitHub Actions, pre-commit hooks (from Phase 6.0) |
-| **0.0020** | [Monitoring & Observability](0.0020_monitoring_observability/README.md) | ⏸️ PENDING | 🟡 IMPORTANT | - | CloudWatch metrics/alarms, performance monitoring, cost tracking (from Phase 6.1) |
-| **0.0021** | [Documentation & API Standards](0.0021_documentation_api_standards/README.md) | ⏸️ PENDING | 🟡 MEDIUM | - | API documentation (Swagger), developer guides, ADRs (from Phase 6.2) |
+| **0.0019** | [Testing Infrastructure & CI/CD](0.0019_testing_infrastructure_ci_cd/README.md) | ⏸️ PENDING | ⭐ CRITICAL | - | pytest framework, GitHub Actions, pre-commit hooks (from 6.0000) |
+| **0.0020** | [Monitoring & Observability](0.0020_monitoring_observability/README.md) | ⏸️ PENDING | 🟡 IMPORTANT | - | CloudWatch metrics/alarms, performance monitoring, cost tracking (from 6.0001) |
+| **0.0021** | [Documentation & API Standards](0.0021_documentation_api_standards/README.md) | ⏸️ PENDING | 🟡 MEDIUM | - | API documentation (Swagger), developer guides, ADRs (from 6.0002) |
 | **0.0022** | [Data Inventory & Gap Analysis](0.0022_data_inventory_gap_analysis/README.md) | ✅ COMPLETE ✓ | 🟡 IMPORTANT | Oct 11, 2025 | Recursive data discovery, multi-source reconciliation, master inventory (from Phase 8) |
 
 ---
@@ -87,19 +87,19 @@ python scripts/monitoring/dims_cli.py verify --category s3_storage
 - ✅ Multi-source integration complete (October 9, 2025)
 - ✅ Autonomous operation achieved (October 22, 2025)
 - ✅ Test/validator reorganization (October 23, 2025)
-- ✅ Phase 0.0002 validated via Workflow #58 (October 23, 2025) - 100% test pass rate (27/27 checks)
-- ✅ Phase 0.0003 validated via Workflow #58 (October 23, 2025) - 100% test pass rate (26/26 checks)
+- ✅ 0.0002 validated via Workflow #58 (October 23, 2025) - 100% test pass rate (27/27 checks)
+- ✅ 0.0003 validated via Workflow #58 (October 23, 2025) - 100% test pass rate (26/26 checks)
   - **Discovery:** Database massively expanded from 26K games (2004-2020) to 66K games (1946-2023, 13.6M play-by-play events)
-- ✅ Phase 0.0004 ADCE integration complete (October 25, 2025) - 100% test pass rate (9/9 comprehensive tests)
+- ✅ 0.0004 ADCE integration complete (October 25, 2025) - 100% test pass rate (9/9 comprehensive tests)
   - **Basketball Reference:** 444 existing files + 43 data types configured for autonomous collection
   - **Scope:** NBA (Tiers 1-9, 33 types) + G League (Tier 11, 10 types)
   - **Priority order:** NBA Modern → NBA Advanced → Historical (ABA/BAA) → G League
   - **Timeline:** 6-9 weeks autonomous 24/7 collection
-- ✅ Phase 0.0007 validated via Workflow #58 (October 23, 2025) - 100% test pass rate (29/29 checks)
+- ✅ 0.0007 validated via Workflow #58 (October 23, 2025) - 100% test pass rate (29/29 checks)
   - **Odds API integration:** Autonomous odds-api scraper, 5 database tables, 10+ bookmakers, real-time betting market data
-- ✅ Phase 0.0010 & 0.11 completed (October 25, 2025) - PostgreSQL JSONB + RAG Pipeline with pgvector
-  - **Phase 0.0010:** 2,573 lines production code, 27/30 tests passing (90%), temporal query integration
-  - **Phase 0.0011:** 3,584 lines production code, 19/24 tests passing (79%), OpenAI embeddings, HNSW vector search
+- ✅ 0.0010 & 0.11 completed (October 25, 2025) - PostgreSQL JSONB + RAG Pipeline with pgvector
+  - **0.0010:** 2,573 lines production code, 27/30 tests passing (90%), temporal query integration
+  - **0.0011:** 3,584 lines production code, 19/24 tests passing (79%), OpenAI embeddings, HNSW vector search
   - **Combined:** ~6,157 lines of production code for unified PostgreSQL data/vector storage
 
 ---
@@ -111,10 +111,10 @@ python scripts/monitoring/dims_cli.py verify --category s3_storage
 **⚠️ IMPORTANT:** These sub-phases were **permanently superseded** by PostgreSQL implementations. They are **NOT** placeholders for NCAA/International data.
 
 **Why they're missing:**
-- `0.5` → **Superseded** by `0.10_postgresql_jsonb_storage` (rec_033)
+- `0.5` → **Superseded** by `0.0010_postgresql_jsonb_storage` (rec_033)
   - Originally: MongoDB NoSQL storage with flexible schema
   - Replaced with: PostgreSQL JSONB columns (same flexibility, better integration)
-- `0.6` → **Superseded** by `0.11_rag_pipeline_pgvector` (rec_034) and `0.12_rag_llm_integration` (rec_188)
+- `0.6` → **Superseded** by `0.0011_rag_pipeline_pgvector` (rec_034) and `0.0012_rag_llm_integration` (rec_188)
   - Originally: RAG pipeline with Qdrant vector database
   - Replaced with: PostgreSQL pgvector extension (same capabilities, unified database)
 
@@ -129,7 +129,7 @@ python scripts/monitoring/dims_cli.py verify --category s3_storage
 See `archive/mongodb_superseded/` for historical context.
 
 ### Autonomous Operation (ADCE)
-Phase 0.0018 represents the **culmination** of Phase 0's data collection efforts:
+0.0018 represents the **culmination** of Phase 0's data collection efforts:
 - **Zero manual intervention** for ongoing data updates
 - **Automatic gap detection** via S3 inventory reconciliation
 - **Priority-based task execution** via orchestrator
@@ -196,7 +196,7 @@ Using this phase's data, simulations can adapt to:
 
 ### Test Files
 Located in `tests/phases/phase_0/`:
-- `test_0_0001_initial_data_collection.py` - Phase 0.0001 comprehensive tests
+- `test_0_0001_initial_data_collection.py` - 0.0001 comprehensive tests
 - More tests being migrated (see [TEST_VALIDATOR_MIGRATION_GUIDE.md](../../TEST_VALIDATOR_MIGRATION_GUIDE.md))
 
 ### Validators
@@ -221,7 +221,7 @@ pytest tests/phases/phase_0/ -v
 
 ## Next Steps
 
-1. ✅ **Complete Phase 0.0004** (Basketball Reference) - 43 data types configured for ADCE (October 25, 2025)
+1. ✅ **Complete 0.0004** (Basketball Reference) - 43 data types configured for ADCE (October 25, 2025)
    - Priority order: NBA Modern (Tiers 1-4) → NBA Advanced (Tiers 5-8) → Historical (Tier 9) → G League (Tier 11)
    - Future expansion: WNBA (Tier 10), International (Tier 12), NCAA (Tier 13)
 2. **Begin autonomous collection** - Deploy ADCE to collect 43 Basketball Reference data types

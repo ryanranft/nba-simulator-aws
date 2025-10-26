@@ -2,7 +2,7 @@
 """
 Test Suite: Robust Architecture for Multi-Source Search
 
-Tests for Phase 0.0016 (rec_189) implementation.
+Tests for 0.0016 (rec_189) implementation.
 
 Test Coverage:
 - SearchStrategy & SearchConfig: 7 tests
@@ -27,7 +27,7 @@ sys.path.insert(
         / "docs"
         / "phases"
         / "phase_0"
-        / "0.16_robust_architecture"
+        / "0.0016_robust_architecture"
     ),
 )
 

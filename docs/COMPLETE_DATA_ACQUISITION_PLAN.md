@@ -66,7 +66,7 @@ Based on the Progressive Fidelity Simulator requirements, this plan acquires **E
 
 **Next Steps:**
 - ✅ Already uploaded to S3
-- ⏸️ Extract to RDS (Phase 2.2)
+- ⏸️ Extract to RDS (2.0002)
 - ⏸️ Create temporal_events table
 
 **No further collection needed** - move to validation

@@ -10,7 +10,7 @@ appropriate scrapers based on data source. Implements the ETL pattern with:
 - Error handling and retry logic
 - Integration with ADCE autonomous system
 
-Based on Phase 0.13 (rec_044) requirements.
+Based on 0.0013 (rec_044) requirements.
 
 Usage:
     from data_dispatcher import DataCollectionDispatcher, ScraperTask
@@ -30,7 +30,7 @@ Usage:
 
 Version: 1.0
 Created: October 25, 2025
-Implements: Phase 0.13 - Dispatcher Pipeline (rec_044)
+Implements: 0.0013 - Dispatcher Pipeline (rec_044)
 """
 
 import asyncio

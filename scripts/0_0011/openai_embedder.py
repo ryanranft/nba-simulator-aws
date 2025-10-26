@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 0.0011: OpenAI Embedding Generator
+0.0011: OpenAI Embedding Generator
 
 Purpose: Generate embeddings using OpenAI API
 Created: October 25, 2025

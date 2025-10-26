@@ -1,7 +1,7 @@
 """
 Test ESPN Play-by-Play to Box Score Processor
 
-Quick tests for Phase 9.0001 ESPN processor.
+Quick tests for 9.0001 ESPN processor.
 
 Usage:
     python tests/test_pbp_to_boxscore/test_espn_processor.py

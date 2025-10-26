@@ -562,7 +562,7 @@ WHERE table_name = 'temporal_events'
 
 **See also:**
 - `docs/TEMPORAL_QUERY_GUIDE.md` - Query examples
-- `docs/phases/PHASE_3_DATABASE.md` Sub-Phase 3.5 - Temporal schema
+- `docs/phases/PHASE_3_DATABASE.md` Sub-3.0005 - Temporal schema
 - `docs/adr/009-temporal-panel-data-architecture.md` - Architecture decisions
 
 ---

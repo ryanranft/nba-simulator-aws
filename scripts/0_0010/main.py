@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 0.0010: PostgreSQL JSONB Query Helpers
+0.0010: PostgreSQL JSONB Query Helpers
 
 Purpose: Helper classes and functions for querying JSONB data
 Created: October 25, 2025
@@ -595,7 +595,7 @@ class JSONBQueryHelper:
 
 def main():
     """Example usage"""
-    print("Phase 0.0010: JSONB Query Helpers - Example Usage\n")
+    print("0.0010: JSONB Query Helpers - Example Usage\n")
     print("=" * 70)
 
     with JSONBQueryHelper() as helper:

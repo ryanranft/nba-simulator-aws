@@ -43,7 +43,7 @@ Build game simulation engine with temporal state reconstruction. This phase crea
 
 ---
 
-## Sub-Phase 4.0: Basic Simulation Engine
+## Sub-4.0000: Basic Simulation Engine
 
 **Status:** ✅ COMPLETE (October 3, 2025)
 
@@ -64,13 +64,13 @@ Build game simulation engine with temporal state reconstruction. This phase crea
 
 **Simulation Accuracy:** ~63% (basic model, room for improvement with ML)
 
-**See:** [Sub-Phase 4.0 Details](phase_4/4.0000_simulation_engine.md)
+**See:** [Sub-4.0000 Details](phase_4/4.0000_simulation_engine.md)
 
 ---
 
 ## Success Criteria
 
-### Basic Implementation (Sub-Phase 4.0)
+### Basic Implementation (Sub-4.0000)
 - [x] Monte Carlo framework operational
 - [x] Temporal queries working (any timestamp)
 - [x] Win probability calculator functional
@@ -173,7 +173,7 @@ def nfl_win_prob(score_diff, time_remaining, possessing_team):
 
 ## Key Workflows
 
-**For Sub-Phase 4.0:**
+**For Sub-4.0000:**
 - Workflow #5: Task Execution
 - Workflow #13: Testing Framework
 - Workflow #2: Command Logging

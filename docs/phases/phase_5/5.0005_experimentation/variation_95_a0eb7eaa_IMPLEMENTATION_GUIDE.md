@@ -3,7 +3,7 @@
 **Recommendation ID:** variation_95_a0eb7eaa
 **Priority:** SECURITY
 **Phase:** 5
-**Subdirectory:** 5.5_experimentation
+**Subdirectory:** 5.0005_experimentation
 **Generated:** 2025-10-15T23:49:50.352053
 
 ---

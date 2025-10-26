@@ -428,7 +428,7 @@ python scripts/etl/scrape_basketball_reference.py \
 ```
 
 **Documents to read first:**
-1. `docs/archive/planning/IMPLEMENTATION_CHECKLIST.md` - Sub-Phase 1.10
+1. `docs/archive/planning/IMPLEMENTATION_CHECKLIST.md` - Sub-1.0010
 2. `docs/ML_FEATURE_CATALOG.md` - Basketball Reference features
 
 ---
@@ -450,7 +450,7 @@ python scripts/simulation/prepare_panel_data.py \
 ```
 
 **Documents to read first:**
-1. `docs/ADVANCED_SIMULATION_FRAMEWORK.md` - Sub-Phase 4.5.1
+1. `docs/ADVANCED_SIMULATION_FRAMEWORK.md` - Sub-4.0005.1
 2. Econometric literature references (Wooldridge, Greene)
 
 ---

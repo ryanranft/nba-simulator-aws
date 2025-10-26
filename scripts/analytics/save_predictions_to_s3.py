@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Save ML predictions to S3 in Parquet format for Athena queries
-Demonstrates Sub-Phase 6.1: S3 Analytics Lake
+Demonstrates Sub-6.0001: S3 Analytics Lake
 """
 
 import pandas as pd
@@ -180,7 +180,7 @@ def main():
     print(f"\nS3 Location:")
     print(f"  s3://{S3_BUCKET}/{S3_PREDICTIONS_PREFIX}/season=2024-25/date=YYYY-MM-DD/")
     print(f"\n📊 Next Step: Query with Athena")
-    print(f"  CREATE EXTERNAL TABLE (see Sub-Phase 6.2)")
+    print(f"  CREATE EXTERNAL TABLE (see Sub-6.0002)")
     print("=" * 70)
 
 

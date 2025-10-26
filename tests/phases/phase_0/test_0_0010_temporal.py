@@ -1,5 +1,5 @@
 """
-Tests for Phase 0.0010: Temporal Integration
+Tests for 0.0010: Temporal Integration
 
 Comprehensive test suite for temporal query capabilities that join
 JSONB raw data with temporal snapshots.

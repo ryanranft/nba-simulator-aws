@@ -110,8 +110,8 @@ class Phase9MasterAgent:
         logger.info(f"Phase 9 Master Agent initialized. Output: {self.output_dir}")
 
     def run_phase_9_3_nba_api_processor(self):
-        """Complete Phase 9.0003: NBA API Processor (1995-2006)"""
-        logger.info("Starting Phase 9.0003: NBA API Processor")
+        """Complete 9.0003: NBA API Processor (1995-2006)"""
+        logger.info("Starting 9.0003: NBA API Processor")
         self.phase_status["9.3"]["status"] = "in_progress"
         self.phase_status["9.3"]["started"] = datetime.now().isoformat()
 
@@ -275,20 +275,20 @@ if __name__ == "__main__":
             )
 
             if result.returncode == 0:
-                logger.info("✅ Phase 9.0003 NBA API Processor completed successfully")
+                logger.info("✅ 9.0003 NBA API Processor completed successfully")
                 self.phase_status["9.3"]["status"] = "completed"
                 self.phase_status["9.3"]["completed"] = datetime.now().isoformat()
             else:
-                logger.error(f"❌ Phase 9.0003 test failed: {result.stderr}")
+                logger.error(f"❌ 9.0003 test failed: {result.stderr}")
                 self.phase_status["9.3"]["status"] = "failed"
 
         except Exception as e:
-            logger.error(f"❌ Phase 9.0003 failed: {e}")
+            logger.error(f"❌ 9.0003 failed: {e}")
             self.phase_status["9.3"]["status"] = "failed"
 
     def run_phase_9_4_kaggle_processor(self):
-        """Complete Phase 9.0004: Kaggle Processor (1946-2020)"""
-        logger.info("Starting Phase 9.0004: Kaggle Processor")
+        """Complete 9.0004: Kaggle Processor (1946-2020)"""
+        logger.info("Starting 9.0004: Kaggle Processor")
         self.phase_status["9.4"]["status"] = "in_progress"
         self.phase_status["9.4"]["started"] = datetime.now().isoformat()
 
@@ -447,20 +447,20 @@ if __name__ == "__main__":
             )
 
             if result.returncode == 0:
-                logger.info("✅ Phase 9.0004 Kaggle Processor completed successfully")
+                logger.info("✅ 9.0004 Kaggle Processor completed successfully")
                 self.phase_status["9.4"]["status"] = "completed"
                 self.phase_status["9.4"]["completed"] = datetime.now().isoformat()
             else:
-                logger.error(f"❌ Phase 9.0004 test failed: {result.stderr}")
+                logger.error(f"❌ 9.0004 test failed: {result.stderr}")
                 self.phase_status["9.4"]["status"] = "failed"
 
         except Exception as e:
-            logger.error(f"❌ Phase 9.0004 failed: {e}")
+            logger.error(f"❌ 9.0004 failed: {e}")
             self.phase_status["9.4"]["status"] = "failed"
 
     def run_phase_9_5_storage_system(self):
-        """Complete Phase 9.0005: Storage System (RDS + S3 Parquet + local cache)"""
-        logger.info("Starting Phase 9.0005: Storage System")
+        """Complete 9.0005: Storage System (RDS + S3 Parquet + local cache)"""
+        logger.info("Starting 9.0005: Storage System")
         self.phase_status["9.5"]["status"] = "in_progress"
         self.phase_status["9.5"]["started"] = datetime.now().isoformat()
 
@@ -469,7 +469,7 @@ if __name__ == "__main__":
             storage_system_file = self.output_dir / "storage_system.py"
 
             storage_system_code = '''"""
-Phase 9.0005: Storage System
+9.0005: Storage System
 
 Implements multi-tier storage system:
 - RDS PostgreSQL for structured queries
@@ -686,20 +686,20 @@ if __name__ == "__main__":
             )
 
             if result.returncode == 0:
-                logger.info("✅ Phase 9.0005 Storage System completed successfully")
+                logger.info("✅ 9.0005 Storage System completed successfully")
                 self.phase_status["9.5"]["status"] = "completed"
                 self.phase_status["9.5"]["completed"] = datetime.now().isoformat()
             else:
-                logger.error(f"❌ Phase 9.0005 test failed: {result.stderr}")
+                logger.error(f"❌ 9.0005 test failed: {result.stderr}")
                 self.phase_status["9.5"]["status"] = "failed"
 
         except Exception as e:
-            logger.error(f"❌ Phase 9.0005 failed: {e}")
+            logger.error(f"❌ 9.0005 failed: {e}")
             self.phase_status["9.5"]["status"] = "failed"
 
     def run_phase_9_6_advanced_metrics(self):
-        """Complete Phase 9.0006: Advanced Metrics Layer"""
-        logger.info("Starting Phase 9.0006: Advanced Metrics Layer")
+        """Complete 9.0006: Advanced Metrics Layer"""
+        logger.info("Starting 9.0006: Advanced Metrics Layer")
         self.phase_status["9.6"]["status"] = "in_progress"
         self.phase_status["9.6"]["started"] = datetime.now().isoformat()
 
@@ -708,7 +708,7 @@ if __name__ == "__main__":
             metrics_file = self.output_dir / "advanced_metrics.py"
 
             metrics_code = '''"""
-Phase 9.0006: Advanced Metrics Layer
+9.0006: Advanced Metrics Layer
 
 Implements advanced basketball metrics:
 - True Shooting Percentage (TS%)
@@ -889,20 +889,20 @@ if __name__ == "__main__":
             )
 
             if result.returncode == 0:
-                logger.info("✅ Phase 9.0006 Advanced Metrics completed successfully")
+                logger.info("✅ 9.0006 Advanced Metrics completed successfully")
                 self.phase_status["9.6"]["status"] = "completed"
                 self.phase_status["9.6"]["completed"] = datetime.now().isoformat()
             else:
-                logger.error(f"❌ Phase 9.0006 test failed: {result.stderr}")
+                logger.error(f"❌ 9.0006 test failed: {result.stderr}")
                 self.phase_status["9.6"]["status"] = "failed"
 
         except Exception as e:
-            logger.error(f"❌ Phase 9.0006 failed: {e}")
+            logger.error(f"❌ 9.0006 failed: {e}")
             self.phase_status["9.6"]["status"] = "failed"
 
     def run_phase_9_7_ml_integration(self):
-        """Complete Phase 9.0007: ML Integration"""
-        logger.info("Starting Phase 9.0007: ML Integration")
+        """Complete 9.0007: ML Integration"""
+        logger.info("Starting 9.0007: ML Integration")
         self.phase_status["9.7"]["status"] = "in_progress"
         self.phase_status["9.7"]["started"] = datetime.now().isoformat()
 
@@ -911,7 +911,7 @@ if __name__ == "__main__":
             ml_file = self.output_dir / "ml_integration.py"
 
             ml_code = '''"""
-Phase 9.0007: ML Integration
+9.0007: ML Integration
 
 Integrates machine learning with temporal box score data:
 - Temporal feature engineering
@@ -1101,20 +1101,20 @@ if __name__ == "__main__":
             )
 
             if result.returncode == 0:
-                logger.info("✅ Phase 9.0007 ML Integration completed successfully")
+                logger.info("✅ 9.0007 ML Integration completed successfully")
                 self.phase_status["9.7"]["status"] = "completed"
                 self.phase_status["9.7"]["completed"] = datetime.now().isoformat()
             else:
-                logger.error(f"❌ Phase 9.0007 test failed: {result.stderr}")
+                logger.error(f"❌ 9.0007 test failed: {result.stderr}")
                 self.phase_status["9.7"]["status"] = "failed"
 
         except Exception as e:
-            logger.error(f"❌ Phase 9.0007 failed: {e}")
+            logger.error(f"❌ 9.0007 failed: {e}")
             self.phase_status["9.7"]["status"] = "failed"
 
     def run_phase_9_8_betting_integration(self):
-        """Complete Phase 9.0008: Betting Integration"""
-        logger.info("Starting Phase 9.0008: Betting Integration")
+        """Complete 9.0008: Betting Integration"""
+        logger.info("Starting 9.0008: Betting Integration")
         self.phase_status["9.8"]["status"] = "in_progress"
         self.phase_status["9.8"]["started"] = datetime.now().isoformat()
 
@@ -1123,7 +1123,7 @@ if __name__ == "__main__":
             betting_file = self.output_dir / "betting_integration.py"
 
             betting_code = '''"""
-Phase 9.0008: Betting Integration
+9.0008: Betting Integration
 
 Integrates betting odds and predictions:
 - Quarter-by-quarter predictions
@@ -1385,17 +1385,15 @@ if __name__ == "__main__":
             )
 
             if result.returncode == 0:
-                logger.info(
-                    "✅ Phase 9.0008 Betting Integration completed successfully"
-                )
+                logger.info("✅ 9.0008 Betting Integration completed successfully")
                 self.phase_status["9.8"]["status"] = "completed"
                 self.phase_status["9.8"]["completed"] = datetime.now().isoformat()
             else:
-                logger.error(f"❌ Phase 9.0008 test failed: {result.stderr}")
+                logger.error(f"❌ 9.0008 test failed: {result.stderr}")
                 self.phase_status["9.8"]["status"] = "failed"
 
         except Exception as e:
-            logger.error(f"❌ Phase 9.0008 failed: {e}")
+            logger.error(f"❌ 9.0008 failed: {e}")
             self.phase_status["9.8"]["status"] = "failed"
 
     def run_all_phases(self):

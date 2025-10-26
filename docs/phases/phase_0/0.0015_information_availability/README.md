@@ -63,14 +63,14 @@ if setup_result['success']:
 
 ### System Components
 
-**Phase 0.0015** consists of 5 integrated components that work together to provide LLMs with external information access:
+**0.0015** consists of 5 integrated components that work together to provide LLMs with external information access:
 
-1. **ExternalResourceConnector** - Connects to PostgreSQL JSONB storage (Phase 0.0010)
+1. **ExternalResourceConnector** - Connects to PostgreSQL JSONB storage (0.0010)
    - Manages database connections with pgvector support
    - Queries structured NBA data from JSONB columns
    - Handles connection pooling and error recovery
 
-2. **SemanticSearchEngine** - Performs vector similarity search (Phase 0.0011)
+2. **SemanticSearchEngine** - Performs vector similarity search (0.0011)
    - Generates embeddings using OpenAI API
    - Executes pgvector similarity searches
    - Supports multi-source queries across entity types
@@ -80,7 +80,7 @@ if setup_result['success']:
    - Manages token budgets (respects context window limits)
    - Estimates token usage for cost optimization
 
-4. **LLMQueryHandler** - Processes queries and generates follow-ups (Phase 0.0012)
+4. **LLMQueryHandler** - Processes queries and generates follow-ups (0.0012)
    - Integrates with LLM APIs for natural language processing
    - Detects when follow-up questions are needed
    - Generates contextual follow-up suggestions
@@ -165,9 +165,9 @@ system = IncreaseInformationAvailability(config=config)
 ## Dependencies
 
 **Required Prerequisites (✅ All Complete):**
-- ✅ Phase 0.0010: PostgreSQL JSONB Storage
-- ✅ Phase 0.0011: RAG Pipeline with pgvector (similarity search)
-- ✅ Phase 0.0012: RAG + LLM Integration (LLM interface)
+- ✅ 0.0010: PostgreSQL JSONB Storage
+- ✅ 0.0011: RAG Pipeline with pgvector (similarity search)
+- ✅ 0.0012: RAG + LLM Integration (LLM interface)
 
 **Python Dependencies:**
 - `psycopg2` - PostgreSQL database connectivity

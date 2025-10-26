@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.148_set_data_source_for_models
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0148_set_data_source_for_models
 python test_rec_196.py -v
 ```
 

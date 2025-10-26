@@ -146,7 +146,7 @@ python scripts/simulation/prepare_panel_data.py \
 ```
 
 **Documents to read:**
-1. `docs/ADVANCED_SIMULATION_FRAMEWORK.md` - Sub-Phase 4.5.1
+1. `docs/ADVANCED_SIMULATION_FRAMEWORK.md` - Sub-4.0005.1
 2. Panel data model examples
 
 ---

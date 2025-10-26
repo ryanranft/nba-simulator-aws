@@ -439,7 +439,7 @@ Data Sources → S3 Data Lake → RDS PostgreSQL → Temporal Queries
 **Priority:** MEDIUM (after Workstream 1, parallel with 2 & 3)
 **Dependencies:** Workstream 1 complete, Basketball Reference Tiers 1-2 complete
 
-**Phase 1.1: Multi-Source Integration**
+**1.0001: Multi-Source Integration**
 
 **Goal:** Integrate 209 features across 5 data sources with conflict resolution
 
@@ -637,7 +637,7 @@ Data Sources → S3 Data Lake → RDS PostgreSQL → Temporal Queries
 - Historical depth (1946-2025)
 
 ✅ **Multi-Source Integration**
-- Phase 1.1 complete (209 features)
+- 1.0001 complete (209 features)
 - Conflict resolution working
 - Quality scores 90%+
 
@@ -1005,29 +1005,29 @@ For the MCP's context, the following files contain additional details:
 
 **Phase 9 Documentation:**
 - `docs/phases/PHASE_9_INDEX.md` - Phase overview
-- `docs/phases/phase_9/9.0_system_architecture.md` - System design
-- `docs/phases/phase_9/9.1_espn_processor.md` - ESPN processor details
-- `docs/phases/phase_9/9.2_hoopr_processor.md` - hoopR processor details
-- `docs/phases/phase_9/9.3_nba_api_processor.md` - NBA API processor details
-- `docs/phases/phase_9/9.4_kaggle_processor.md` - Kaggle processor details
-- `docs/phases/phase_9/9.5_storage_system.md` - Storage architecture
-- `docs/phases/phase_9/9.6_advanced_metrics.md` - Advanced metrics details
-- `docs/phases/phase_9/9.7_ml_integration.md` - ML integration approach
-- `docs/phases/phase_9/9.8_betting_integration.md` - Betting integration approach
+- `docs/phases/phase_9/9.0000_system_architecture.md` - System design
+- `docs/phases/phase_9/9.0001_espn_processor.md` - ESPN processor details
+- `docs/phases/phase_9/9.0002_hoopr_processor.md` - hoopR processor details
+- `docs/phases/phase_9/9.0003_nba_api_processor.md` - NBA API processor details
+- `docs/phases/phase_9/9.0004_kaggle_processor.md` - Kaggle processor details
+- `docs/phases/phase_9/9.0005_storage_system.md` - Storage architecture
+- `docs/phases/phase_9/9.0006_advanced_metrics.md` - Advanced metrics details
+- `docs/phases/phase_9/9.0007_ml_integration.md` - ML integration approach
+- `docs/phases/phase_9/9.0008_betting_integration.md` - Betting integration approach
 
 **Option 2A Status:**
 - `docs/OPTION_2A_STATUS.md` - Current snapshot generation status (60% complete)
 - `docs/OPTION_2A_SESSION_SUMMARY.md` - Implementation details
 
 **Basketball Reference:**
-- `docs/phases/phase_0/0.1_basketball_reference/README.md` - Overview of 13 tiers
-- `docs/phases/phase_0/0.1_basketball_reference/TIER_1_NBA_HIGH_VALUE.md` - Tier 1 details
-- `docs/phases/phase_0/0.1_basketball_reference/TIER_2_NBA_STRATEGIC.md` - Tier 2 details
-- `docs/phases/phase_0/0.1_basketball_reference/IMPLEMENTATION_SUMMARY.md` - Technical approach
+- `docs/phases/phase_0/0.0001_basketball_reference/README.md` - Overview of 13 tiers
+- `docs/phases/phase_0/0.0001_basketball_reference/TIER_1_NBA_HIGH_VALUE.md` - Tier 1 details
+- `docs/phases/phase_0/0.0001_basketball_reference/TIER_2_NBA_STRATEGIC.md` - Tier 2 details
+- `docs/phases/phase_0/0.0001_basketball_reference/IMPLEMENTATION_SUMMARY.md` - Technical approach
 
 **Multi-Source Integration:**
 - `docs/phases/PHASE_1_INDEX.md` - Phase 1 overview
-- `docs/phases/phase_1/1.1_multi_source_integration.md` - Integration details
+- `docs/phases/phase_1/1.0001_multi_source_integration.md` - Integration details
 
 **ML and Plus/Minus:**
 - `docs/PLUS_MINUS_IMPLEMENTATION_SUMMARY.md` - Plus/minus system details

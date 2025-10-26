@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Pytest Suite for Phase 0.1: Initial Data Collection
+Pytest Suite for 0.0001: Initial Data Collection
 
-Tests all validation components for Phase 0.1 to ensure S3 bucket
+Tests all validation components for 0.0001 to ensure S3 bucket
 configuration and data upload meet specifications.
 
 Usage:
@@ -68,7 +68,7 @@ def upload_validator(bucket_name):
 
 
 class TestS3BucketConfiguration:
-    """Test S3 bucket configuration per Phase 0.1 specs."""
+    """Test S3 bucket configuration per 0.0001 specs."""
 
     def test_bucket_exists(self, bucket_config_validator):
         """Test that bucket exists and is accessible."""
@@ -123,12 +123,12 @@ class TestS3BucketConfiguration:
 
 
 class TestS3UploadCompleteness:
-    """Test S3 upload completeness per Phase 0.1 specs."""
+    """Test S3 upload completeness per 0.0001 specs."""
 
     @pytest.mark.slow
     def test_total_file_count(self, upload_validator):
         """
-        Test that total file count shows healthy growth from Phase 0.1 baseline.
+        Test that total file count shows healthy growth from 0.0001 baseline.
 
         Uses ADCE tracking to validate:
         - No data loss (current >= initial)
@@ -142,7 +142,7 @@ class TestS3UploadCompleteness:
     @pytest.mark.slow
     def test_data_type_counts(self, upload_validator):
         """
-        Test that each data type shows no data loss from Phase 0.1 baseline.
+        Test that each data type shows no data loss from 0.0001 baseline.
 
         Validates:
         - No data loss (current >= initial for all types)
@@ -178,15 +178,15 @@ class TestS3UploadCompleteness:
 
 
 class TestPhase01Integration:
-    """Integration tests for complete Phase 0.1 validation."""
+    """Integration tests for complete 0.0001 validation."""
 
     def test_phase_01_complete_validation(
         self, bucket_config_validator, upload_validator
     ):
         """
-        Complete Phase 0.1 validation - all checks must pass.
+        Complete 0.0001 validation - all checks must pass.
 
-        This is the comprehensive test that validates Phase 0.1 is fully complete.
+        This is the comprehensive test that validates 0.0001 is fully complete.
         """
         # Run bucket config validations
         config_passed, config_results = bucket_config_validator.run_all_validations()
@@ -221,16 +221,16 @@ class TestPhase01Integration:
 
 
 class TestPhase01Metadata:
-    """Tests for Phase 0.1 metadata and documentation accuracy."""
+    """Tests for 0.0001 metadata and documentation accuracy."""
 
     def test_documented_file_count_matches_actual(
         self, bucket_name, s3_client, upload_validator
     ):
         """
-        Verify actual S3 count shows growth from Phase 0.1 baseline.
+        Verify actual S3 count shows growth from 0.0001 baseline.
 
         ADCE Tracking:
-        - Phase 0.1 initial: 146,115 files
+        - 0.0001 initial: 146,115 files
         - ADCE autonomous collection adds new data sources
         - Current count should be >= initial (no data loss)
         """
@@ -247,7 +247,7 @@ class TestPhase01Metadata:
                 ):
                     actual_count += 1
 
-        # Phase 0.1 initial baseline
+        # 0.0001 initial baseline
         initial_count = upload_validator.initial_total
 
         # Verify no data loss (growth expected from ADCE)
@@ -267,7 +267,7 @@ class TestPhase01Metadata:
     @pytest.mark.slow
     def test_storage_costs_within_budget(self, bucket_name, s3_client):
         """
-        Verify storage size is within Phase 0.1 budget (~119 GB, $2.74/month).
+        Verify storage size is within 0.0001 budget (~119 GB, $2.74/month).
 
         Alerts if costs are significantly above budget.
         """
@@ -286,7 +286,7 @@ class TestPhase01Metadata:
         total_gb = total_bytes / (1024**3)
         estimated_monthly_cost = total_gb * 0.023  # S3 Standard pricing $0.023/GB
 
-        # Phase 0.1 documented budget
+        # 0.0001 documented budget
         budgeted_cost = 2.74
         max_acceptable_cost = budgeted_cost * 1.20  # 20% over budget threshold
 

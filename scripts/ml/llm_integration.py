@@ -4,7 +4,7 @@ LLM Integration Module with Streaming Support
 Integrates with OpenAI GPT-4/3.5 and other LLMs.
 Supports streaming responses, cost tracking, and response caching.
 
-Part of Phase 0.0012: RAG + LLM Integration (rec_188)
+Part of 0.0012: RAG + LLM Integration (rec_188)
 """
 
 import os

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Phase 0.0004 Tests: Basketball Reference Data Collection
+0.0004 Tests: Basketball Reference Data Collection
 
-Comprehensive pytest test suite for Phase 0.0004 (Basketball Reference).
+Comprehensive pytest test suite for 0.0004 (Basketball Reference).
 
 Test Coverage:
 - S3 bucket access and configuration
@@ -207,7 +207,7 @@ class TestPhase04DataQuality:
 
 
 class TestPhase04Integration:
-    """Integration tests for Phase 0.0004"""
+    """Integration tests for 0.0004"""
 
     @pytest.fixture
     def validator(self):
@@ -215,11 +215,11 @@ class TestPhase04Integration:
         return BasketballReferenceValidator(verbose=False)
 
     def test_phase_complete_validation(self, validator):
-        """Comprehensive test that Phase 0.0004 is complete"""
+        """Comprehensive test that 0.0004 is complete"""
         all_passed, results = validator.run_all_validations()
 
         assert all_passed == True, (
-            f"Phase 0.0004 completion validation failed. "
+            f"0.0004 completion validation failed. "
             f"Results: {results}, Errors: {validator.errors}"
         )
 
@@ -244,10 +244,10 @@ class TestPhase04Integration:
 
 
 class TestPhase04Metadata:
-    """Tests for Phase 0.0004 documentation metadata"""
+    """Tests for 0.0004 documentation metadata"""
 
     def test_phase_readme_exists(self):
-        """Verify Phase 0.0004 README exists"""
+        """Verify 0.0004 README exists"""
         readme_path = Path("docs/phases/phase_0/0.0004_basketball_reference/README.md")
         assert readme_path.exists(), f"README not found: {readme_path}"
 
@@ -275,7 +275,7 @@ class TestPhase04Metadata:
 
 
 class TestPhase04README:
-    """Tests for Phase 0.0004 README completeness"""
+    """Tests for 0.0004 README completeness"""
 
     @pytest.fixture
     def readme_content(self):
@@ -301,7 +301,7 @@ class TestPhase04README:
 
 @pytest.mark.slow
 class TestPhase04Comprehensive:
-    """Slow comprehensive tests for Phase 0.0004"""
+    """Slow comprehensive tests for 0.0004"""
 
     @pytest.fixture
     def validator(self):

@@ -61,7 +61,7 @@ echo "   Checking documentation file path references..."
 KEY_DOCS="CLAUDE.md QUICKSTART.md scripts/automation/validate_phase.py"
 for doc in $KEY_DOCS; do
     if [ -f "$doc" ]; then
-        # Look for path patterns like "phase_0/0.1_" or "5.19_" but not "0.0001_" or "5.0019_"
+        # Look for path patterns like "phase_0/0.0001_" or "5.19_" but not "0.0001_" or "5.0019_"
         OLD_REFS=$(grep -n "phase_[0-9]/[0-9]\.[0-9]_\|phase_[0-9]/[0-9]\.[0-9][0-9]_" "$doc" 2>/dev/null | grep -v "/[0-9]\.0[0-9][0-9][0-9]_" || true)
 
         if [ -n "$OLD_REFS" ]; then
@@ -81,7 +81,7 @@ else
     echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     echo -e "${YELLOW}ADR-010 requires 4-digit zero-padded format:${NC}"
-    echo "   OLD: 0.1_name, 0.10_name, 5.19_name"
+    echo "   OLD: 0.0001_name, 0.0010_name, 5.0019_name"
     echo "   NEW: 0.0001_name, 0.0010_name, 5.0019_name"
     echo ""
     echo -e "${YELLOW}See: docs/adr/010-four-digit-subphase-numbering.md${NC}"

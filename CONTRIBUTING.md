@@ -24,9 +24,9 @@ We use **4-digit zero-padded sub-phase numbering** for all phase organization.
 - `5.0121_implement_ab_testing`
 
 ❌ **Incorrect (old format):**
-- `0.1_basketball_reference` ← Will fail pre-commit hook
-- `0.10_postgresql_jsonb_storage` ← Creates sorting ambiguity
-- `5.121_implement_ab_testing` ← Not zero-padded
+- `0.0001_basketball_reference` ← Will fail pre-commit hook
+- `0.0010_postgresql_jsonb_storage` ← Creates sorting ambiguity
+- `5.0121_implement_ab_testing` ← Not zero-padded
 
 ### Rationale
 

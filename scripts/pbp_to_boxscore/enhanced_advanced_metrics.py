@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Enhanced Phase 9.0006: Advanced Metrics Layer
+Enhanced 9.0006: Advanced Metrics Layer
 
 Implements sophisticated basketball metrics with enhanced features:
 - True Shooting Percentage (TS%) with 3PT adjustment

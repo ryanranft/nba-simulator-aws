@@ -154,7 +154,7 @@ else:
 
 ## 📋 Implementation Phases
 
-### Phase 4.5: Advanced Simulation Architecture (NEW)
+### 4.0005: Advanced Simulation Architecture (NEW)
 
 **Prerequisites:**
 - ✅ Phase 0-6 complete (infrastructure backbone)
@@ -167,7 +167,7 @@ else:
 
 ---
 
-### Sub-Phase 4.5.1: Panel Data Model Estimation (Week 1-2)
+### Sub-4.0005.1: Panel Data Model Estimation (Week 1-2)
 
 **Objective:** Estimate team-level panel data models with fixed effects
 
@@ -308,7 +308,7 @@ with open('data/panel_model_params.json', 'w') as f:
 
 ---
 
-### Sub-Phase 4.5.2: Cluster Equation System (Week 3-4)
+### Sub-4.0005.2: Cluster Equation System (Week 3-4)
 
 **Objective:** Estimate simultaneous equation system for interconnected stats
 
@@ -419,7 +419,7 @@ def solve_system(self, params, exog_values):
 
 ---
 
-### Sub-Phase 4.5.3: Non-Linear Dynamics (Week 5)
+### Sub-4.0005.3: Non-Linear Dynamics (Week 5)
 
 **Objective:** Capture non-linearities (momentum, fatigue, regime-switching)
 
@@ -522,7 +522,7 @@ class RegimeSwitchingModel:
 
 ---
 
-### Sub-Phase 4.5.4: Hierarchical Bayesian Models (Week 6)
+### Sub-4.0005.4: Hierarchical Bayesian Models (Week 6)
 
 **Objective:** Multi-level player/team/league structure with partial pooling
 
@@ -609,7 +609,7 @@ def demonstrate_partial_pooling(self, trace):
 
 ---
 
-### Sub-Phase 4.5.5: Integrated Simulation Engine (Week 7-8)
+### Sub-4.0005.5: Integrated Simulation Engine (Week 7-8)
 
 **Objective:** Combine all models into unified simulation framework
 
@@ -893,7 +893,7 @@ pip install scikit-learn  # Polynomial features
 1. Review this framework with user
 2. Confirm priorities (which models to build first?)
 3. Set up additional Python packages
-4. Begin Sub-Phase 4.5.1 (Panel data preparation)
+4. Begin Sub-4.0005.1 (Panel data preparation)
 
 **This Week:**
 1. Prepare panel data structure (team-game observations)

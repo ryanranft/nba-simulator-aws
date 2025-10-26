@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 0.0011: Vector Search Queries
+0.0011: Vector Search Queries
 
 Purpose: Semantic search over NBA embeddings
 Created: October 25, 2025

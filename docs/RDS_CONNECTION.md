@@ -327,7 +327,7 @@ SELECT current_user;
 
 - **Database Schema:** `sql/create_tables.sql`
 - **Indexes:** `sql/create_indexes.sql`
-- **PROGRESS.md:** Phase 3.1 - RDS PostgreSQL Setup
+- **PROGRESS.md:** 3.0001 - RDS PostgreSQL Setup
 - **AWS Console:** https://console.aws.amazon.com/rds/home?region=us-east-1
 
 ---

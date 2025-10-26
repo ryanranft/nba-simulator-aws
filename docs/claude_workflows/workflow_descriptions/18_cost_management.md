@@ -79,7 +79,7 @@ Lists Glue ETL jobs:
    Jobs: extract-schedule extract-pbp process-game-data
 ```
 
-**Status:** Shows "Not created yet (⏸️ Pending)" if Phase 2.2 ETL not started
+**Status:** Shows "Not created yet (⏸️ Pending)" if 2.0002 ETL not started
 
 #### 7. Cost Forecast
 Projects end-of-month total based on current spending rate:

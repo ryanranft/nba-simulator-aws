@@ -65,9 +65,9 @@ client.transition_model_version_stage(
 - **Artifact Store**: S3 (model binaries, plots, data)
 
 **Integration Points:**
-- **[5.20_panel_data](../5.20_panel_data/README.md) + [5.1_feature_engineering](../5.1_feature_engineering/README.md)**: Track feature engineering pipeline versions
+- **[5.0020_panel_data](../5.20_panel_data/README.md) + [5.0001_feature_engineering](../5.1_feature_engineering/README.md)**: Track feature engineering pipeline versions
 - **Phase 5 Models (5.0)**: Version all XGBoost/ML models
-- **[5.19_drift_detection](../5.19_drift_detection/README.md)**: Connect drift detection to model retraining
+- **[5.0019_drift_detection](../5.19_drift_detection/README.md)**: Connect drift detection to model retraining
 - **ml_systems_3**: Dashboard visualization of model performance
 
 ---

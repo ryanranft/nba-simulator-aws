@@ -397,7 +397,7 @@ Comprehensive historical basketball statistics site. Most complete source for hi
 **See also:**
 - `docs/adr/009-temporal-panel-data-architecture.md` - Temporal architecture decisions
 - `docs/TEMPORAL_QUERY_GUIDE.md` - Query examples with precision filtering
-- `docs/phases/PHASE_3_DATABASE.md` Sub-Phase 3.5 - Temporal table schemas
+- `docs/phases/PHASE_3_DATABASE.md` Sub-3.0005 - Temporal table schemas
 
 ---
 

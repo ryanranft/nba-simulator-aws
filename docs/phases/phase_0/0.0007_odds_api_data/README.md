@@ -11,7 +11,7 @@
 
 ## Overview
 
-Phase 0.7 integrates betting odds data from The Odds API into the nba-simulator-aws system. **This integration uses a separate autonomous scraper project** ([odds-api](https://github.com/ryanranft/odds-api)) that continuously collects betting odds and writes to the shared RDS PostgreSQL database.
+0.0007 integrates betting odds data from The Odds API into the nba-simulator-aws system. **This integration uses a separate autonomous scraper project** ([odds-api](https://github.com/ryanranft/odds-api)) that continuously collects betting odds and writes to the shared RDS PostgreSQL database.
 
 **Key Achievement:** Real-time betting market data integrated with ML predictions for value betting identification and strategy validation.
 
@@ -522,7 +522,7 @@ Identify risk-free arbitrage opportunities across bookmakers (rare but possible)
 
 ### This Project (nba-simulator-aws)
 - [Phase 0: Data Collection](../PHASE_0_INDEX.md)
-- [Phase 5: Machine Learning Models](../../phase_5/5.0_machine_learning_models.md)
+- [Phase 5: Machine Learning Models](../../phase_5/5.0000_machine_learning_models.md)
 - [Phase 7: Betting Odds Integration](../../phase_7/7.0000_betting_odds_integration.md)
 
 ### Separate Project (odds-api)

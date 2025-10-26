@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 0.0011: RAG Query Interface
+0.0011: RAG Query Interface
 
 Purpose: Retrieval-Augmented Generation queries for NBA data
 Created: October 25, 2025

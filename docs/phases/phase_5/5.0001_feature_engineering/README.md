@@ -163,14 +163,14 @@ pipeline = AdvancedFeatureEngineeringPipeline(config=config)
 ## Dependencies
 
 **Prerequisites:**
-- ✅ **[5.20_panel_data](../5.20_panel_data/README.md)** (rec_22) - REQUIRED for temporal operations
+- ✅ **[5.0020_panel_data](../5.20_panel_data/README.md)** (rec_22) - REQUIRED for temporal operations
 - ✅ pandas, numpy - Standard libraries
 - ✅ scikit-learn - For feature selection
 
 **Enables:**
 - ML model training with advanced features
-- [5.2_model_versioning](../5.2_model_versioning/README.md) - Track feature sets with MLflow
-- [5.19_drift_detection](../5.19_drift_detection/README.md) - Monitor 80-100 features for drift
+- [5.0002_model_versioning](../5.2_model_versioning/README.md) - Track feature sets with MLflow
+- [5.0019_drift_detection](../5.19_drift_detection/README.md) - Monitor 80-100 features for drift
 - Feature importance analysis
 - Temporal analytics and forecasting
 
@@ -295,7 +295,7 @@ python test_rec_11.py -v
 ## Troubleshooting
 
 **Issue: "rec_22 not found"**
-- Solution: Implement [5.20_panel_data](../5.20_panel_data/README.md) first (required dependency)
+- Solution: Implement [5.0020_panel_data](../5.20_panel_data/README.md) first (required dependency)
 
 **Issue: Memory error with large datasets**
 - Solution: Process players in batches (see [STATUS.md](STATUS.md) for batch processing code)
@@ -315,7 +315,7 @@ See [STATUS.md](STATUS.md) for complete lessons learned and optimization strateg
 - **[STATUS.md](STATUS.md)** - Detailed implementation status, lessons learned, future enhancements
 - **[implement_rec_11.py](implement_rec_11.py)** - Complete implementation (880 lines)
 - **[test_rec_11.py](test_rec_11.py)** - Test suite (600 lines)
-- **[5.20_panel_data](../5.20_panel_data/README.md)** - Required dependency
+- **[5.0020_panel_data](../5.20_panel_data/README.md)** - Required dependency
 - **[Phase 5 Index](../PHASE_5_INDEX.md)** - Parent phase overview
 
 ---

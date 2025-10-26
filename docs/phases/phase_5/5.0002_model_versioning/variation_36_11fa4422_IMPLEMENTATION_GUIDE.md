@@ -3,7 +3,7 @@
 **Recommendation ID:** variation_36_11fa4422
 **Priority:** SECURITY
 **Phase:** 5
-**Subdirectory:** 5.2_model_management
+**Subdirectory:** 5.0002_model_management
 **Generated:** 2025-10-15T23:49:50.311403
 
 ---

@@ -71,7 +71,7 @@ Raw ESPN JSON files contain extensive metadata, commentary, broadcast informatio
 - Coaching details
 - Team photos/logos
 
-**Note:** Exact JSON field paths to be documented after examining sample files (Phase 2.2 prep).
+**Note:** Exact JSON field paths to be documented after examining sample files (2.0002 prep).
 
 ## Rationale
 

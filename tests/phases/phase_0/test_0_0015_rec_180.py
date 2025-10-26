@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite: Phase 0.0015 - Increase Information Availability (rec_180)
+Test Suite: 0.0015 - Increase Information Availability (rec_180)
 
 Comprehensive tests for:
 - SearchResult and RetrievalContext data structures
@@ -27,7 +27,7 @@ sys.path.insert(0, str(project_root))
 
 # Import implementation
 impl_path = (
-    project_root / "docs" / "phases" / "phase_0" / "0.15_information_availability"
+    project_root / "docs" / "phases" / "phase_0" / "0.0015_information_availability"
 )
 sys.path.insert(0, str(impl_path))
 

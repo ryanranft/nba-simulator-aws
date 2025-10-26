@@ -119,7 +119,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.98_compare_data_distribution_to_training_data
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0098_compare_data_distribution_to_training_data
 python test_rec_132.py -v
 ```
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 0.0011: RAG Pipeline Main Interface
+0.0011: RAG Pipeline Main Interface
 
 Purpose: Unified CLI for RAG pipeline operations
 Created: October 25, 2025
@@ -140,7 +140,7 @@ def cmd_compare(args):
 def main():
     """Main CLI entry point"""
     parser = argparse.ArgumentParser(
-        description='Phase 0.0011: RAG Pipeline for NBA Data',
+        description='0.0011: RAG Pipeline for NBA Data',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

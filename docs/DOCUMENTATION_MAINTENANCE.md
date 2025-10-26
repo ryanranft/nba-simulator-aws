@@ -42,9 +42,9 @@ python scripts/maintenance/sync_progress.py
 
 **What it checks:**
 - ✅ S3 bucket status (Phase 0)
-- ✅ RDS database status (Phase 3.1)
-- ✅ Glue crawler status (Phase 2.1)
-- ✅ Glue ETL job status (Phase 2.2)
+- ✅ RDS database status (3.0001)
+- ✅ Glue crawler status (2.0001)
+- ✅ Glue ETL job status (2.0002)
 - ✅ Project statistics
 
 **Modes:**
@@ -93,12 +93,12 @@ Some documentation requires human judgment and should NOT be auto-updated:
 
 ### After Completing a Phase
 
-When you finish a major phase (e.g., Phase 2.1: Glue Crawler):
+When you finish a major phase (e.g., 2.0001: Glue Crawler):
 
 **1. Update PROGRESS.md:**
 ```markdown
 # Find the phase section
-### Phase 2.1: AWS Glue Crawler
+### 2.0001: AWS Glue Crawler
 
 # Change status from ⏸️ PENDING to ✅ COMPLETE
 **Status:** ✅ COMPLETE
@@ -121,7 +121,7 @@ When you finish a major phase (e.g., Phase 2.1: Glue Crawler):
 **4. Commit changes:**
 ```bash
 git add PROGRESS.md QUICKSTART.md
-git commit -m "Update progress: Phase 2.1 complete"
+git commit -m "Update progress: 2.0001 complete"
 ```
 
 ---
@@ -331,7 +331,7 @@ grep -r "password\|secret\|token\|key" docs/ | grep -v "example\|placeholder\|yo
 
 2. **New session:**
    - Claude reads updated docs automatically
-   - Mention if something major changed: "I just completed Phase 2.1"
+   - Mention if something major changed: "I just completed 2.0001"
 
 3. **When Claude seems outdated:**
    - Ask: "Can you check PROGRESS.md for the current phase?"

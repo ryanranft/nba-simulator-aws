@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.105_implement_data_provenance_tracking_for_reproducible_ml_pipel
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0105_implement_data_provenance_tracking_for_reproducible_ml_pipel
 python test_rec_140.py -v
 ```
 

@@ -3,8 +3,8 @@
 Update Phase References to 4-Digit Format (ADR-010 STEP 5)
 
 This script updates all documentation and code references from old format
-(e.g., "Phase 0.0001", "phase_0/0.0001_name/") to new 4-digit format
-(e.g., "Phase 0.0001", "phase_0/0.0001_name/").
+(e.g., "0.0001", "phase_0/0.0001_name/") to new 4-digit format
+(e.g., "0.0001", "phase_0/0.0001_name/").
 
 Usage:
     python scripts/maintenance/update_phase_references.py --dry-run
@@ -117,7 +117,7 @@ def format_test_5(match):
 
 
 # Define patterns
-# Prose text patterns (e.g., "Phase 0.0001")
+# Prose text patterns (e.g., "0.0001")
 PATTERNS.extend(
     [
         (

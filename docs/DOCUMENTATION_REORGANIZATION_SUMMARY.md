@@ -53,15 +53,15 @@ Complete reorganization of NBA Temporal Panel Data System documentation, reducin
 **Target:** `docs/phases/phase_0/0.0001_basketball_reference/documentation/`
 
 **Files Moved:**
-1. `BASKETBALL_REFERENCE_BOX_SCORE_SYSTEM.md` → `0.1_basketball_reference/documentation/BOX_SCORE_SYSTEM.md`
-2. `BASKETBALL_REFERENCE_COMPARISON.md` → `0.1_basketball_reference/documentation/COMPARISON.md`
-3. `BASKETBALL_REFERENCE_PBP_DISCOVERY.md` → `0.1_basketball_reference/documentation/PBP_DISCOVERY.md`
-4. `BASKETBALL_REFERENCE_PBP_SYSTEM.md` → `0.1_basketball_reference/documentation/PBP_SYSTEM.md`
-5. `BASKETBALL_REFERENCE_SCRAPING_NOTES.md` → `0.1_basketball_reference/documentation/SCRAPING_NOTES.md`
-6. `BASKETBALL_REFERENCE_TEST_PLAN.md` → `0.1_basketball_reference/documentation/TEST_PLAN.md`
-7. `OVERNIGHT_WORKFLOW_BASKETBALL_REFERENCE_INTEGRATION.md` → `0.1_basketball_reference/documentation/OVERNIGHT_WORKFLOW_INTEGRATION.md`
+1. `BASKETBALL_REFERENCE_BOX_SCORE_SYSTEM.md` → `0.0001_basketball_reference/documentation/BOX_SCORE_SYSTEM.md`
+2. `BASKETBALL_REFERENCE_COMPARISON.md` → `0.0001_basketball_reference/documentation/COMPARISON.md`
+3. `BASKETBALL_REFERENCE_PBP_DISCOVERY.md` → `0.0001_basketball_reference/documentation/PBP_DISCOVERY.md`
+4. `BASKETBALL_REFERENCE_PBP_SYSTEM.md` → `0.0001_basketball_reference/documentation/PBP_SYSTEM.md`
+5. `BASKETBALL_REFERENCE_SCRAPING_NOTES.md` → `0.0001_basketball_reference/documentation/SCRAPING_NOTES.md`
+6. `BASKETBALL_REFERENCE_TEST_PLAN.md` → `0.0001_basketball_reference/documentation/TEST_PLAN.md`
+7. `OVERNIGHT_WORKFLOW_BASKETBALL_REFERENCE_INTEGRATION.md` → `0.0001_basketball_reference/documentation/OVERNIGHT_WORKFLOW_INTEGRATION.md`
 
-**README Updated:** `0.1_basketball_reference/README.md` - Added documentation/ section
+**README Updated:** `0.0001_basketball_reference/README.md` - Added documentation/ section
 
 ---
 
@@ -147,10 +147,10 @@ docs/
 │   └── statistics/                     # NEW - Statistics docs (2 files + README)
 └── phases/
     ├── phase_0/
-    │   └── 0.1_basketball_reference/
+    │   └── 0.0001_basketball_reference/
     │       └── documentation/          # NEW - BBRef technical docs (7 files)
     └── phase_9/
-        └── 9.0_plus_minus/             # NEW - Plus/Minus system (6 files + README)
+        └── 9.0000_plus_minus/             # NEW - Plus/Minus system (6 files + README)
 ```
 
 ---
@@ -186,7 +186,7 @@ docs/
 - All PLUS_MINUS_*.md and REC_11_PLUS_MINUS_*.md → phase_9/9.0000_plus_minus/*.md
 
 ### Basketball Reference → phase_0/0.0001_basketball_reference/documentation/
-- All BASKETBALL_REFERENCE_*.md and OVERNIGHT_WORKFLOW_*.md → 0.1_basketball_reference/documentation/*.md
+- All BASKETBALL_REFERENCE_*.md and OVERNIGHT_WORKFLOW_*.md → 0.0001_basketball_reference/documentation/*.md
 
 ### Scrapers → data_collection/scrapers/
 - All *SCRAPER*.md and *DEPLOYMENT*.md → data_collection/scrapers/*.md
@@ -232,7 +232,7 @@ docs/
    - Existing subdirectories (monitoring/, data_collection/, features/, phases/) provide sufficient organization
 
 3. ✅ **Phase 5 cleanup complete** (8 files organized) - Commit 360bc1e
-   - Moved 5 files to subdirectories (5.19_drift_detection/, 5.2_model_versioning/, ml_systems/book_recommendations/)
+   - Moved 5 files to subdirectories (5.0019_drift_detection/, 5.0002_model_versioning/, ml_systems/book_recommendations/)
    - Removed 2 duplicate implementation guides
    - Archived 1 superseded planning file
    - Result: 11 files → 3 essential files (5.0, PHASE_5_INDEX, BOOK_RECOMMENDATIONS_INDEX)

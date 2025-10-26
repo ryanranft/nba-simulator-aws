@@ -629,7 +629,7 @@ class PerformExtensiveErrorAnalysisOnOutputsToReduceHallucinationRate:
 def main():
     """Main execution function with example usage."""
     print("=" * 80)
-    print("Phase 0.0014: Error Analysis & Hallucination Detection")
+    print("0.0014: Error Analysis & Hallucination Detection")
     print("=" * 80)
 
     # Initialize

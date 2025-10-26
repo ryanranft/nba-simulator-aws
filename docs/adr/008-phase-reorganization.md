@@ -18,8 +18,8 @@ The current phase structure (Phase 0-6) has logical inconsistencies discovered a
 
 **Problems identified:**
 
-1. **Duplicate upload instructions:** Phase 0.0007 and Phase 1.3 both describe uploading ESPN data to S3
-2. **Chicken-and-egg problem:** Phase 0.0007 instructs uploading to S3, but S3 bucket doesn't exist until Phase 1.2
+1. **Duplicate upload instructions:** 0.0007 and 1.0003 both describe uploading ESPN data to S3
+2. **Chicken-and-egg problem:** 0.0007 instructs uploading to S3, but S3 bucket doesn't exist until 1.0002
 3. **Data quality analysis out of order:** Phase 0 tries to verify data quality before data is in S3
 4. **Workflow #38 placement unclear:** Auto-update workflow assumes S3 baseline exists, but runs in Phase 0 (before S3 setup)
 5. **Multi-sport replication confusion:** For new sports (NFL, MLB), unclear whether to run Phase 0 or Phase 1 first
@@ -86,7 +86,7 @@ Reorganize Phases 0-3 to follow a logical data flow: **Collection → Quality �
 - Each phase builds on the previous phase's output
 
 ### 2. **Eliminates Duplication**
-- Single source of truth for "how to upload ESPN data to S3" (Phase 0.0003)
+- Single source of truth for "how to upload ESPN data to S3" (0.0003)
 - Phase 1 focuses exclusively on quality/gaps, not initial upload
 - Clear separation of concerns
 
@@ -97,8 +97,8 @@ For new sports (NFL, MLB, NHL):
 - **Phase 2-3:** Same ETL patterns (sport-agnostic)
 
 ### 4. **Workflow #38 Integration**
-- Phase 0.0003: Initial upload establishes S3 baseline
-- Phase 1.4: Workflow #38 fills gaps from baseline to today
+- 0.0003: Initial upload establishes S3 baseline
+- 1.0004: Workflow #38 fills gaps from baseline to today
 - Clear prerequisites: S3 must exist (Phase 0) before gap-filling (Phase 1)
 
 ### 5. **Claude Code Clarity**
@@ -165,8 +165,8 @@ When starting a new session:
    - Focus: Getting data into S3 (one-time setup)
 
 4. **Reorganize Phase 1:**
-   - Move Phase 0.0007 content → New Phase 1.3-1.4
-   - Move Phase 0.0001-0.6 content → New Phase 1.1-1.2, 1.5-1.6
+   - Move 0.0007 content → New 1.0003-1.4
+   - Move 0.0001-0.6 content → New 1.0001-1.2, 1.5-1.6
    - Title: "Phase 1: Data Quality & Gap Analysis"
    - Focus: Analyzing S3 data, filling gaps, establishing baseline
 
@@ -218,7 +218,7 @@ How will we know if this decision was successful?
 
 3. **Workflow #38 integration is clear:**
    - Prerequisites obvious (S3 must exist)
-   - Placement in Phase 1.4 makes sense
+   - Placement in 1.0004 makes sense
 
 4. **No broken documentation links:**
    - All internal links work
@@ -247,9 +247,9 @@ At that point, verify:
 **Key insight:** Phase numbering should reflect data flow, not implementation order.
 
 **Previous attempts to solve this:**
-- October 2-3: Added Phase 0.0007 (ESPN Data Gap Filling) to existing Phase 0
+- October 2-3: Added 0.0007 (ESPN Data Gap Filling) to existing Phase 0
 - October 4: Created Workflow #38 (Auto-Update ESPN Data)
-- Realized: Phase 0.0007 uploads to S3, but S3 doesn't exist until Phase 1
+- Realized: 0.0007 uploads to S3, but S3 doesn't exist until Phase 1
 
 **This reorganization finalizes the logical structure and prevents future confusion.**
 

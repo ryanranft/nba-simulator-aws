@@ -216,7 +216,7 @@ python scripts/automation/autonomous_phase_completion.py --all --dry-run
 
 ---
 
-## Example: Phase 0.8 Implementation
+## Example: 0.0008 Implementation
 
 **Sub-phase:** Player Identification
 

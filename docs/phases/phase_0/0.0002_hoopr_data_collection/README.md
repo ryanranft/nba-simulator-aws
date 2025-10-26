@@ -35,7 +35,7 @@ aws s3 ls s3://nba-sim-raw-data-lake/hoopr_phase1/ --recursive | wc -l
 ```
 
 **Historical milestones:**
-- **Oct 9, 2025 (Phase 0.2 Initial Upload):** 410 files (314 CSV + 96 Parquet), 8.2 GB
+- **Oct 9, 2025 (0.0002 Initial Upload):** 410 files (314 CSV + 96 Parquet), 8.2 GB
 - **Oct 9, 2025 (RDS Integration):** 13.1M play-by-play events, 6.7 GB in RDS PostgreSQL
 
 **Current metrics tracked in:** `inventory/metrics.yaml`
@@ -48,7 +48,7 @@ aws s3 ls s3://nba-sim-raw-data-lake/hoopr_phase1/ --recursive | wc -l
 
 This phase provides **modern era play-by-play data with complete coverage (2002-2025)** that powers the **hybrid econometric + nonparametric simulation system** described in the [main README](../../../README.md#simulation-methodology).
 
-**What Phase 0.2 enables:**
+**What 0.0002 enables:**
 
 ### 1. High-Frequency Panel Data for Econometric Analysis
 - **13.1M play-by-play events** provide granular observations for panel data regression
@@ -79,7 +79,7 @@ Using this phase's 23+ years of data (2002-2025), simulations adapt to:
 - **Temporal dynamics**: First game vs. mid-season vs. playoffs (30,758 games across all contexts)
 - **Cross-source validation**: 97% overlap with ESPN data enables robustness checks and data quality assurance
 
-**Key advantage of Phase 0.2:** Provides the **longest modern-era temporal coverage** (23+ years) with **100% play-by-play availability**, enabling robust estimation of causal effects and empirical distributions across all game contexts.
+**Key advantage of 0.0002:** Provides the **longest modern-era temporal coverage** (23+ years) with **100% play-by-play availability**, enabling robust estimation of causal effects and empirical distributions across all game contexts.
 
 See [main README simulation methodology](../../../README.md#simulation-methodology) for complete technical framework.
 
@@ -552,7 +552,7 @@ CREATE INDEX idx_hoopr_schedule_date ON hoopr_schedule(game_date);
 - **[DATA_CATALOG.md](../../../DATA_CATALOG.md)** - Complete data source reference
 - **[HOOPR_SCHEMA_MAPPING.md](../../../HOOPR_SCHEMA_MAPPING.md)** - Schema details
 - **[HOOPR_152_ENDPOINTS_GUIDE.md](../../../HOOPR_152_ENDPOINTS_GUIDE.md)** - API reference
-- **[Phase 9.2: hoopR Processor](../../phase_9/9.2_hoopr_processor.md)** - ETL pipeline
+- **[9.0002: hoopR Processor](../../phase_9/9.0002_hoopr_processor.md)** - ETL pipeline
 
 ---
 

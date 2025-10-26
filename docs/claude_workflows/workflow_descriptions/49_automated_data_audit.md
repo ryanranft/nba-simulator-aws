@@ -402,8 +402,8 @@ bash scripts/audit/run_data_audit.sh --skip-s3
 ## Related Documentation
 
 - **Phase 8:** [Data Audit & Inventory](../../phases/PHASE_8_INDEX.md)
-- **Sub-Phase 8.0:** [Recursive Data Discovery](../../phases/phase_8/8.0_recursive_data_discovery.md)
-- **Sub-Phase 8.1:** [Deep Content Analysis](../../phases/phase_8/8.1_deep_content_analysis.md)
+- **Sub-8.0000:** [Recursive Data Discovery](../../phases/phase_8/8.0000_recursive_data_discovery.md)
+- **Sub-8.0001:** [Deep Content Analysis](../../phases/phase_8/8.0001_deep_content_analysis.md)
 - **Master Inventory:** [MASTER_DATA_INVENTORY.md](../../MASTER_DATA_INVENTORY.md)
 
 ---

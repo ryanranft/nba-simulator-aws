@@ -1,5 +1,5 @@
 """
-Tests for Phase 5.0014
+Tests for 5.0014
 
 Auto-generated test template.
 
@@ -21,7 +21,7 @@ from validate_5_14 import Phase514Validator
 
 
 class TestPhase514Validation:
-    """Tests for Phase 5.0014 validation."""
+    """Tests for 5.0014 validation."""
 
     @pytest.fixture
     def validator(self):
@@ -47,13 +47,13 @@ class TestPhase514Validation:
 
 
 class TestPhase514Integration:
-    """Integration tests for Phase 5.0014."""
+    """Integration tests for 5.0014."""
 
     def test_phase_complete_validation(self):
         """Comprehensive phase completion test."""
         validator = Phase514Validator(verbose=False)
         all_passed, results = validator.run_all_validations()
 
-        assert all_passed == True, "Phase 5.0014 validation failed"
+        assert all_passed == True, "5.0014 validation failed"
         assert results["feature_1_valid"] == True
         assert results["feature_2_valid"] == True

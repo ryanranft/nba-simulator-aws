@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.60_implement_normalization_for_input_data
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0060_implement_normalization_for_input_data
 python test_rec_089.py -v
 ```
 

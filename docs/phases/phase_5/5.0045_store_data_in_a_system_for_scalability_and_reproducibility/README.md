@@ -118,7 +118,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.45_store_data_in_a_system_for_scalability_and_reproducibility
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0045_store_data_in_a_system_for_scalability_and_reproducibility
 python test_rec_070.py -v
 ```
 

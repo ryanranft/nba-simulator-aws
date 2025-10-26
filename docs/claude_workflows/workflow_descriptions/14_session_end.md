@@ -162,7 +162,7 @@ python scripts/monitoring/dims_cli.py update
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Next pending task in PROGRESS.md:
-  ⏸️ Phase 2.2: Create year-based Glue Crawlers for manageable data...
+  ⏸️ 2.0002: Create year-based Glue Crawlers for manageable data...
 
 ╔═══════════════════════════════════════════════════════════════╗
 ║  ✓ Session end checklist complete                            ║

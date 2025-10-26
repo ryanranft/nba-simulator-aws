@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 0.0012: RAG + LLM Integration - Main CLI
+0.0012: RAG + LLM Integration - Main CLI
 
 Natural language query interface for NBA temporal panel data.
 Combines retrieval-augmented generation with LLM for intelligent responses.
@@ -10,7 +10,7 @@ Usage:
     python scripts/0_12/main.py interactive
     python scripts/0_12/main.py metrics
 
-Part of Phase 0.0012: RAG + LLM Integration (rec_188)
+Part of 0.0012: RAG + LLM Integration (rec_188)
 """
 
 import os

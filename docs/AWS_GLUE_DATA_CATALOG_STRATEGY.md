@@ -9,7 +9,7 @@
 
 ## Overview
 
-This document describes the strategy for using **AWS Glue Data Catalog** as a cloud-based metadata and indexing solution for the 117GB `/data` folder. This is **separate from the abandoned Phase 2.0 ETL use case** - we're using Glue Catalog purely for metadata discovery and queryability, not for ETL transformations.
+This document describes the strategy for using **AWS Glue Data Catalog** as a cloud-based metadata and indexing solution for the 117GB `/data` folder. This is **separate from the abandoned 2.0000 ETL use case** - we're using Glue Catalog purely for metadata discovery and queryability, not for ETL transformations.
 
 ---
 
@@ -29,9 +29,9 @@ This document describes the strategy for using **AWS Glue Data Catalog** as a cl
 
 ---
 
-## Why This Differs from Abandoned Phase 2.0
+## Why This Differs from Abandoned 2.0000
 
-### Phase 2.0 (Abandoned) - AWS Glue ETL
+### 2.0000 (Abandoned) - AWS Glue ETL
 **Use Case:** Data extraction and transformation
 **Status:** ❌ Abandoned due to scale issues
 **Reason for Abandonment:**
@@ -145,7 +145,7 @@ This document describes the strategy for using **AWS Glue Data Catalog** as a cl
      --database-input '{"Name": "nba_data_catalog"}'
    ```
 
-2. Configure selective crawlers (avoid Phase 2.0 mistakes)
+2. Configure selective crawlers (avoid 2.0000 mistakes)
    - **Option A:** Year-based crawlers (365-366 files each)
    - **Option B:** Data-type crawlers (box scores, play-by-play, schedules)
    - **Option C:** Schema-only sampling (crawl 5% of files for representative schema)
@@ -261,7 +261,7 @@ WHERE s.season = '2023-24';
 
 1. **Real-time data needs** - Glue Catalog updates are eventual consistency
 2. **High query volume** - Athena costs scale with data scanned
-3. **Complex transformations** - Use local scripts (per Phase 2.0 lessons)
+3. **Complex transformations** - Use local scripts (per 2.0000 lessons)
 4. **Large file processing** - Glue Crawler may still fail (>100K files)
 
 ### Mitigation Strategies
@@ -282,13 +282,13 @@ WHERE s.season = '2023-24';
 
 ---
 
-## Differences from Phase 2.0 Lessons
+## Differences from 2.0000 Lessons
 
-### Phase 2.0 Lessons Applied
+### 2.0000 Lessons Applied
 
 From `docs/phases/phase_2/2.0000_aws_glue_etl.md`:
 
-**What failed in Phase 2.0:**
+**What failed in 2.0000:**
 - ❌ Single crawler on 70K+ files → OutOfMemoryError
 - ❌ Deeply nested JSON (5+ levels) → Internal Service Exception
 - ❌ ETL transformations at scale
@@ -350,7 +350,7 @@ From `docs/phases/phase_2/2.0000_aws_glue_etl.md`:
 - [Glue Crawler Best Practices](https://docs.aws.amazon.com/glue/latest/dg/crawler-best-practices.html)
 
 **Workflows:**
-- Workflow #34 - Lessons Learned Review (check Phase 2.0 failures)
+- Workflow #34 - Lessons Learned Review (check 2.0000 failures)
 - Workflow #03 - Decision Workflow (document ADR if implementing)
 - Workflow #21 - Data Validation (verify catalog accuracy)
 
@@ -361,7 +361,7 @@ From `docs/phases/phase_2/2.0000_aws_glue_etl.md`:
 **Return to:** [PROGRESS.md](../PROGRESS.md) | [Documentation Index](docs/README.md)
 
 **Related:**
-- [Phase 2.0 AWS Glue ETL (Abandoned)](docs/phases/phase_2/2.0000_aws_glue_etl.md)
+- [2.0000 AWS Glue ETL (Abandoned)](docs/phases/phase_2/2.0000_aws_glue_etl.md)
 - [Data Structure Guide](docs/DATA_STRUCTURE_GUIDE.md)
 - [Setup Guide](docs/SETUP.md)
 

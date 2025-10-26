@@ -1,4 +1,4 @@
-# Phase 5.0009: Cross-Validation Strategies
+# 5.0009: Cross-Validation Strategies
 
 **Status:** ✅ COMPLETE
 **Implementation:** `scripts/ml/cross_validation_strategies.py` (557 lines)
@@ -64,8 +64,8 @@ print(f"Mean Accuracy: {cv_results['test_accuracy'].mean():.4f}")
 
 ## Workflow References
 
-- **Phase 5.0001** - Hyperparameter Optimization (use appropriate CV)
-- **Phase 5.0007** - Learning Curves (CV for robust estimates)
+- **5.0001** - Hyperparameter Optimization (use appropriate CV)
+- **5.0007** - Learning Curves (CV for robust estimates)
 
 ---
 

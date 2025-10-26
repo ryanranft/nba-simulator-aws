@@ -121,7 +121,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.97_create_a_monitoring_system_to_log_data_points_through_the_pi
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0097_create_a_monitoring_system_to_log_data_points_through_the_pi
 python test_rec_131.py -v
 ```
 

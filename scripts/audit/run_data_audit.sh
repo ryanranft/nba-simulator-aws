@@ -158,9 +158,9 @@ if [ "$SKIP_S3" = false ]; then
     if [ "$RDS_STATUS" = "available" ]; then
         log SUCCESS "RDS PostgreSQL: $RDS_STATUS"
 
-        # Phase 3.5: RDS Deep Inspection (if requested)
+        # 3.0005: RDS Deep Inspection (if requested)
         if [ "$DEEP_RDS" = true ]; then
-            log INFO "Phase 3.5: Running RDS deep inspection..."
+            log INFO "3.0005: Running RDS deep inspection..."
             if ! bash "$PROJECT_ROOT/scripts/audit/inspect_rds.sh"; then
                 log WARNING "RDS deep inspection detected issues"
                 # Send alert for RDS health issues

@@ -1,5 +1,5 @@
 """
-Tests for Phase 6.0
+Tests for 6.0000
 
 Auto-generated test template.
 
@@ -21,7 +21,7 @@ from validate_6_0 import Phase60Validator
 
 
 class TestPhase60Validation:
-    """Tests for Phase 6.0 validation."""
+    """Tests for 6.0000 validation."""
 
     @pytest.fixture
     def validator(self):
@@ -47,13 +47,13 @@ class TestPhase60Validation:
 
 
 class TestPhase60Integration:
-    """Integration tests for Phase 6.0."""
+    """Integration tests for 6.0000."""
 
     def test_phase_complete_validation(self):
         """Comprehensive phase completion test."""
         validator = Phase60Validator(verbose=False)
         all_passed, results = validator.run_all_validations()
 
-        assert all_passed == True, "Phase 6.0 validation failed"
+        assert all_passed == True, "6.0000 validation failed"
         assert results["feature_1_valid"] == True
         assert results["feature_2_valid"] == True

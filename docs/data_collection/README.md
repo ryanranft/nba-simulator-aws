@@ -20,7 +20,7 @@ This directory contains documentation for all data collection systems, scrapers,
 Complete documentation for scraper systems including:
 - ESPN scraper implementation
 - NBA API scraper optimization
-- Basketball Reference scraper (see Phase 0.1)
+- Basketball Reference scraper (see 0.0001)
 - Management and monitoring systems
 - Autonomous overnight deployment
 - Test results and validation
@@ -47,7 +47,7 @@ Complete documentation for scraper systems including:
 
 **Phase Documentation:**
 - [Phase 0: Data Collection](../phases/phase_0/PHASE_0_INDEX.md)
-- [Phase 0.1: Basketball Reference](../phases/phase_0/0.1_basketball_reference/)
+- [0.0001: Basketball Reference](../phases/phase_0/0.0001_basketball_reference/)
 - [Phase 1: Data Quality](../phases/PHASE_1_INDEX.md)
 
 **Workflows:**

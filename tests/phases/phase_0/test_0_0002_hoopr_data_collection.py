@@ -1,7 +1,7 @@
 """
-Tests for Phase 0.2: hoopR Data Collection
+Tests for 0.0002: hoopR Data Collection
 
-This test suite validates the completion of Phase 0.2 by checking:
+This test suite validates the completion of 0.0002 by checking:
 - S3 hoopR file storage (Parquet and CSV files)
 - RDS table creation and population
 - Temporal coverage (2002-2025)
@@ -28,7 +28,7 @@ from validate_0_2_hoopr_collection import Phase02HooprValidator
 
 
 class TestPhase02HooprS3Storage:
-    """Tests for Phase 0.2 S3 storage validation."""
+    """Tests for 0.0002 S3 storage validation."""
 
     @pytest.fixture
     def validator(self):
@@ -55,7 +55,7 @@ class TestPhase02HooprS3Storage:
 
 
 class TestPhase02HooprRDSTables:
-    """Tests for Phase 0.2 RDS table validation."""
+    """Tests for 0.0002 RDS table validation."""
 
     @pytest.fixture
     def validator(self):
@@ -104,7 +104,7 @@ class TestPhase02HooprRDSTables:
 
 
 class TestPhase02HooprDataQuality:
-    """Tests for Phase 0.2 data quality validation."""
+    """Tests for 0.0002 data quality validation."""
 
     @pytest.fixture
     def validator(self):
@@ -133,10 +133,10 @@ class TestPhase02HooprDataQuality:
 
 
 class TestPhase02HooprIntegration:
-    """Integration tests for Phase 0.2."""
+    """Integration tests for 0.0002."""
 
     def test_phase_complete_validation(self):
-        """Comprehensive test that Phase 0.2 is complete."""
+        """Comprehensive test that 0.0002 is complete."""
         validator = Phase02HooprValidator(verbose=False)
         all_passed, results = validator.run_all_validations()
 
@@ -176,15 +176,15 @@ class TestPhase02HooprIntegration:
         if validator.rds_available:
             assert (
                 all_passed == True
-            ), f"Phase 0.2 completion validation failed. Failures: {validator.failures}"
+            ), f"0.0002 completion validation failed. Failures: {validator.failures}"
 
 
 class TestPhase02HooprMetadata:
-    """Tests for Phase 0.2 documentation metadata."""
+    """Tests for 0.0002 documentation metadata."""
 
     def test_documented_file_counts(self):
         """Verify documented file counts are reasonable."""
-        # From Phase 0.2 README: 410 files (314 CSV + 96 Parquet)
+        # From 0.0002 README: 410 files (314 CSV + 96 Parquet)
         expected_total = 410
         expected_csv = 314
         expected_parquet = 96
@@ -196,7 +196,7 @@ class TestPhase02HooprMetadata:
 
     def test_documented_data_sizes(self):
         """Verify documented data sizes are reasonable."""
-        # From Phase 0.2 README:
+        # From 0.0002 README:
         # - Total: 8.2 GB
         # - Play-by-play: 6.2 GB
         # - Player box: 433 MB
@@ -220,7 +220,7 @@ class TestPhase02HooprMetadata:
 
     def test_temporal_coverage_documented(self):
         """Verify documented temporal coverage is correct."""
-        # From Phase 0.2 README: 2002-2025 (23+ years)
+        # From 0.0002 README: 2002-2025 (23+ years)
         start_year = 2002
         end_year = 2025
         years_coverage = end_year - start_year + 1
@@ -229,7 +229,7 @@ class TestPhase02HooprMetadata:
 
     def test_game_count_documented(self):
         """Verify documented game count is reasonable."""
-        # From Phase 0.2 README: 30,758 games
+        # From 0.0002 README: 30,758 games
         documented_games = 30_758
 
         # Sanity check: ~1,230 games/season × 24 seasons ≈ 29,520 games
@@ -243,21 +243,21 @@ class TestPhase02HooprMetadata:
 
 
 class TestPhase02HooprREADME:
-    """Tests for Phase 0.2 README completeness."""
+    """Tests for 0.0002 README completeness."""
 
     def test_readme_exists(self):
-        """Test that Phase 0.2 README exists."""
+        """Test that 0.0002 README exists."""
         readme_path = (
             Path(__file__).parent.parent.parent.parent
-            / "docs/phases/phase_0/0.2_hoopr_data_collection/README.md"
+            / "docs/phases/phase_0/0.0002_hoopr_data_collection/README.md"
         )
-        assert readme_path.exists(), "Phase 0.2 README should exist"
+        assert readme_path.exists(), "0.0002 README should exist"
 
     def test_readme_has_key_sections(self):
         """Test that README contains key sections."""
         readme_path = (
             Path(__file__).parent.parent.parent.parent
-            / "docs/phases/phase_0/0.2_hoopr_data_collection/README.md"
+            / "docs/phases/phase_0/0.0002_hoopr_data_collection/README.md"
         )
 
         with open(readme_path, "r") as f:
@@ -281,7 +281,7 @@ class TestPhase02HooprREADME:
         """Test that README navigation links are valid."""
         readme_path = (
             Path(__file__).parent.parent.parent.parent
-            / "docs/phases/phase_0/0.2_hoopr_data_collection/README.md"
+            / "docs/phases/phase_0/0.0002_hoopr_data_collection/README.md"
         )
 
         with open(readme_path, "r") as f:
@@ -299,7 +299,7 @@ class TestPhase02HooprREADME:
 # Slow tests marker for comprehensive validation
 @pytest.mark.slow
 class TestPhase02HooprComprehensive:
-    """Comprehensive slow tests for Phase 0.2."""
+    """Comprehensive slow tests for 0.0002."""
 
     def test_all_seasons_have_data(self):
         """Test that all seasons from 2002-2024 have data (slow query)."""

@@ -240,15 +240,15 @@ python scripts/monitoring/dims_cli.py verify --category s3_storage
 
 ### Phase 0: Data Collection
 - Phase 2 consumes Phase 0 outputs (ESPN, hoopR, NBA API data)
-- ADCE (Phase 0.0018) can trigger Phase 2 processing for new games
-- Data quality from Phase 0.0009 ensures clean inputs
+- ADCE (0.0018) can trigger Phase 2 processing for new games
+- Data quality from 0.0009 ensures clean inputs
 
-### Phase 0.0022: Data Inventory & Gap Analysis
+### 0.0022: Data Inventory & Gap Analysis
 - Audit identifies which games have PBP data
 - Gap analysis shows missing box scores
 - Phase 2 fills gaps by generating from PBP
 
-### Phase 0.0020: Monitoring & Observability
+### 0.0020: Monitoring & Observability
 - CloudWatch tracks Phase 2 processing metrics
 - Alarms trigger on verification failures
 - Dashboard shows generation progress

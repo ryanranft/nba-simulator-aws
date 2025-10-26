@@ -41,7 +41,7 @@ Integrate multiple data sources to maximize ML granularity. Originally planned a
 
 ---
 
-## Sub-Phase 1.0: Data Quality Checks
+## Sub-1.0000: Data Quality Checks
 
 **Status:** ⏸️ PENDING
 **Time Estimate:** 6 hours
@@ -62,11 +62,11 @@ Integrate multiple data sources to maximize ML granularity. Originally planned a
 
 **Output:** `docs/DATA_QUALITY_BASELINE.md`
 
-**See:** [Sub-Phase 1.0 Details](phase_1/1.0000_data_quality_checks.md)
+**See:** [Sub-1.0000 Details](phase_1/1.0000_data_quality_checks.md)
 
 ---
 
-## Sub-Phase 1.1: Multi-Source Integration
+## Sub-1.0001: Multi-Source Integration
 
 **Status:** ⏸️ PENDING (comprehensive plan complete)
 **Time Estimate:** 28 hours over 4 weeks
@@ -91,13 +91,13 @@ Integrate multiple data sources to maximize ML granularity. Originally planned a
 - Defensive metrics enabled
 - Historical coverage: 1946-2025
 
-**See:** [Sub-Phase 1.1 Details](phase_1/1.0001_multi_source_integration.md)
+**See:** [Sub-1.0001 Details](phase_1/1.0001_multi_source_integration.md)
 
 ---
 
 ## Success Criteria
 
-### Sub-Phase 1.0 (Data Quality Checks)
+### Sub-1.0000 (Data Quality Checks)
 - [ ] Data coverage analyzed (file counts, date ranges)
 - [ ] Coverage gaps identified and documented
 - [ ] Automated gap-filling workflow tested (Workflow #38)
@@ -107,7 +107,7 @@ Integrate multiple data sources to maximize ML granularity. Originally planned a
   - [ ] Consistency checked (canonical IDs)
 - [ ] Verification source chosen (optional)
 
-### Sub-Phase 1.1 (Multi-Source Integration)
+### Sub-1.0001 (Multi-Source Integration)
 - [ ] Basketball Reference data integrated (47 features)
 - [ ] NBA.com Stats data integrated (92 features)
 - [ ] Kaggle historical data integrated (12 features)
@@ -124,7 +124,7 @@ Integrate multiple data sources to maximize ML granularity. Originally planned a
 - S3 GET requests: ~$0.01/month (checking files)
 - Lambda (if automated): ~$0.20/month
 
-### Multi-Source Integration Costs (Sub-Phase 1.1)
+### Multi-Source Integration Costs (Sub-1.0001)
 | Source | Cost | Notes |
 |--------|------|-------|
 | **ESPN** | $0 | Already in S3 |
@@ -145,8 +145,8 @@ Integrate multiple data sources to maximize ML granularity. Originally planned a
 - [ ] Data structure documented (`docs/DATA_STRUCTURE_GUIDE.md`)
 - [ ] User has chosen verification sources (optional)
 
-**For Sub-Phase 1.1:**
-- [ ] Sub-Phase 1.0 complete (quality baseline established)
+**For Sub-1.0001:**
+- [ ] Sub-1.0000 complete (quality baseline established)
 - [ ] Scraper infrastructure ready
 - [ ] Rate limiting configured
 
@@ -158,14 +158,14 @@ Integrate multiple data sources to maximize ML granularity. Originally planned a
 
 This phase is **sport-agnostic** - follow the same pattern:
 
-### Step 1: Data Quality Checks (Sub-Phase 1.0 equivalent)
+### Step 1: Data Quality Checks (Sub-1.0000 equivalent)
 1. Analyze S3 coverage for new sport
 2. Identify gaps
 3. Upload local data if needed
 4. Run automated gap filling
 5. Establish quality baseline
 
-### Step 2: Multi-Source Integration (Sub-Phase 1.1 equivalent)
+### Step 2: Multi-Source Integration (Sub-1.0001 equivalent)
 1. Identify sport-specific data sources
 2. Plan feature catalog (200+ features recommended)
 3. Integrate each source incrementally
@@ -182,12 +182,12 @@ This phase is **sport-agnostic** - follow the same pattern:
 
 ## Key Workflows
 
-**For Sub-Phase 1.0:**
+**For Sub-1.0000:**
 - Workflow #21: Data Validation
 - Workflow #38: Auto-Update ESPN Data
 - Workflow #11: Error Handling
 
-**For Sub-Phase 1.1:**
+**For Sub-1.0001:**
 - Workflow #42: Scraper Management
 - Workflow #21: Data Validation
 - Workflow #18: Cost Management
@@ -196,7 +196,7 @@ This phase is **sport-agnostic** - follow the same pattern:
 
 ## Critical Documentation
 
-**Sub-Phase 1.1 Planning Documents:**
+**Sub-1.0001 Planning Documents:**
 - [ML_FEATURE_CATALOG.md](../../ML_FEATURE_CATALOG.md) - Complete 209 feature breakdown
 - [PHASE_1_MULTI_SOURCE_PLAN.md](phase_1/1.0001_multi_source_integration.md) - Detailed 28-hour roadmap
 - [IMPLEMENTATION_CHECKLIST.md](../../archive/planning/IMPLEMENTATION_CHECKLIST.md) - Week-by-week tasks
@@ -223,7 +223,7 @@ python scripts/monitoring/dims_cli.py verify --category s3_storage
 | **Basketball Reference** | HTML | Free | 1946-present | ⭐⭐⭐⭐⭐ |
 | **SportsData.io** | API | $19/mo | 1999-present | ⭐⭐⭐⭐ |
 
-**See Sub-Phase 1.0 for complete source comparison tables (NFL, MLB, NHL, Soccer).**
+**See Sub-1.0000 for complete source comparison tables (NFL, MLB, NHL, Soccer).**
 
 ---
 
@@ -247,10 +247,10 @@ python scripts/monitoring/dims_cli.py verify --category s3_storage
 
 ## Next Steps
 
-**After Sub-Phase 1.0 complete:**
-- → Begin Sub-Phase 1.1 (Multi-Source Integration)
+**After Sub-1.0000 complete:**
+- → Begin Sub-1.0001 (Multi-Source Integration)
 
-**After Sub-Phase 1.1 complete:**
+**After Sub-1.0001 complete:**
 - → Proceed to [Phase 2: AWS Glue ETL](PHASE_2_INDEX.md)
 
 ---
@@ -263,7 +263,7 @@ python scripts/monitoring/dims_cli.py verify --category s3_storage
 **Workflow Index:** [CLAUDE_WORKFLOW_ORDER.md](../claude_workflows/CLAUDE_WORKFLOW_ORDER.md)
 
 **Related Documentation:**
-- [Data Quality Baseline](../DATA_QUALITY_BASELINE.md) (created in Sub-Phase 1.0)
+- [Data Quality Baseline](../DATA_QUALITY_BASELINE.md) (created in Sub-1.0000)
 - [ML Feature Catalog](../ML_FEATURE_CATALOG.md) (209 features)
 - [Data Source Baselines](../DATA_SOURCE_BASELINES.md)
 

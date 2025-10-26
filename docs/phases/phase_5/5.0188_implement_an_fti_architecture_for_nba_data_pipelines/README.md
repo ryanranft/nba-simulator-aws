@@ -122,7 +122,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.19_implement_an_fti_architecture_for_nba_data_pipelines
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0019_implement_an_fti_architecture_for_nba_data_pipelines
 python test_rec_031.py -v
 ```
 

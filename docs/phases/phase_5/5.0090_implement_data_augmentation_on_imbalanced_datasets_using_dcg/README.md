@@ -123,7 +123,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.90_implement_data_augmentation_on_imbalanced_datasets_using_dcg
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0090_implement_data_augmentation_on_imbalanced_datasets_using_dcg
 python test_rec_120.py -v
 ```
 

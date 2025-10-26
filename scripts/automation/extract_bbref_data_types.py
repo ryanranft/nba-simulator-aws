@@ -232,7 +232,7 @@ def main():
     )
     parser.add_argument(
         "--tier-docs-dir",
-        default="docs/phases/phase_0/0.4_basketball_reference",
+        default="docs/phases/phase_0/0.0004_basketball_reference",
         help="Directory containing TIER_*.md files",
     )
     parser.add_argument(

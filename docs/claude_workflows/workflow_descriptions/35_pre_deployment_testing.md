@@ -82,7 +82,7 @@ pytest --cov=scripts --cov-report=term-missing
 
 **Before running Glue ETL on full dataset (146K files)**
 
-### Phase 2.1: Sample Data Validation
+### 2.0001: Sample Data Validation
 
 #### Test 1: Process 10 Sample Files
 ```python
@@ -151,7 +151,7 @@ def test_extracted_data_quality():
     assert result["player_name"] and len(result["player_name"]) > 0, "Player name required"
 ```
 
-### Phase 2.2: Schema Compliance
+### 2.0002: Schema Compliance
 
 **Test 3: Database Schema Validation**
 ```python
@@ -175,7 +175,7 @@ def test_schema_compliance():
     assert isinstance(result["points"], (int, type(None))), "points must be int or None"
 ```
 
-### Phase 2.3: Pre-Full Run Checklist
+### 2.0003: Pre-Full Run Checklist
 
 **Before running ETL on 146K files:**
 
@@ -209,7 +209,7 @@ bash scripts/aws/check_costs.sh
 
 **Before deploying RDS PostgreSQL database**
 
-### Phase 3.1: Local Database Testing
+### 3.0001: Local Database Testing
 
 #### Test 1: Schema Creation
 ```bash
@@ -264,7 +264,7 @@ def test_load_sample_data_to_rds():
     conn.close()
 ```
 
-### Phase 3.2: Pre-Production Deployment Checklist
+### 3.0002: Pre-Production Deployment Checklist
 
 **Before creating RDS instance:**
 
@@ -300,7 +300,7 @@ psql -U postgres -f scripts/sql/schema.sql
 
 **Before launching EC2 instance for game simulation**
 
-### Phase 4.1: Local Simulation Testing
+### 4.0001: Local Simulation Testing
 
 #### Test 1: Run 10 Test Simulations
 ```python
@@ -350,7 +350,7 @@ def test_simulation_score_distribution():
     assert unique_scores > 50, "Too little variance in simulation"
 ```
 
-### Phase 4.2: Pre-EC2 Launch Checklist
+### 4.0002: Pre-EC2 Launch Checklist
 
 **Before launching EC2 instance:**
 
@@ -383,7 +383,7 @@ echo "t2.small: ~$15/month (production)"
 
 **Before running SageMaker ML training**
 
-### Phase 5.0001: Feature Engineering Validation
+### 5.0001: Feature Engineering Validation
 
 #### Test 1: Feature Data Quality
 ```python
@@ -438,7 +438,7 @@ def test_training_data_sufficient():
     conn.close()
 ```
 
-### Phase 5.0002: Model Training Test
+### 5.0002: Model Training Test
 
 #### Test 3: Sample Model Training
 ```python
@@ -468,7 +468,7 @@ def test_model_training_smoke_test():
     print(f"Model trained successfully, sample prediction: {prediction[0]}")
 ```
 
-### Phase 5.0003: Pre-SageMaker Launch Checklist
+### 5.0003: Pre-SageMaker Launch Checklist
 
 **Before starting SageMaker training:**
 

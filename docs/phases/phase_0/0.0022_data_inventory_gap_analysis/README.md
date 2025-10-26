@@ -1,4 +1,4 @@
-# Phase 0.0022: Data Inventory & Gap Analysis
+# 0.0022: Data Inventory & Gap Analysis
 
 **Parent Phase:** [Phase 0: Data Collection](../PHASE_0_INDEX.md)
 
@@ -499,7 +499,7 @@ All criteria met:
 
 ## When to Run This Audit
 
-**Execute Phase 0.0022:**
+**Execute 0.0022:**
 1. **After any new data acquisition** - Verify what was collected
 2. **Before starting analysis** - Ensure you have complete data picture
 3. **When planning scrapers** - Identify gaps to fill
@@ -526,7 +526,7 @@ All criteria met:
 - Gap resolution tracked in ADCE task queue
 - Success measured by gap closure rate
 
-### Phase 0.0020 (Monitoring)
+### 0.0020 (Monitoring)
 - Audit metrics published to CloudWatch
 - Alarms trigger on data quality drops
 - Dashboard shows inventory trends
@@ -573,7 +573,7 @@ docs/audit/GAP_RESOLUTION_GUIDE.md          # How to fill gaps
 
 ## Prerequisites
 
-**Before starting Phase 0.0022:**
+**Before starting 0.0022:**
 - [x] At least one data collection phase complete (Phase 0)
 - [x] AWS credentials configured
 - [x] RDS instance accessible (if applicable)
@@ -641,11 +641,11 @@ aws s3 ls s3://bucket/ --recursive --page-size 1000 | wc -l
 
 **Return to:** [Phase 0 Index](../PHASE_0_INDEX.md)
 
-**Prerequisites:** Phase 0.0001-0.0018 (Data collection complete)
+**Prerequisites:** 0.0001-0.0018 (Data collection complete)
 
 **Integrates with:**
-- Phase 0.0018: Autonomous Data Collection - Gap filling
-- Phase 0.0020: Monitoring & Observability - Metrics publishing
+- 0.0018: Autonomous Data Collection - Gap filling
+- 0.0020: Monitoring & Observability - Metrics publishing
 - All data collection sub-phases - Validates completeness
 
 ---

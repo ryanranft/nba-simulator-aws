@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Unified Feature Extractor for Phase 1.1 Multi-Source Integration
+Unified Feature Extractor for 1.0001 Multi-Source Integration
 
 Purpose: Extract 229+ features from 5 data sources for ML pipeline
 Sources: ESPN, NBA.com Stats, hoopR, Basketball Reference, Derived features
@@ -723,8 +723,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-

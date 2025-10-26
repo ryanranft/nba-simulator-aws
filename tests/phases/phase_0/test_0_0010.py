@@ -1,5 +1,5 @@
 """
-Tests for Phase 0.0010: PostgreSQL JSONB Storage
+Tests for 0.0010: PostgreSQL JSONB Storage
 
 Comprehensive test suite for JSONB storage implementation.
 
@@ -424,7 +424,7 @@ class TestQueryHelpers:
 
 
 class TestValidators:
-    """Test Phase 0.0010 validators"""
+    """Test 0.0010 validators"""
 
     def test_validator_creation(self):
         """Test Phase010Validator can be created"""
@@ -486,7 +486,7 @@ class TestValidators:
 
 
 class TestIntegration:
-    """Integration tests for Phase 0.0010"""
+    """Integration tests for 0.0010"""
 
     @pytest.mark.skipif(
         not os.getenv("RDS_PASSWORD"), reason="Requires database connection"

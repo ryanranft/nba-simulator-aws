@@ -201,4 +201,4 @@ for data_type in schedule pbp box_scores team_stats; do
     echo "    ${data_type}: ${table_count}"
 done
 echo ""
-echo "✅ Complete! Ready for Phase 2.2 (Glue ETL)."
+echo "✅ Complete! Ready for 2.0002 (Glue ETL)."

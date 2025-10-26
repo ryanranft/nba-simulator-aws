@@ -20,7 +20,7 @@ This workflow provides a systematic process for reorganizing phase structures, r
 ## When to Use This Workflow
 
 Use this workflow when:
-1. **Renaming sub-phases** (e.g., `0.1_old_name` → `0.1_new_name`)
+1. **Renaming sub-phases** (e.g., `0.0001_old_name` → `0.0001_new_name`)
 2. **Restructuring phase directories** (e.g., moving files between sub-phases)
 3. **Consolidating duplicate phase indexes** (e.g., removing `/docs/phases/PHASE_X_INDEX.md` duplicates)
 4. **Archiving superseded implementations** (e.g., MongoDB → PostgreSQL transitions)
@@ -369,7 +369,7 @@ git commit -m "refactor: Migrate Phase 0.X tests and validators
 
 ### Scenario 1: Renaming a Sub-Phase
 
-**Example:** `0.8_old_security` → `0.8_security_implementation`
+**Example:** `0.0008_old_security` → `0.0008_security_implementation`
 
 ```bash
 # 1. Rename directory
@@ -379,12 +379,12 @@ mv docs/phases/phase_0/0.0008_old_security/ docs/phases/phase_0/0.0008_security_
 # (Edit PHASE_0_INDEX.md with new name)
 
 # 3. Find and replace references
-grep -r "0.8_old_security" docs/ --include="*.md" -l | xargs sed -i '' 's|0.8_old_security|0.8_security_implementation|g'
+grep -r "0.0008_old_security" docs/ --include="*.md" -l | xargs sed -i '' 's|0.0008_old_security|0.0008_security_implementation|g'
 
 # 4. Verify and commit
 git diff docs/
 git add docs/phases/
-git commit -m "refactor: Rename 0.8_old_security to 0.8_security_implementation"
+git commit -m "refactor: Rename 0.0008_old_security to 0.0008_security_implementation"
 ```
 
 ### Scenario 2: Renumbering Sub-Phases

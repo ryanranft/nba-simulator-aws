@@ -1,4 +1,4 @@
-# Phase 0.12: RAG + LLM Integration Configuration
+# 0.0012: RAG + LLM Integration Configuration
 #
 # Configuration for NBA RAG+LLM natural language query system.
 # Customize retrieval parameters, LLM settings, and cost limits.

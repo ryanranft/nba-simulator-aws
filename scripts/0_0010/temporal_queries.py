@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 0.0010: Temporal Integration for JSONB Storage
+0.0010: Temporal Integration for JSONB Storage
 
 Purpose: Enable temporal queries that join JSONB raw data with temporal snapshots
 Created: October 25, 2025
@@ -626,7 +626,7 @@ class TemporalJSONBQueries:
 
 def main():
     """Example usage demonstrating temporal integration"""
-    print("Phase 0.0010: Temporal Integration - Example Usage\n")
+    print("0.0010: Temporal Integration - Example Usage\n")
     print("=" * 70)
 
     with TemporalJSONBQueries() as queries:

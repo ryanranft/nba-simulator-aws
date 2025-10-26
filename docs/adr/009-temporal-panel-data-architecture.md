@@ -405,7 +405,7 @@ age_years = EXTRACT(EPOCH FROM (event_timestamp - birth_date)) / (365.25 * 24 * 
 
 **Document Status:** Accepted
 **Review Date:** October 7, 2025
-**Next Review:** After Phase 3.5 implementation (estimated November 2025)
+**Next Review:** After 3.0005 implementation (estimated November 2025)
 
 ---
 

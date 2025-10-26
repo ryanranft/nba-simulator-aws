@@ -100,7 +100,7 @@ Already implemented:
 - ✅ RDS selected as primary database
 
 Pending:
-- ⏸️ Provision RDS PostgreSQL instance (Phase 3.1)
+- ⏸️ Provision RDS PostgreSQL instance (3.0001)
 - ⏸️ Create database schema
 - ⏸️ Monitor query performance during development
 

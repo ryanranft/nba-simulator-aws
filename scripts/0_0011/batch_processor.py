@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 0.0011: Batch Processor for Embeddings
+0.0011: Batch Processor for Embeddings
 
 Purpose: Process embeddings in batches with progress tracking
 Created: October 25, 2025

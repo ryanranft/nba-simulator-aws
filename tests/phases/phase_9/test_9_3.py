@@ -1,5 +1,5 @@
 """
-Tests for Phase 9.0003
+Tests for 9.0003
 
 Auto-generated test template.
 
@@ -21,7 +21,7 @@ from validate_9_3 import Phase93Validator
 
 
 class TestPhase93Validation:
-    """Tests for Phase 9.0003 validation."""
+    """Tests for 9.0003 validation."""
 
     @pytest.fixture
     def validator(self):
@@ -47,13 +47,13 @@ class TestPhase93Validation:
 
 
 class TestPhase93Integration:
-    """Integration tests for Phase 9.0003."""
+    """Integration tests for 9.0003."""
 
     def test_phase_complete_validation(self):
         """Comprehensive phase completion test."""
         validator = Phase93Validator(verbose=False)
         all_passed, results = validator.run_all_validations()
 
-        assert all_passed == True, "Phase 9.0003 validation failed"
+        assert all_passed == True, "9.0003 validation failed"
         assert results["feature_1_valid"] == True
         assert results["feature_2_valid"] == True

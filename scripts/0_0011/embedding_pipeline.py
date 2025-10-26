@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 0.0011: Embedding Pipeline for RAG
+0.0011: Embedding Pipeline for RAG
 
 Purpose: Generate and store vector embeddings for NBA data
 Created: October 25, 2025
@@ -470,7 +470,7 @@ def main():
     args = parser.parse_args()
 
     print(f"\n{'='*70}")
-    print("Phase 0.0011: RAG Embedding Pipeline")
+    print("0.0011: RAG Embedding Pipeline")
     print(f"{'='*70}\n")
 
     if args.dry_run:

@@ -10,7 +10,7 @@
 
 > **📋 Note:** ML implementations reorganized into Phase 5 (October 18-26, 2025):
 > - `5.0001_feature_engineering/` - Advanced temporal feature engineering (formerly `phase_0/rec_11`)
-> - `5.0002_model_versioning/` - MLflow model lifecycle (formerly `phase_0/ml_systems_1`, renamed from 5.2_model_management)
+> - `5.0002_model_versioning/` - MLflow model lifecycle (formerly `phase_0/ml_systems_1`, renamed from 5.0002_model_management)
 > - `5.0019_drift_detection/` - Data drift detection (formerly `phase_0/ml_systems_2`)
 > - `5.0020_panel_data/` - Temporal panel data processing (formerly `phase_0/rec_22`)
 >
@@ -101,7 +101,7 @@ This phase has 13 recommendations from technical book analysis:
 
 ---
 
-## Sub-Phase 5.0000: ML Model Pipeline
+## Sub-5.0000: ML Model Pipeline
 
 **Status:** ✅ COMPLETE (October 3, 2025)
 
@@ -127,7 +127,7 @@ This phase has 13 recommendations from technical book analysis:
 
 **Best Model:** XGBoost with 75% accuracy (vs 63% baseline)
 
-**See:** [Sub-Phase 5.0000 Details](phase_5/5.0000_machine_learning_models.md)
+**See:** [Sub-5.0000 Details](phase_5/5.0000_machine_learning_models.md)
 
 ---
 
@@ -258,7 +258,7 @@ features = [
 
 ## Key Workflows
 
-**For Sub-Phase 5.0000:**
+**For Sub-5.0000:**
 - Workflow #13: Testing Framework
 - Workflow #5: Task Execution
 - Workflow #2: Command Logging

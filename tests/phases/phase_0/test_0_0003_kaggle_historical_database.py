@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Phase 0.3 Tests: Kaggle Historical Database
+0.0003 Tests: Kaggle Historical Database
 
-Comprehensive pytest test suite for Phase 0.3 (Kaggle Historical Database).
+Comprehensive pytest test suite for 0.0003 (Kaggle Historical Database).
 
 Test Coverage:
 - Database file existence and accessibility
@@ -369,13 +369,13 @@ class TestPhase03Metadata:
     """Test metadata and documentation"""
 
     def test_readme_file_exists(self):
-        """Test that Phase 0.3 README exists"""
+        """Test that 0.0003 README exists"""
         readme_path = (
             Path(__file__).resolve().parents[3]
             / "docs"
             / "phases"
             / "phase_0"
-            / "0.3_kaggle_historical_database"
+            / "0.0003_kaggle_historical_database"
             / "README.md"
         )
         assert readme_path.exists(), f"README not found: {readme_path}"
@@ -387,7 +387,7 @@ class TestPhase03Metadata:
             / "docs"
             / "phases"
             / "phase_0"
-            / "0.3_kaggle_historical_database"
+            / "0.0003_kaggle_historical_database"
             / "README.md"
         )
 
@@ -424,7 +424,7 @@ class TestPhase03Metadata:
             / "docs"
             / "phases"
             / "phase_0"
-            / "0.3_kaggle_historical_database"
+            / "0.0003_kaggle_historical_database"
             / "README.md"
         )
 
@@ -451,7 +451,7 @@ class TestPhase03README:
             / "docs"
             / "phases"
             / "phase_0"
-            / "0.3_kaggle_historical_database"
+            / "0.0003_kaggle_historical_database"
             / "README.md"
         )
 
@@ -478,7 +478,7 @@ class TestPhase03README:
             / "docs"
             / "phases"
             / "phase_0"
-            / "0.3_kaggle_historical_database"
+            / "0.0003_kaggle_historical_database"
             / "README.md"
         )
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Integration Tests: Phase 0.0013 - Dispatcher Pipeline End-to-End ETL
+Integration Tests: 0.0013 - Dispatcher Pipeline End-to-End ETL
 
 Tests complete data flow:
 - Scrape → S3 → PostgreSQL
@@ -35,14 +35,14 @@ from scripts.etl.data_dispatcher import (
 )
 
 # Import implementation wrapper
-impl_path = project_root / "docs" / "phases" / "phase_0" / "0.13_dispatcher_pipeline"
+impl_path = project_root / "docs" / "phases" / "phase_0" / "0.0013_dispatcher_pipeline"
 sys.path.insert(0, str(impl_path))
 
 from implement_rec_044 import DispatcherPipeline
 
 
 class TestPhase013Integration:
-    """Integration tests for Phase 0.0013 dispatcher pipeline"""
+    """Integration tests for 0.0013 dispatcher pipeline"""
 
     @pytest_asyncio.fixture
     async def pipeline(self):
@@ -403,7 +403,7 @@ class TestPhase013Validation:
     @pytest.mark.asyncio
     async def test_phase_completion_criteria(self):
         """
-        Test that Phase 0.0013 meets all completion criteria:
+        Test that 0.0013 meets all completion criteria:
         1. Dispatcher pipeline functional
         2. Scraper registry operational
         3. Task creation and routing works
@@ -440,7 +440,7 @@ class TestPhase013Validation:
         assert pipeline.initialized is False
 
         # ✅ All criteria met
-        assert True, "Phase 0.0013 completion criteria met"
+        assert True, "0.0013 completion criteria met"
 
     @pytest.mark.asyncio
     async def test_integration_with_existing_scrapers(self):
@@ -492,7 +492,7 @@ def get_test_summary():
 
 if __name__ == "__main__":
     print("=" * 80)
-    print("Phase 0.0013 Integration Tests")
+    print("0.0013 Integration Tests")
     print("=" * 80)
 
     summary = get_test_summary()

@@ -2,7 +2,7 @@
 
 **Purpose:** Process ESPN play-by-play data into box score snapshots overnight
 **Category:** Data Processing
-**Prerequisites:** Phase 9.0000 (System Architecture) and 9.1 (ESPN Processor) complete
+**Prerequisites:** 9.0000 (System Architecture) and 9.1 (ESPN Processor) complete
 **Related Workflows:**
 - Workflow #38: [Overnight Scraper Handoff Protocol](38_overnight_scraper_handoff.md)
 - Workflow #40: [Scraper Operations Complete](40_scraper_operations_complete.md)
@@ -381,7 +381,7 @@ Once Phase 9 is complete, quarter box scores enable:
    - Test betting strategies on 22M snapshots
    - Calculate ROI per strategy
 
-**Next Step:** Phase 9.0008 (Betting Integration)
+**Next Step:** 9.0008 (Betting Integration)
 
 ---
 
@@ -395,7 +395,7 @@ Once Phase 9 is complete, quarter box scores enable:
 ---
 
 *Created: October 12, 2025*
-*Status: Active - Phase 9.0000 and 9.1 Complete*
+*Status: Active - 9.0000 and 9.1 Complete*
 
 
 

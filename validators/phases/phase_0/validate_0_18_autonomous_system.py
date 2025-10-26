@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Validate Phase 0.0018 - Autonomous Data Collection Ecosystem (ADCE)
+Validate 0.0018 - Autonomous Data Collection Ecosystem (ADCE)
 
 Validates autonomous system health, configuration, and infrastructure.
 
@@ -16,7 +16,7 @@ from pathlib import Path
 
 
 class Phase018Validator:
-    """Validates Phase 0.0018 ADCE system."""
+    """Validates 0.0018 ADCE system."""
 
     def __init__(self, verbose: bool = False):
         self.verbose = verbose
@@ -166,7 +166,7 @@ class Phase018Validator:
             return False
 
     def validate_test_coverage(self) -> bool:
-        """Validate test files exist for Phase 0.0018."""
+        """Validate test files exist for 0.0018."""
         try:
             test_files = [
                 "tests/phases/phase_0/test_0_0018_autonomous_loop.py",
@@ -196,10 +196,10 @@ class Phase018Validator:
         try:
             doc_files = [
                 "docs/phases/phase_0/0.0018_autonomous_data_collection/README.md",
-                "docs/phases/phase_0/0.0018_autonomous_data_collection/0.9.1_unified_scraper_system.md",
-                "docs/phases/phase_0/0.0018_autonomous_data_collection/0.9.2_reconciliation_engine.md",
-                "docs/phases/phase_0/0.0018_autonomous_data_collection/0.9.3_scraper_orchestrator.md",
-                "docs/phases/phase_0/0.0018_autonomous_data_collection/0.9.4_autonomous_loop.md",
+                "docs/phases/phase_0/0.0018_autonomous_data_collection/0.9.0001_unified_scraper_system.md",
+                "docs/phases/phase_0/0.0018_autonomous_data_collection/0.9.0002_reconciliation_engine.md",
+                "docs/phases/phase_0/0.0018_autonomous_data_collection/0.9.0003_scraper_orchestrator.md",
+                "docs/phases/phase_0/0.0018_autonomous_data_collection/0.9.0004_autonomous_loop.md",
             ]
 
             missing_docs = []
@@ -257,7 +257,7 @@ class Phase018Validator:
     def run_all_validations(self) -> Tuple[bool, Dict]:
         """Run all validations."""
         print(f"\n{'='*60}")
-        print(f"Phase 0.0018: Autonomous Data Collection Ecosystem (ADCE)")
+        print(f"0.0018: Autonomous Data Collection Ecosystem (ADCE)")
         print(f"{'='*60}\n")
 
         results = {
@@ -305,7 +305,7 @@ class Phase018Validator:
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Validate Phase 0.0018")
+    parser = argparse.ArgumentParser(description="Validate 0.0018")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     args = parser.parse_args()
 

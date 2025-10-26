@@ -113,7 +113,7 @@ Add a "How This Phase Enables the Vision" section that explains:
 
 **Example:**
 ```markdown
-## How Phase 0.0001 Data Enables the Simulation Vision
+## How 0.0001 Data Enables the Simulation Vision
 
 This phase collects the foundational temporal data that powers the **hybrid econometric + nonparametric simulation system** described in the [main README](../../../README.md#simulation-methodology).
 
@@ -236,11 +236,11 @@ ls ../../../README.md  # Should exist
 
 ### Scenario 2: Completing a New Phase
 
-**Situation:** Phase 2.3 work is complete, ready to mark ✅ COMPLETE
+**Situation:** 2.0003 work is complete, ready to mark ✅ COMPLETE
 
 **Before marking complete:**
 1. Read main README vision (lines 1-400)
-2. Read Phase 2.3 README
+2. Read 2.0003 README
 3. Check validation checklist (all 6 areas above)
 4. If misalignments found:
    - Fix temporal precision statements
@@ -252,16 +252,16 @@ ls ../../../README.md  # Should exist
 
 ### Scenario 3: User Highlights Phase README Inconsistency
 
-**Situation:** User says "Phase 0.0001 README temporal precision is outdated with main README"
+**Situation:** User says "0.0001 README temporal precision is outdated with main README"
 
 **Steps:**
 1. Read main README temporal precision section
-2. Read Phase 0.0001 README temporal precision section
+2. Read 0.0001 README temporal precision section
 3. Identify specific misalignments:
    - Wrong date ranges?
    - Incorrect precision capabilities?
    - Missing simulation methodology?
-4. Update Phase 0.0001 README to match main README
+4. Update 0.0001 README to match main README
 5. Check if other phases have same issue
 6. Create Workflow #57 validation as future prevention
 
@@ -372,7 +372,7 @@ python scripts/maintenance/validate_phase_readme.py --diff
 
 **Output:**
 ```
-Phase 0.0001 README Validation:
+0.0001 README Validation:
 ✅ Temporal precision aligns with main README
 ✅ DIMS integration present
 ✅ Vision alignment section exists

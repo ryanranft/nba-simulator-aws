@@ -196,7 +196,7 @@ The next session should focus on **continuing core project work** rather than ad
 The user was viewing `docs/phases/phase_0/0.0022_data_inventory_gap_analysis/README.md` when requesting this summary, suggesting potential interest in data quality work.
 
 **Suggested Focus:**
-1. **Review Phase 0.0022 (Data Inventory & Gap Analysis)**
+1. **Review 0.0022 (Data Inventory & Gap Analysis)**
    - What data gaps exist in the S3 bucket?
    - Are there missing games/seasons that need collection?
    - What's the data quality status?
@@ -223,7 +223,7 @@ The user was viewing `docs/phases/phase_0/0.0022_data_inventory_gap_analysis/REA
 **Tasks:**
 1. Read `docs/phases/PHASE_1_INDEX.md`
 2. Review Phase 1 architecture
-3. Begin Phase 1.0001 (first sub-phase)
+3. Begin 1.0001 (first sub-phase)
 4. Migrate Phase 1 to 4-digit format during implementation
 
 ### Option 3: Begin Phase 2 (Play-by-Play to Box Score)
@@ -508,7 +508,7 @@ pre-commit run validate-phase-numbering --all-files
 
 ### Strategic Decision Points
 1. **If user says "continue where we left off":**
-   - User was viewing Phase 0.0022 (Data Inventory)
+   - User was viewing 0.0022 (Data Inventory)
    - Likely interest in data quality/gap analysis
    - Suggest reviewing that sub-phase
 
@@ -685,10 +685,10 @@ Start Session
     ↓
 Ask User: "What would you like to work on?"
     ↓
-    ├── "Data quality / Phase 0" → Review Phase 0.0022, run inventory analysis
+    ├── "Data quality / Phase 0" → Review 0.0022, run inventory analysis
     ├── "Start Phase 1" → Read PHASE_1_INDEX.md, plan implementation
     ├── "Set up database" → Review Phase 3, confirm $29/month cost, provision RDS
-    └── "Continue where we left off" → Check Phase 0.0022 (user was viewing)
+    └── "Continue where we left off" → Check 0.0022 (user was viewing)
 ```
 
 ### Context Budget Planning

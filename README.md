@@ -698,8 +698,8 @@ See `QUICKSTART.md` for complete workflow commands.
 
 See `PROGRESS.md` for detailed implementation plan. Current priority:
 
-1. **Phase 2.1:** Set up AWS Glue Crawler (~45 min, adds $1/month)
-2. **Phase 2.2:** Create Glue ETL job (~6-8 hrs dev, adds $13/month)
+1. **2.0001:** Set up AWS Glue Crawler (~45 min, adds $1/month)
+2. **2.0002:** Create Glue ETL job (~6-8 hrs dev, adds $13/month)
 3. **Phase 3:** Provision RDS PostgreSQL (~2-3 hrs, adds $29/month)
 
 ---

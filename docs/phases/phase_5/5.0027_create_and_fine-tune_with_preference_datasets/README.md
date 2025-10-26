@@ -122,7 +122,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.27_create_and_fine-tune_with_preference_datasets
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0027_create_and_fine-tune_with_preference_datasets
 python test_rec_047.py -v
 ```
 

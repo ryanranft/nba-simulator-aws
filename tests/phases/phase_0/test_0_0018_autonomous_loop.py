@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Suite: Phase 0.0018 - Autonomous Loop Controller
+Test Suite: 0.0018 - Autonomous Loop Controller
 
 Tests for ADCE autonomous loop controller (scripts/autonomous/autonomous_loop.py)
 

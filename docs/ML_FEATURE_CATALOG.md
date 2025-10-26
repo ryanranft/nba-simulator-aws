@@ -599,9 +599,9 @@ def create_ml_features(player_id: int, game_id: str) -> dict:
 
 ## Next Steps
 
-1. **Implement Basketball Reference scraper** (Sub-Phase 1.10)
-2. **Expand NBA.com Stats scraper** (Sub-Phase 1.7 - add 10 more endpoints)
-3. **Create feature engineering pipeline** (Sub-Phase 1.13)
+1. **Implement Basketball Reference scraper** (Sub-1.0010)
+2. **Expand NBA.com Stats scraper** (Sub-1.0007 - add 10 more endpoints)
+3. **Create feature engineering pipeline** (Sub-1.0013)
 4. **Export to SageMaker-ready format** (Parquet in S3)
 5. **Train initial models** (Phase 5 continuation)
 

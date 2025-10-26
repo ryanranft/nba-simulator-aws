@@ -4,7 +4,7 @@ RAG Retrieval Module with Temporal Awareness
 Retrieves relevant context from PostgreSQL using pgvector semantic search.
 Integrates JSONB data, vector embeddings, and temporal snapshots.
 
-Part of Phase 0.0012: RAG + LLM Integration (rec_188)
+Part of 0.0012: RAG + LLM Integration (rec_188)
 """
 
 import os

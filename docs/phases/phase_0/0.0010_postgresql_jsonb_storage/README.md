@@ -441,7 +441,7 @@ migration:
 **Prerequisites:**
 - PostgreSQL RDS instance running (already provisioned)
 - PostgreSQL 13+ with JSONB support
-- S3 data available (Phase 0.0000-0.5 complete)
+- S3 data available (0.0000-0.5 complete)
 
 **Enables:**
 - [0.8: RAG Pipeline with pgvector](../0.8_rag_pipeline_pgvector/README.md)
@@ -603,7 +603,7 @@ def migrate_from_mongodb():
 
 ## Temporal Integration (Added October 25, 2025)
 
-Phase 0.0010 now includes **temporal query integration** - the ability to join JSONB raw data with temporal snapshots to answer the core project vision:
+0.0010 now includes **temporal query integration** - the ability to join JSONB raw data with temporal snapshots to answer the core project vision:
 
 > **"What were Kobe Bryant's career statistics at exactly 7:02:34.56 PM CT on June 19, 2016?"**
 
@@ -922,7 +922,7 @@ Using database queries, simulations adapt in real-time:
 ## Navigation
 
 **Return to:** [Phase 0: Data Collection](../../PHASE_0_INDEX.md)
-**Prerequisites:** Phase 0.0001-0.6 (Data Collection complete)
+**Prerequisites:** 0.0001-0.6 (Data Collection complete)
 **Next Steps:** [0.8: RAG Pipeline with pgvector](../0.8_rag_pipeline_pgvector/README.md)
 
 ---

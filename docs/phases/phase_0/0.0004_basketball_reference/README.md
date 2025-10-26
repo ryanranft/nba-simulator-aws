@@ -32,7 +32,7 @@
 
 ---
 
-## Current Status (Phase 0.0004 ADCE Integration Complete)
+## Current Status (0.0004 ADCE Integration Complete)
 
 **Data Collected (October 2025):**
 - ✅ **444 files** across 14 data categories
@@ -53,7 +53,7 @@ python scripts/monitoring/dims_cli.py verify --category s3_storage
 
 ## How This Phase Enables the Simulation Vision
 
-Phase 0.0004 provides Basketball Reference data that powers the **hybrid econometric + nonparametric simulation system** described in the [main README](../../../README.md#simulation-methodology).
+0.0004 provides Basketball Reference data that powers the **hybrid econometric + nonparametric simulation system** described in the [main README](../../../README.md#simulation-methodology).
 
 ### 1. Econometric Causal Inference Foundation
 

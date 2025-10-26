@@ -123,3 +123,4 @@ s3_security_audit_report.md
 !.env.example
 !.env.template
 !.env.sample
+*.bak

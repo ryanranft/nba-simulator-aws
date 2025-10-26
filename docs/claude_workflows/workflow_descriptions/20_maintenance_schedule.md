@@ -337,7 +337,7 @@ aws rds describe-db-instances --db-instance-identifier nba-sim-db
 - ✅ **complete** - Instance exists with "DBInstanceStatus" in response
 - ⏸️ **pending** - Instance not found OR error response
 
-**Mapped to:** Phase 3.1 - RDS Database Setup
+**Mapped to:** 3.0001 - RDS Database Setup
 
 #### Step 3: Check Glue Crawler Status
 
@@ -351,7 +351,7 @@ aws glue get-crawler --name nba-data-crawler
 - ✅ **complete** - Crawler exists with "Crawler" in response
 - ⏸️ **pending** - Crawler not found OR error response
 
-**Mapped to:** Phase 2.1 - Glue Crawler Setup
+**Mapped to:** 2.0001 - Glue Crawler Setup
 
 #### Step 4: Check Glue ETL Job Status
 
@@ -365,7 +365,7 @@ aws glue get-job --job-name nba-etl-job
 - ✅ **complete** - Job exists with "Job" in response
 - ⏸️ **pending** - Job not found OR error response
 
-**Mapped to:** Phase 2.2 - Glue ETL Job Setup
+**Mapped to:** 2.0002 - Glue ETL Job Setup
 
 ### Example Output
 
@@ -394,7 +394,7 @@ Test files: 5
    ✅ Phase 0 (Data Collection) appears complete
    ⏸️ Phase 2 (ETL Extraction) pending
    ⏸️ Phase 3 (Database) pending
-   ⏸️ Phase 2.2 (Glue ETL Job) pending
+   ⏸️ 2.0002 (Glue ETL Job) pending
 
 💾 To apply updates, manually edit PROGRESS.md
    This script provides detection only for now
@@ -439,11 +439,11 @@ Test files: 5
 
 **Scenario 3: Mismatch detected**
 ```
-PROGRESS.md shows: Phase 2.1 Glue Crawler = ✅ COMPLETED
+PROGRESS.md shows: 2.0001 Glue Crawler = ✅ COMPLETED
 make sync-progress shows: Glue Crawler: pending
 
 💡 Suggested Updates:
-   ⏸️ Phase 2.1 (Glue Crawler) pending
+   ⏸️ 2.0001 (Glue Crawler) pending
 ```
 
 **Action:** Either:
@@ -466,7 +466,7 @@ make sync-progress
 
 # 4. Update PROGRESS.md manually
 vim PROGRESS.md
-# Change Phase 3.1 from ⏸️ PENDING to ✅ COMPLETED
+# Change 3.0001 from ⏸️ PENDING to ✅ COMPLETED
 ```
 
 **Weekly maintenance routine:**
@@ -497,8 +497,8 @@ make sync-progress
 make sync-progress
 
 # Check which specific resource is missing:
-# ⏸️ Phase 2.1 (Glue Crawler) pending
-# ⏸️ Phase 2.2 (Glue ETL Job) pending
+# ⏸️ 2.0001 (Glue Crawler) pending
+# ⏸️ 2.0002 (Glue ETL Job) pending
 
 # Go back and complete those tasks
 ```
@@ -610,12 +610,12 @@ aws s3 ls s3://nba-sim-raw-data-lake/ --recursive --summarize | grep "Total Obje
 # Cause: PROGRESS.md is outdated
 # Solution: Update PROGRESS.md manually
 vim PROGRESS.md
-# Find the phase (e.g., Phase 3.1 RDS Database)
+# Find the phase (e.g., 3.0001 RDS Database)
 # Change: ⏸️ PENDING → ✅ COMPLETED
 
 # Commit the update
 git add PROGRESS.md
-git commit -m "Update PROGRESS.md: Phase 3.1 complete"
+git commit -m "Update PROGRESS.md: 3.0001 complete"
 ```
 
 **Problem: Script says "pending" but resource exists in AWS Console**

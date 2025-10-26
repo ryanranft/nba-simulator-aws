@@ -269,7 +269,7 @@ if __name__ == '__main__':
 ### Run Validators
 
 ```bash
-# Phase 0.0001 validators
+# 0.0001 validators
 python validators/phases/phase_0/validate_0_1_s3_bucket_config.py
 python validators/phases/phase_0/validate_0_1_upload_completeness.py
 ```
@@ -277,7 +277,7 @@ python validators/phases/phase_0/validate_0_1_upload_completeness.py
 ### Run Tests
 
 ```bash
-# All Phase 0.0001 tests
+# All 0.0001 tests
 pytest tests/phases/phase_0/test_0_0001_initial_data_collection.py -v
 
 # Fast tests only

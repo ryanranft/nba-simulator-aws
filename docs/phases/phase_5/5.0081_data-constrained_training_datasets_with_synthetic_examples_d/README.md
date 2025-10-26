@@ -120,7 +120,7 @@ This recommendation integrates with:
 
 ```bash
 # Run test suite
-cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.81_data-constrained_training_datasets_with_synthetic_examples_d
+cd /Users/ryanranft/nba-simulator-aws/docs/phases/phase_5/5.0081_data-constrained_training_datasets_with_synthetic_examples_d
 python test_rec_111.py -v
 ```
 

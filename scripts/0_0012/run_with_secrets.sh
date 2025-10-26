@@ -1,6 +1,6 @@
 #!/bin/bash
-# Phase 0.12: Load secrets and run RAG+LLM system
-# This script loads secrets from the hierarchical structure and runs the Phase 0.12 CLI
+# 0.0012: Load secrets and run RAG+LLM system
+# This script loads secrets from the hierarchical structure and runs the 0.0012 CLI
 
 set -e
 
@@ -32,7 +32,7 @@ if [ -n "$RDS_HOST_NBA_SIMULATOR_AWS_WORKFLOW" ]; then
     export POSTGRES_PASSWORD="$RDS_PASSWORD_NBA_SIMULATOR_AWS_WORKFLOW"
     export POSTGRES_PORT="5432"
 
-    # RDS-specific env vars (for Phase 0.11 compatibility)
+    # RDS-specific env vars (for 0.0011 compatibility)
     export RDS_HOST="$RDS_HOST_NBA_SIMULATOR_AWS_WORKFLOW"
     export RDS_DATABASE="$RDS_DATABASE_NBA_SIMULATOR_AWS_WORKFLOW"
     export RDS_USER="$RDS_USERNAME_NBA_SIMULATOR_AWS_WORKFLOW"
@@ -43,10 +43,10 @@ if [ -n "$RDS_HOST_NBA_SIMULATOR_AWS_WORKFLOW" ]; then
 fi
 
 echo ""
-echo "🚀 Running Phase 0.12 RAG+LLM CLI with loaded secrets"
+echo "🚀 Running 0.0012 RAG+LLM CLI with loaded secrets"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Run the Phase 0.12 CLI with all arguments
+# Run the 0.0012 CLI with all arguments
 cd /Users/ryanranft/nba-simulator-aws
 python3 scripts/0_12/main.py "$@"

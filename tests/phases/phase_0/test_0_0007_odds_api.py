@@ -1,7 +1,7 @@
 """
-Tests for Phase 0.0007: Odds API Data Integration
+Tests for 0.0007: Odds API Data Integration
 
-This test suite validates the completion of Phase 0.0007 by checking:
+This test suite validates the completion of 0.0007 by checking:
 - Database schema existence (odds schema)
 - Core table creation (events, bookmakers, market_types, odds_snapshots, scores)
 - Reference data population
@@ -32,7 +32,7 @@ from validate_0_7_odds_api import Phase07OddsAPIValidator
 
 
 class TestPhase07OddsSchema:
-    """Tests for Phase 0.0007 database schema validation."""
+    """Tests for 0.0007 database schema validation."""
 
     @pytest.fixture
     def validator(self):
@@ -59,7 +59,7 @@ class TestPhase07OddsSchema:
 
 
 class TestPhase07ReferenceData:
-    """Tests for Phase 0.0007 reference data validation."""
+    """Tests for 0.0007 reference data validation."""
 
     @pytest.fixture
     def validator(self):
@@ -128,7 +128,7 @@ class TestPhase07ReferenceData:
 
 
 class TestPhase07DataPresence:
-    """Tests for Phase 0.0007 data presence (lenient - scraper runs separately)."""
+    """Tests for 0.0007 data presence (lenient - scraper runs separately)."""
 
     @pytest.fixture
     def validator(self):
@@ -179,7 +179,7 @@ class TestPhase07DataPresence:
 
 
 class TestPhase07DataQuality:
-    """Tests for Phase 0.0007 data quality (if data exists)."""
+    """Tests for 0.0007 data quality (if data exists)."""
 
     @pytest.fixture
     def validator(self):
@@ -288,7 +288,7 @@ class TestPhase07OddsCalculations:
 
 
 class TestPhase07Integration:
-    """Tests for Phase 0.0007 integration capability."""
+    """Tests for 0.0007 integration capability."""
 
     @pytest.fixture
     def validator(self):

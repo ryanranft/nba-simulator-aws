@@ -41,7 +41,7 @@ Integrate historical betting odds data and build betting strategy backtesting sy
 
 ---
 
-## Sub-Phase 7.0: Betting Odds Integration
+## Sub-7.0000: Betting Odds Integration
 
 **Status:** ⏸️ PENDING (not yet started)
 
@@ -67,13 +67,13 @@ Integrate historical betting odds data and build betting strategy backtesting sy
 - Modified Kelly (fractional Kelly)
 - Arbitrage detection
 
-**See:** [Sub-Phase 7.0 Details](phase_7/7.0000_betting_odds_integration.md)
+**See:** [Sub-7.0000 Details](phase_7/7.0000_betting_odds_integration.md)
 
 ---
 
 ## Success Criteria
 
-### Sub-Phase 7.0 (Betting Odds Integration)
+### Sub-7.0000 (Betting Odds Integration)
 - [ ] Historical odds data source chosen
 - [ ] Odds data ingestion pipeline operational
 - [ ] Odds database schema created
@@ -202,7 +202,7 @@ odds_types = [
 
 ## Key Workflows
 
-**For Sub-Phase 7.0:**
+**For Sub-7.0000:**
 - Workflow #18: Cost Management
 - Workflow #5: Task Execution
 - Workflow #13: Testing Framework

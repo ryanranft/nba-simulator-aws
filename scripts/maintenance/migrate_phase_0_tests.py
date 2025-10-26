@@ -28,13 +28,13 @@ TESTS_PHASE_0 = PROJECT_ROOT / "tests" / "phases" / "phase_0"
 
 # Sub-phases to migrate (exclude 0.1 - already migrated, and archived files)
 SUB_PHASES = [
-    "0.8_security_implementation",
-    "0.9_data_extraction",
-    "0.13_dispatcher_pipeline",
-    "0.14_error_analysis",
-    "0.15_information_availability",
-    "0.16_robust_architecture",
-    "0.17_external_apis",
+    "0.0008_security_implementation",
+    "0.0009_data_extraction",
+    "0.0013_dispatcher_pipeline",
+    "0.0014_error_analysis",
+    "0.0015_information_availability",
+    "0.0016_robust_architecture",
+    "0.0017_external_apis",
 ]
 
 DEPRECATION_NOTICE = '''"""
