@@ -14,14 +14,14 @@ Phase 6 focuses on: prediction serving, REST API, and deployment
 
 ## Sub-Phases
 
-- [6.1_implement_health_checks_for_microservices](6.1_implement_health_checks_for_microservices/README.md)
-- [6.1_monitoring_dashboards](6.1_monitoring_dashboards/README.md)
-- [6.1_performance_monitoring](6.1_performance_monitoring/README.md)
-- [6.2_build_business_microservice_with_fastapi](6.2_build_business_microservice_with_fastapi/README.md)
-- [6.2_business_metrics](6.2_business_metrics/README.md)
-- [6.2_experiment_tracking](6.2_experiment_tracking/README.md)
-- [6.3_implement_autoscaling_for_sagemaker_endpoint](6.3_implement_autoscaling_for_sagemaker_endpoint/README.md)
-- [6.4_implement_mlops_pipeline_to_serve_image_search_model](6.4_implement_mlops_pipeline_to_serve_image_search_model/README.md)
+- [6.0001_implement_health_checks_for_microservices](6.0001_implement_health_checks_for_microservices/README.md)
+- [6.0001_monitoring_dashboards](6.0001_monitoring_dashboards/README.md)
+- [6.0001_performance_monitoring](6.0001_performance_monitoring/README.md)
+- [6.0002_build_business_microservice_with_fastapi](6.0002_build_business_microservice_with_fastapi/README.md)
+- [6.0002_business_metrics](6.0002_business_metrics/README.md)
+- [6.0002_experiment_tracking](6.0002_experiment_tracking/README.md)
+- [6.0003_implement_autoscaling_for_sagemaker_endpoint](6.0003_implement_autoscaling_for_sagemaker_endpoint/README.md)
+- [6.0004_implement_mlops_pipeline_to_serve_image_search_model](6.0004_implement_mlops_pipeline_to_serve_image_search_model/README.md)
 
 
 ---

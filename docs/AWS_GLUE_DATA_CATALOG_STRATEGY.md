@@ -40,7 +40,7 @@ This document describes the strategy for using **AWS Glue Data Catalog** as a cl
 - Needed full control over extraction logic
 - Local Python scripts proved more reliable
 
-**Reference:** `docs/phases/phase_2/2.0_aws_glue_etl.md`
+**Reference:** `docs/phases/phase_2/2.0000_aws_glue_etl.md`
 
 ### This Strategy - AWS Glue Data Catalog
 **Use Case:** Metadata indexing and schema discovery
@@ -286,7 +286,7 @@ WHERE s.season = '2023-24';
 
 ### Phase 2.0 Lessons Applied
 
-From `docs/phases/phase_2/2.0_aws_glue_etl.md`:
+From `docs/phases/phase_2/2.0000_aws_glue_etl.md`:
 
 **What failed in Phase 2.0:**
 - ❌ Single crawler on 70K+ files → OutOfMemoryError
@@ -339,7 +339,7 @@ From `docs/phases/phase_2/2.0_aws_glue_etl.md`:
 ## References
 
 **Related Documentation:**
-- `docs/phases/phase_2/2.0_aws_glue_etl.md` - Why ETL was abandoned (different use case)
+- `docs/phases/phase_2/2.0000_aws_glue_etl.md` - Why ETL was abandoned (different use case)
 - `docs/DATA_STRUCTURE_GUIDE.md` - Current data structure
 - `docs/SETUP.md` - AWS configuration
 - `PROGRESS.md` - Project status
@@ -361,7 +361,7 @@ From `docs/phases/phase_2/2.0_aws_glue_etl.md`:
 **Return to:** [PROGRESS.md](../PROGRESS.md) | [Documentation Index](docs/README.md)
 
 **Related:**
-- [Phase 2.0 AWS Glue ETL (Abandoned)](docs/phases/phase_2/2.0_aws_glue_etl.md)
+- [Phase 2.0 AWS Glue ETL (Abandoned)](docs/phases/phase_2/2.0000_aws_glue_etl.md)
 - [Data Structure Guide](docs/DATA_STRUCTURE_GUIDE.md)
 - [Setup Guide](docs/SETUP.md)
 

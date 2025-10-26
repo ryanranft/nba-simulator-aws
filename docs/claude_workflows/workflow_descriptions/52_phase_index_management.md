@@ -68,8 +68,8 @@ docs/phases/
 │       └── [other tiers...]
 ├── PHASE_1_INDEX.md              # Phase 1 overview
 ├── phase_1/                      # Phase 1 subdirectory
-│   ├── 1.0_data_quality_checks.md
-│   └── 1.1_multi_source_integration.md
+│   ├── 1.0000_data_quality_checks.md
+│   └── 1.0001_multi_source_integration.md
 ├── PHASE_2_INDEX.md through PHASE_7_INDEX.md
 └── phase_2/ through phase_7/     # Corresponding subdirectories
 ```
@@ -86,7 +86,7 @@ docs/phases/
 - Location: `docs/phases/`
 
 **Sub-phase files:**
-- Format: `N.M_name.md` (e.g., `1.0_data_quality_checks.md`)
+- Format: `N.M_name.md` (e.g., `1.0000_data_quality_checks.md`)
 - Location: `docs/phases/phase_N/`
 - Size: 300-800 lines (target), max 1,200 lines
 - N = phase number (0-7)

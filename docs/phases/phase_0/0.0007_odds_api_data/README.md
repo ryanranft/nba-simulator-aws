@@ -523,7 +523,7 @@ Identify risk-free arbitrage opportunities across bookmakers (rare but possible)
 ### This Project (nba-simulator-aws)
 - [Phase 0: Data Collection](../PHASE_0_INDEX.md)
 - [Phase 5: Machine Learning Models](../../phase_5/5.0_machine_learning_models.md)
-- [Phase 7: Betting Odds Integration](../../phase_7/7.0_betting_odds_integration.md)
+- [Phase 7: Betting Odds Integration](../../phase_7/7.0000_betting_odds_integration.md)
 
 ### Separate Project (odds-api)
 - [odds-api README](file:///Users/ryanranft/odds-api/README.md)

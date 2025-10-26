@@ -20,7 +20,7 @@ This index organizes book recommendations for Phase 6 by functional subdirectory
 ## Subdirectories
 
 ### 6.1 Monitoring Dashboards (2 recommendations)
-**Path:** `6.1_monitoring_dashboards/`
+**Path:** `6.0001_monitoring_dashboards/`
 
 - **Monitoring Dashboards** (ml_systems_3) - CRITICAL
   - Real-time system health monitoring
@@ -35,7 +35,7 @@ This index organizes book recommendations for Phase 6 by functional subdirectory
   - Source: The Elements of Statistical Learning
 
 ### 6.2 Experiment Tracking (1 recommendation)
-**Path:** `6.2_experiment_tracking/`
+**Path:** `6.0002_experiment_tracking/`
 
 - **ML Experiment Tracking Dashboard** (consolidated_consolidated_rec_15) - NICE_TO_HAVE
   - MLflow-based experiment tracking

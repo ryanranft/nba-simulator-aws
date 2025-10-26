@@ -20,7 +20,7 @@ This index organizes book recommendations for Phase 4 by functional subdirectory
 ## Subdirectories
 
 ### 4.1 Simulation Data (1 recommendation)
-**Path:** `4.1_simulation_data/`
+**Path:** `4.0001_simulation_data/`
 
 - **Panel Data Processing System** (rec_22) - CRITICAL
   - Multi-dimensional panel data structures

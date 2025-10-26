@@ -20,7 +20,7 @@ This index organizes book recommendations for Phase 3 by functional subdirectory
 ## Subdirectories
 
 ### 3.1 Database Monitoring (1 recommendation)
-**Path:** `3.1_database_monitoring/`
+**Path:** `3.0001_database_monitoring/`
 
 - **Interactive Statistical Dashboards** (consolidated_rec_21) - NICE_TO_HAVE
   - Real-time database performance monitoring

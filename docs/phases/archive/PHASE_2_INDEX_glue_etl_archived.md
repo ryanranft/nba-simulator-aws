@@ -59,7 +59,7 @@ Extract raw JSON from S3, transform into structured format, and load into RDS Po
 
 **Fields Extracted:** 53 core fields (games, players, teams, stats)
 
-**See:** [Sub-Phase 2.0 Details](phase_2/2.0_aws_glue_etl.md)
+**See:** [Sub-Phase 2.0 Details](phase_2/2.0000_aws_glue_etl.md)
 
 ---
 

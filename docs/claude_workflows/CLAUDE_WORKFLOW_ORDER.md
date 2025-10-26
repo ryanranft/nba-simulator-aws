@@ -148,7 +148,7 @@ Execute workflow steps
 
 **Future enhancement (planned):**
 - PROGRESS.md will become a directory system
-- Each phase will have detailed plan file (e.g., `PHASE_2.2_ETL.md`)
+- Each phase will have detailed plan file (e.g., `PHASE_2.0002_ETL.md`)
 - Phase files will contain thousands of in-depth instructions
 - Phase files will reference specific workflows by number
 
@@ -156,7 +156,7 @@ Execute workflow steps
 ```
 PROGRESS.md (directory/index)
   ↓
-phases/PHASE_2.2_ETL.md (detailed plan)
+phases/PHASE_2.0002_ETL.md (detailed plan)
   ↓
 "Follow workflow #24 (AWS Resource Setup) for Glue job creation"
   ↓

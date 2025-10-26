@@ -72,7 +72,7 @@ This directory contains **20 model performance tracking variations** from book r
 - [5.0: ML Model Pipeline](../5.0_machine_learning_models.md)
 - [5.2: Model Versioning](../5.2_model_versioning/)
 - [5.19: Drift Detection](../5.19_drift_detection/)
-- [6.1: Monitoring Dashboards](../../phase_6/6.1_monitoring_dashboards/)
+- [6.1: Monitoring Dashboards](../../phase_6/6.0001_monitoring_dashboards/)
 
 **Provides:**
 - Performance metrics API

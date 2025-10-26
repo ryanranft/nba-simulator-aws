@@ -528,7 +528,7 @@ def migrate_kaggle_to_postgres():
 
 - **[DATA_CATALOG.md](../../../DATA_CATALOG.md)** - Complete data source reference
 - **[DATA_SOURCES.md](../../../DATA_SOURCES.md)** - All data sources overview
-- **[Phase 1: Data Quality](../../phase_1/1.0_data_quality_checks.md)** - Quality validation
+- **[Phase 1: Data Quality](../../phase_1/1.0000_data_quality_checks.md)** - Quality validation
 
 ---
 

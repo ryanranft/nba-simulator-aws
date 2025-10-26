@@ -62,7 +62,7 @@ Quality-of-life improvements and optional system enhancements. This phase adds n
 5. **Performance:** Query optimization, caching, indexing
 6. **Cost Tracking:** Automated cost reports, budget alerts
 
-**See:** [Sub-Phase 6.0 Details](phase_6/6.0_optional_enhancements.md)
+**See:** [Sub-Phase 6.0 Details](phase_6/6.0000_optional_enhancements.md)
 
 ---
 

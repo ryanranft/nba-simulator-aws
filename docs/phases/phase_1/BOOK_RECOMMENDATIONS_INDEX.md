@@ -20,7 +20,7 @@ This index organizes book recommendations for Phase 1 by functional subdirectory
 ## Subdirectories
 
 ### 1.1 Data Validation (1 recommendation)
-**Path:** `1.1_data_validation/`
+**Path:** `1.0001_data_validation/`
 
 - **Statistical Model Validation System** (rec_19) - CRITICAL
   - Comprehensive statistical validation framework
@@ -29,7 +29,7 @@ This index organizes book recommendations for Phase 1 by functional subdirectory
   - Source: STATISTICS 601 Advanced Statistical Methods
 
 ### 1.2 Quality Checks (1 recommendation)
-**Path:** `1.2_quality_checks/`
+**Path:** `1.0002_quality_checks/`
 
 - **Econometric Model Validation** (rec_23) - IMPORTANT
   - Time series and panel data validation

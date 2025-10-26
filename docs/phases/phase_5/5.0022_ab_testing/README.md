@@ -72,7 +72,7 @@ This directory contains **17 A/B testing variations** from book recommendations:
 - [5.0: ML Model Pipeline](../5.0_machine_learning_models.md)
 - [5.21: Model Performance Tracking](../5.21_model_performance_tracking/)
 - [5.2: Model Versioning](../5.2_model_versioning/)
-- [6.1: Monitoring Dashboards](../../phase_6/6.1_monitoring_dashboards/)
+- [6.1: Monitoring Dashboards](../../phase_6/6.0001_monitoring_dashboards/)
 
 **Provides:**
 - Experiment design utilities

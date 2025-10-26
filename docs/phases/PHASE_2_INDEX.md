@@ -50,17 +50,16 @@ Generate granular box score snapshots from play-by-play (PBP) data to enable tem
 
 | # | Sub-Phase | Status | Timeline | Priority | Dependencies |
 |---|-----------|--------|----------|----------|--------------|
-| **2.0** | [System Architecture](phase_2/2.0_system_architecture.md) | ⏸️ PENDING | 1-2 weeks | ⭐ CRITICAL | None |
-| **2.1** | [ESPN Processor](phase_2/2.1_espn_processor.md) | ⏸️ PENDING | 2-3 weeks | ⭐ CRITICAL | 2.0 |
-| **2.2** | [hoopR Processor](phase_2/2.2_hoopr_processor.md) | ⏸️ PENDING | 2 weeks | 🟡 HIGH | 2.1 |
-| **2.3** | [NBA API Processor](phase_2/2.3_nba_api_processor.md) | ⏸️ PENDING | 2 weeks | 🟡 MEDIUM | 2.1, 2.2 |
-| **2.4** | [Kaggle Processor](phase_2/2.4_kaggle_processor.md) | ⏸️ PENDING | 1 week | 🟢 LOW | 2.1-2.3 |
-| **2.5** | [Storage System](phase_2/2.5_storage_system.md) | ⏸️ PENDING | 1 week | 🟡 HIGH | 2.1 |
-| **2.6** | [Advanced Metrics](phase_2/2.6_advanced_metrics.md) | ⏸️ PENDING | 2-3 weeks | 🟡 MEDIUM | 2.5 |
-| **2.7** | [ML Integration](phase_2/2.7_ml_integration.md) | ⏸️ PENDING | 2 weeks | 🟡 HIGH | 2.6 |
-| **2.8** | [Betting Integration](phase_2/2.8_betting_integration.md) | ⏸️ PENDING | 3 weeks | 🟡 MEDIUM | 2.7 |
+| **2.0** | [System Architecture](phase_2/2.0000_system_architecture.md) | ⏸️ PENDING | 1-2 weeks | ⭐ CRITICAL | None |
+| **2.1** | [ESPN Processor](phase_2/2.0001_espn_processor.md) | ⏸️ PENDING | 2-3 weeks | ⭐ CRITICAL | 2.0 |
+| **2.2** | [hoopR Processor](phase_2/2.0002_hoopr_processor.md) | ⏸️ PENDING | 2 weeks | 🟡 HIGH | 2.1 |
+| **2.3** | [NBA API Processor](phase_2/2.0003_nba_api_processor.md) | ⏸️ PENDING | 2 weeks | 🟡 MEDIUM | 2.1, 2.2 |
+| **2.4** | [Kaggle Processor](phase_2/2.0004_kaggle_processor.md) | ⏸️ PENDING | 1 week | 🟢 LOW | 2.1-2.3 |
+| **2.5** | [Storage System](phase_2/2.0005_storage_system.md) | ⏸️ PENDING | 1 week | 🟡 HIGH | 2.1 |
+| **2.6** | [Advanced Metrics](phase_2/2.0006_advanced_metrics.md) | ⏸️ PENDING | 2-3 weeks | 🟡 MEDIUM | 2.5 |
+| **2.7** | [ML Integration](phase_2/2.0007_ml_integration.md) | ⏸️ PENDING | 2 weeks | 🟡 HIGH | 2.6 |
 
-**Total Sub-Phases:** 9
+**Total Sub-Phases:** 8 (2.8 moved to Phase 7 during reorganization)
 **Estimated Duration:** 12 weeks
 **Prerequisites:** Phase 0 complete
 

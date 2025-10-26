@@ -64,7 +64,7 @@ Build game simulation engine with temporal state reconstruction. This phase crea
 
 **Simulation Accuracy:** ~63% (basic model, room for improvement with ML)
 
-**See:** [Sub-Phase 4.0 Details](phase_4/4.0_simulation_engine.md)
+**See:** [Sub-Phase 4.0 Details](phase_4/4.0000_simulation_engine.md)
 
 ---
 

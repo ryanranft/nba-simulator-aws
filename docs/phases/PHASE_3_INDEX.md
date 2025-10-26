@@ -63,7 +63,7 @@ Set up RDS PostgreSQL database with temporal indexing for millisecond-precision 
 - Support for millisecond-precision lookups
 - Cumulative aggregation optimized
 
-**See:** [Sub-Phase 3.0 Details](phase_3/3.0_database_infrastructure.md)
+**See:** [Sub-Phase 3.0 Details](phase_3/3.0000_database_infrastructure.md)
 
 ---
 

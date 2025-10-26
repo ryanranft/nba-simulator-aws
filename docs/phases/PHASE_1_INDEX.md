@@ -33,11 +33,11 @@ Integrate multiple data sources to maximize ML granularity. Originally planned a
 
 | Sub-Phase | Name | Status | Time | Features | File |
 |-----------|------|--------|------|----------|------|
-| **1.0** | Data Quality Checks | ✅ COMPLETE ✓ | 6h | Oct 23, 2025 | [1.0_data_quality_checks.md](phase_1/1.0_data_quality_checks.md) |
-| **1.1** | Multi-Source Integration | ✅ COMPLETE ✓ | 28h | Oct 23, 2025 | [1.1_multi_source_integration.md](phase_1/1.1_multi_source_integration.md) |
-| **1.3** | Data Quality Monitoring | ✅ COMPLETE ✓ | ~6h | Oct 23, 2025 | [1.3_data_quality/](phase_1/1.3_data_quality/README.md) |
-| **1.4** | Data Validation Pipeline | ✅ COMPLETE ✓ | ~4h | Oct 23, 2025 | [1.4_data_validation/](phase_1/1.4_data_validation/README.md) |
-| **1.5** | Statistical Analysis Framework | ✅ COMPLETE ✓ | ~4h | Oct 23, 2025 | [1.5_statistical_analysis/](phase_1/1.5_statistical_analysis/README.md) |
+| **1.0** | Data Quality Checks | ✅ COMPLETE ✓ | 6h | Oct 23, 2025 | [1.0000_data_quality_checks.md](phase_1/1.0000_data_quality_checks.md) |
+| **1.1** | Multi-Source Integration | ✅ COMPLETE ✓ | 28h | Oct 23, 2025 | [1.0001_multi_source_integration.md](phase_1/1.0001_multi_source_integration.md) |
+| **1.3** | Data Quality Monitoring | ✅ COMPLETE ✓ | ~6h | Oct 23, 2025 | [1.0003_data_quality/](phase_1/1.0003_data_quality/README.md) |
+| **1.4** | Data Validation Pipeline | ✅ COMPLETE ✓ | ~4h | Oct 23, 2025 | [1.0004_data_validation/](phase_1/1.0004_data_validation/README.md) |
+| **1.5** | Statistical Analysis Framework | ✅ COMPLETE ✓ | ~4h | Oct 23, 2025 | [1.0005_statistical_analysis/](phase_1/1.0005_statistical_analysis/README.md) |
 
 ---
 
@@ -62,7 +62,7 @@ Integrate multiple data sources to maximize ML granularity. Originally planned a
 
 **Output:** `docs/DATA_QUALITY_BASELINE.md`
 
-**See:** [Sub-Phase 1.0 Details](phase_1/1.0_data_quality_checks.md)
+**See:** [Sub-Phase 1.0 Details](phase_1/1.0000_data_quality_checks.md)
 
 ---
 
@@ -91,7 +91,7 @@ Integrate multiple data sources to maximize ML granularity. Originally planned a
 - Defensive metrics enabled
 - Historical coverage: 1946-2025
 
-**See:** [Sub-Phase 1.1 Details](phase_1/1.1_multi_source_integration.md)
+**See:** [Sub-Phase 1.1 Details](phase_1/1.0001_multi_source_integration.md)
 
 ---
 
@@ -198,7 +198,7 @@ This phase is **sport-agnostic** - follow the same pattern:
 
 **Sub-Phase 1.1 Planning Documents:**
 - [ML_FEATURE_CATALOG.md](../../ML_FEATURE_CATALOG.md) - Complete 209 feature breakdown
-- [PHASE_1_MULTI_SOURCE_PLAN.md](phase_1/1.1_multi_source_integration.md) - Detailed 28-hour roadmap
+- [PHASE_1_MULTI_SOURCE_PLAN.md](phase_1/1.0001_multi_source_integration.md) - Detailed 28-hour roadmap
 - [IMPLEMENTATION_CHECKLIST.md](../../archive/planning/IMPLEMENTATION_CHECKLIST.md) - Week-by-week tasks
 - [QUICK_START_MULTI_SOURCE.md](../../archive/planning/QUICK_START_MULTI_SOURCE.md) - Quick start guide
 

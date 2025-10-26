@@ -67,7 +67,7 @@ Integrate historical betting odds data and build betting strategy backtesting sy
 - Modified Kelly (fractional Kelly)
 - Arbitrage detection
 
-**See:** [Sub-Phase 7.0 Details](phase_7/7.0_betting_odds_integration.md)
+**See:** [Sub-Phase 7.0 Details](phase_7/7.0000_betting_odds_integration.md)
 
 ---
 

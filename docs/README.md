@@ -117,7 +117,7 @@ This index helps Claude Code and developers find the right documentation efficie
 - **docs/DATA_SOURCE_MAPPING.md** (711 lines)
 - **docs/TEMPORAL_VS_TRADITIONAL.md** (626 lines)
 - **docs/ML_FEATURE_CATALOG.md** (621 lines)
-- **docs/PHASE_2.2_ETL_PLAN.md** (613 lines)
+- **docs/PHASE_2.0002_ETL_PLAN.md** (613 lines)
 - **docs/REPRODUCTION_GUIDE.md** (573 lines)
 - **docs/TEMPORAL_VALIDATION_GUIDE.md** (572 lines)
 - **docs/DATA_DEDUPLICATION_RULES.md** (567 lines)

@@ -14,10 +14,10 @@ Phase 3 focuses on: database design, storage infrastructure, and schema manageme
 
 ## Sub-Phases
 
-- [3.1_database_monitoring](3.1_database_monitoring/README.md)
-- [3.1_set_up_mongodb_serverless_for_data_storage](3.1_set_up_mongodb_serverless_for_data_storage/README.md)
-- [3.2_set_up_qdrant_cloud_as_a_vector_database](3.2_set_up_qdrant_cloud_as_a_vector_database/README.md)
-- [3.3_deploy_zenml_pipelines_to_aws_using_zenml_cloud](3.3_deploy_zenml_pipelines_to_aws_using_zenml_cloud/README.md)
+- [3.0001_database_monitoring](3.0001_database_monitoring/README.md)
+- [3.0001_set_up_mongodb_serverless_for_data_storage](3.0001_set_up_mongodb_serverless_for_data_storage/README.md)
+- [3.0002_set_up_qdrant_cloud_as_a_vector_database](3.0002_set_up_qdrant_cloud_as_a_vector_database/README.md)
+- [3.0003_deploy_zenml_pipelines_to_aws_using_zenml_cloud](3.0003_deploy_zenml_pipelines_to_aws_using_zenml_cloud/README.md)
 
 
 ---
