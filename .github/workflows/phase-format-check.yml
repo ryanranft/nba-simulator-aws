@@ -1,0 +1,31 @@
+name: Validate Phase Numbering (ADR-010)
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - main
+
+jobs:
+  validate-phase-format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate 4-digit phase numbering format
+        run: |
+          echo "🔍 Validating ADR-010 compliance (4-digit phase numbering)..."
+          bash scripts/maintenance/validate_phase_numbering.sh
+
+      - name: Report validation results
+        if: failure()
+        run: |
+          echo "❌ Phase numbering validation failed!"
+          echo "Please ensure all phase numbers use 4-digit format (N.MMMM)"
+          echo "See ADR-010: docs/adr/010-four-digit-subphase-numbering.md"
+          exit 1

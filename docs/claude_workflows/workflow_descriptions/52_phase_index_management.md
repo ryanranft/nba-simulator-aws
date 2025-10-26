@@ -31,7 +31,7 @@ This workflow ensures consistent management of the phase index system implemente
 **4-Level Hierarchy:**
 1. **PROGRESS.md** (~390 lines) - Master index, high-level status
 2. **PHASE_N_INDEX.md** (~150 lines) - Phase overview + sub-phase table
-3. **phase_N/N.M_name.md** (300-800 lines) - Sub-phase implementation details
+3. **phase_N/N.MMMM_name.md** (300-800 lines) - Sub-phase implementation details (4-digit format per ADR-010)
 4. **Workflows** (200-400 lines) - Specific procedures
 
 ---
@@ -61,8 +61,8 @@ This workflow ensures consistent management of the phase index system implemente
 docs/phases/
 ├── PHASE_0_INDEX.md              # Phase 0 overview
 ├── phase_0/                      # Phase 0 subdirectory
-│   ├── 0.0_initial_data_collection.md
-│   └── 0.1_basketball_reference/
+│   ├── 0.0000_initial_data_collection.md
+│   └── 0.0001_basketball_reference/
 │       ├── README.md             # Tier index
 │       ├── TIER_01_NBA_HIGH_VALUE.md
 │       └── [other tiers...]
@@ -86,7 +86,7 @@ docs/phases/
 - Location: `docs/phases/`
 
 **Sub-phase files:**
-- Format: `N.M_name.md` (e.g., `1.0000_data_quality_checks.md`)
+- Format: `N.MMMM_name.md` (4-digit, zero-padded per ADR-010, e.g., `1.0000_data_quality_checks.md`)
 - Location: `docs/phases/phase_N/`
 - Size: 300-800 lines (target), max 1,200 lines
 - N = phase number (0-7)
@@ -255,7 +255,7 @@ Add phase to master index:
 # Determine next sub-phase number (M)
 # If phase has 0.0 and 0.1, next is 0.2
 
-touch docs/phases/phase_N/N.M_name.md
+touch docs/phases/phase_N/N.MMMM_name.md
 ```
 
 ### Step 2: Update Phase Index
@@ -265,7 +265,7 @@ Add row to sub-phase table in PHASE_N_INDEX.md:
 ```markdown
 | Sub-Phase | Name | Status | Time | File |
 |-----------|------|--------|------|------|
-| **N.M** | [Sub-phase name] | ⏸️ PENDING | X-Yh | [N.M_name.md](phase_N/N.M_name.md) |
+| **N.MMMM** | [Sub-phase name] | ⏸️ PENDING | X-Yh | [N.MMMM_name.md](phase_N/N.MMMM_name.md) |
 ```
 
 Add new section with overview:
@@ -279,7 +279,7 @@ Add new section with overview:
 - Task 1
 - Task 2
 
-**See:** [Sub-Phase N.M Details](phase_N/N.M_name.md)
+**See:** [Sub-Phase N.MMMM Details](phase_N/N.MMMM_name.md)
 ```
 
 ### Step 3: Add to Success Criteria
@@ -297,7 +297,7 @@ Add to phase's sub-phase list:
 ```markdown
 - ⏸️ [Phase N: Name](docs/phases/PHASE_N_INDEX.md)
   - ...
-  - ⏸️ [N.M Name](docs/phases/phase_N/N.M_name.md) - Description
+  - ⏸️ [N.MMMM Name](docs/phases/phase_N/N.MMMM_name.md) - Description
 ```
 
 ---
@@ -316,7 +316,7 @@ Add to phase's sub-phase list:
 - Example: `validators/phases/phase_0/validate_0_1_s3_bucket_config.py`
 - Run via: `python validators/phases/phase_N/validate_N_M_feature.py`
 
-**Documentation:** `docs/phases/phase_N/N.M_name/README.md`
+**Documentation:** `docs/phases/phase_N/N.MMMM_name/README.md`
 - Contains ONLY documentation (no .py files)
 - References tests/validators with example commands
 
@@ -461,13 +461,13 @@ Add to phase's sub-phase list:
 
 **When a sub-phase status changes:**
 
-1. **Update sub-phase file** (phase_N/N.M_name.md) - Change status at top
+1. **Update sub-phase file** (phase_N/N.MMMM_name.md) - Change status at top
 2. **Update phase index** (PHASE_N_INDEX.md) - Update sub-phase table + section
 3. **Update PROGRESS.md** - Only when full phase status changes
 
 **Example:**
 ```markdown
-# Sub-phase file (N.M_name.md)
+# Sub-phase file (N.MMMM_name.md)
 **Status:** ⏸️ PENDING → 🔄 IN PROGRESS
 
 # Phase index (PHASE_N_INDEX.md)
@@ -619,7 +619,7 @@ grep -r "docs/phases/PHASE_N_[A-Z]" . --include="*.md"
 - ✅ Sub-phases: 300-800 lines (90%+ in range)
 - ✅ Navigation: 3 clicks from PROGRESS.md to implementation
 - ✅ Context efficiency: Read only what's needed (<15% per session)
-- ✅ Consistent naming: All files follow N.M_name.md convention
+- ✅ Consistent naming: All files follow N.MMMM_name.md convention (4-digit format per ADR-010)
 
 ---
 

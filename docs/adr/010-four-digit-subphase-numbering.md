@@ -432,6 +432,176 @@ git revert HEAD  # Atomic commit makes rollback clean
 
 All changes in single commit enable clean rollback if needed.
 
+### Detailed Rollback Procedure
+
+If critical issues are discovered after deployment, follow one of these rollback strategies:
+
+#### Option 1: Simple Revert (Recommended for Single-Commit Rollback)
+
+If the migration was done in a single atomic commit:
+
+```bash
+# Identify the commit to revert
+git log --oneline | head -5
+
+# Revert the ADR-010 implementation commit
+git revert <commit-sha>
+
+# Example:
+# git revert 6fb4ec3
+
+# Push to remote
+git push origin main
+```
+
+**Pros:**
+- Clean git history (shows revert explicitly)
+- Preserves original commit for future reference
+- Safe and reversible
+
+**Cons:**
+- Creates a new revert commit
+- May conflict with subsequent commits
+
+#### Option 2: Forward Fix (Recommended for Production)
+
+Instead of full rollback, fix the specific issue:
+
+**If breaking imports:**
+```bash
+# Fix import paths in affected files
+# Update to correct format
+git add .
+git commit -m "fix: Correct phase import paths after ADR-010"
+```
+
+**If failing tests:**
+```bash
+# Update test discovery patterns
+# Fix test file references
+pytest tests/ -v  # Verify fixes
+git add .
+git commit -m "fix: Update test patterns for ADR-010 format"
+```
+
+**If broken links:**
+```bash
+# Find broken links
+grep -r "\[.*\](phase_[0-9]/[0-9]\.[0-9]_" docs/
+
+# Update documentation links
+git add .
+git commit -m "docs: Fix documentation links for ADR-010"
+```
+
+**Pros:**
+- Maintains ADR-010 benefits
+- Fixes specific issue without full rollback
+- Preserves work already done
+
+**Cons:**
+- Requires identifying root cause
+- May take longer than revert
+
+#### Option 3: Hard Reset (Emergency Only - Destructive)
+
+**⚠️ WARNING:** This is destructive and should only be used in emergencies.
+
+```bash
+# Create backup first
+git branch emergency-backup-$(date +%Y%m%d-%H%M%S)
+
+# Hard reset to before ADR-010
+git reset --hard <commit-before-adr-010>
+
+# Force push (DANGEROUS - requires team coordination)
+git push origin main --force
+
+# Notify all contributors immediately
+```
+
+**When to use:**
+- Repository is completely broken
+- No other option works
+- Team has been notified and agrees
+
+**Never use if:**
+- Other contributors have pulled the changes
+- Changes have been deployed to production
+- There's any alternative solution
+
+#### Rollback Testing Procedure
+
+Before executing any rollback:
+
+```bash
+# 1. Test current state
+pytest tests/ -v
+python -m py_compile scripts/**/*.py
+
+# 2. Create test branch
+git checkout -b test-rollback-adr-010
+
+# 3. Perform rollback on test branch
+git revert <commit-sha>
+
+# 4. Validate rollback
+pytest tests/ -v
+bash scripts/maintenance/validate_phase_numbering.sh
+python scripts/automation/validate_phase.py 0
+
+# 5. If tests pass, apply to main
+git checkout main
+git merge test-rollback-adr-010
+
+# 6. If tests fail, investigate before rollback
+git checkout main
+git branch -D test-rollback-adr-010
+```
+
+#### Post-Rollback Actions
+
+After successful rollback:
+
+1. **Update PROGRESS.md:**
+   ```markdown
+   ## Recent Changes
+   - **ADR-010 Rollback (Date):** Reverted 4-digit format due to [reason]
+   - **Status:** Using old format (N.M) until issues resolved
+   ```
+
+2. **Update ADR-010 status:**
+   ```markdown
+   **Status:** ❌ Rolled Back
+   **Rollback Date:** [Date]
+   **Reason:** [Specific issue that required rollback]
+   ```
+
+3. **Disable validation hooks:**
+   ```bash
+   # Temporarily disable ADR-010 pre-commit hook
+   # Edit .pre-commit-config.yaml
+   # Comment out validate-phase-numbering hook
+   ```
+
+4. **Notify contributors:**
+   - Create GitHub issue explaining rollback
+   - Update documentation
+   - Communicate timeline for re-attempt
+
+#### Prevention of Rollback Necessity
+
+To minimize rollback risk:
+
+- ✅ Test thoroughly before merging
+- ✅ Use feature branch for migration
+- ✅ Run full test suite before push
+- ✅ Validate all phase numbering
+- ✅ Check documentation links
+- ✅ Review with team before merge
+- ✅ Deploy during low-activity period
+- ✅ Have backup branch ready
+
 ---
 
 ## Implementation Summary

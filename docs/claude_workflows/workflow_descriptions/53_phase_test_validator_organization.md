@@ -65,7 +65,7 @@ nba-simulator-aws/
     └── phases/
         ├── PHASE_N_INDEX.md
         └── phase_N/
-            └── N.M_name/
+            └── N.MMMM_name/
                 ├── README.md       # Documentation
                 └── ...             # No .py files (except deprecated)
 ```
@@ -242,7 +242,7 @@ class PhaseNMFeatureValidator:
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description='Validate Phase N.M feature')
+    parser = argparse.ArgumentParser(description='Validate Phase N.MMMM feature (4-digit format per ADR-010)')
     parser.add_argument('--option', help='Optional parameter')
     args = parser.parse_args()
 

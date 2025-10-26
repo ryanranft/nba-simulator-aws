@@ -46,7 +46,7 @@ This workflow consolidates the complete process for validating and marking a pha
 #### Step 1.1: Read Phase README
 
 ```bash
-# Example: Validating Phase 0.0002
+# Example: Validating Phase 0.0002 (4-digit format per ADR-010)
 cat docs/phases/phase_0/0.0002_hoopr_data_collection/README.md
 ```
 
@@ -202,7 +202,7 @@ class PhaseNMFeatureValidator:
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description='Validate Phase N.M [feature]')
+    parser = argparse.ArgumentParser(description='Validate Phase N.MMMM [feature] (4-digit format per ADR-010)')
     parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
     args = parser.parse_args()
 
@@ -226,7 +226,7 @@ if __name__ == '__main__':
 """
 Tests for Phase N.M: [Phase Name]
 
-This test suite validates the completion of Phase N.M by checking:
+This test suite validates the completion of Phase N.MMMM (4-digit format per ADR-010) by checking:
 - [Feature 1]
 - [Feature 2]
 - [Feature 3]
@@ -248,7 +248,7 @@ from validate_N_M_feature import PhaseNMFeatureValidator
 
 
 class TestPhaseNMFeatureValidation:
-    """Tests for Phase N.M feature validation."""
+    """Tests for Phase N.MMMM feature validation (4-digit format per ADR-010)."""
 
     @pytest.fixture
     def validator(self):
@@ -276,12 +276,12 @@ class TestPhaseNMIntegration:
     """Integration tests for Phase N.M."""
 
     def test_phase_complete_validation(self):
-        """Comprehensive test that Phase N.M is complete."""
+        """Comprehensive test that Phase N.MMMM (4-digit format per ADR-010) is complete."""
         validator = PhaseNMFeatureValidator(verbose=False)
         all_passed, results = validator.run_all_validations()
 
         assert all_passed == True, \
-            "Phase N.M completion validation failed"
+            "Phase N.MMMM completion validation failed"
 
         # Check specific results
         assert results['feature_1_valid'] == True
@@ -289,7 +289,7 @@ class TestPhaseNMIntegration:
 
 
 class TestPhaseNMMetadata:
-    """Tests for Phase N.M documentation metadata."""
+    """Tests for Phase N.MMMM documentation metadata (4-digit format per ADR-010)."""
 
     def test_documented_metrics_match_actual(self):
         """Verify documented metrics match actual state."""
@@ -297,7 +297,7 @@ class TestPhaseNMMetadata:
         # TODO: Extract documented file counts, table counts, etc.
         # TODO: Compare to actual values from validators
         # Example:
-        # readme_path = Path("docs/phases/phase_N/N.M_name/README.md")
+        # readme_path = Path("docs/phases/phase_N/N.MMMM_name/README.md")
         # readme_content = readme_path.read_text()
         # # Extract metrics and compare
         pass
@@ -535,7 +535,7 @@ python scripts/monitoring/dims_cli.py verify --category s3_storage
 ```
 
 **Historical milestones:**
-- **Oct 2024 (Phase N.M Initial Upload):** 146,115 files, 119 GB
+- **Oct 2024 (Phase N.MMMM Initial Upload):** 146,115 files, 119 GB
 - **Oct 2025 (ADCE Autonomous Collection):** +25,323 files
 
 **See also:** Workflow #56 (DIMS Management), `inventory/metrics.yaml`
@@ -546,7 +546,7 @@ python scripts/monitoring/dims_cli.py verify --category s3_storage
 **Template:**
 
 ```markdown
-## How Phase N.M Enables the Simulation Vision
+## How Phase N.MMMM Enables the Simulation Vision
 
 This phase provides [data/infrastructure/capability] that powers the **hybrid econometric + nonparametric simulation system** described in the [main README](../../../README.md#simulation-methodology).
 
@@ -595,7 +595,7 @@ See [main README](../../../README.md#simulation-methodology) for complete method
 
 ```bash
 # From phase README directory
-cd docs/phases/phase_N/N.M_name/
+cd docs/phases/phase_N/N.MMMM_name/
 
 # Test link to main README
 ls ../../../README.md  # Should exist
@@ -634,7 +634,7 @@ python scripts/monitoring/dims_cli.py verify --category documentation
 
 ```markdown
 **Historical milestones:**
-- **[Date] (Phase N.M [Event]):** [Baseline metric]
+- **[Date] (Phase N.MMMM [Event]):** [Baseline metric]
 - **Example:** Oct 2024 (Phase 0.0001 Initial Upload): 146,115 files, 119 GB
 ```
 
@@ -751,7 +751,7 @@ find docs/phases/phase_N/ -name "*.py"
 
 ## Common Scenarios
 
-### Scenario 1: Data Collection Phase (e.g., Phase 0.0001, 0.2)
+### Scenario 1: Data Collection Phase (e.g., Phase 0.0001, 0.0002) - 4-digit format per ADR-010
 
 **Validators needed:**
 - S3 bucket configuration

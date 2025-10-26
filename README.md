@@ -633,6 +633,26 @@ nba-simulator-aws/
  requirements.txt    # Python dependencies
 ```
 
+### Phase Organization
+
+This project uses a **hierarchical phase organization** with 4-digit zero-padded sub-phase numbering (see [ADR-010](docs/adr/010-four-digit-subphase-numbering.md)):
+
+**Format:** `N.MMMM_name` (4 digits, zero-padded, supports up to 9,999 sub-phases per phase)
+
+**Active Phases:**
+- **Phase 0:** `0.0001` - `0.0022` (Initial Data Collection & Security)
+- **Phase 5:** `5.0001` - `5.0013` (Machine Learning Models & Frameworks)
+
+**Examples:**
+- `docs/phases/phase_0/0.0001_basketball_reference/`
+- `docs/phases/phase_5/5.0121_implement_ab_testing/`
+
+**Benefits:**
+- Eliminates filesystem sorting ambiguity (0.0001, 0.0002, ... 0.0010, 0.0011)
+- Future-proof scalability (supports growth to 9,999 sub-phases)
+- Visual clarity and alignment in directory listings
+- Pre-commit validation prevents old format usage
+
 ---
 
 ## Git & GitHub
