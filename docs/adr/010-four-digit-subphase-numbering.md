@@ -160,6 +160,202 @@ The project uses a hierarchical phase/sub-phase organization system to manage co
 4. Update documentation references
 5. Update workflows (#52, #53, #58)
 
+#### STEP 5B: Smart Phase Reference Cleanup (Planned)
+
+**Status:** Pending (follows STEP 5)
+
+**Context:**
+STEP 5 updated 1,300 phase references across 427 files. Verification check found ~500 remaining instances of old patterns ("0.1", "0.10", "0.11", etc.). However, not all these instances are phase references:
+- ✅ **Phase references** (need updating): "Phase 0.1", "phase_0/0.1_", "Sub-Phase 0.10"
+- ❌ **Statistical values** (leave alone): "0.1 blocks per game", "$0.50/month", "averages 0.16 points"
+- ❌ **Legitimate decimals** (leave alone): Version numbers, percentages, costs
+
+**Solution:**
+Create context-aware Python script that distinguishes phase references from numerical values.
+
+**Implementation:** `scripts/maintenance/smart_phase_reference_cleanup.py`
+
+**Features:**
+
+1. **Pattern Detection**
+   - Search patterns: `0.1`, `0.10` through `0.99`
+   - File types: `.md`, `.py`, `.yaml`, `.txt`
+   - Directories: `docs/`, `scripts/`, `tests/`, `validators/`, `inventory/`
+   - Exclude: `data/`, `synthesis_output/`, `.git/`, `docs/archive/`
+
+2. **Context Classification**
+
+   For each match, analyze surrounding text (±50 characters) to classify as:
+
+   - **A. Phase References** (UPDATE these):
+     - Patterns: `Phase 0.1`, `phase_0/0.1_`, `Sub-Phase 0.10`, `Phase 0.16-0.18`
+     - Context keywords: "Phase", "Sub-Phase", "phase_", "PHASE_"
+     - Path patterns: `docs/phases/phase_0/0.X_name/`
+
+   - **B. Statistical Values** (SKIP these):
+     - Patterns: `0.1 blocks`, `averages 0.16`, `+$0.50`
+     - Context keywords: "blocks", "points", "averages", "per", "$", "%"
+     - Unit patterns: `0.X [unit]` where unit is: blocks, points, dollars, percent
+
+   - **C. Archive Files** (SKIP these):
+     - Any file in: `docs/archive/`
+     - Rationale: Archives preserve historical references intentionally
+
+   - **D. Ambiguous Cases** (FLAG for manual review):
+     - Cannot determine with confidence
+     - Present to user for decision
+
+3. **Safe Replacement Rules**
+
+   Phase 0 (2-digit sub-phases):
+   ```
+   Phase 0.1 → Phase 0.0001
+   Phase 0.10 → Phase 0.0010
+   phase_0/0.1_ → phase_0/0.0001_
+   Sub-Phase 0.16-0.18 → Sub-Phase 0.0016-0.0018
+   ```
+
+   Phase 5 (3-digit sub-phases):
+   ```
+   Phase 5.5 → Phase 5.0005
+   phase_5/5.27_ → phase_5/5.0027_
+   ```
+
+4. **Output Reports**
+
+   - **Summary Report:** Total counts by category (phase refs, statistical, archive, ambiguous)
+   - **Detailed Classification:** Line-by-line breakdown with context
+   - **Change Preview:** Git-style diffs for each file
+   - **Logs:** All actions logged to `phase_cleanup.log`
+
+5. **Execution Modes**
+
+   - `--analyze` (default): Find all matches, classify, generate reports, no changes
+   - `--dry-run`: Show exactly what would change, preview diffs, no changes
+   - `--execute`: Make the changes (only classified phase references)
+   - `--interactive`: Show each ambiguous case, ask user for decision
+
+6. **Safety Features**
+
+   - ✅ Creates git backup branch before any changes
+   - ✅ Never modifies archive files (`docs/archive/`)
+   - ✅ Never modifies data files (`data/`, `synthesis_output/`)
+   - ✅ Validates regex before applying
+   - ✅ Preserves file permissions and encoding
+   - ✅ Comprehensive logging
+
+**Core Algorithm:**
+
+```python
+class PhaseReferenceClassifier:
+    """Classify 0.X patterns as phase references or other values"""
+
+    PHASE_KEYWORDS = [
+        'Phase', 'phase_', 'Sub-Phase', 'PHASE_',
+        'docs/phases/', '/phase_'
+    ]
+
+    STATISTICAL_KEYWORDS = [
+        'blocks', 'points', 'averages', 'per', 'average',
+        '$', '%', 'percent', 'rate', 'ratio'
+    ]
+
+    ARCHIVE_PATHS = [
+        'docs/archive/', '/archive/', '_archive'
+    ]
+
+    def classify(self, match, context_before, context_after, file_path):
+        """Returns: 'phase', 'statistical', 'archive', or 'ambiguous'"""
+
+        # Check archive first (highest priority skip)
+        if any(arch in file_path for arch in self.ARCHIVE_PATHS):
+            return 'archive'
+
+        # Check for phase keywords
+        full_context = context_before + match + context_after
+        has_phase_keyword = any(kw in full_context for kw in self.PHASE_KEYWORDS)
+
+        # Check for statistical keywords
+        has_stat_keyword = any(kw in full_context for kw in self.STATISTICAL_KEYWORDS)
+
+        # Decision logic
+        if has_phase_keyword and not has_stat_keyword:
+            return 'phase'
+        elif has_stat_keyword and not has_phase_keyword:
+            return 'statistical'
+        elif has_phase_keyword and has_stat_keyword:
+            return 'ambiguous'  # Both detected - needs review
+        else:
+            return 'ambiguous'  # Neither detected - needs review
+```
+
+**Execution Steps:**
+
+```bash
+# Step 1: Create the script
+touch scripts/maintenance/smart_phase_reference_cleanup.py
+chmod +x scripts/maintenance/smart_phase_reference_cleanup.py
+
+# Step 2: Run analysis
+python scripts/maintenance/smart_phase_reference_cleanup.py --analyze
+
+# Step 3: Review detailed classification
+python scripts/maintenance/smart_phase_reference_cleanup.py --analyze --verbose
+
+# Step 4: Dry-run
+python scripts/maintenance/smart_phase_reference_cleanup.py --dry-run
+
+# Step 5: Handle ambiguous cases
+python scripts/maintenance/smart_phase_reference_cleanup.py --interactive
+
+# Step 6: Execute
+git branch backup-before-smart-cleanup
+python scripts/maintenance/smart_phase_reference_cleanup.py --execute
+git diff --stat
+git diff | less
+
+# Step 7: Commit if good
+git add -A
+git commit -m "refactor: STEP 5B - Smart phase reference cleanup (ADR-010)"
+```
+
+**Expected Outcomes:**
+
+Based on initial scan of ~500 matches:
+
+| Category | Count | Percentage | Action |
+|----------|-------|------------|--------|
+| Phase references | 45-60 | 10-12% | Update |
+| Statistical values | 400-430 | 80-86% | Skip |
+| Archive files | ~20 | 4% | Skip |
+| Ambiguous | 5-10 | 1-2% | Manual review |
+
+**Files to Update:** ~15-20 files
+
+**Examples of What Gets Fixed:**
+- ✅ `docs/TEST_VALIDATOR_MIGRATION_GUIDE.md` - Path reference `phase_0/0.1.../`
+- ✅ `scripts/automation/extract_bbref_data_types.py` - Default path `phase_0/0.4_`
+- ✅ `tests/phases/phase_0/test_0_0002_hoopr_data_collection.py` - Path strings `0.2_hoopr`
+- ✅ `docs/data_collection/scrapers/README.md` - Link to Phase 0.1
+
+**Examples of What Gets Skipped:**
+- ❌ `docs/archive/*` - All archive files (preserved for history)
+- ❌ `"$0.50/month"` - Currency value
+- ❌ `"averages 0.1 blocks"` - Statistical metric
+- ❌ `"0.16-0.18"` in context of version numbers
+
+**Success Criteria:**
+
+- ✅ Script correctly identifies 90%+ of phase references automatically
+- ✅ Zero false positives (no statistical values incorrectly changed)
+- ✅ Clear reports showing classification reasoning
+- ✅ All archive files left untouched
+- ✅ Interactive mode for ambiguous cases
+- ✅ Git backup created before changes
+- ✅ Comprehensive logging of all actions
+
+**Estimated Time:** 1-2 hours (script creation + testing + execution)
+
 ### Phase 3: Validation
 1. Run test suite: `pytest tests/phases/ -v`
 2. Run validators manually
