@@ -1,0 +1,193 @@
+name: Security
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  secret-scanning:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install detect-secrets
+      run: |
+        pip install detect-secrets
+
+    - name: Run detect-secrets scan
+      run: |
+        detect-secrets scan --all-files \
+          --baseline .secrets.baseline \
+          --exclude-files '\.git/.*' \
+          --exclude-files '\.pytest_cache/.*' \
+          --exclude-files '__pycache__/.*' \
+          --exclude-files 'htmlcov/.*' \
+          --exclude-files 'mlruns/.*' \
+          --exclude-files 'data/.*' || true
+
+    - name: Verify no new secrets
+      run: |
+        if git diff --quiet .secrets.baseline; then
+          echo "✅ No new secrets detected"
+        else
+          echo "::warning::New potential secrets detected - please review"
+        fi
+
+  bandit-scan:
+    name: Bandit Security Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install bandit
+      run: |
+        pip install bandit[toml]
+
+    - name: Run bandit security scan
+      run: |
+        bandit -r scripts/ notebooks/ tests/ \
+          -f json -o bandit-report.json \
+          -ll || true
+
+    - name: Upload bandit report
+      uses: actions/upload-artifact@v4
+      with:
+        name: bandit-security-report
+        path: bandit-report.json
+
+  dependency-check:
+    name: Dependency Vulnerability Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install safety
+      run: |
+        pip install safety
+
+    - name: Check dependencies for vulnerabilities
+      run: |
+        pip install -r requirements.txt
+        safety check --json || true
+
+  codeql-analysis:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: python
+        queries: security-extended
+
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v3
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:python"
+
+  prms-validation:
+    name: PRMS Path Reference Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install pyyaml tabulate
+
+    - name: Run PRMS path reference validation
+      run: |
+        python scripts/maintenance/prms_cli.py scan --format json > prms-report.json
+        cat prms-report.json
+
+    - name: Check for outdated references
+      run: |
+        python -c "
+        import json
+        with open('prms-report.json') as f:
+            report = json.load(f)
+        outdated = report.get('outdated_references', [])
+        if outdated:
+            print(f'::warning::Found {len(outdated)} outdated path references')
+            for ref in outdated[:5]:
+                print(f'::warning::{ref[\"file\"]}:{ref[\"line\"]} - {ref[\"reference\"]}')
+        else:
+            print('✅ No outdated path references found')
+        "
+
+    - name: Upload PRMS report
+      uses: actions/upload-artifact@v4
+      with:
+        name: prms-path-report
+        path: prms-report.json
+
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [secret-scanning, bandit-scan, dependency-check, codeql-analysis, prms-validation]
+    if: always()
+
+    steps:
+    - name: Check security scan results
+      run: |
+        echo "Secret Scanning: ${{ needs.secret-scanning.result }}"
+        echo "Bandit Scan: ${{ needs.bandit-scan.result }}"
+        echo "Dependency Check: ${{ needs.dependency-check.result }}"
+        echo "CodeQL Analysis: ${{ needs.codeql-analysis.result }}"
+        echo "PRMS Validation: ${{ needs.prms-validation.result }}"
+
+        if [ "${{ needs.secret-scanning.result }}" != "success" ]; then
+          echo "::warning::Secret scanning reported issues"
+        fi
+
+        if [ "${{ needs.bandit-scan.result }}" != "success" ]; then
+          echo "::warning::Bandit security scan reported issues"
+        fi

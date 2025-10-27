@@ -1,0 +1,311 @@
+name: Data Validation
+
+on:
+  schedule:
+    # Run daily at 6 AM UTC (after overnight scraper jobs)
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'inventory/**'
+      - 'scripts/monitoring/dims/**'
+
+jobs:
+  dims-verification:
+    name: DIMS Metrics Verification
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Run DIMS verification
+      env:
+        RDS_HOST: ${{ secrets.RDS_HOST }}
+        RDS_PORT: ${{ secrets.RDS_PORT }}
+        RDS_DATABASE: ${{ secrets.RDS_DATABASE }}
+        RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
+        RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}  # pragma: allowlist secret
+        S3_BUCKET: nba-sim-raw-data-lake
+      run: |
+        python scripts/monitoring/dims_cli.py verify --format json > dims-report.json
+        cat dims-report.json
+
+    - name: Check for metric drift
+      run: |
+        python -c "
+        import json
+        with open('dims-report.json') as f:
+            report = json.load(f)
+
+        errors = report.get('errors', 0)
+        drift_detected = report.get('drift_detected', False)
+
+        if errors > 0:
+            print(f'::error::DIMS verification found {errors} errors')
+            exit(1)
+        elif drift_detected:
+            print(f'::warning::DIMS detected metric drift')
+        else:
+            print('✅ All DIMS metrics verified, no drift detected')
+        "
+
+    - name: Upload DIMS report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: dims-verification-report
+        path: |
+          dims-report.json
+          inventory/outputs/prms/
+
+  data-gap-analysis:
+    name: Data Gap Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install psycopg2-binary pyyaml
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Analyze data gaps
+      env:
+        RDS_HOST: ${{ secrets.RDS_HOST }}
+        RDS_PORT: ${{ secrets.RDS_PORT }}
+        RDS_DATABASE: ${{ secrets.RDS_DATABASE }}
+        RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
+        RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}  # pragma: allowlist secret
+      run: |
+        python -c "
+        import psycopg2
+        import os
+        import json
+
+        conn = psycopg2.connect(
+            host=os.getenv('RDS_HOST'),
+            port=int(os.getenv('RDS_PORT', 5432)),
+            database=os.getenv('RDS_DATABASE'),
+            user=os.getenv('RDS_USERNAME'),
+            password=os.getenv('RDS_PASSWORD')
+        )
+
+        cursor = conn.cursor()
+
+        # Check missing box scores
+        cursor.execute('''
+            SELECT COUNT(*) FROM (
+                SELECT DISTINCT game_id FROM games
+                EXCEPT
+                SELECT DISTINCT game_id FROM box_score_players
+            ) AS gaps
+        ''')
+        missing_box_scores = cursor.fetchone()[0]
+
+        # Check missing play-by-play
+        cursor.execute('''
+            SELECT COUNT(*) FROM (
+                SELECT DISTINCT game_id FROM games
+                EXCEPT
+                SELECT DISTINCT game_id::varchar FROM hoopr_play_by_play
+            ) AS gaps
+        ''')
+        missing_pbp = cursor.fetchone()[0]
+
+        # Check total games
+        cursor.execute('SELECT COUNT(*) FROM games')
+        total_games = cursor.fetchone()[0]
+
+        cursor.close()
+        conn.close()
+
+        report = {
+            'total_games': total_games,
+            'missing_box_scores': missing_box_scores,
+            'missing_play_by_play': missing_pbp,
+            'box_score_completeness': round((total_games - missing_box_scores) / total_games * 100, 2),
+            'pbp_completeness': round((total_games - missing_pbp) / total_games * 100, 2)
+        }
+
+        with open('data-gap-report.json', 'w') as f:
+            json.dump(report, f, indent=2)
+
+        print(f'Total Games: {total_games:,}')
+        print(f'Missing Box Scores: {missing_box_scores:,} ({100-report[\"box_score_completeness\"]:.1f}%)')
+        print(f'Missing Play-by-Play: {missing_pbp:,} ({100-report[\"pbp_completeness\"]:.1f}%)')
+
+        if missing_box_scores > 30000:
+            print('::warning::Over 30K games missing box score data')
+        if missing_pbp > 20000:
+            print('::warning::Over 20K games missing play-by-play data')
+        "
+
+    - name: Upload data gap report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: data-gap-report
+        path: data-gap-report.json
+
+  s3-inventory:
+    name: S3 Inventory Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Check S3 bucket inventory
+      run: |
+        # Count objects and calculate size
+        aws s3 ls s3://nba-sim-raw-data-lake --recursive | wc -l > s3-object-count.txt
+        aws s3 ls s3://nba-sim-raw-data-lake --recursive --summarize | \
+          tail -2 > s3-summary.txt || true
+
+        echo "S3 Bucket Inventory:"
+        cat s3-summary.txt
+
+        # Check recent uploads (last 24 hours)
+        aws s3 ls s3://nba-sim-raw-data-lake --recursive | \
+          awk '{if (NF >= 4) print $1, $2}' | \
+          sort -r | head -20 > s3-recent-files.txt
+
+        echo "Recent uploads (last 20 files):"
+        cat s3-recent-files.txt
+
+    - name: Upload S3 inventory report
+      uses: actions/upload-artifact@v4
+      with:
+        name: s3-inventory-report
+        path: |
+          s3-object-count.txt
+          s3-summary.txt
+          s3-recent-files.txt
+
+  adce-health-check:
+    name: ADCE System Health Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Check ADCE autonomous system status
+      env:
+        RDS_HOST: ${{ secrets.RDS_HOST }}
+        RDS_PORT: ${{ secrets.RDS_PORT }}
+        RDS_DATABASE: ${{ secrets.RDS_DATABASE }}
+        RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
+        RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}  # pragma: allowlist secret
+        S3_BUCKET: nba-sim-raw-data-lake
+      run: |
+        python scripts/autonomous/autonomous_cli.py health --format json > adce-health.json || true
+
+        if [ -f adce-health.json ]; then
+          cat adce-health.json
+
+          python -c "
+          import json
+          try:
+              with open('adce-health.json') as f:
+                  health = json.load(f)
+
+              status = health.get('status', 'unknown')
+              if status == 'healthy':
+                  print('✅ ADCE system is healthy')
+              elif status == 'degraded':
+                  print('::warning::ADCE system is degraded')
+              else:
+                  print('::error::ADCE system is unhealthy')
+          except:
+              print('::warning::Could not parse ADCE health status')
+          " || true
+        else
+          echo "::warning::ADCE health check not available"
+        fi
+
+    - name: Upload ADCE health report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: adce-health-report
+        path: adce-health.json
+
+  validation-summary:
+    name: Validation Summary
+    runs-on: ubuntu-latest
+    needs: [dims-verification, data-gap-analysis, s3-inventory, adce-health-check]
+    if: always()
+
+    steps:
+    - name: Check validation results
+      run: |
+        echo "DIMS Verification: ${{ needs.dims-verification.result }}"
+        echo "Data Gap Analysis: ${{ needs.data-gap-analysis.result }}"
+        echo "S3 Inventory: ${{ needs.s3-inventory.result }}"
+        echo "ADCE Health Check: ${{ needs.adce-health-check.result }}"
+
+        if [ "${{ needs.dims-verification.result }}" != "success" ]; then
+          echo "::error::DIMS verification failed"
+        fi
+
+        if [ "${{ needs.data-gap-analysis.result }}" != "success" ]; then
+          echo "::warning::Data gap analysis reported issues"
+        fi
