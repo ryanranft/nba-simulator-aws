@@ -38,7 +38,6 @@ This index helps Claude Code and developers find the right documentation efficie
 - **docs/phases/PHASE_4_INDEX.md** - Simulation (✅ Complete)
 - **docs/phases/PHASE_5_INDEX.md** - ML models (✅ Complete)
 - **docs/phases/PHASE_6_INDEX.md** - AWS Glue ETL (⏸️ Deferred - Python ETL working)
-- **docs/phases/PHASE_7_INDEX.md** - Betting odds (⏸️ Optional)
 
 ### Workflows
 - **docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md** - Workflow index (38 workflows)
