@@ -47,3 +47,11 @@ repos:
         language: script
         files: '^(docs/phases/|tests/phases/|validators/phases/)'
         pass_filenames: false
+
+      - id: validate-path-references
+        name: Validate path references with PRMS
+        entry: scripts/maintenance/validate_path_references.sh
+        language: script
+        files: '\.(py|md|yaml|yml|sh)$'
+        exclude: '^(docs/archive/|docs/migrations/|docs/adr/|inventory/historical/)'
+        pass_filenames: false

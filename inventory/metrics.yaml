@@ -1,6 +1,6 @@
 metadata:
   version: 1.0.0
-  last_updated: '2025-10-26T18:48:16.779337Z'
+  last_updated: '2025-10-26T18:51:03.155656Z'
   last_verified: '2025-10-21T19:00:00Z'
   verified_by: manual_verification
   system: DIMS v1.0.0
@@ -148,6 +148,43 @@ workflows:
     verification_method: automated
     cached: false
     cache_expires: null
+code_quality:
+  path_references:
+    total_scanned:
+      value: 0
+      last_verified: null
+      verification_method: prms_scan
+      description: Total path references found in codebase
+      cached: false
+      cache_expires: null
+    must_update:
+      value: 0
+      last_verified: null
+      verification_method: prms_classification
+      description: Outdated path references requiring updates (>=80% confidence)
+      cached: false
+      cache_expires: null
+    manual_review:
+      value: 0
+      last_verified: null
+      verification_method: prms_classification
+      description: Path references requiring manual review (<80% confidence)
+      cached: false
+      cache_expires: null
+    skipped:
+      value: 0
+      last_verified: null
+      verification_method: prms_classification
+      description: Path references in archives/migrations (intentionally skipped)
+      cached: false
+      cache_expires: null
+    health_status:
+      value: unknown
+      last_verified: null
+      verification_method: prms_validation
+      description: 'Overall path reference health: clean, needs_attention, or unknown'
+      cached: false
+      cache_expires: null
 sql_schemas:
   total_lines:
     value: 758

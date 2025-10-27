@@ -208,6 +208,48 @@ else
     echo "  ℹ️  DIMS not installed (optional monitoring tool)"
 fi
 
+# ─────────────────────────────────────────────────────────────────────────
+# PRMS (Path Reference Management System) - Path validation
+# ─────────────────────────────────────────────────────────────────────────
+echo ""
+echo "▶ PATH REFERENCES (PRMS)"
+
+# Check if PRMS is available
+if [ -f "scripts/maintenance/prms_cli.py" ]; then
+    # Run quick scan (detects outdated path references)
+    prms_output=$(python scripts/maintenance/prms_cli.py scan --classify 2>/dev/null)
+    prms_exit_code=$?
+
+    # Check scan results
+    if [ -f "inventory/outputs/prms/prms_audit_report.json" ]; then
+        must_update=$(python3 -c "
+import json
+try:
+    with open('inventory/outputs/prms/prms_audit_report.json', 'r') as f:
+        data = json.load(f)
+    count = sum(1 for ref in data.get('references', [])
+                if ref.get('category') == 'MUST_UPDATE'
+                and ref.get('confidence', 0) >= 0.8)
+    print(count)
+except:
+    print('0')
+" 2>/dev/null)
+
+        if [ "$must_update" = "0" ]; then
+            echo "  ✓ All path references up to date"
+        else
+            echo "  ⚠️  Found $must_update outdated path reference(s)"
+            echo "  💡 Run: python scripts/maintenance/prms_cli.py report"
+            echo "  💡 Fix: python scripts/maintenance/prms_cli.py fix"
+        fi
+    else
+        echo "  ⚠️  PRMS scan failed (non-critical)"
+        echo "  💡 Run manually: python scripts/maintenance/prms_cli.py scan --classify"
+    fi
+else
+    echo "  ℹ️  PRMS not installed (optional path validation tool)"
+fi
+
 echo ""
 echo "╔═══════════════════════════════════════════════════════════════╗"
 echo "║ ✓ Diagnostics complete - ready to work                        ║"
@@ -629,6 +671,33 @@ if [ -f "FILE_INVENTORY.md" ]; then
         docs_to_check=$((docs_to_check + 1))
     else
         echo -e "${GREEN}✓${NC} FILE_INVENTORY.md is current"
+    fi
+fi
+
+# Check PRMS path references
+if [ -f "scripts/maintenance/prms_cli.py" ]; then
+    # Quick check for outdated path references
+    if [ -f "inventory/outputs/prms/prms_audit_report.json" ]; then
+        must_update=$(python3 -c "
+import json
+try:
+    with open('inventory/outputs/prms/prms_audit_report.json', 'r') as f:
+        data = json.load(f)
+    count = sum(1 for ref in data.get('references', [])
+                if ref.get('category') == 'MUST_UPDATE'
+                and ref.get('confidence', 0) >= 0.8)
+    print(count)
+except:
+    print('0')
+" 2>/dev/null)
+
+        if [ "$must_update" = "0" ]; then
+            echo -e "${GREEN}✓${NC} PRMS: All path references up to date"
+        else
+            echo -e "${YELLOW}⚠️${NC}  PRMS: $must_update outdated path reference(s) detected"
+            echo -e "${BLUE}   💡 Fix before next session: python scripts/maintenance/prms_cli.py fix${NC}"
+            docs_to_check=$((docs_to_check + 1))
+        fi
     fi
 fi
 

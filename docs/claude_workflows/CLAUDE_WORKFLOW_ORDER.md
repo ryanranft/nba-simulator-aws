@@ -49,6 +49,7 @@ All detailed workflow descriptions are located in: `/docs/claude_workflows/workf
 56. **DIMS Management** → `56_dims_management.md` (session start/end, weekly maintenance)
 ~~57. **Phase-README Alignment**~~ → DEPRECATED - See #58
 58. **Phase Completion & Validation** → `58_phase_completion_validation.md` (BEFORE marking any phase ✅ COMPLETE)
+60. **PRMS Path Reference Management** → `60_prms_path_reference_management.md` (automatic pre-commit validation, session checks)
 
 ### Testing (By Phase)
 

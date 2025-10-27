@@ -230,6 +230,84 @@ The autonomous implementation system has completed its mission. Next steps:
 
 ---
 
+## The Automation Triad
+
+**✅ COMPLETE - October 26, 2025** - Self-maintaining codebase infrastructure
+
+The codebase now has three integrated automation systems that work together to maintain quality and prevent technical debt:
+
+### 1. DIMS - Data Inventory Management System
+**Purpose:** Track and validate data metrics across the entire system
+
+**Capabilities:**
+- PostgreSQL-backed metrics tracking (25+ metrics)
+- Automated drift detection
+- Jupyter integration for analysis
+- Session start/end verification
+
+**Status:** ✅ Production (v3.1.0)
+**Documentation:** `docs/monitoring/dims/` and Workflow #56
+**Usage:** `python scripts/monitoring/dims_cli.py [verify|update|report]`
+
+### 2. ADCE - Autonomous Data Collection Engine
+**Purpose:** 24/7 self-healing data collection and scraping
+
+**Capabilities:**
+- Multi-source scraper orchestration (ESPN, NBA API, Basketball Reference, hoopR)
+- Automatic error recovery and retry logic
+- Health monitoring and alerting
+- Zero-downtime operation
+
+**Status:** ✅ Production (Phase 0.0018)
+**Documentation:** `docs/data_collection/scrapers/` and Workflow #42
+**Usage:** `python scripts/autonomous/autonomous_cli.py [start|stop|status|health]`
+
+### 3. PRMS - Path Reference Management System
+**Purpose:** Prevent outdated path references and maintain code quality
+
+**Capabilities:**
+- Automated path reference scanning and classification
+- Pre-commit hook integration (blocks commits with outdated refs)
+- Session start/end validation
+- DIMS integration for health tracking
+- Intelligent classification (MUST_UPDATE, SKIP, MANUAL_REVIEW)
+
+**Status:** ✅ Production (v1.0.0)
+**Documentation:** Workflow #60
+**Usage:** `python scripts/maintenance/prms_cli.py [scan|fix|report]`
+
+**Integration Features:**
+- **Scan:** Discover all path references across codebase
+- **Classify:** Categorize references by confidence and context
+- **Fix:** Auto-correct high-confidence outdated references (≥80%)
+- **Report:** Generate Markdown, JSON, HTML audit reports
+- **Pre-commit:** Block commits with outdated path references
+- **Session Manager:** Automatic validation at session start/end
+- **DIMS Tracking:** Path reference health metrics integrated with DIMS
+
+### Together: Self-Maintaining Codebase
+
+**Benefits:**
+1. **Data Integrity:** DIMS ensures all metrics are accurate and current
+2. **Data Freshness:** ADCE keeps data collection running 24/7 autonomously
+3. **Code Quality:** PRMS prevents path reference drift and technical debt
+4. **Minimal Manual Intervention:** All three systems operate autonomously
+5. **Unified Dashboard:** DIMS provides single-pane-of-glass view of all health metrics
+
+**Quick Reference:**
+```bash
+# Check all systems
+python scripts/monitoring/dims_cli.py verify          # DIMS
+python scripts/autonomous/autonomous_cli.py status    # ADCE
+python scripts/maintenance/prms_cli.py scan           # PRMS
+
+# Session management (runs all checks automatically)
+bash scripts/shell/session_manager.sh start
+bash scripts/shell/session_manager.sh end
+```
+
+---
+
 ## Navigation Protocol
 
 **Standard flow:**
