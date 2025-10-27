@@ -130,3 +130,5 @@ s3_security_audit_report.md
 inventory/outputs/prms/*.md
 inventory/outputs/prms/*.html
 inventory/outputs/prms/*.json
+.coverage
+htmlcov/
