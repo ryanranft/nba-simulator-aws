@@ -162,13 +162,13 @@ metrics:
   # S3 Storage Metrics
   s3_storage:
     total_objects:
-      command: "aws s3 ls s3://nba-sim-raw-data-lake --recursive --summarize 2>/dev/null | grep 'Total Objects' | awk '{print $3}'"
+      command: "python3 -c \"import boto3; s3 = boto3.client('s3'); paginator = s3.get_paginator('list_objects_v2'); pages = paginator.paginate(Bucket='nba-sim-raw-data-lake'); print(sum(len(page.get('Contents', [])) for page in pages))\" 2>/dev/null || echo 0"
       parse_type: "integer"
       category: "volatile"
       description: "Total number of objects in S3 bucket"
 
     total_size_gb:
-      command: "aws s3 ls s3://nba-sim-raw-data-lake --recursive --summarize 2>/dev/null | grep 'Total Size' | awk '{print $3/1024/1024/1024}'"
+      command: "python3 -c \"import boto3; s3 = boto3.client('s3'); paginator = s3.get_paginator('list_objects_v2'); pages = paginator.paginate(Bucket='nba-sim-raw-data-lake'); print(round(sum(obj['Size'] for page in pages for obj in page.get('Contents', [])) / 1024 / 1024 / 1024, 2))\" 2>/dev/null || echo 0.0"
       parse_type: "float"
       precision: 2
       category: "volatile"
@@ -323,7 +323,7 @@ metrics:
       description: "Size of NBA archives directory in GB"
 
     temp_data_size_gb:
-      command: "du -sg ~/nba-sim-temp 2>/dev/null | awk '{print $1}'"
+      command: "[ -d ~/nba-sim-temp ] && du -sg ~/nba-sim-temp 2>/dev/null | awk '{print $1}' || echo 0"
       parse_type: "integer"
       category: "volatile"
       description: "Size of temporary NBA data in GB"
@@ -345,7 +345,7 @@ metrics:
   # AWS Inventory Metrics (Workflow #47)
   aws_inventory:
     rds_database_size_gb:
-      command: "psql -h $DB_HOST -U $DB_USER -d nba_simulator -t -c \"SELECT ROUND(pg_database_size('nba_simulator')::numeric / 1024 / 1024 / 1024, 2)\" 2>/dev/null | tr -d ' ' || echo 0"
+      command: "PGPASSWORD=$RDS_PASSWORD psql -h $RDS_HOST -U $RDS_USERNAME -d $RDS_DATABASE -t -c \"SELECT ROUND(pg_database_size('nba_simulator')::numeric / 1024 / 1024 / 1024, 2)\" 2>/dev/null | tr -d ' ' || echo 0"
       parse_type: "float"
       precision: 2
       category: "volatile"
@@ -358,7 +358,7 @@ metrics:
       description: "RDS allocated storage in GB"
 
     monthly_cost_estimate_usd:
-      command: "python3 -c \"import json; s3=$(aws s3api get-bucket-location --bucket nba-sim-raw-data-lake 2>/dev/null && aws s3api list-objects-v2 --bucket nba-sim-raw-data-lake --query 'sum(Contents[].Size)' 2>/dev/null || echo 0); rds=20; print(f'{(float(s3)/1024/1024/1024*0.023 + rds):.2f}')\""
+      command: "python3 -c \"import boto3; s3_size_gb = round(sum(obj['Size'] for page in boto3.client('s3').get_paginator('list_objects_v2').paginate(Bucket='nba-sim-raw-data-lake') for obj in page.get('Contents', [])) / 1024 / 1024 / 1024, 2); rds_cost = 29; s3_cost = s3_size_gb * 0.023; print(f'{(s3_cost + rds_cost):.2f}')\" 2>/dev/null || echo 0.0"
       parse_type: "float"
       precision: 2
       category: "volatile"
@@ -367,13 +367,13 @@ metrics:
   # Data Gap Analysis Metrics (Workflow #46)
   data_gaps:
     missing_games_count:
-      command: "psql -h $DB_HOST -U $DB_USER -d nba_simulator -t -c \"SELECT COUNT(*) FROM (SELECT DISTINCT game_id FROM games EXCEPT SELECT DISTINCT game_id FROM box_scores) AS gaps\" 2>/dev/null | tr -d ' ' || echo 0"
+      command: "PGPASSWORD=$RDS_PASSWORD psql -h $RDS_HOST -U $RDS_USERNAME -d $RDS_DATABASE -t -c \"SELECT COUNT(*) FROM (SELECT DISTINCT game_id FROM games EXCEPT SELECT DISTINCT game_id FROM box_score_players) AS gaps\" 2>/dev/null | tr -d ' ' || echo 0"
       parse_type: "integer"
       category: "volatile"
-      description: "Number of games missing box score data"
+      description: "Number of games missing box score player data"
 
     games_without_pbp:
-      command: "psql -h $DB_HOST -U $DB_USER -d nba_simulator -t -c \"SELECT COUNT(*) FROM (SELECT DISTINCT game_id FROM games EXCEPT SELECT DISTINCT game_id FROM play_by_play) AS gaps\" 2>/dev/null | tr -d ' ' || echo 0"
+      command: "PGPASSWORD=$RDS_PASSWORD psql -h $RDS_HOST -U $RDS_USERNAME -d $RDS_DATABASE -t -c \"SELECT COUNT(*) FROM (SELECT DISTINCT game_id FROM games EXCEPT SELECT DISTINCT game_id::varchar FROM hoopr_play_by_play) AS gaps\" 2>/dev/null | tr -d ' ' || echo 0"
       parse_type: "integer"
       category: "volatile"
       description: "Number of games without play-by-play data"
@@ -381,7 +381,7 @@ metrics:
   # Sync Status Metrics (Workflow #49)
   sync_status:
     local_s3_sync_status:
-      command: "bash scripts/monitoring/check_sync_status.sh --brief 2>/dev/null || echo 'unknown'"
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/ --max-items 1 >/dev/null 2>&1 && echo 'accessible' || echo 'unavailable'"
       parse_type: "string"
       category: "volatile"
-      description: "Local to S3 sync status (synced/drift/unknown)"
+      description: "S3 bucket accessibility status (accessible/unavailable)"

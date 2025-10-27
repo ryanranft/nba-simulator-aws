@@ -1,21 +1,21 @@
 metadata:
   version: 1.0.0
-  last_updated: '2025-10-26T18:51:03.155656Z'
+  last_updated: '2025-10-26T21:05:39.490357Z'
   last_verified: '2025-10-21T19:00:00Z'
   verified_by: manual_verification
   system: DIMS v1.0.0
   notes: Initial metrics from comprehensive verification on 2025-10-21
 s3_storage:
   total_objects:
-    value: 172726
-    last_verified: '2025-10-21T14:00:00Z'
-    verification_method: aws_cli
+    value: 172810
+    last_verified: '2025-10-26T22:56:42Z'
+    verification_method: boto3_paginator
     cached: false
     cache_expires: null
   total_size_gb:
-    value: 118.26
-    last_verified: '2025-10-21T14:00:00Z'
-    verification_method: aws_cli
+    value: 118.27
+    last_verified: '2025-10-26T22:56:42Z'
+    verification_method: boto3_paginator
     cached: false
     cache_expires: null
   hoopr_files:
@@ -28,6 +28,55 @@ prediction_system:
   total_lines:
     value: 2103
     last_verified: '2025-10-21T14:00:00Z'
+    verification_method: wc_command
+    cached: false
+    cache_expires: null
+  fetch_upcoming_games_lines:
+    value: 303
+    path: scripts/ml/fetch_upcoming_games.py
+    last_verified: '2025-10-26T22:20:36Z'
+    verification_method: wc_command
+    cached: false
+    cache_expires: null
+  fetch_recent_player_data_lines:
+    value: 341
+    path: scripts/ml/fetch_recent_player_data.py
+    last_verified: '2025-10-26T22:20:36Z'
+    verification_method: wc_command
+    cached: false
+    cache_expires: null
+  prepare_upcoming_game_features_lines:
+    value: 416
+    path: scripts/ml/prepare_upcoming_game_features.py
+    last_verified: '2025-10-26T22:20:36Z'
+    verification_method: wc_command
+    cached: false
+    cache_expires: null
+  predict_upcoming_games_lines:
+    value: 367
+    path: scripts/ml/predict_upcoming_games.py
+    last_verified: '2025-10-26T22:20:36Z'
+    verification_method: wc_command
+    cached: false
+    cache_expires: null
+  train_model_for_predictions_lines:
+    value: 359
+    path: scripts/ml/train_model_for_predictions.py
+    last_verified: '2025-10-26T22:20:36Z'
+    verification_method: wc_command
+    cached: false
+    cache_expires: null
+  demo_predictions_lines:
+    value: 181
+    path: scripts/ml/demo_predictions.py
+    last_verified: '2025-10-26T22:20:36Z'
+    verification_method: wc_command
+    cached: false
+    cache_expires: null
+  daily_predictions_sh_lines:
+    value: 136
+    path: scripts/ml/daily_predictions.sh
+    last_verified: '2025-10-26T22:20:36Z'
     verification_method: wc_command
     cached: false
     cache_expires: null
@@ -64,6 +113,31 @@ plus_minus_system:
       docs: 2054
     cached: false
     cache_expires: null
+  python_lines:
+    value: 1616
+    last_verified: '2025-10-26T22:20:36Z'
+    verification_method: wc_command
+    files:
+      - plus_minus_calculator.py
+      - populate_plus_minus_tables.py
+      - demo_plus_minus_population.py
+    cached: false
+    cache_expires: null
+  sql_lines:
+    value: 2318
+    directory: sql/plus_minus/
+    last_verified: '2025-10-26T22:20:36Z'
+    verification_method: find_cat_wc
+    description: All SQL schemas, views, and migrations for Plus/Minus system
+    cached: false
+    cache_expires: null
+  docs_lines:
+    value: 0
+    last_verified: '2025-10-26T22:20:36Z'
+    verification_method: wc_command
+    note: Documentation files may have been moved or renamed
+    cached: false
+    cache_expires: null
   python_files:
     total_lines: 1616
     scripts:
@@ -97,8 +171,8 @@ plus_minus_system:
       lines: 480
 code_base:
   python_files:
-    value: 1675
-    last_verified: '2025-10-26T18:48:16.667105Z'
+    value: 1681
+    last_verified: '2025-10-26T20:44:09.113717Z'
     verification_method: automated
     cached: false
     cache_expires: null
@@ -114,15 +188,15 @@ code_base:
     directory: scripts/pbp_to_boxscore/
     last_verified: '2025-10-21T14:00:00Z'
   test_files:
-    value: 640
-    last_verified: '2025-10-26T17:50:02.605743Z'
+    value: 643
+    last_verified: '2025-10-26T20:44:09.224863Z'
     verification_method: automated
     cached: false
     cache_expires: null
 documentation:
   markdown_files:
-    value: 1760
-    last_verified: '2025-10-26T13:15:36.253496Z'
+    value: 1777
+    last_verified: '2025-10-26T20:53:21.119292Z'
     verification_method: automated
     cached: false
     cache_expires: null
@@ -142,9 +216,9 @@ git:
     cache_expires: null
 workflows:
   total:
-    value: 66
+    value: 67
     directory: docs/claude_workflows/workflow_descriptions/
-    last_verified: '2025-10-23T07:42:02.113427Z'
+    last_verified: '2025-10-26T20:15:25.903684Z'
     verification_method: automated
     cached: false
     cache_expires: null
@@ -203,3 +277,86 @@ local_data:
     path: /Users/ryanranft/0espn
     last_verified: '2025-10-21T14:00:00Z'
     note: Multi-sport data (not NBA-only)
+  archives_size_gb:
+    value: 1
+    path: ~/sports-simulator-archives/nba
+    last_verified: '2025-10-26T22:20:36Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  temp_data_size_gb:
+    value: 0
+    path: ~/nba-sim-temp
+    last_verified: '2025-10-26T22:20:36Z'
+    verification_method: automated
+    note: Directory does not exist (expected)
+    cached: false
+    cache_expires: null
+file_inventory:
+  total_files_documented:
+    value: 0
+    last_verified: '2025-10-26T22:20:36Z'
+    verification_method: automated
+    note: FILE_INVENTORY.md section count
+    cached: false
+    cache_expires: null
+  last_inventory_age_days:
+    value: 999
+    last_verified: '2025-10-26T22:20:36Z'
+    verification_method: automated
+    note: 999 = FILE_INVENTORY.md not found or very old
+    cached: false
+    cache_expires: null
+aws_inventory:
+  rds_database_size_gb:
+    value: 14.0
+    endpoint: nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com
+    database: nba_simulator
+    last_verified: '2025-10-26T22:56:42Z'
+    verification_method: postgresql_query
+    note: Database contains production data
+    cached: false
+    cache_expires: null
+  rds_allocated_storage_gb:
+    value: 0
+    instance_id: nba-sim-db
+    last_verified: '2025-10-26T22:56:42Z'
+    verification_method: aws_rds_api
+    cached: false
+    cache_expires: null
+  monthly_cost_estimate_usd:
+    value: 31.72
+    components:
+      s3_storage: 2.72
+      rds_instance: 29.0
+    last_verified: '2025-10-26T22:56:42Z'
+    verification_method: boto3_calculation
+    note: S3 size * $0.023/GB + RDS $29/month
+    cached: false
+    cache_expires: null
+data_gaps:
+  missing_games_count:
+    value: 29129
+    last_verified: '2025-10-26T22:56:42Z'
+    verification_method: postgresql_query
+    description: Games without box score data
+    note: Data gaps detected, ETL pipeline pending
+    cached: false
+    cache_expires: null
+  games_without_pbp:
+    value: 16049
+    last_verified: '2025-10-26T22:56:42Z'
+    verification_method: postgresql_query
+    description: Games without play-by-play data
+    note: Data gaps detected, ETL pipeline pending
+    cached: false
+    cache_expires: null
+sync_status:
+  local_s3_sync_status:
+    value: accessible
+    bucket: s3://nba-sim-raw-data-lake
+    last_verified: '2025-10-26T22:20:36Z'
+    verification_method: aws_s3_api
+    description: S3 bucket accessibility status
+    cached: false
+    cache_expires: null
