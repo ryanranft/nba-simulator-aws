@@ -1,8 +1,8 @@
 # Week 3 Implementation Plan - Phase 2: ETL Framework
 
-**Date:** October 28, 2025  
-**Phase:** Phase 2 - ETL Framework Consolidation  
-**Duration:** Week 3 of 14-week refactoring plan (Week 3-5 for full Phase 2)  
+**Date:** October 28, 2025
+**Phase:** Phase 2 - ETL Framework Consolidation
+**Duration:** Week 3 of 14-week refactoring plan (Week 3-5 for full Phase 2)
 **Status:** 🔄 IN PROGRESS
 
 ---
@@ -32,7 +32,7 @@ Create organized ETL package structure and consolidate hoopR scrapers (priority 
 ## 📋 Week 3 Tasks
 
 ### Task 1: Create ETL Package Structure
-**Estimated Time:** 30 minutes  
+**Estimated Time:** 30 minutes
 **Priority:** HIGH
 
 **Action Items:**
@@ -70,7 +70,7 @@ nba_simulator/etl/
 ---
 
 ### Task 2: Create Base Scraper Classes
-**Estimated Time:** 45 minutes  
+**Estimated Time:** 45 minutes
 **Priority:** HIGH
 
 **Action Items:**
@@ -91,7 +91,7 @@ nba_simulator/etl/
 ---
 
 ### Task 3: Consolidate hoopR Scrapers
-**Estimated Time:** 2 hours  
+**Estimated Time:** 2 hours
 **Priority:** HIGH (PRIMARY DATA SOURCE)
 
 **Current hoopR Scripts:**
@@ -119,7 +119,7 @@ class HooprPlayByPlayExtractor(BaseExtractor):
 ---
 
 ### Task 4: Create ETL Integration Tests
-**Estimated Time:** 1 hour  
+**Estimated Time:** 1 hour
 **Priority:** MEDIUM
 
 **Action Items:**
@@ -138,7 +138,7 @@ class HooprPlayByPlayExtractor(BaseExtractor):
 ---
 
 ### Task 5: Validate Against Database Baseline
-**Estimated Time:** 30 minutes  
+**Estimated Time:** 30 minutes
 **Priority:** HIGH
 
 **Action Items:**
@@ -157,7 +157,7 @@ class HooprPlayByPlayExtractor(BaseExtractor):
 ---
 
 ### Task 6: Document ETL Architecture
-**Estimated Time:** 30 minutes  
+**Estimated Time:** 30 minutes
 **Priority:** MEDIUM
 
 **Action Items:**
@@ -184,7 +184,7 @@ from ...utils.logging import setup_logging
 class BaseScraper(ABC):
     """
     Base class for all data scrapers.
-    
+
     Provides:
     - Retry logic with exponential backoff
     - Rate limiting
@@ -192,23 +192,23 @@ class BaseScraper(ABC):
     - Health checks
     - Logging integration
     """
-    
+
     def __init__(self, name: str, config: Optional[Dict[str, Any]] = None):
         self.name = name
         self.config = config or {}
         self.logger = setup_logging(f"etl.{name}")
         self._setup()
-    
+
     @abstractmethod
     def extract(self) -> Any:
         """Extract data from source"""
         pass
-    
+
     @abstractmethod
     def validate(self, data: Any) -> bool:
         """Validate extracted data"""
         pass
-    
+
     def health_check(self) -> bool:
         """Check if scraper is operational"""
         pass
@@ -229,45 +229,45 @@ from ...base.scraper import BaseScraper
 class HooprPlayByPlayExtractor(BaseScraper):
     """
     hoopR play-by-play data extractor.
-    
+
     Wraps existing hoopr_pbp_scraper.py for backward compatibility
     while providing new interface.
     """
-    
+
     def __init__(self, config=None):
         super().__init__("hoopr_pbp", config)
         self.legacy_script = Path("scripts/etl/hoopr_pbp_scraper.py")
-    
+
     def extract(self, season: str = None, force: bool = False):
         """
         Extract play-by-play data from hoopR.
-        
+
         Currently calls legacy script. Future versions will
         implement direct extraction.
         """
         self.logger.info(f"Extracting hoopR PBP for season {season}")
-        
+
         # Call legacy script
         cmd = [sys.executable, str(self.legacy_script)]
         if season:
             cmd.extend(["--season", season])
         if force:
             cmd.append("--force")
-        
+
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             timeout=3600  # 1 hour timeout
         )
-        
+
         if result.returncode != 0:
             self.logger.error(f"Legacy script failed: {result.stderr}")
             raise RuntimeError(f"hoopR extraction failed")
-        
+
         self.logger.info("hoopR PBP extraction complete")
         return self._parse_output(result.stdout)
-    
+
     def validate(self, data):
         """Validate hoopR data meets expectations"""
         # Check record count
@@ -334,7 +334,7 @@ Before marking any scraper as migrated:
 1. **hoopR Pipeline Disruption**
    - Risk: Breaking primary data source (99% of data)
    - Mitigation: Parallel operation, keep old scripts
-   
+
 2. **temporal_events Integration**
    - Risk: Breaking event-level data population
    - Mitigation: Explicit tests for temporal_events
@@ -430,6 +430,6 @@ Before marking any scraper as migrated:
 
 ---
 
-**Status:** Ready to begin Week 3 implementation  
+**Status:** Ready to begin Week 3 implementation
 **Next:** Create ETL package structure and base classes
 
