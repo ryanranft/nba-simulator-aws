@@ -140,9 +140,7 @@ class OddsSyncManager:
             print("\nSyncing bookmakers...")
 
         local_cursor = self.local_conn.cursor(cursor_factory=RealDictCursor)
-        local_cursor.execute(
-            "SELECT bookmaker_key, bookmaker_title FROM odds.bookmakers"
-        )
+        local_cursor.execute("SELECT bookmaker_key, title FROM odds.bookmakers")
         bookmakers = local_cursor.fetchall()
 
         rds_cursor = self.rds_conn.cursor()
@@ -156,7 +154,7 @@ class OddsSyncManager:
                 ON CONFLICT (bookmaker_key) DO UPDATE 
                 SET bookmaker_title = EXCLUDED.bookmaker_title
                 """,
-                (row["bookmaker_key"], row["bookmaker_title"]),
+                (row["bookmaker_key"], row["title"]),
             )
             synced += 1
 
@@ -181,7 +179,7 @@ class OddsSyncManager:
                 """
                 INSERT INTO odds.market_types (market_key, market_name)
                 VALUES (%s, %s)
-                ON CONFLICT (market_key) DO UPDATE 
+                ON CONFLICT (market_key) DO UPDATE
                 SET market_name = EXCLUDED.market_name
                 """,
                 (row["market_key"], row["market_name"]),
@@ -200,8 +198,8 @@ class OddsSyncManager:
         local_cursor = self.local_conn.cursor(cursor_factory=RealDictCursor)
         local_cursor.execute(
             """
-            SELECT 
-                event_id, sport_key, sport_title, commence_time, 
+            SELECT
+                event_id, sport_key, sport_title, commence_time,
                 home_team, away_team, created_at, updated_at
             FROM odds.events
             """
@@ -249,21 +247,17 @@ class OddsSyncManager:
         if self.verbose:
             print("Syncing odds snapshots...")
 
-        # Get bookmaker and market_type mappings
+        # Get bookmaker and market_type mappings from RDS
         rds_cursor = self.rds_conn.cursor(cursor_factory=RealDictCursor)
 
         # Bookmaker mapping
-        rds_cursor.execute(
-            "SELECT bookmaker_id, bookmaker_key FROM odds.bookmakers"
-        )
+        rds_cursor.execute("SELECT bookmaker_id, bookmaker_key FROM odds.bookmakers")
         bookmaker_map = {
             row["bookmaker_key"]: row["bookmaker_id"] for row in rds_cursor.fetchall()
         }
 
         # Market type mapping
-        rds_cursor.execute(
-            "SELECT market_type_id, market_key FROM odds.market_types"
-        )
+        rds_cursor.execute("SELECT market_type_id, market_key FROM odds.market_types")
         market_map = {
             row["market_key"]: row["market_type_id"] for row in rds_cursor.fetchall()
         }
@@ -276,22 +270,20 @@ class OddsSyncManager:
         # Fetch in batches
         offset = 0
         synced = 0
+        skipped = 0
 
         while offset < total:
             local_cursor.execute(
                 """
                 SELECT 
-                    os.event_id,
-                    b.bookmaker_key,
-                    mt.market_key,
-                    os.outcome_name,
-                    os.price,
-                    os.point,
-                    os.last_update,
-                    os.is_latest
-                FROM odds.odds_snapshots os
-                JOIN odds.bookmakers b ON os.bookmaker_id = b.bookmaker_id
-                JOIN odds.market_types mt ON os.market_type_id = mt.market_type_id
+                    event_id,
+                    bookmaker_key,
+                    market_key,
+                    outcome_name,
+                    price,
+                    point,
+                    last_update
+                FROM odds.odds_snapshots
                 LIMIT %s OFFSET %s
                 """,
                 (batch_size, offset),
@@ -307,8 +299,15 @@ class OddsSyncManager:
                 market_type_id = market_map.get(row["market_key"])
 
                 if not bookmaker_id or not market_type_id:
+                    skipped += 1
                     continue
 
+                # Determine if it's latest (for simplicity, mark all as latest)
+                is_latest = True
+
+                # Use last_update if available, otherwise use current timestamp
+                last_update = row["last_update"] if row["last_update"] else datetime.now()
+                
                 rds_cursor.execute(
                     """
                     INSERT INTO odds.odds_snapshots (
@@ -325,8 +324,8 @@ class OddsSyncManager:
                         row["outcome_name"],
                         row["price"],
                         row["point"],
-                        row["last_update"],
-                        row["is_latest"],
+                        last_update,
+                        is_latest,
                     ),
                 )
                 synced += 1
@@ -340,6 +339,8 @@ class OddsSyncManager:
 
         if self.verbose:
             print(f"  ✓ Synced {synced:,} odds snapshots")
+            if skipped > 0:
+                print(f"  ⚠️  Skipped {skipped:,} snapshots (missing bookmaker/market mapping)")
 
     def full_sync(self):
         """Perform full synchronization."""

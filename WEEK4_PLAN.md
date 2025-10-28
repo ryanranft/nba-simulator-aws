@@ -1,8 +1,8 @@
 # Week 4 Implementation Plan - Integration Tests & Transformers
 
-**Date:** October 28, 2025  
-**Phase:** Phase 2 - ETL Framework (continued)  
-**Duration:** Week 4 of 14-week refactoring plan  
+**Date:** October 28, 2025
+**Phase:** Phase 2 - ETL Framework (continued)
+**Duration:** Week 4 of 14-week refactoring plan
 **Status:** 🔄 IN PROGRESS
 
 ---
@@ -37,7 +37,7 @@ Test extractors with real production data and implement transformation layer for
 ## 📋 Week 4 Tasks
 
 ### Task 1: Create Integration Test Framework
-**Estimated Time:** 1 hour  
+**Estimated Time:** 1 hour
 **Priority:** HIGH
 
 **Action Items:**
@@ -63,7 +63,7 @@ tests/integration/
 ---
 
 ### Task 2: Test hoopR Extractors (PRIORITY)
-**Estimated Time:** 1.5 hours  
+**Estimated Time:** 1.5 hours
 **Priority:** HIGH (Primary data source)
 
 **Action Items:**
@@ -83,7 +83,7 @@ tests/integration/
 ---
 
 ### Task 3: Test Other Extractors
-**Estimated Time:** 1.5 hours  
+**Estimated Time:** 1.5 hours
 **Priority:** MEDIUM
 
 **Action Items:**
@@ -96,7 +96,7 @@ tests/integration/
 ---
 
 ### Task 4: Create Transformation Layer
-**Estimated Time:** 2 hours  
+**Estimated Time:** 2 hours
 **Priority:** HIGH
 
 **Action Items:**
@@ -119,7 +119,7 @@ nba_simulator/etl/transformers/
 ---
 
 ### Task 5: Implement Data Quality Framework
-**Estimated Time:** 1.5 hours  
+**Estimated Time:** 1.5 hours
 **Priority:** MEDIUM
 
 **Action Items:**
@@ -132,7 +132,7 @@ nba_simulator/etl/transformers/
 ---
 
 ### Task 6: Documentation & Validation
-**Estimated Time:** 1 hour  
+**Estimated Time:** 1 hour
 **Priority:** MEDIUM
 
 **Action Items:**
@@ -157,21 +157,21 @@ from nba_simulator.config.loader import config
 class BaseIntegrationTest(unittest.TestCase):
     """
     Base class for integration tests.
-    
+
     Provides:
     - Database connection utilities
     - Data comparison methods
     - Performance measurement
     - Test data cleanup
     """
-    
+
     @classmethod
     def setUpClass(cls):
         """Set up test environment"""
         cls.db_available = cls._check_database_connection()
         if not cls.db_available:
             raise unittest.SkipTest("Database not available")
-    
+
     @classmethod
     def _check_database_connection(cls):
         """Check if database is accessible"""
@@ -180,11 +180,11 @@ class BaseIntegrationTest(unittest.TestCase):
             return result is not None
         except Exception:
             return False
-    
+
     def compare_outputs(self, extractor_output, database_output):
         """Compare extractor output with database data"""
         pass
-    
+
     def measure_performance(self, func, *args, **kwargs):
         """Measure execution time and memory"""
         pass
@@ -203,43 +203,43 @@ from typing import Any, Dict
 class BaseTransformer(ABC):
     """
     Base class for data transformers.
-    
+
     Transforms raw data from extractors into standardized format.
     """
-    
+
     def __init__(self, name: str):
         self.name = name
-    
+
     @abstractmethod
     def transform(self, data: Any) -> Dict[str, Any]:
         """
         Transform data to standardized format.
-        
+
         Args:
             data: Raw data from extractor
-        
+
         Returns:
             Transformed data in standard format
         """
         pass
-    
+
     @abstractmethod
     def validate_schema(self, data: Dict[str, Any]) -> bool:
         """
         Validate transformed data against schema.
-        
+
         Args:
             data: Transformed data
-        
+
         Returns:
             True if valid, False otherwise
         """
         pass
-    
+
     def get_quality_metrics(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Calculate data quality metrics.
-        
+
         Returns:
             Dictionary of quality metrics
         """
@@ -295,13 +295,13 @@ UNIFIED_SCHEMA = {
 
 ### Risk Mitigation
 
-**Risk:** Integration tests slow down development  
+**Risk:** Integration tests slow down development
 **Mitigation:** Use small sample sizes, parallel execution
 
-**Risk:** Extractors fail with real data  
+**Risk:** Extractors fail with real data
 **Mitigation:** Wrapper pattern allows instant fallback to scripts
 
-**Risk:** Performance regression  
+**Risk:** Performance regression
 **Mitigation:** Measure and compare with baseline
 
 ---
@@ -339,7 +339,7 @@ UNIFIED_SCHEMA = {
 1. **Integration Tests May Reveal Issues**
    - Risk: Extractors fail with real data
    - Mitigation: Wrapper pattern allows fallback
-   
+
 2. **Performance Issues**
    - Risk: Extractors slower than direct scripts
    - Mitigation: Measure and optimize
@@ -419,6 +419,6 @@ UNIFIED_SCHEMA = {
 
 ---
 
-**Status:** Ready to begin Week 4 implementation  
+**Status:** Ready to begin Week 4 implementation
 **Next:** Create integration test framework
 
