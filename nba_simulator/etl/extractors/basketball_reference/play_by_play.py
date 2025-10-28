@@ -14,9 +14,9 @@ from ...base.extractor import BaseExtractor
 class BasketballReferencePlayByPlayExtractor(BaseExtractor):
     """
     Basketball Reference play-by-play data extractor.
-    
+
     Historical data source with comprehensive coverage.
-    
+
     Supports multiple extraction modes:
     - async - Fast parallel extraction
     - incremental - New games only
@@ -24,21 +24,21 @@ class BasketballReferencePlayByPlayExtractor(BaseExtractor):
     - daily - Daily incremental updates
     - backfill - Fill historical gaps
     - discovery - Discover available games
-    
+
     Usage:
         extractor = BasketballReferencePlayByPlayExtractor()
         result = extractor.extract(season="2024", mode="incremental")
     """
-    
+
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """
         Initialize Basketball Reference play-by-play extractor.
-        
+
         Args:
             config: Optional configuration dictionary
         """
         project_root = Path(__file__).parent.parent.parent.parent.parent
-        
+
         self.legacy_scripts = {
             'async': project_root / "scripts/etl/basketball_reference_async_scraper.py",
             'incremental': project_root / "scripts/etl/basketball_reference_incremental_scraper.py",
@@ -47,10 +47,10 @@ class BasketballReferencePlayByPlayExtractor(BaseExtractor):
             'backfill': project_root / "scripts/etl/basketball_reference_pbp_backfill.py",
             'discovery': project_root / "scripts/etl/basketball_reference_pbp_discovery.py",
         }
-        
+
         # Default to incremental
         legacy_script = self.legacy_scripts.get('incremental')
-        
+
         super().__init__(
             name="basketball_reference_play_by_play",
             legacy_script=str(legacy_script) if legacy_script else None,
@@ -58,7 +58,7 @@ class BasketballReferencePlayByPlayExtractor(BaseExtractor):
             max_retries=3,
             rate_limit_delay=3.0  # BBRef needs slower rate limiting
         )
-    
+
     def extract(
         self,
         season: Optional[str] = None,
@@ -68,14 +68,14 @@ class BasketballReferencePlayByPlayExtractor(BaseExtractor):
     ) -> Dict[str, Any]:
         """
         Extract play-by-play data from Basketball Reference.
-        
+
         Args:
             season: NBA season (e.g., "2024")
             game_id: Specific game ID to extract
             force: Force re-extraction
-            mode: Extraction mode ('async', 'incremental', 'comprehensive', 
+            mode: Extraction mode ('async', 'incremental', 'comprehensive',
                   'daily', 'backfill', 'discovery')
-        
+
         Returns:
             Dictionary with extraction results
         """
@@ -83,7 +83,7 @@ class BasketballReferencePlayByPlayExtractor(BaseExtractor):
             f"Extracting Basketball Reference PBP data (season={season}, "
             f"game_id={game_id}, force={force}, mode={mode})"
         )
-        
+
         args = []
         if season:
             args.extend(["--season", season])
@@ -91,18 +91,18 @@ class BasketballReferencePlayByPlayExtractor(BaseExtractor):
             args.extend(["--game-id", game_id])
         if force:
             args.append("--force")
-        
+
         # Select script based on mode
         if mode in self.legacy_scripts:
             self.legacy_script = self.legacy_scripts[mode]
-        
+
         try:
             result = self.run_with_retry(
                 self.call_legacy_script,
                 args=args,
                 timeout=10800  # 3 hour timeout (BBRef is slow)
             )
-            
+
             return {
                 'status': 'success',
                 'mode': mode,
@@ -111,32 +111,32 @@ class BasketballReferencePlayByPlayExtractor(BaseExtractor):
                 'stdout': result.stdout[:500],
                 'exit_code': result.returncode
             }
-        
+
         except Exception as e:
             self.logger.error(f"Basketball Reference PBP extraction failed: {e}")
             return {
                 'status': 'error',
                 'error': str(e)
             }
-    
+
     def validate(self, data: Dict[str, Any]) -> bool:
         """Validate extraction results"""
         if not isinstance(data, dict):
             return False
         return data.get('status') == 'success'
-    
+
     def health_check(self) -> Dict[str, Any]:
         """Check extractor health"""
         health = super().health_check()
-        
+
         scripts_available = {}
         for name, path in self.legacy_scripts.items():
             scripts_available[name] = path.exists()
-        
+
         health['legacy_scripts'] = scripts_available
         health['data_source'] = 'Basketball Reference'
         health['purpose'] = 'Historical data and comprehensive coverage'
         health['rate_limit_note'] = 'Slower rate limiting (3s) to respect BBRef'
-        
+
         return health
 

@@ -96,7 +96,7 @@ print("\nTest 4: Instantiating hoopR extractors...")
 try:
     hoopr_pbp = HooprPlayByPlayExtractor()
     print(f"✅ HooprPlayByPlayExtractor instantiated: {hoopr_pbp.name}")
-    
+
     hoopr_box = HooprPlayerBoxExtractor()
     print(f"✅ HooprPlayerBoxExtractor instantiated: {hoopr_box.name}")
 except Exception as e:
@@ -108,10 +108,10 @@ print("\nTest 4b: Instantiating ESPN extractors...")
 try:
     espn_pbp = ESPNPlayByPlayExtractor()
     print(f"✅ ESPNPlayByPlayExtractor instantiated: {espn_pbp.name}")
-    
+
     espn_box = ESPNBoxScoresExtractor()
     print(f"✅ ESPNBoxScoresExtractor instantiated: {espn_box.name}")
-    
+
     espn_schedule = ESPNScheduleExtractor()
     print(f"✅ ESPNScheduleExtractor instantiated: {espn_schedule.name}")
 except Exception as e:
@@ -123,7 +123,7 @@ print("\nTest 4c: Instantiating Basketball Reference extractors...")
 try:
     bbref_pbp = BasketballReferencePlayByPlayExtractor()
     print(f"✅ BasketballReferencePlayByPlayExtractor instantiated: {bbref_pbp.name}")
-    
+
     bbref_box = BasketballReferenceBoxScoresExtractor()
     print(f"✅ BasketballReferenceBoxScoresExtractor instantiated: {bbref_box.name}")
 except Exception as e:
@@ -135,7 +135,7 @@ print("\nTest 4d: Instantiating NBA API extractors...")
 try:
     nbaapi_pbp = NBAAPIPlayByPlayExtractor()
     print(f"✅ NBAAPIPlayByPlayExtractor instantiated: {nbaapi_pbp.name}")
-    
+
     nbaapi_panel = NBAAPIPossessionPanelExtractor()
     print(f"✅ NBAAPIPossessionPanelExtractor instantiated: {nbaapi_panel.name}")
 except Exception as e:
@@ -150,42 +150,42 @@ try:
     print(f"✅ hoopR PBP health check: {hoopr_pbp_health['status']}")
     print(f"   - Primary data source: {hoopr_pbp_health.get('primary_data_source', False)}")
     print(f"   - Expected records: {hoopr_pbp_health.get('expected_records', 'Unknown')}")
-    
+
     hoopr_box_health = hoopr_box.health_check()
     print(f"✅ hoopR Player box health check: {hoopr_box_health['status']}")
-    
+
     # ESPN health checks
     espn_pbp_health = espn_pbp.health_check()
     print(f"✅ ESPN PBP health check: {espn_pbp_health['status']}")
     print(f"   - Data source: {espn_pbp_health.get('data_source', 'Unknown')}")
     print(f"   - Purpose: {espn_pbp_health.get('purpose', 'Unknown')}")
-    
+
     if 'legacy_scripts' in espn_pbp_health:
         print("   - ESPN legacy scripts available:")
         for name, available in espn_pbp_health['legacy_scripts'].items():
             status = "✅" if available else "⚠️"
             print(f"     {status} {name}: {available}")
-    
+
     espn_box_health = espn_box.health_check()
     print(f"✅ ESPN Box scores health check: {espn_box_health['status']}")
-    
+
     espn_schedule_health = espn_schedule.health_check()
     print(f"✅ ESPN Schedule health check: {espn_schedule_health['status']}")
-    
+
     # Basketball Reference health checks
     bbref_pbp_health = bbref_pbp.health_check()
     print(f"✅ Basketball Reference PBP health check: {bbref_pbp_health['status']}")
     print(f"   - Data source: {bbref_pbp_health.get('data_source', 'Unknown')}")
     print(f"   - Purpose: {bbref_pbp_health.get('purpose', 'Unknown')}")
-    
+
     bbref_box_health = bbref_box.health_check()
     print(f"✅ Basketball Reference Box scores health check: {bbref_box_health['status']}")
-    
+
     # NBA API health checks
     nbaapi_pbp_health = nbaapi_pbp.health_check()
     print(f"✅ NBA API PBP health check: {nbaapi_pbp_health['status']}")
     print(f"   - Data source: {nbaapi_pbp_health.get('data_source', 'Unknown')}")
-    
+
     nbaapi_panel_health = nbaapi_panel.health_check()
     print(f"✅ NBA API Possession Panel health check: {nbaapi_panel_health['status']}")
     print(f"   - Data type: {nbaapi_panel_health.get('data_type', 'Unknown')}")
