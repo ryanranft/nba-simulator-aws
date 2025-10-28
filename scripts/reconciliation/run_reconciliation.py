@@ -84,13 +84,13 @@ class ReconciliationPipeline:
     def _run_health_checks(self):
         """
         Run pre-flight health checks before starting pipeline.
-        
+
         Returns:
             tuple: (success: bool, issues: list)
         """
         logger.info("Running pre-flight health checks...")
         issues = []
-        
+
         # Check AWS credentials
         try:
             import boto3
@@ -100,7 +100,7 @@ class ReconciliationPipeline:
         except Exception as e:
             issues.append(f"AWS credentials check failed: {e}")
             logger.warning(f"⚠️  AWS credentials: {e}")
-        
+
         # Check S3 bucket access
         try:
             import boto3
@@ -111,7 +111,7 @@ class ReconciliationPipeline:
         except Exception as e:
             issues.append(f"S3 bucket access failed: {e}")
             logger.error(f"❌ S3 bucket: {e}")
-        
+
         # Check disk space
         try:
             disk = psutil.disk_usage('/')
@@ -123,7 +123,7 @@ class ReconciliationPipeline:
                 logger.info(f"✅ Disk space: {free_gb:.2f} GB free")
         except Exception as e:
             logger.warning(f"⚠️  Could not check disk space: {e}")
-        
+
         # Check cache directory
         cache_dir = Path("inventory/cache")
         if not cache_dir.exists():
@@ -131,13 +131,13 @@ class ReconciliationPipeline:
             logger.info(f"✅ Created cache directory: {cache_dir}")
         else:
             logger.info(f"✅ Cache directory exists: {cache_dir}")
-        
+
         # Check config file
         if not self.config_file.exists():
             logger.warning(f"⚠️  Config file not found, using defaults")
         else:
             logger.info(f"✅ Config file: {self.config_file}")
-        
+
         success = len(issues) == 0
         if success:
             logger.info("✅ All health checks passed")
@@ -145,27 +145,27 @@ class ReconciliationPipeline:
             logger.error(f"❌ {len(issues)} health check(s) failed")
             for issue in issues:
                 logger.error(f"   - {issue}")
-        
+
         return success, issues
 
     def _retry_with_backoff(self, func, *args, **kwargs):
         """
         Execute function with exponential backoff retry logic.
-        
+
         Args:
             func: Function to execute
             *args: Function arguments
             **kwargs: Function keyword arguments
-            
+
         Returns:
             Function result
-            
+
         Raises:
             Exception: If all retries exhausted
         """
         max_attempts = self.config.get("retry", {}).get("max_attempts", 3)
         backoff = self.config.get("retry", {}).get("backoff_seconds", 5)
-        
+
         for attempt in range(1, max_attempts + 1):
             try:
                 return func(*args, **kwargs)
@@ -173,7 +173,7 @@ class ReconciliationPipeline:
                 if attempt == max_attempts:
                     logger.error(f"❌ Failed after {max_attempts} attempts: {e}")
                     raise
-                
+
                 wait_time = backoff * (2 ** (attempt - 1))  # Exponential backoff
                 logger.warning(f"⚠️  Attempt {attempt}/{max_attempts} failed: {e}")
                 logger.info(f"   Retrying in {wait_time}s...")
@@ -195,17 +195,17 @@ class ReconciliationPipeline:
         logger.info("=" * 80)
         logger.info("RECONCILIATION PIPELINE - ADCE Phase 2A MVP (ENHANCED)")
         logger.info("=" * 80)
-        
+
         # Performance tracking
         start_time = datetime.now()
         start_memory = psutil.Process().memory_info().rss / (1024 ** 2)  # MB
         step_times = {}
-        
+
         # Health checks (if enabled)
         if self.config.get("health_checks", {}).get("enabled", True):
             logger.info("\n[Pre-Flight] Running health checks...")
             health_ok, health_issues = self._run_health_checks()
-            
+
             if not health_ok:
                 fail_fast = self.config.get("health_checks", {}).get("fail_fast", False)
                 if fail_fast:
@@ -217,7 +217,7 @@ class ReconciliationPipeline:
                     }
                 else:
                     logger.warning("⚠️  Health checks failed but continuing (fail_fast=False)")
-        
+
         logger.info("")
 
         # Parse steps
@@ -281,7 +281,7 @@ class ReconciliationPipeline:
             duration = (datetime.now() - start_time).total_seconds()
             end_memory = psutil.Process().memory_info().rss / (1024 ** 2)  # MB
             memory_delta = end_memory - start_memory
-            
+
             self.results["pipeline_duration_seconds"] = duration
             self.results["completed_at"] = datetime.now().isoformat()
             self.results["success"] = True
@@ -311,26 +311,26 @@ class ReconciliationPipeline:
     def _print_performance_summary(self, step_times):
         """
         Print detailed performance breakdown.
-        
+
         Args:
             step_times: Dict of step names to duration in seconds
         """
         if not step_times:
             return
-        
+
         print("\n" + "=" * 60)
         print("⏱️  PERFORMANCE BREAKDOWN")
         print("=" * 60)
-        
+
         total_time = sum(step_times.values())
-        
+
         for step, duration in step_times.items():
             percentage = (duration / total_time * 100) if total_time > 0 else 0
             bar_length = int(percentage / 2)  # 50 chars = 100%
             bar = "█" * bar_length + "░" * (50 - bar_length)
-            
+
             print(f"{step:12} {bar} {duration:6.1f}s ({percentage:5.1f}%)")
-        
+
         print("=" * 60)
         print(f"{'TOTAL':12} {' ' * 50} {total_time:6.1f}s")
         print("=" * 60)

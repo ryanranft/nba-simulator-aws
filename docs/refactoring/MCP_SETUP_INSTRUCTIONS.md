@@ -1,7 +1,7 @@
 # MCP Setup Instructions for Claude Desktop
 
-**Purpose:** Enable Claude Desktop to access your NBA database and S3 bucket  
-**Time Required:** 5-10 minutes  
+**Purpose:** Enable Claude Desktop to access your NBA database and S3 bucket
+**Time Required:** 5-10 minutes
 **Status:** USER ACTION REQUIRED
 
 ---
@@ -98,7 +98,7 @@ Expected: List of 40 tables
 **Solution:** Check your database credentials and RDS endpoint
 
 ### Issue: "No MCP tools available"
-**Solution:** 
+**Solution:**
 1. Ensure config file is in correct location
 2. Check JSON syntax is valid
 3. Restart Claude Desktop
@@ -125,6 +125,6 @@ See: `docs/refactoring/REFACTORING_GUIDE.md` for usage during refactoring.
 
 ---
 
-**Created:** October 28, 2025  
+**Created:** October 28, 2025
 **For:** NBA Simulator AWS Production Refactoring
 
