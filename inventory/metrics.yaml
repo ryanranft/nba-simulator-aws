@@ -1,14 +1,14 @@
 metadata:
   version: 1.0.0
-  last_updated: '2025-10-27T10:58:33.048488Z'
+  last_updated: '2025-10-28T05:03:56.232525Z'
   last_verified: '2025-10-21T19:00:00Z'
   verified_by: manual_verification
   system: DIMS v1.0.0
   notes: Initial metrics from comprehensive verification on 2025-10-21
 s3_storage:
   total_objects:
-    value: 172832
-    last_verified: '2025-10-27T10:44:40.966334Z'
+    value: 172842
+    last_verified: '2025-10-28T05:03:55.735059Z'
     verification_method: automated
     cached: false
     cache_expires: null
@@ -171,8 +171,8 @@ plus_minus_system:
       lines: 480
 code_base:
   python_files:
-    value: 1682
-    last_verified: '2025-10-27T10:44:41.072995Z'
+    value: 1693
+    last_verified: '2025-10-28T05:03:55.870040Z'
     verification_method: automated
     cached: false
     cache_expires: null
@@ -188,15 +188,15 @@ code_base:
     directory: scripts/pbp_to_boxscore/
     last_verified: '2025-10-21T14:00:00Z'
   test_files:
-    value: 644
-    last_verified: '2025-10-27T10:44:41.177052Z'
+    value: 645
+    last_verified: '2025-10-28T05:03:55.986776Z'
     verification_method: automated
     cached: false
     cache_expires: null
 documentation:
   markdown_files:
-    value: 1777
-    last_verified: '2025-10-26T20:53:21.119292Z'
+    value: 1783
+    last_verified: '2025-10-28T05:03:56.105548Z'
     verification_method: automated
     cached: false
     cache_expires: null
