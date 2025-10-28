@@ -1,9 +1,14 @@
 """
-ETL Module
+ETL Module - Extract, Transform, Load
 
-Extract, Transform, Load pipeline components.
-(To be implemented in Phase 2)
+Consolidates 75+ scrapers into organized structure.
+Provides base classes and source-specific extractors.
+
+Phase 2 of refactoring (Weeks 3-5).
 """
 
-__all__ = []
+__version__ = "2.0.0-alpha"
 
+from .base import BaseScraper, BaseExtractor, BaseLoader
+
+__all__ = ["BaseScraper", "BaseExtractor", "BaseLoader"]
