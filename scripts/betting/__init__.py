@@ -11,4 +11,3 @@ This module provides comprehensive betting analysis including:
 """
 
 __version__ = "1.0.0"
-
