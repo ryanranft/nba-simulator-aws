@@ -38,13 +38,13 @@ print()
 def get_all_tables() -> List[str]:
     """Get list of all tables in the database"""
     query = """
-    SELECT table_name 
-    FROM information_schema.tables 
-    WHERE table_schema = 'public' 
+    SELECT table_name
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
     AND table_type = 'BASE TABLE'
     ORDER BY table_name;
     """
-    
+
     try:
         results = execute_query(query)
         tables = [row['table_name'] for row in results]
@@ -69,26 +69,26 @@ def get_table_metrics(table_name: str) -> Dict[str, Any]:
         'n_tup_del': None,
         'error': None
     }
-    
+
     try:
         # Get record count
         count_query = f"SELECT COUNT(*) as count FROM {table_name};"
         count_result = execute_query(count_query)
         metrics['record_count'] = count_result[0]['count']
-        
+
         # Get table size
         size_query = f"""
-        SELECT 
+        SELECT
             pg_total_relation_size('{table_name}') as size_bytes,
             pg_size_pretty(pg_total_relation_size('{table_name}')) as size_pretty;
         """
         size_result = execute_query(size_query)
         metrics['size_bytes'] = size_result[0]['size_bytes']
         metrics['size_pretty'] = size_result[0]['size_pretty']
-        
+
         # Get statistics
         stats_query = f"""
-        SELECT 
+        SELECT
             last_vacuum,
             last_autovacuum,
             last_analyze,
@@ -96,7 +96,7 @@ def get_table_metrics(table_name: str) -> Dict[str, Any]:
             n_tup_ins,
             n_tup_upd,
             n_tup_del
-        FROM pg_stat_user_tables 
+        FROM pg_stat_user_tables
         WHERE relname = '{table_name}';
         """
         stats_result = execute_query(stats_query)
@@ -107,17 +107,17 @@ def get_table_metrics(table_name: str) -> Dict[str, Any]:
             metrics['n_tup_ins'] = stats.get('n_tup_ins')
             metrics['n_tup_upd'] = stats.get('n_tup_upd')
             metrics['n_tup_del'] = stats.get('n_tup_del')
-        
+
     except Exception as e:
         metrics['error'] = str(e)
-    
+
     return metrics
 
 
 def validate_critical_tables(baseline: Dict[str, Any]) -> List[str]:
     """Validate critical tables have expected record counts"""
     issues = []
-    
+
     # Expected baselines from documentation
     expected = {
         'games': {'min': 44000, 'max': 50000, 'expected': 44828},
@@ -125,11 +125,11 @@ def validate_critical_tables(baseline: Dict[str, Any]) -> List[str]:
         'box_score_players': {'min': 400000, 'max': 450000, 'expected': 408833},
         'box_score_snapshots': {'min': 0, 'max': 10000, 'expected': 1},
     }
-    
+
     for table_name, exp in expected.items():
         if table_name in baseline:
             actual = baseline[table_name].get('record_count', 0)
-            
+
             if actual < exp['min'] or actual > exp['max']:
                 issues.append(
                     f"⚠️  {table_name}: {actual:,} records "
@@ -137,7 +137,7 @@ def validate_critical_tables(baseline: Dict[str, Any]) -> List[str]:
                 )
             else:
                 print(f"✅ {table_name}: {actual:,} records (within expected range)")
-    
+
     return issues
 
 
@@ -146,57 +146,57 @@ def investigate_temporal_events() -> Dict[str, Any]:
     print("\n" + "=" * 70)
     print("CRITICAL QUESTION #1: What is temporal_events table?")
     print("=" * 70)
-    
+
     investigation = {
         'question': 'What is temporal_events table (5.8 GB)?',
         'findings': {}
     }
-    
+
     try:
         # Get table structure
         schema_query = """
-        SELECT column_name, data_type, character_maximum_length 
-        FROM information_schema.columns 
+        SELECT column_name, data_type, character_maximum_length
+        FROM information_schema.columns
         WHERE table_name = 'temporal_events'
         ORDER BY ordinal_position;
         """
         schema = execute_query(schema_query)
         investigation['findings']['schema'] = schema
-        
+
         print(f"\nTable Structure ({len(schema)} columns):")
         for col in schema[:10]:  # Show first 10 columns
             print(f"  - {col['column_name']}: {col['data_type']}")
         if len(schema) > 10:
             print(f"  ... and {len(schema) - 10} more columns")
-        
+
         # Get sample records
         sample_query = "SELECT * FROM temporal_events LIMIT 5;"
         samples = execute_query(sample_query)
         investigation['findings']['sample_count'] = len(samples)
-        
+
         print(f"\n✅ Sample records available: {len(samples)}")
-        
+
         # Get total count and size
         count_query = "SELECT COUNT(*) as count FROM temporal_events;"
         size_query = """
-        SELECT 
+        SELECT
             pg_size_pretty(pg_total_relation_size('temporal_events')) as size
         FROM pg_tables WHERE tablename = 'temporal_events';
         """
-        
+
         count_result = execute_query(count_query)
         size_result = execute_query(size_query)
-        
+
         investigation['findings']['record_count'] = count_result[0]['count']
         investigation['findings']['size'] = size_result[0]['size'] if size_result else 'Unknown'
-        
+
         print(f"✅ Total records: {count_result[0]['count']:,}")
         print(f"✅ Table size: {investigation['findings']['size']}")
-        
+
         # Check for recent activity
         stats_query = """
         SELECT n_tup_ins, n_tup_upd, n_tup_del, last_autoanalyze
-        FROM pg_stat_user_tables 
+        FROM pg_stat_user_tables
         WHERE relname = 'temporal_events';
         """
         stats = execute_query(stats_query)
@@ -205,19 +205,19 @@ def investigate_temporal_events() -> Dict[str, Any]:
             print(f"✅ Recent inserts: {stats[0]['n_tup_ins']:,}")
             print(f"✅ Recent updates: {stats[0]['n_tup_upd']:,}")
             print(f"✅ Last analyzed: {stats[0]['last_autoanalyze']}")
-        
+
         investigation['conclusion'] = "Investigation complete - see findings for details"
-        
+
     except Exception as e:
         investigation['error'] = str(e)
         print(f"❌ Error investigating temporal_events: {e}")
-    
+
     return investigation
 
 
 def main():
     """Main validation workflow"""
-    
+
     # Initialize results
     results = {
         'timestamp': datetime.now().isoformat(),
@@ -232,25 +232,25 @@ def main():
         'critical_questions': {},
         'summary': {}
     }
-    
+
     print("Step 1: Getting list of all tables...")
     print("-" * 70)
     tables = get_all_tables()
-    
+
     if not tables:
         print("❌ No tables found. Cannot continue validation.")
         sys.exit(1)
-    
+
     print()
     print("Step 2: Collecting metrics for each table...")
     print("-" * 70)
-    
+
     for i, table_name in enumerate(tables, 1):
         print(f"[{i}/{len(tables)}] Analyzing {table_name}...", end=" ")
-        
+
         metrics = get_table_metrics(table_name)
         results['baseline'][table_name] = metrics
-        
+
         if metrics['error']:
             print(f"❌ Error: {metrics['error']}")
             results['validation']['issues'].append(f"{table_name}: {metrics['error']}")
@@ -258,40 +258,40 @@ def main():
             count = metrics['record_count']
             size = metrics['size_pretty']
             print(f"✅ {count:,} records, {size}")
-    
+
     print()
     print("Step 3: Validating critical tables...")
     print("-" * 70)
-    
+
     critical_issues = validate_critical_tables(results['baseline'])
     results['validation']['issues'].extend(critical_issues)
-    
+
     if not critical_issues:
         print("\n✅ All critical tables validated successfully!")
     else:
         print(f"\n⚠️  Found {len(critical_issues)} issue(s) with critical tables:")
         for issue in critical_issues:
             print(f"  {issue}")
-    
+
     # Investigate temporal_events (Critical Question #1)
     results['critical_questions']['temporal_events'] = investigate_temporal_events()
-    
+
     # Summary
     print("\n" + "=" * 70)
     print("VALIDATION SUMMARY")
     print("=" * 70)
-    
+
     total_tables = len(tables)
-    tables_with_data = sum(1 for m in results['baseline'].values() 
+    tables_with_data = sum(1 for m in results['baseline'].values()
                           if m['record_count'] and m['record_count'] > 0)
     tables_with_errors = sum(1 for m in results['baseline'].values() if m['error'])
-    
-    total_records = sum(m['record_count'] for m in results['baseline'].values() 
+
+    total_records = sum(m['record_count'] for m in results['baseline'].values()
                        if m['record_count'])
-    total_size_bytes = sum(m['size_bytes'] for m in results['baseline'].values() 
+    total_size_bytes = sum(m['size_bytes'] for m in results['baseline'].values()
                           if m['size_bytes'])
     total_size_gb = total_size_bytes / (1024**3)
-    
+
     results['summary'] = {
         'total_tables': total_tables,
         'tables_with_data': tables_with_data,
@@ -300,34 +300,34 @@ def main():
         'total_size_gb': round(total_size_gb, 2),
         'validation_passed': len(results['validation']['issues']) == 0
     }
-    
+
     print(f"\nTotal tables: {total_tables}")
     print(f"Tables with data: {tables_with_data}")
     print(f"Tables with errors: {tables_with_errors}")
     print(f"Total records: {total_records:,}")
     print(f"Total database size: {total_size_gb:.2f} GB")
     print()
-    
+
     if results['validation']['issues']:
         print(f"❌ VALIDATION FAILED: {len(results['validation']['issues'])} issue(s) found")
         results['validation']['passed'] = False
     else:
         print("✅ VALIDATION PASSED: All checks successful!")
         results['validation']['passed'] = True
-    
+
     # Save baseline snapshot
     output_dir = project_root / "backups"
     output_dir.mkdir(exist_ok=True)
-    
+
     output_file = output_dir / f"week2_baseline_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    
+
     with open(output_file, 'w') as f:
         json.dump(results, f, indent=2, default=str)
-    
+
     print()
     print(f"📁 Baseline saved to: {output_file}")
     print()
-    
+
     # Exit code
     sys.exit(0 if results['validation']['passed'] else 1)
 
