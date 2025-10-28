@@ -31,6 +31,8 @@ import yaml
 from pathlib import Path
 from datetime import datetime, timedelta
 import json
+import time
+import psutil  # For memory/performance monitoring
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -75,7 +77,107 @@ class ReconciliationPipeline:
             "s3": {"bucket": "nba-sim-raw-data-lake", "sample_rate": 0.1},
             "performance": {"full_cycle_max_minutes": 10},
             "dry_run": {"enabled": False, "save_results": True},
+            "retry": {"max_attempts": 3, "backoff_seconds": 5},
+            "health_checks": {"enabled": True, "fail_fast": False},
         }
+
+    def _run_health_checks(self):
+        """
+        Run pre-flight health checks before starting pipeline.
+        
+        Returns:
+            tuple: (success: bool, issues: list)
+        """
+        logger.info("Running pre-flight health checks...")
+        issues = []
+        
+        # Check AWS credentials
+        try:
+            import boto3
+            sts = boto3.client('sts')
+            sts.get_caller_identity()
+            logger.info("✅ AWS credentials valid")
+        except Exception as e:
+            issues.append(f"AWS credentials check failed: {e}")
+            logger.warning(f"⚠️  AWS credentials: {e}")
+        
+        # Check S3 bucket access
+        try:
+            import boto3
+            s3 = boto3.client('s3')
+            bucket = self.config.get("s3", {}).get("bucket", "nba-sim-raw-data-lake")
+            s3.head_bucket(Bucket=bucket)
+            logger.info(f"✅ S3 bucket accessible: {bucket}")
+        except Exception as e:
+            issues.append(f"S3 bucket access failed: {e}")
+            logger.error(f"❌ S3 bucket: {e}")
+        
+        # Check disk space
+        try:
+            disk = psutil.disk_usage('/')
+            free_gb = disk.free / (1024 ** 3)
+            if free_gb < 1.0:
+                issues.append(f"Low disk space: {free_gb:.2f} GB free")
+                logger.warning(f"⚠️  Low disk space: {free_gb:.2f} GB")
+            else:
+                logger.info(f"✅ Disk space: {free_gb:.2f} GB free")
+        except Exception as e:
+            logger.warning(f"⚠️  Could not check disk space: {e}")
+        
+        # Check cache directory
+        cache_dir = Path("inventory/cache")
+        if not cache_dir.exists():
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            logger.info(f"✅ Created cache directory: {cache_dir}")
+        else:
+            logger.info(f"✅ Cache directory exists: {cache_dir}")
+        
+        # Check config file
+        if not self.config_file.exists():
+            logger.warning(f"⚠️  Config file not found, using defaults")
+        else:
+            logger.info(f"✅ Config file: {self.config_file}")
+        
+        success = len(issues) == 0
+        if success:
+            logger.info("✅ All health checks passed")
+        else:
+            logger.error(f"❌ {len(issues)} health check(s) failed")
+            for issue in issues:
+                logger.error(f"   - {issue}")
+        
+        return success, issues
+
+    def _retry_with_backoff(self, func, *args, **kwargs):
+        """
+        Execute function with exponential backoff retry logic.
+        
+        Args:
+            func: Function to execute
+            *args: Function arguments
+            **kwargs: Function keyword arguments
+            
+        Returns:
+            Function result
+            
+        Raises:
+            Exception: If all retries exhausted
+        """
+        max_attempts = self.config.get("retry", {}).get("max_attempts", 3)
+        backoff = self.config.get("retry", {}).get("backoff_seconds", 5)
+        
+        for attempt in range(1, max_attempts + 1):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                if attempt == max_attempts:
+                    logger.error(f"❌ Failed after {max_attempts} attempts: {e}")
+                    raise
+                
+                wait_time = backoff * (2 ** (attempt - 1))  # Exponential backoff
+                logger.warning(f"⚠️  Attempt {attempt}/{max_attempts} failed: {e}")
+                logger.info(f"   Retrying in {wait_time}s...")
+                time.sleep(wait_time)
 
     def run(self, steps="all", use_cache=False, full_scan=False, dry_run=False):
         """
@@ -91,10 +193,32 @@ class ReconciliationPipeline:
             dict: Pipeline results
         """
         logger.info("=" * 80)
-        logger.info("RECONCILIATION PIPELINE - ADCE Phase 2A MVP")
+        logger.info("RECONCILIATION PIPELINE - ADCE Phase 2A MVP (ENHANCED)")
         logger.info("=" * 80)
-
+        
+        # Performance tracking
         start_time = datetime.now()
+        start_memory = psutil.Process().memory_info().rss / (1024 ** 2)  # MB
+        step_times = {}
+        
+        # Health checks (if enabled)
+        if self.config.get("health_checks", {}).get("enabled", True):
+            logger.info("\n[Pre-Flight] Running health checks...")
+            health_ok, health_issues = self._run_health_checks()
+            
+            if not health_ok:
+                fail_fast = self.config.get("health_checks", {}).get("fail_fast", False)
+                if fail_fast:
+                    logger.error("❌ Health checks failed and fail_fast=True. Aborting.")
+                    return {
+                        "success": False,
+                        "error": "Health checks failed",
+                        "issues": health_issues
+                    }
+                else:
+                    logger.warning("⚠️  Health checks failed but continuing (fail_fast=False)")
+        
+        logger.info("")
 
         # Parse steps
         if steps == "all":
@@ -107,47 +231,74 @@ class ReconciliationPipeline:
         try:
             # Step 1: Scan S3 (or use cache)
             if "scan" in run_steps:
+                step_start = datetime.now()
                 if use_cache:
                     logger.info("\n[Step 1/4] Loading cached S3 inventory...")
                     self.results["inventory"] = self._load_cached_inventory()
                 else:
                     logger.info("\n[Step 1/4] Scanning S3...")
-                    self.results["inventory"] = self._scan_s3(full_scan=full_scan)
+                    # Wrap S3 scan with retry logic
+                    self.results["inventory"] = self._retry_with_backoff(
+                        self._scan_s3, full_scan=full_scan
+                    )
+                step_times["scan"] = (datetime.now() - step_start).total_seconds()
+                logger.info(f"   ⏱️  Step 1 completed in {step_times['scan']:.1f}s")
             else:
                 logger.info("\n[Step 1/4] Skipped (using existing inventory)")
                 self.results["inventory"] = self._load_cached_inventory()
 
             # Step 2: Analyze coverage
             if "analyze" in run_steps:
+                step_start = datetime.now()
                 logger.info("\n[Step 2/4] Analyzing coverage...")
-                self.results["analysis"] = self._analyze_coverage()
+                self.results["analysis"] = self._retry_with_backoff(self._analyze_coverage)
+                step_times["analyze"] = (datetime.now() - step_start).total_seconds()
+                logger.info(f"   ⏱️  Step 2 completed in {step_times['analyze']:.1f}s")
             else:
                 logger.info("\n[Step 2/4] Skipped")
 
             # Step 3: Detect gaps
             if "detect" in run_steps:
+                step_start = datetime.now()
                 logger.info("\n[Step 3/4] Detecting gaps...")
-                self.results["gaps"] = self._detect_gaps()
+                self.results["gaps"] = self._retry_with_backoff(self._detect_gaps)
+                step_times["detect"] = (datetime.now() - step_start).total_seconds()
+                logger.info(f"   ⏱️  Step 3 completed in {step_times['detect']:.1f}s")
             else:
                 logger.info("\n[Step 3/4] Skipped")
 
             # Step 4: Generate task queue
             if "generate" in run_steps:
+                step_start = datetime.now()
                 logger.info("\n[Step 4/4] Generating task queue...")
                 self.results["tasks"] = self._generate_tasks(dry_run=dry_run)
+                step_times["generate"] = (datetime.now() - step_start).total_seconds()
+                logger.info(f"   ⏱️  Step 4 completed in {step_times['generate']:.1f}s")
             else:
                 logger.info("\n[Step 4/4] Skipped")
 
+            # Performance summary
             duration = (datetime.now() - start_time).total_seconds()
+            end_memory = psutil.Process().memory_info().rss / (1024 ** 2)  # MB
+            memory_delta = end_memory - start_memory
+            
             self.results["pipeline_duration_seconds"] = duration
             self.results["completed_at"] = datetime.now().isoformat()
             self.results["success"] = True
+            self.results["performance"] = {
+                "total_seconds": duration,
+                "step_times": step_times,
+                "memory_used_mb": memory_delta,
+                "peak_memory_mb": end_memory
+            }
 
             logger.info("\n" + "=" * 80)
             logger.info(f"✅ PIPELINE COMPLETE - Duration: {duration:.1f}s")
+            logger.info(f"   Memory: {memory_delta:+.1f} MB (peak: {end_memory:.1f} MB)")
             logger.info("=" * 80)
 
             self._print_summary()
+            self._print_performance_summary(step_times)
 
             return self.results
 
@@ -156,6 +307,33 @@ class ReconciliationPipeline:
             self.results["success"] = False
             self.results["error"] = str(e)
             return self.results
+
+    def _print_performance_summary(self, step_times):
+        """
+        Print detailed performance breakdown.
+        
+        Args:
+            step_times: Dict of step names to duration in seconds
+        """
+        if not step_times:
+            return
+        
+        print("\n" + "=" * 60)
+        print("⏱️  PERFORMANCE BREAKDOWN")
+        print("=" * 60)
+        
+        total_time = sum(step_times.values())
+        
+        for step, duration in step_times.items():
+            percentage = (duration / total_time * 100) if total_time > 0 else 0
+            bar_length = int(percentage / 2)  # 50 chars = 100%
+            bar = "█" * bar_length + "░" * (50 - bar_length)
+            
+            print(f"{step:12} {bar} {duration:6.1f}s ({percentage:5.1f}%)")
+        
+        print("=" * 60)
+        print(f"{'TOTAL':12} {' ' * 50} {total_time:6.1f}s")
+        print("=" * 60)
 
     def _scan_s3(self, full_scan=False):
         """Run S3 inventory scanner"""
