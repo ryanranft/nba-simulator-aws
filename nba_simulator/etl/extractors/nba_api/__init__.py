@@ -1,9 +1,16 @@
 """
 NBA API Data Extractors
 
-Extractors for NBA API data sources (7 scrapers to consolidate).
-To be implemented in Week 3-4.
+Extractors for NBA API data sources.
+Consolidates NBA API scripts into organized structure.
+
+NBA API provides official statistics and possession data.
 """
 
-__all__ = []
+from .play_by_play import NBAAPIPlayByPlayExtractor
+from .possession_panel import NBAAPIPossessionPanelExtractor
 
+__all__ = [
+    "NBAAPIPlayByPlayExtractor",
+    "NBAAPIPossessionPanelExtractor",
+]
