@@ -151,7 +151,7 @@ class OddsSyncManager:
                 """
                 INSERT INTO odds.bookmakers (bookmaker_key, bookmaker_title)
                 VALUES (%s, %s)
-                ON CONFLICT (bookmaker_key) DO UPDATE 
+                ON CONFLICT (bookmaker_key) DO UPDATE
                 SET bookmaker_title = EXCLUDED.bookmaker_title
                 """,
                 (row["bookmaker_key"], row["title"]),
@@ -275,7 +275,7 @@ class OddsSyncManager:
         while offset < total:
             local_cursor.execute(
                 """
-                SELECT 
+                SELECT
                     event_id,
                     bookmaker_key,
                     market_key,
@@ -307,7 +307,7 @@ class OddsSyncManager:
 
                 # Use last_update if available, otherwise use current timestamp
                 last_update = row["last_update"] if row["last_update"] else datetime.now()
-                
+
                 rds_cursor.execute(
                     """
                     INSERT INTO odds.odds_snapshots (
