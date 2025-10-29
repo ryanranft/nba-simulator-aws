@@ -26,10 +26,10 @@ Phase 0 establishes the complete data collection infrastructure for the NBA temp
 - 🗄️ `0.2_rag_mongodb_SUPERSEDED` - Original Qdrant vector database RAG
 - 🗄️ `0.6_rag_llm_mongodb_SUPERSEDED` - Original MongoDB/Qdrant RAG + LLM
 
-**New PostgreSQL Sub-Phases (Planned):**
-- 🔵 [0.0023: PostgreSQL JSONB Storage](0.0023_postgresql_jsonb_storage/README.md) - Flexible schema with JSONB
-- 🔵 [0.0024: RAG Pipeline with pgvector](0.0024_rag_pipeline_pgvector/README.md) - Vector embeddings in PostgreSQL
-- 🔵 [0.0025: RAG + LLM Integration](0.0025_rag_llm_integration/README.md) - Natural language query interface
+**PostgreSQL Sub-Phases (Already Complete):**
+- ✅ [0.0010: PostgreSQL JSONB Storage](0.0010_postgresql_jsonb_storage/README.md) - Completed Oct 25, 2025
+- ✅ [0.0011: RAG Pipeline with pgvector](0.0011_rag_pipeline_pgvector/README.md) - Completed Oct 25, 2025
+- ✅ [0.0012: RAG + LLM Integration](0.0012_rag_llm_integration/README.md) - Completed Oct 25, 2025
 
 **Why PostgreSQL?**
 - ✅ **Cost Savings:** $300-600/year (eliminate MongoDB + vector DB)
@@ -38,7 +38,7 @@ Phase 0 establishes the complete data collection infrastructure for the NBA temp
 - ✅ **ACID Transactions:** Data consistency across all operations
 - ✅ **Same Flexibility:** JSONB = MongoDB, pgvector = Qdrant
 
-**Status:** Archiving complete, new sub-phases ready for implementation (Priority 3, Weeks 5-6)
+**Status:** Archiving complete, PostgreSQL implementations deployed and tested (Oct 25, 2025)
 
 **See:** [Archive README](archive/mongodb_superseded/README.md) for full rationale and migration details
 
@@ -215,9 +215,9 @@ The following sub-phases were originally planned to use MongoDB and Qdrant but h
 
 | # | Original Sub-Phase | Status | Superseded By | Reason |
 |---|-------------------|--------|---------------|--------|
-| **0.1** | [NoSQL MongoDB Storage](archive/mongodb_superseded/0.1_nosql_mongodb_SUPERSEDED/README.md) | 🗄️ ARCHIVED | [0.0023 PostgreSQL JSONB](0.0023_postgresql_jsonb_storage/README.md) | PostgreSQL JSONB provides same flexibility with better integration |
-| **0.2** | [RAG with Qdrant](archive/mongodb_superseded/0.2_rag_mongodb_SUPERSEDED/README.md) | 🗄️ ARCHIVED | [0.0024 RAG with pgvector](0.0024_rag_pipeline_pgvector/README.md) | pgvector eliminates need for separate vector database |
-| **0.6** | [RAG + LLM with MongoDB](archive/mongodb_superseded/0.6_rag_llm_mongodb_SUPERSEDED/README.md) | 🗄️ ARCHIVED | [0.0025 PostgreSQL RAG + LLM](0.0025_rag_llm_integration/README.md) | Unified PostgreSQL architecture simplifies stack |
+| **0.1** | [NoSQL MongoDB Storage](archive/mongodb_superseded/0.1_nosql_mongodb_SUPERSEDED/README.md) | 🗄️ ARCHIVED | [0.0010 PostgreSQL JSONB](0.0010_postgresql_jsonb_storage/README.md) | PostgreSQL JSONB provides same flexibility with better integration |
+| **0.2** | [RAG with Qdrant](archive/mongodb_superseded/0.2_rag_mongodb_SUPERSEDED/README.md) | 🗄️ ARCHIVED | [0.0011 RAG with pgvector](0.0011_rag_pipeline_pgvector/README.md) | pgvector eliminates need for separate vector database |
+| **0.6** | [RAG + LLM with MongoDB](archive/mongodb_superseded/0.6_rag_llm_mongodb_SUPERSEDED/README.md) | 🗄️ ARCHIVED | [0.0012 PostgreSQL RAG + LLM](0.0012_rag_llm_integration/README.md) | Unified PostgreSQL architecture simplifies stack |
 
 ### Why PostgreSQL?
 

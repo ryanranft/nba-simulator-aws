@@ -2,7 +2,7 @@
 
 **Original Status:** 🔵 PLANNED
 **New Status:** 🗄️ **ARCHIVED - SUPERSEDED**
-**Superseded By:** [0.12 PostgreSQL RAG + LLM Integration](../../0.12_rag_llm_integration/README.md)
+**Superseded By:** [0.0012 PostgreSQL RAG + LLM Integration](../../0.0012_rag_llm_integration/README.md)
 **Archived Date:** October 22, 2025
 **Implementation ID:** rec_188 (MongoDB/Qdrant-based - superseded)
 
@@ -21,7 +21,7 @@
 - ✅ **Simpler architecture:** One database for everything
 - ✅ **Better integration:** Join embeddings, data, and LLM responses
 
-**Current Implementation:** [0.12 PostgreSQL RAG + LLM Integration](../../0.12_rag_llm_integration/README.md)
+**Current Implementation:** [0.0012 PostgreSQL RAG + LLM Integration](../../0.0012_rag_llm_integration/README.md)
 
 ---
 

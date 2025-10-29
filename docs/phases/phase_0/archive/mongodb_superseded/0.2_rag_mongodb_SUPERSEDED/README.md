@@ -2,7 +2,7 @@
 
 **Original Status:** 🔵 PLANNED
 **New Status:** 🗄️ **ARCHIVED - SUPERSEDED**
-**Superseded By:** [0.11 RAG Pipeline with pgvector](../../0.11_rag_pipeline_pgvector/README.md)
+**Superseded By:** [0.0011 RAG Pipeline with pgvector](../../0.0011_rag_pipeline_pgvector/README.md)
 **Archived Date:** October 22, 2025
 **Implementation ID:** rec_034 (Qdrant/MongoDB-based - superseded)
 
@@ -21,7 +21,7 @@
 - ✅ **Simpler architecture:** One connection pool, one backup strategy
 - ✅ **Better integration:** Join embeddings with temporal data
 
-**Current Implementation:** [0.11 RAG Pipeline with pgvector](../../0.11_rag_pipeline_pgvector/README.md)
+**Current Implementation:** [0.0011 RAG Pipeline with pgvector](../../0.0011_rag_pipeline_pgvector/README.md)
 
 ---
 

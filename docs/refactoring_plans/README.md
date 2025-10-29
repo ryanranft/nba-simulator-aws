@@ -1,9 +1,9 @@
 # Refactoring Plans - Full Codebase Reorganization
 
-**Status:** 📋 **PLANS IMPORTED** (Not yet started)  
-**Scope:** Complete system reorganization (4,055+ files)  
-**Timeline:** 14 weeks (production-safe approach)  
-**Generated:** October 27, 2025  
+**Status:** 📋 **PLANS IMPORTED** (Not yet started)
+**Scope:** Complete system reorganization (4,055+ files)
+**Timeline:** 14 weeks (production-safe approach)
+**Generated:** October 27, 2025
 **Imported:** October 29, 2025
 
 ---
@@ -279,7 +279,7 @@ Before starting refactoring, complete:
 
 ### Phase 0 (Separate from Refactoring)
 - [Phase 0 Index](../phases/phase_0/PHASE_0_INDEX.md)
-- [Phase 0 PostgreSQL Work](../phases/phase_0/0.0023_postgresql_jsonb_storage/README.md)
+- [Phase 0 PostgreSQL Work](../phases/phase_0/0.0010_postgresql_jsonb_storage/README.md)
 
 ### Architecture
 - [Architecture Decision Records](../adr/)
@@ -331,7 +331,7 @@ Plans designed for MCP (Model Context Protocol) assisted execution:
    crontab -l
    systemctl list-units --type=timer | grep nba
    launchctl list | grep nba
-   
+
    # Create baseline
    pg_dump > backups/pre_refactor_$(date +%Y%m%d).sql
    git tag pre-refactor-comprehensive-$(date +%Y%m%d)
@@ -352,7 +352,7 @@ Plans designed for MCP (Model Context Protocol) assisted execution:
 
 ---
 
-**Plans Imported:** October 29, 2025  
-**Status:** Ready for execution (awaiting Phase 0 PostgreSQL completion)  
+**Plans Imported:** October 29, 2025
+**Status:** Ready for execution (awaiting Phase 0 PostgreSQL completion)
 **Next Action:** Complete Phase 0 work, then begin refactoring Phase 0 (Pre-Flight Safety)
 

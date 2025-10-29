@@ -2,7 +2,7 @@
 
 **Original Status:** 🔵 PLANNED
 **New Status:** 🗄️ **ARCHIVED - SUPERSEDED**
-**Superseded By:** [0.10 PostgreSQL JSONB Storage](../../0.10_postgresql_jsonb_storage/README.md)
+**Superseded By:** [0.0010 PostgreSQL JSONB Storage](../../0.0010_postgresql_jsonb_storage/README.md)
 **Archived Date:** October 22, 2025
 **Implementation ID:** rec_033 (MongoDB-based - superseded)
 
@@ -21,7 +21,7 @@
 - ✅ **Lower cost:** $0 additional (using existing RDS)
 - ✅ **Simpler architecture:** Single database
 
-**Current Implementation:** [0.10 PostgreSQL JSONB Storage](../../0.10_postgresql_jsonb_storage/README.md)
+**Current Implementation:** [0.0010 PostgreSQL JSONB Storage](../../0.0010_postgresql_jsonb_storage/README.md)
 
 ---
 

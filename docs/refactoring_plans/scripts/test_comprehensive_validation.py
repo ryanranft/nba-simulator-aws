@@ -74,8 +74,8 @@ class TestDatabaseIntegrity:
 
         result = DatabaseConnection.execute_query(
             """
-            SELECT column_name, data_type 
-            FROM information_schema.columns 
+            SELECT column_name, data_type
+            FROM information_schema.columns
             WHERE table_name = 'games'
             ORDER BY ordinal_position
         """
@@ -167,8 +167,8 @@ class TestDatabaseIntegrity:
 
         result = DatabaseConnection.execute_query(
             """
-            SELECT COUNT(*) as null_count 
-            FROM games 
+            SELECT COUNT(*) as null_count
+            FROM games
             WHERE game_id IS NULL
         """
         )
@@ -188,8 +188,8 @@ class TestDIMSMonitoring:
 
         result = DatabaseConnection.execute_query(
             """
-            SELECT COUNT(*) as cnt 
-            FROM information_schema.tables 
+            SELECT COUNT(*) as cnt
+            FROM information_schema.tables
             WHERE table_name = 'dims_metrics_snapshots'
         """
         )
@@ -204,7 +204,7 @@ class TestDIMSMonitoring:
 
         result = DatabaseConnection.execute_query(
             """
-            SELECT 
+            SELECT
                 COUNT(*) as snapshot_count,
                 MAX(created_at) as last_snapshot
             FROM dims_metrics_snapshots
@@ -225,8 +225,8 @@ class TestDIMSMonitoring:
 
         result = DatabaseConnection.execute_query(
             """
-            SELECT COUNT(*) as cnt 
-            FROM information_schema.tables 
+            SELECT COUNT(*) as cnt
+            FROM information_schema.tables
             WHERE table_name = 'dims_config'
         """
         )
@@ -245,8 +245,8 @@ class TestPhase8BoxScore:
 
         result = DatabaseConnection.execute_query(
             """
-            SELECT column_name, data_type 
-            FROM information_schema.columns 
+            SELECT column_name, data_type
+            FROM information_schema.columns
             WHERE table_name = 'box_score_snapshots'
             ORDER BY ordinal_position
         """
@@ -268,8 +268,8 @@ class TestPhase8BoxScore:
 
         result = DatabaseConnection.execute_query(
             """
-            SELECT snapshot_data 
-            FROM box_score_snapshots 
+            SELECT snapshot_data
+            FROM box_score_snapshots
             LIMIT 1
         """
         )
@@ -287,8 +287,8 @@ class TestPhase8BoxScore:
 
         result = DatabaseConnection.execute_query(
             """
-            SELECT COUNT(*) as cnt 
-            FROM information_schema.tables 
+            SELECT COUNT(*) as cnt
+            FROM information_schema.tables
             WHERE table_name = 'box_score_verification'
         """
         )
@@ -307,9 +307,9 @@ class TestDataQuality:
 
         result = DatabaseConnection.execute_query(
             """
-            SELECT game_id, COUNT(*) as cnt 
-            FROM games 
-            GROUP BY game_id 
+            SELECT game_id, COUNT(*) as cnt
+            FROM games
+            GROUP BY game_id
             HAVING COUNT(*) > 1
         """
         )
@@ -324,7 +324,7 @@ class TestDataQuality:
 
         result = DatabaseConnection.execute_query(
             """
-            SELECT 
+            SELECT
                 MIN(game_date) as earliest,
                 MAX(game_date) as latest
             FROM games
@@ -419,8 +419,8 @@ class TestIndexes:
 
         result = DatabaseConnection.execute_query(
             """
-            SELECT indexname 
-            FROM pg_indexes 
+            SELECT indexname
+            FROM pg_indexes
             WHERE tablename = 'games'
         """
         )
@@ -436,8 +436,8 @@ class TestIndexes:
 
         result = DatabaseConnection.execute_query(
             """
-            SELECT indexname 
-            FROM pg_indexes 
+            SELECT indexname
+            FROM pg_indexes
             WHERE tablename = 'play_by_play'
         """
         )
@@ -498,8 +498,8 @@ class TestReferentialIntegrity:
 
         result = DatabaseConnection.execute_query(
             """
-            SELECT 
-                tc.table_name, 
+            SELECT
+                tc.table_name,
                 tc.constraint_name,
                 tc.constraint_type
             FROM information_schema.table_constraints tc
