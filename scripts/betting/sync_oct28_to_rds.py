@@ -50,7 +50,7 @@ for row in bookmakers:
         """
         INSERT INTO odds.bookmakers (bookmaker_key, bookmaker_title)
         VALUES (%s, %s)
-        ON CONFLICT (bookmaker_key) DO UPDATE 
+        ON CONFLICT (bookmaker_key) DO UPDATE
         SET bookmaker_title = EXCLUDED.bookmaker_title
         """,
         (row["bookmaker_key"], row["title"]),
@@ -68,7 +68,7 @@ for row in markets:
         """
         INSERT INTO odds.market_types (market_key, market_name)
         VALUES (%s, %s)
-        ON CONFLICT (market_key) DO UPDATE 
+        ON CONFLICT (market_key) DO UPDATE
         SET market_name = EXCLUDED.market_name
         """,
         (row["market_key"], row["market_name"]),
@@ -136,7 +136,7 @@ event_ids = [evt["event_id"] for evt in events]
 print("\n4. Syncing October 28 odds snapshots...")
 local_cur.execute(
     """
-    SELECT 
+    SELECT
         event_id, bookmaker_key, market_key, outcome_name, price, point, last_update
     FROM odds.odds_snapshots
     WHERE event_id = ANY(%s)
@@ -192,7 +192,7 @@ rds_events = rds_cur.fetchone()[0]
 
 rds_cur.execute(
     """
-    SELECT COUNT(*) FROM odds.odds_snapshots 
+    SELECT COUNT(*) FROM odds.odds_snapshots
     WHERE event_id = ANY(%s)
     """,
     (event_ids,),
@@ -211,4 +211,3 @@ print("✅ SYNC COMPLETE")
 print("=" * 70)
 print("\nYou can now run betting analysis:")
 print("  python3 scripts/betting/run_full_betting_analysis.py --date 2025-10-28")
-

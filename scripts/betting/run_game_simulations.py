@@ -56,7 +56,7 @@ class GameSimulator:
             points = 0
 
         # Possession duration (10-24 seconds, mode at 18)
-        duration = int(np.random.triangular(10, 24, 18))
+        duration = int(np.random.triangular(10, 18, 24))
 
         return points, duration
 

@@ -242,47 +242,95 @@ def analyze_total(game: Dict, consensus: Dict, simulation: Dict) -> List[Dict]:
 
 
 def analyze_player_props(game: Dict) -> List[Dict]:
-    """Analyze player prop betting opportunities."""
+    """Analyze player prop betting opportunities using real player data."""
     opportunities = []
 
-    if "player_props" not in game:
-        return opportunities
+    # Check for new data structure with home_players and away_players
+    all_players = []
+    if "home_players" in game:
+        all_players.extend(game["home_players"])
+    if "away_players" in game:
+        all_players.extend(game["away_players"])
 
-    # For each player
-    for player_key, props in game["player_props"].items():
-        for stat_type, projection in props["projections"].items():
-            # Assume market odds of -110 for both sides (placeholder)
+    if not all_players:
+        # Fallback to old structure if present
+        if "player_props" in game:
+            for player_key, props in game["player_props"].items():
+                all_players.append(props)
+        else:
+            return opportunities
+
+    # Analyze each player's props
+    for player in all_players:
+        player_name = player.get("name", player.get("player_name", "Unknown"))
+        betting_lines = player.get("betting_lines", {})
+        simulations = player.get("simulations", {})
+
+        # For each stat type that has both a betting line and simulation
+        for stat_type, line_value in betting_lines.items():
+            if line_value is None:
+                continue
+
+            # Get simulation data for this stat type
+            # Map player_assists -> assists, player_points -> points, etc.
+            stat_key = stat_type.replace("player_", "")
+
+            if stat_key not in simulations:
+                continue
+
+            sim_data = simulations[stat_key]
+
+            # Assume market odds of -110 for both sides (standard vig)
             market_odds = -110
             market_prob = american_to_probability(market_odds)
 
-            # Check over
-            over_prob = projection["over_probability"]
+            # Check over opportunity
+            over_prob = sim_data.get("over_probability", 0.5)
             over_edge = over_prob - market_prob
             over_ev = calculate_ev(over_prob, market_odds)
 
-            if over_ev > 0.01:  # Lower threshold for props
+            if over_ev > 0.01:  # Lower threshold for props (1% EV)
                 opportunities.append(
                     {
                         "market_type": "player_prop",
-                        "player": props["player_name"],
+                        "player": player_name,
                         "stat": stat_type,
-                        "recommendation": f"{props['player_name']} OVER {projection['line']:.1f} {stat_type}",
-                        "line": projection["line"],
+                        "recommendation": f"{player_name} OVER {line_value:.1f} {stat_key}",
+                        "line": line_value,
                         "market_odds": market_odds,
                         "model_probability": over_prob,
                         "market_probability": market_prob,
                         "edge": over_edge,
                         "expected_value": over_ev,
                         "kelly_fraction": kelly_criterion(over_prob, market_odds),
-                        "confidence": calculate_confidence_level(
-                            over_prob,
-                            prob_std=(
-                                projection["std"] / projection["mean"]
-                                if projection["mean"] > 0
-                                else 0.1
-                            ),
-                        ),
-                        "mean_projection": projection["mean"],
+                        "confidence": calculate_confidence_level(over_prob),
+                        "mean_projection": sim_data.get("mean", line_value),
+                        "median_projection": sim_data.get("median", line_value),
+                    }
+                )
+
+            # Check under opportunity
+            under_prob = sim_data.get("under_probability", 0.5)
+            under_edge = under_prob - market_prob
+            under_ev = calculate_ev(under_prob, market_odds)
+
+            if under_ev > 0.01:  # Lower threshold for props (1% EV)
+                opportunities.append(
+                    {
+                        "market_type": "player_prop",
+                        "player": player_name,
+                        "stat": stat_type,
+                        "recommendation": f"{player_name} UNDER {line_value:.1f} {stat_key}",
+                        "line": line_value,
+                        "market_odds": market_odds,
+                        "model_probability": under_prob,
+                        "market_probability": market_prob,
+                        "edge": under_edge,
+                        "expected_value": under_ev,
+                        "kelly_fraction": kelly_criterion(under_prob, market_odds),
+                        "confidence": calculate_confidence_level(under_prob),
+                        "mean_projection": sim_data.get("mean", line_value),
+                        "median_projection": sim_data.get("median", line_value),
                     }
                 )
 
