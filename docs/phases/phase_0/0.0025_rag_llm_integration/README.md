@@ -518,8 +518,8 @@ Top 5 games with similar drama and stakes:
 
 ## Navigation
 
-**Return to:** [Phase 0 Index](../PHASE_0_INDEX.md)  
-**Previous:** [0.0024 RAG Pipeline with pgvector](../0.0024_rag_pipeline_pgvector/README.md)  
+**Return to:** [Phase 0 Index](../PHASE_0_INDEX.md)
+**Previous:** [0.0024 RAG Pipeline with pgvector](../0.0024_rag_pipeline_pgvector/README.md)
 **Related:** [Phase 5: Machine Learning Models](../../phase_5/PHASE_5_INDEX.md)
 
 ---

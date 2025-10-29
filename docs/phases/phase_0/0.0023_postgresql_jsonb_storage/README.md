@@ -315,8 +315,8 @@ GROUP BY season;
 
 ## Navigation
 
-**Return to:** [Phase 0 Index](../PHASE_0_INDEX.md)  
-**Next:** [0.0024 RAG Pipeline with pgvector](../0.0024_rag_pipeline_pgvector/README.md)  
+**Return to:** [Phase 0 Index](../PHASE_0_INDEX.md)
+**Next:** [0.0024 RAG Pipeline with pgvector](../0.0024_rag_pipeline_pgvector/README.md)
 **Related:** [PostgreSQL Setup Guide](../../../SETUP.md)
 
 ---

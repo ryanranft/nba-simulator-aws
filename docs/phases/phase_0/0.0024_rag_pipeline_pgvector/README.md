@@ -481,8 +481,8 @@ results = db.execute("""
 
 ## Navigation
 
-**Return to:** [Phase 0 Index](../PHASE_0_INDEX.md)  
-**Previous:** [0.0023 PostgreSQL JSONB Storage](../0.0023_postgresql_jsonb_storage/README.md)  
+**Return to:** [Phase 0 Index](../PHASE_0_INDEX.md)
+**Previous:** [0.0023 PostgreSQL JSONB Storage](../0.0023_postgresql_jsonb_storage/README.md)
 **Next:** [0.0025 RAG + LLM Integration](../0.0025_rag_llm_integration/README.md)
 
 ---
