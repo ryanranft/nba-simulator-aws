@@ -1,26 +1,26 @@
 metadata:
   version: 1.0.0
-  last_updated: '2025-10-29T20:49:07.339484Z'
+  last_updated: '2025-10-30T15:16:15.835651Z'
   last_verified: '2025-10-21T19:00:00Z'
   verified_by: manual_verification
   system: DIMS v1.0.0
   notes: Initial metrics from comprehensive verification on 2025-10-21
 s3_storage:
   total_objects:
-    value: 172862
-    last_verified: '2025-10-29T20:09:57.818923Z'
+    value: 172874
+    last_verified: '2025-10-30T15:16:15.278465Z'
     verification_method: automated
     cached: false
     cache_expires: null
   total_size_gb:
-    value: 118.27
-    last_verified: '2025-10-26T22:56:42Z'
-    verification_method: boto3_paginator
+    value: 119.31
+    last_verified: '2025-10-30T15:16:15.391289Z'
+    verification_method: automated
     cached: false
     cache_expires: null
   hoopr_files:
-    value: 0
-    last_verified: '2025-10-29T20:49:07.328173Z'
+    value: 96
+    last_verified: '2025-10-30T15:16:15.493405Z'
     verification_method: automated
     cached: false
     cache_expires: null
@@ -171,8 +171,8 @@ plus_minus_system:
       lines: 480
 code_base:
   python_files:
-    value: 1740
-    last_verified: '2025-10-29T20:40:36.413995Z'
+    value: 1741
+    last_verified: '2025-10-30T15:16:15.614659Z'
     verification_method: automated
     cached: false
     cache_expires: null
@@ -325,11 +325,11 @@ aws_inventory:
     cached: false
     cache_expires: null
   monthly_cost_estimate_usd:
-    value: 0.0
+    value: 31.74
     components:
       s3_storage: 2.72
       rds_instance: 29.0
-    last_verified: '2025-10-29T20:49:07.337064Z'
+    last_verified: '2025-10-30T15:16:15.722264Z'
     verification_method: automated
     note: S3 size * $0.023/GB + RDS $29/month
     cached: false
