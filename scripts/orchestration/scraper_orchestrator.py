@@ -38,6 +38,8 @@ import json
 import time
 import subprocess  # nosec B404 - Used for calling internal scraper scripts only
 import signal
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -102,6 +104,9 @@ class ScraperOrchestrator:
             "start_time": None,
             "end_time": None,
         }
+
+        # Thread-safe stats updates
+        self.stats_lock = threading.Lock()
 
         # Setup signal handlers
         signal.signal(signal.SIGINT, self._signal_handler)
@@ -310,6 +315,8 @@ class ScraperOrchestrator:
     def _execute_tasks_weighted(self, tasks):
         """Execute tasks sorted by weighted priority score.
 
+        Uses ThreadPoolExecutor for parallel execution with max_concurrent limit.
+
         Args:
             tasks: List of task dictionaries
         """
@@ -331,19 +338,38 @@ class ScraperOrchestrator:
                 )
 
         logger.info(f"\n{'=' * 80}")
-        logger.info(f"Executing {len(tasks_sorted)} tasks in weighted score order")
+        logger.info(
+            f"Executing {len(tasks_sorted)} tasks in weighted score order "
+            f"(max {self.max_concurrent} concurrent)"
+        )
         logger.info(f"{'=' * 80}")
 
-        # Execute in score order
-        for task in tasks_sorted:
-            if not self.running:
-                logger.warning("Shutdown requested, stopping execution...")
-                break
+        # Execute in parallel with score order priority
+        with ThreadPoolExecutor(max_workers=self.max_concurrent) as executor:
+            # Submit tasks in score order
+            future_to_task = {
+                executor.submit(self._execute_task, task): task for task in tasks_sorted
+            }
 
-            self._execute_task(task)
+            # Process completed tasks
+            for future in as_completed(future_to_task):
+                if not self.running:
+                    logger.warning("Shutdown requested, cancelling remaining tasks...")
+                    executor.shutdown(wait=False, cancel_futures=True)
+                    break
+
+                task = future_to_task[future]
+                try:
+                    future.result()  # Get result to propagate exceptions
+                except Exception as e:
+                    logger.error(
+                        f"Task {task.get('id', 'unknown')} raised exception: {e}"
+                    )
 
     def _execute_tasks_by_priority(self, tasks):
         """Execute tasks grouped by priority (legacy method).
+
+        Uses ThreadPoolExecutor for parallel execution with max_concurrent limit.
 
         Args:
             tasks: List of task dictionaries
@@ -361,14 +387,34 @@ class ScraperOrchestrator:
                 continue
 
             logger.info(f"\n{'=' * 80}")
-            logger.info(f"Executing {len(priority_tasks)} {priority} priority tasks")
+            logger.info(
+                f"Executing {len(priority_tasks)} {priority} priority tasks "
+                f"(max {self.max_concurrent} concurrent)"
+            )
             logger.info(f"{'=' * 80}")
 
-            for task in priority_tasks:
-                if not self.running:
-                    break
+            # Execute priority group in parallel
+            with ThreadPoolExecutor(max_workers=self.max_concurrent) as executor:
+                future_to_task = {
+                    executor.submit(self._execute_task, task): task
+                    for task in priority_tasks
+                }
 
-                self._execute_task(task)
+                for future in as_completed(future_to_task):
+                    if not self.running:
+                        logger.warning(
+                            "Shutdown requested, cancelling remaining tasks..."
+                        )
+                        executor.shutdown(wait=False, cancel_futures=True)
+                        break
+
+                    task = future_to_task[future]
+                    try:
+                        future.result()
+                    except Exception as e:
+                        logger.error(
+                            f"Task {task.get('id', 'unknown')} raised exception: {e}"
+                        )
 
     def _execute_task(self, task):
         """
@@ -390,22 +436,25 @@ class ScraperOrchestrator:
 
         if self.dry_run:
             logger.info(f"  [DRY RUN] Would execute: {scraper}")
-            self.execution_stats["skipped"] += 1
+            with self.stats_lock:
+                self.execution_stats["skipped"] += 1
             return
 
         # Check if scraper exists in config
         if scraper not in self.scraper_config.get("scrapers", {}):
             logger.error(f"  ❌ Scraper not found in config: {scraper}")
-            self.execution_stats["failed"] += 1
-            self.execution_stats["by_priority"][priority.lower()]["failed"] += 1
+            with self.stats_lock:
+                self.execution_stats["failed"] += 1
+                self.execution_stats["by_priority"][priority.lower()]["failed"] += 1
             return
 
         # Build scraper command
         scraper_script = self._find_scraper_script(scraper)
         if not scraper_script:
             logger.error(f"  ❌ Scraper script not found for: {scraper}")
-            self.execution_stats["failed"] += 1
-            self.execution_stats["by_priority"][priority.lower()]["failed"] += 1
+            with self.stats_lock:
+                self.execution_stats["failed"] += 1
+                self.execution_stats["by_priority"][priority.lower()]["failed"] += 1
             return
 
         # Execute scraper
@@ -428,27 +477,33 @@ class ScraperOrchestrator:
 
             if result.returncode == 0:
                 logger.info(f"  ✅ Task completed in {duration:.1f}s")
-                self.execution_stats["completed"] += 1
-                self.execution_stats["by_priority"][priority.lower()]["completed"] += 1
-                self.execution_stats["by_scraper"][scraper]["completed"] += 1
+                with self.stats_lock:
+                    self.execution_stats["completed"] += 1
+                    self.execution_stats["by_priority"][priority.lower()][
+                        "completed"
+                    ] += 1
+                    self.execution_stats["by_scraper"][scraper]["completed"] += 1
             else:
                 logger.error(f"  ❌ Task failed after {duration:.1f}s")
                 logger.error(f"  Error: {result.stderr[:200]}")
-                self.execution_stats["failed"] += 1
-                self.execution_stats["by_priority"][priority.lower()]["failed"] += 1
-                self.execution_stats["by_scraper"][scraper]["failed"] += 1
+                with self.stats_lock:
+                    self.execution_stats["failed"] += 1
+                    self.execution_stats["by_priority"][priority.lower()]["failed"] += 1
+                    self.execution_stats["by_scraper"][scraper]["failed"] += 1
 
         except subprocess.TimeoutExpired:
             logger.error(
                 f"  ❌ Task timed out after {task.get('estimated_time_minutes', 5)} minutes"
             )
-            self.execution_stats["failed"] += 1
-            self.execution_stats["by_priority"][priority.lower()]["failed"] += 1
+            with self.stats_lock:
+                self.execution_stats["failed"] += 1
+                self.execution_stats["by_priority"][priority.lower()]["failed"] += 1
 
         except Exception as e:
             logger.error(f"  ❌ Task failed with exception: {e}")
-            self.execution_stats["failed"] += 1
-            self.execution_stats["by_priority"][priority.lower()]["failed"] += 1
+            with self.stats_lock:
+                self.execution_stats["failed"] += 1
+                self.execution_stats["by_priority"][priority.lower()]["failed"] += 1
 
     def _find_scraper_script(self, scraper_name):
         """
