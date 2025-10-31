@@ -61,6 +61,7 @@ class ScraperOrchestrator:
         self,
         task_queue_file="inventory/gaps.json",
         scraper_config_file="config/scraper_config.yaml",
+        autonomous_config_file="config/autonomous_config.yaml",
         max_concurrent=5,
         dry_run=False,
     ):
@@ -70,11 +71,13 @@ class ScraperOrchestrator:
         Args:
             task_queue_file: Path to task queue JSON
             scraper_config_file: Path to scraper configuration
+            autonomous_config_file: Path to autonomous configuration (for priority weighting)
             max_concurrent: Maximum concurrent scraper processes
             dry_run: If True, don't execute, just show plan
         """
         self.task_queue_file = Path(task_queue_file)
         self.scraper_config_file = Path(scraper_config_file)
+        self.autonomous_config_file = Path(autonomous_config_file)
         self.max_concurrent = max_concurrent
         self.dry_run = dry_run
         self.running = True
@@ -84,6 +87,9 @@ class ScraperOrchestrator:
 
         # Load scraper config
         self.scraper_config = self._load_scraper_config()
+
+        # Load autonomous config (for priority weighting)
+        self.autonomous_config = self._load_autonomous_config()
 
         # Execution tracking
         self.execution_stats = {
@@ -101,12 +107,16 @@ class ScraperOrchestrator:
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
 
+        # Check if weighted priority scoring is enabled
+        self.use_weighted_scoring = self._check_weighted_scoring_enabled()
+
         logger.info("=" * 80)
         logger.info("SCRAPER ORCHESTRATOR - ADCE Phase 3")
         logger.info("=" * 80)
         logger.info(f"Task queue: {self.task_queue_file}")
         logger.info(f"Total tasks: {self.task_queue.get('total_tasks', 0)}")
         logger.info(f"Max concurrent: {self.max_concurrent}")
+        logger.info(f"Weighted scoring: {self.use_weighted_scoring}")
         logger.info(f"Dry run: {self.dry_run}")
         logger.info("=" * 80)
 
@@ -151,9 +161,109 @@ class ScraperOrchestrator:
 
         return config
 
+    def _load_autonomous_config(self):
+        """Load autonomous configuration (for priority weighting)"""
+        if not self.autonomous_config_file.exists():
+            logger.warning(
+                f"Autonomous config not found: {self.autonomous_config_file}"
+            )
+            logger.warning("Using default priority weighting settings")
+            return {}
+
+        logger.info(f"Loading autonomous config from: {self.autonomous_config_file}")
+
+        with open(self.autonomous_config_file, "r") as f:
+            config = yaml.safe_load(f)
+
+        return config
+
+    def _check_weighted_scoring_enabled(self):
+        """Check if weighted priority scoring is enabled"""
+        task_processing = self.autonomous_config.get("task_processing", {})
+        priority_weighting = task_processing.get("priority_weighting", {})
+        return priority_weighting.get("enabled", False)
+
+    def _calculate_task_score(self, task):
+        """Calculate weighted priority score for a task.
+
+        Combines multiple factors to create a numeric score:
+        - Base priority (CRITICAL=1000, HIGH=100, MEDIUM=10, LOW=1)
+        - Task age (+0.5 points per hour since detection)
+        - Source importance (multiplier: ESPN=1.5x, NBA_API=1.3x, etc.)
+        - Gap size (smaller gaps = higher priority, -0.1 per file)
+        - Historical success rate (+20 points for 100% success)
+
+        Args:
+            task: Task dictionary from task queue
+
+        Returns:
+            float: Weighted priority score (higher = execute sooner)
+        """
+        if not self.use_weighted_scoring:
+            # Fall back to simple priority ordering
+            priority_values = {"CRITICAL": 1000, "HIGH": 100, "MEDIUM": 10, "LOW": 1}
+            return priority_values.get(task.get("priority", "LOW"), 1)
+
+        # Get weighting configuration
+        task_processing = self.autonomous_config.get("task_processing", {})
+        weighting = task_processing.get("priority_weighting", {})
+
+        # Base score from priority
+        base_scores = weighting.get(
+            "base_scores", {"CRITICAL": 1000, "HIGH": 100, "MEDIUM": 10, "LOW": 1}
+        )
+        score = base_scores.get(task.get("priority", "LOW"), 1)
+
+        # Age factor: older tasks get higher priority
+        age_weight = weighting.get("age_weight", 0.5)
+        if "detected_at" in task:
+            try:
+                detected = datetime.fromisoformat(task["detected_at"])
+                age_hours = (datetime.now() - detected).total_seconds() / 3600
+                score += age_hours * age_weight
+            except (ValueError, TypeError):
+                pass  # Skip if timestamp invalid
+
+        # Source importance multiplier
+        source_multipliers = weighting.get(
+            "source_multipliers",
+            {
+                "espn": 1.5,
+                "nba_api": 1.3,
+                "basketball_reference": 1.2,
+                "hoopr": 1.1,
+                "default": 1.0,
+            },
+        )
+        source = task.get("source", "").lower()
+        multiplier = source_multipliers.get(
+            source, source_multipliers.get("default", 1.0)
+        )
+        score *= multiplier
+
+        # Gap size factor: smaller gaps = higher priority
+        gap_size_weight = weighting.get("gap_size_weight", -0.1)
+        max_gap_penalty = weighting.get("max_gap_size_penalty", 10)
+        if "gap_size" in task:
+            gap_size = task["gap_size"]
+            penalty = gap_size * gap_size_weight
+            penalty = max(penalty, -max_gap_penalty)  # Cap penalty
+            score += penalty
+
+        # Historical success rate boost
+        success_weight = weighting.get("success_rate_weight", 20)
+        if "success_rate" in task:
+            success_rate = task["success_rate"]
+            score += success_rate * success_weight
+
+        return score
+
     def execute_all_tasks(self, priority_filter=None):
         """
         Execute all tasks in queue (or filtered by priority)
+
+        Uses weighted priority scoring if enabled, otherwise uses simple
+        priority grouping (CRITICAL → HIGH → MEDIUM → LOW).
 
         Args:
             priority_filter: If set, only execute tasks of this priority
@@ -177,7 +287,67 @@ class ScraperOrchestrator:
             ]
             logger.info(f"Filtered to {len(tasks)} {priority_filter} priority tasks")
 
-        # Execute tasks by priority
+        if not tasks:
+            logger.info("No tasks to execute")
+            self.execution_stats["end_time"] = datetime.now()
+            return self.execution_stats
+
+        # Execute tasks using weighted scoring or simple priority grouping
+        if self.use_weighted_scoring:
+            logger.info("Using weighted priority scoring")
+            self._execute_tasks_weighted(tasks)
+        else:
+            logger.info("Using simple priority grouping")
+            self._execute_tasks_by_priority(tasks)
+
+        self.execution_stats["end_time"] = datetime.now()
+
+        # Print summary
+        self._print_execution_summary()
+
+        return self.execution_stats
+
+    def _execute_tasks_weighted(self, tasks):
+        """Execute tasks sorted by weighted priority score.
+
+        Args:
+            tasks: List of task dictionaries
+        """
+        # Calculate scores for all tasks
+        logger.info("Calculating weighted priority scores...")
+        for task in tasks:
+            task["_score"] = self._calculate_task_score(task)
+
+        # Sort by score (descending)
+        tasks_sorted = sorted(tasks, key=lambda t: t["_score"], reverse=True)
+
+        # Log scoring summary
+        if tasks_sorted:
+            logger.info("\nTop 5 tasks by score:")
+            for i, task in enumerate(tasks_sorted[:5], 1):
+                logger.info(
+                    f"  {i}. [{task.get('priority')}] {task.get('scraper')} "
+                    f"(score: {task['_score']:.2f})"
+                )
+
+        logger.info(f"\n{'=' * 80}")
+        logger.info(f"Executing {len(tasks_sorted)} tasks in weighted score order")
+        logger.info(f"{'=' * 80}")
+
+        # Execute in score order
+        for task in tasks_sorted:
+            if not self.running:
+                logger.warning("Shutdown requested, stopping execution...")
+                break
+
+            self._execute_task(task)
+
+    def _execute_tasks_by_priority(self, tasks):
+        """Execute tasks grouped by priority (legacy method).
+
+        Args:
+            tasks: List of task dictionaries
+        """
         priority_order = ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
 
         for priority in priority_order:
@@ -199,13 +369,6 @@ class ScraperOrchestrator:
                     break
 
                 self._execute_task(task)
-
-        self.execution_stats["end_time"] = datetime.now()
-
-        # Print summary
-        self._print_execution_summary()
-
-        return self.execution_stats
 
     def _execute_task(self, task):
         """
@@ -249,15 +412,8 @@ class ScraperOrchestrator:
         try:
             start_time = time.time()
 
-            cmd = [sys.executable, str(scraper_script)]
-
-            # Add task-specific args if needed
-            if task.get("season"):
-                cmd.extend(["--season", task["season"]])
-            if task.get("game_ids"):
-                cmd.extend(
-                    ["--game-ids", ",".join(str(gid) for gid in task["game_ids"][:10])]
-                )
+            # Build command with parameter validation
+            cmd = self._build_scraper_command(scraper, scraper_script, task)
 
             logger.info(f"  🚀 Executing: {' '.join(cmd)}")
 
@@ -323,6 +479,59 @@ class ScraperOrchestrator:
                     return match
 
         return None
+
+    def _build_scraper_command(self, scraper, scraper_script, task):
+        """
+        Build scraper command with validated parameters
+
+        Args:
+            scraper: Scraper name
+            scraper_script: Path to scraper script
+            task: Task dict from queue
+
+        Returns:
+            list: Command to execute
+        """
+        cmd = [sys.executable, str(scraper_script)]
+
+        # Get accepted parameters for this scraper
+        scraper_config = self.scraper_config.get("scrapers", {}).get(scraper, {})
+        accepted_params = scraper_config.get("accepted_parameters", [])
+
+        # If no accepted_parameters defined, use default common parameters
+        if not accepted_params:
+            accepted_params = [
+                "season",
+                "game_ids",
+                "start_date",
+                "end_date",
+                "dry_run",
+            ]
+
+        # Parameter mapping: task_key -> (cli_arg, formatter)
+        param_mapping = {
+            "season": ("--season", lambda v: str(v)),
+            "game_ids": (
+                "--game-ids",
+                lambda v: ",".join(str(gid) for gid in v[:10]),
+            ),
+            "days": ("--days", lambda v: str(v)),
+            "start_date": ("--start-date", lambda v: str(v)),
+            "end_date": ("--end-date", lambda v: str(v)),
+            "player_id": ("--player-id", lambda v: str(v)),
+            "team_id": ("--team-id", lambda v: str(v)),
+            "dry_run": ("--dry-run", None),  # Flag, no value
+        }
+
+        # Add parameters that scraper accepts and task provides
+        for param_key, (cli_arg, formatter) in param_mapping.items():
+            if param_key in accepted_params and task.get(param_key):
+                if formatter:
+                    cmd.extend([cli_arg, formatter(task[param_key])])
+                else:
+                    cmd.append(cli_arg)
+
+        return cmd
 
     def _print_execution_summary(self):
         """Print execution summary"""

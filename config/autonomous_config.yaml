@@ -7,6 +7,16 @@ last_updated: "2025-10-22"
 # Enable/Disable Autonomous Mode
 enabled: true
 
+# Test Mode Configuration (for component testing without reconciliation)
+test_mode:
+  enabled: false # Enable for component testing
+  skip_reconciliation: true # Don't start reconciliation daemon in test mode
+  skip_task_queue_check: false # Still process tasks if queue exists
+  clear_queue_on_start: false # Don't clear existing queue on startup
+  allow_execution: true # Allow scraper execution (unlike dry_run)
+  # Note: test_mode allows execution but skips reconciliation
+  #       dry_run prevents all execution
+
 # Reconciliation Configuration
 reconciliation_interval_hours: 1 # Run reconciliation every hour
 use_aws_inventory: true # Use AWS S3 Inventory when available
@@ -26,6 +36,35 @@ task_processing:
     - MEDIUM
     - LOW
   max_tasks_per_run: 1000 # Limit tasks per orchestrator run
+
+  # Weighted Priority Scoring (Week 3 Enhancement)
+  priority_weighting:
+    enabled: true # Use weighted scoring instead of simple priority groups
+
+    # Base priority scores
+    base_scores:
+      CRITICAL: 1000
+      HIGH: 100
+      MEDIUM: 10
+      LOW: 1
+
+    # Age factor: points added per hour old
+    age_weight: 0.5 # Add 0.5 points per hour since detection
+
+    # Source importance multipliers
+    source_multipliers:
+      espn: 1.5 # ESPN is most reliable
+      nba_api: 1.3
+      basketball_reference: 1.2
+      hoopr: 1.1
+      default: 1.0
+
+    # Gap size factor: smaller gaps = higher priority
+    gap_size_weight: -0.1 # Subtract 0.1 points per missing file
+    max_gap_size_penalty: 10 # Cap penalty at 10 points
+
+    # Historical success rate boost
+    success_rate_weight: 20 # Add up to 20 points for 100% success rate
 
 # Health Check Configuration
 health_check:
@@ -47,12 +86,12 @@ exponential_backoff: true # Use exponential backoff for retries
 
 # Alert Configuration
 alerts:
-  enabled: false # MVP: Disable alerts (future: email/Slack)
+  enabled: true # Alerts enabled for production
   channels:
     email:
-      enabled: false
-      to: []
-      subject_prefix: "[ADCE Autonomous Loop]"
+      enabled: true
+      sns_topic_arn: "arn:aws:sns:us-east-1:575734508327:nba-simulator-adce-alerts"
+      subject_prefix: "[ADCE Alert]"
     slack:
       enabled: false
       webhook_url: ""
