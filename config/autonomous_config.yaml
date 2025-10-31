@@ -27,6 +27,46 @@ min_tasks_to_trigger: 1 # Minimum tasks in queue to trigger orchestrator
 max_orchestrator_runtime_minutes: 120 # Kill orchestrator if runs longer than 2 hours
 max_concurrent_scrapers: 5 # Maximum concurrent scraper processes
 
+# Rate Limiting Configuration (Week 3 Enhancement)
+rate_limiting:
+  enabled: true # Enable global rate limit coordination
+
+  # Global rate limits (across all scrapers)
+  global_limits:
+    requests_per_minute: 100 # Max total requests/min across all scrapers
+    requests_per_hour: 5000 # Max total requests/hour across all scrapers
+
+  # Per-source rate limits
+  source_limits:
+    espn:
+      requests_per_minute: 60 # ESPN allows higher rate
+      requests_per_hour: 3000
+      burst_size: 10 # Allow bursts of 10 requests
+
+    nba_api:
+      requests_per_minute: 30 # NBA API more restrictive
+      requests_per_hour: 1000
+      burst_size: 5
+
+    basketball_reference:
+      requests_per_minute: 20 # Be gentle with Basketball Reference
+      requests_per_hour: 500
+      burst_size: 3
+      min_delay_seconds: 3 # Minimum 3s between requests
+
+    hoopr:
+      requests_per_minute: 40
+      requests_per_hour: 2000
+      burst_size: 8
+
+  # Backoff strategy when limits approached
+  backoff:
+    enabled: true
+    threshold_percent: 80 # Start backing off at 80% of limit
+    initial_delay_seconds: 1 # Start with 1s delay
+    max_delay_seconds: 30 # Cap at 30s delay
+    exponential_factor: 2 # Double delay each time
+
 # Task Queue Configuration
 task_queue_file: inventory/gaps.json
 task_processing:

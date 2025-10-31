@@ -46,6 +46,9 @@ from collections import defaultdict
 import logging
 import yaml
 
+# Import rate limit coordinator
+from scripts.orchestration.rate_limit_coordinator import RateLimitCoordinator
+
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
@@ -114,6 +117,12 @@ class ScraperOrchestrator:
 
         # Check if weighted priority scoring is enabled
         self.use_weighted_scoring = self._check_weighted_scoring_enabled()
+
+        # Initialize rate limit coordinator
+        rate_limit_config = self.autonomous_config.get(
+            "rate_limiting", {"enabled": False}
+        )
+        self.rate_limiter = RateLimitCoordinator(rate_limit_config)
 
         logger.info("=" * 80)
         logger.info("SCRAPER ORCHESTRATOR - ADCE Phase 3")
@@ -459,6 +468,13 @@ class ScraperOrchestrator:
 
         # Execute scraper
         try:
+            # Acquire rate limit permission
+            if not self.rate_limiter.acquire(source):
+                logger.warning(f"  ⚠️ Rate limit exceeded for {source}, skipping task")
+                with self.stats_lock:
+                    self.execution_stats["skipped"] += 1
+                return
+
             start_time = time.time()
 
             # Build command with parameter validation
@@ -466,14 +482,18 @@ class ScraperOrchestrator:
 
             logger.info(f"  🚀 Executing: {' '.join(cmd)}")
 
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=task.get("estimated_time_minutes", 5) * 60,
-            )  # nosec B603 - cmd is internally constructed
+            try:
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=task.get("estimated_time_minutes", 5) * 60,
+                )  # nosec B603 - cmd is internally constructed
 
-            duration = time.time() - start_time
+                duration = time.time() - start_time
+            finally:
+                # Always release rate limit (even if scraper failed)
+                self.rate_limiter.release(source)
 
             if result.returncode == 0:
                 logger.info(f"  ✅ Task completed in {duration:.1f}s")
@@ -620,6 +640,24 @@ class ScraperOrchestrator:
             logger.info(
                 f"  {scraper}: {stats['completed']} completed, {stats['failed']} failed"
             )
+
+        # Rate limiting stats
+        rate_stats = self.rate_limiter.get_stats()
+        if rate_stats.get("enabled"):
+            logger.info(f"\nRate Limiting:")
+            global_stats = rate_stats["global"]
+            logger.info(
+                f"  Global: {global_stats['requests_last_minute']}/{global_stats['limit_rpm']} req/min, "
+                f"{global_stats['requests_last_hour']}/{global_stats['limit_rph']} req/hour"
+            )
+
+            if rate_stats.get("sources"):
+                logger.info(f"  By Source:")
+                for source, stats in sorted(rate_stats["sources"].items()):
+                    logger.info(
+                        f"    {source}: {stats['requests_last_minute']}/{stats['limit_rpm']} req/min, "
+                        f"tokens={stats['tokens_available']:.1f}"
+                    )
 
         logger.info("=" * 80)
 
