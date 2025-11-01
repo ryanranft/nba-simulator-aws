@@ -61,13 +61,17 @@ class TaskQueueGenerator:
         ("espn", "box_scores"): "espn_async_scraper",
         ("espn", "schedule"): "espn_async_scraper",
         ("basketball_reference", "box_scores"): "basketball_reference_async_scraper",
+        ("basketball_reference", "play_by_play"): "basketball_reference_async_scraper",
         (
             "basketball_reference",
             "advanced_stats",
         ): "basketball_reference_async_scraper",
-        ("nba_api", "player_tracking"): "nba_api_scraper",
-        ("nba_api", "team_dashboards"): "nba_api_scraper",
+        ("nba_api", "player_tracking"): "nba_api_async_scraper",
+        ("nba_api", "team_dashboards"): "nba_api_async_scraper",
+        ("nba_api", "play_by_play"): "nba_api_async_scraper",
+        ("nba_api", "team_stats"): "nba_api_async_scraper",
         ("hoopr", "parquet_files"): "hoopr_incremental_scraper",
+        ("hoopr", "play_by_play"): "hoopr_incremental_scraper",
     }
 
     # Time estimates per task type (minutes)

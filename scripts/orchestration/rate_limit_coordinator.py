@@ -71,6 +71,11 @@ class RateLimitCoordinator:
         # Thread safety
         self.lock = threading.RLock()
 
+        # Configuration (must be set BEFORE _initialize_tokens)
+        self.global_limits = config.get("global_limits", {})
+        self.source_limits = config.get("source_limits", {})
+        self.backoff_config = config.get("backoff", {})
+
         # Request tracking (sliding window)
         self.global_requests = deque()  # [(timestamp, source), ...]
         self.source_requests = defaultdict(deque)  # source -> [(timestamp), ...]
@@ -85,11 +90,6 @@ class RateLimitCoordinator:
         # Backoff state
         self.backoff_delays = defaultdict(float)  # source -> current_delay
         self.last_request_times = {}  # source -> timestamp
-
-        # Configuration
-        self.global_limits = config.get("global_limits", {})
-        self.source_limits = config.get("source_limits", {})
-        self.backoff_config = config.get("backoff", {})
 
         logger.info("Rate limit coordinator initialized")
         logger.info(f"  Global: {self.global_limits}")

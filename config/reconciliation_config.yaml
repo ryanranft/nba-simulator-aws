@@ -84,7 +84,7 @@ integration:
 
 # Dry Run Mode
 dry_run:
-  enabled: true # MVP: Don't trigger actions, just report
+  enabled: false # DISABLED - Now generating actual tasks for autonomous execution
   save_results: true # Save analysis even in dry run
   skip_task_generation: false # Generate tasks even in dry run
 

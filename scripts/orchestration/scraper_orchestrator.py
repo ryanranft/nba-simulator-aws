@@ -46,6 +46,11 @@ from collections import defaultdict
 import logging
 import yaml
 
+# Add project root to path for imports
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 # Import rate limit coordinator
 from scripts.orchestration.rate_limit_coordinator import RateLimitCoordinator
 
