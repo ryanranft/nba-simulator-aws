@@ -1,0 +1,137 @@
+openapi: 3.0.3
+info:
+  title: NBA Simulator - Temporal Query API
+  description: |
+    Query NBA statistics at any exact moment in time with millisecond precision.
+
+    **Core Capability:**
+    Snapshot queries of cumulative statistics at specific timestamps.
+
+    **Example Queries:**
+    - "What were Kobe Bryant's career stats at 7:02:34.56 PM CT on June 19, 2016?"
+    - "What was the NBA's average pace at 11:23:45 PM on March 15, 2023?"
+
+    **Phase:** Future implementation (Phase 3+)
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:5002
+    description: Temporal Query server (future)
+
+tags:
+  - name: Players
+    description: Player statistics queries
+  - name: Teams
+    description: Team statistics queries
+  - name: Games
+    description: Game state queries
+
+paths:
+  /api/v1/query/player-stats:
+    get:
+      tags: [Players]
+      summary: Get player statistics at timestamp
+      operationId: getPlayerStatsAtTime
+      parameters:
+        - name: player_id
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "2544"  # Kobe Bryant
+        - name: timestamp
+          in: query
+          required: true
+          description: ISO 8601 timestamp with millisecond precision
+          schema:
+            type: string
+            format: date-time
+            example: "2016-06-19T19:02:34.560-05:00"
+        - name: stat_type
+          in: query
+          schema:
+            type: string
+            enum: [career, season, playoffs]
+            default: "career"
+      responses:
+        '200':
+          description: Player stats retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  player_id:
+                    type: string
+                  player_name:
+                    type: string
+                  timestamp:
+                    type: string
+                  stats:
+                    type: object
+                    properties:
+                      games_played:
+                        type: integer
+                      points:
+                        type: integer
+                      rebounds:
+                        type: integer
+                      assists:
+                        type: integer
+                      ppg:
+                        type: number
+                      rpg:
+                        type: number
+                      apg:
+                        type: number
+
+  /api/v1/query/game-state:
+    get:
+      tags: [Games]
+      summary: Get complete game state at timestamp
+      operationId: getGameStateAtTime
+      parameters:
+        - name: game_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: timestamp
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Game state retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  game_id:
+                    type: string
+                  timestamp:
+                    type: string
+                  score:
+                    type: object
+                    properties:
+                      home:
+                        type: integer
+                      away:
+                        type: integer
+                  possession:
+                    type: string
+                    enum: [home, away]
+                  lineup:
+                    type: object
+                    properties:
+                      home:
+                        type: array
+                        items:
+                          type: string
+                      away:
+                        type: array
+                        items:
+                          type: string

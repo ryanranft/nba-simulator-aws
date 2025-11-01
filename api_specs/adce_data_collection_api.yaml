@@ -1,0 +1,567 @@
+openapi: 3.0.3
+info:
+  title: NBA Simulator - ADCE Data Collection API
+  description: |
+    Autonomous Data Collection Engine (ADCE) API for managing NBA data scraping,
+    reconciliation, and S3 storage operations.
+
+    **Features:**
+    - Multi-source data collection (ESPN, NBA API, Basketball Reference, hoopR)
+    - Autonomous reconciliation every 15 minutes
+    - Priority-based task queue with weighted scoring
+    - Parallel execution with rate limiting
+    - Real-time health monitoring
+
+    **Base URL:** http://localhost:8080 (health monitoring)
+    **Version:** 4.0 (Week 3 enhancements)
+  version: 4.0.0
+  contact:
+    name: NBA Simulator Team
+    email: nba-simulator@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server (health monitoring)
+  - url: http://localhost:5000
+    description: Local API server (future implementation)
+
+tags:
+  - name: Health
+    description: System health and status monitoring
+  - name: Tasks
+    description: Task queue management
+  - name: Reconciliation
+    description: Data reconciliation operations
+  - name: Scrapers
+    description: Scraper management and execution
+
+paths:
+  /status:
+    get:
+      tags: [Health]
+      summary: Get ADCE system status
+      description: |
+        Returns comprehensive system status including:
+        - Component health (reconciliation daemon, orchestrator, task queue)
+        - Uptime and reconciliation cycles
+        - S3 connection status
+        - DIMS metrics health
+      operationId: getSystemStatus
+      responses:
+        '200':
+          description: System status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemStatus'
+              example:
+                status: "healthy"
+                uptime_seconds: 3540
+                reconciliation_cycles: 12
+                components:
+                  reconciliation_daemon:
+                    status: "running"
+                    pid: 78533
+                    uptime: "59 minutes"
+                  orchestrator:
+                    status: "idle"
+                    message: "No tasks in queue"
+                  task_queue:
+                    status: "available"
+                    total_tasks: 0
+                  s3:
+                    status: "healthy"
+                    objects: 172719
+                    size_gb: 126.4
+                  dims:
+                    status: "healthy"
+                    last_update_hours: 0.1
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check endpoint
+      description: Simple health check for load balancers and monitoring systems
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy, degraded, unhealthy]
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2025-11-01T08:30:00Z"
+
+  /tasks:
+    get:
+      tags: [Tasks]
+      summary: Get task queue status
+      description: |
+        Returns current task queue state including:
+        - Total tasks in queue
+        - Tasks by priority (critical, high, medium, low)
+        - Tasks by data source
+        - Estimated completion time
+      operationId: getTaskQueue
+      responses:
+        '200':
+          description: Task queue retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskQueue'
+              example:
+                total_tasks: 5
+                by_priority:
+                  critical: 1
+                  high: 2
+                  medium: 1
+                  low: 1
+                by_source:
+                  espn: 2
+                  nba_api: 2
+                  basketball_reference: 1
+                estimated_completion_minutes: 45
+
+    post:
+      tags: [Tasks]
+      summary: Add task to queue
+      description: |
+        Manually add a data collection task to the queue.
+
+        **Note:** Tasks are normally added automatically by the reconciliation
+        daemon. Use this endpoint only for manual/emergency operations.
+      operationId: addTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+            example:
+              source: "espn"
+              data_type: "games"
+              date_range:
+                start: "2025-10-01"
+                end: "2025-10-31"
+              priority: "high"
+              metadata:
+                reason: "manual_backfill"
+                requested_by: "admin"
+      responses:
+        '202':
+          description: Task accepted and queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+              example:
+                task_id: "task_espn_games_20251001_20251031"
+                status: "queued"
+                priority: "high"
+                estimated_start: "2025-11-01T09:00:00Z"
+                position_in_queue: 3
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Queue full or system unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /tasks/{task_id}:
+    get:
+      tags: [Tasks]
+      summary: Get task status
+      description: Get detailed status of a specific task
+      operationId: getTaskStatus
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          description: Unique task identifier
+          schema:
+            type: string
+            example: "task_espn_games_20251001_20251031"
+      responses:
+        '200':
+          description: Task status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskStatus'
+              example:
+                task_id: "task_espn_games_20251001_20251031"
+                status: "running"
+                progress: 45
+                files_collected: 127
+                files_total: 283
+                started_at: "2025-11-01T08:30:00Z"
+                estimated_completion: "2025-11-01T09:15:00Z"
+                errors: []
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /reconciliation/trigger:
+    post:
+      tags: [Reconciliation]
+      summary: Manually trigger reconciliation
+      description: |
+        Manually trigger a reconciliation cycle outside the normal 15-minute schedule.
+
+        **Use cases:**
+        - Emergency gap detection
+        - After manual S3 uploads
+        - Testing and validation
+      operationId: triggerReconciliation
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                force:
+                  type: boolean
+                  description: Force reconciliation even if one is already running
+                  default: false
+                scope:
+                  type: string
+                  enum: [full, incremental]
+                  description: Full reconciliation or incremental since last run
+                  default: "incremental"
+      responses:
+        '202':
+          description: Reconciliation triggered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reconciliation_id:
+                    type: string
+                    example: "recon_20251101_083045"
+                  status:
+                    type: string
+                    enum: [queued, running]
+                    example: "running"
+                  estimated_duration_seconds:
+                    type: integer
+                    example: 120
+        '409':
+          description: Reconciliation already in progress
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /reconciliation/status:
+    get:
+      tags: [Reconciliation]
+      summary: Get reconciliation status
+      description: Get status of current or last reconciliation cycle
+      operationId: getReconciliationStatus
+      responses:
+        '200':
+          description: Reconciliation status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  current_cycle:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        enum: [idle, running, completed, failed]
+                      started_at:
+                        type: string
+                        format: date-time
+                      progress:
+                        type: integer
+                        minimum: 0
+                        maximum: 100
+                      gaps_detected:
+                        type: integer
+                      tasks_created:
+                        type: integer
+                  last_cycle:
+                    type: object
+                    properties:
+                      completed_at:
+                        type: string
+                        format: date-time
+                      duration_seconds:
+                        type: integer
+                      gaps_detected:
+                        type: integer
+                      tasks_created:
+                        type: integer
+                  statistics:
+                    type: object
+                    properties:
+                      total_cycles:
+                        type: integer
+                      average_duration_seconds:
+                        type: number
+                      average_gaps_detected:
+                        type: number
+
+  /scrapers:
+    get:
+      tags: [Scrapers]
+      summary: List available scrapers
+      description: Get list of all configured data source scrapers
+      operationId: listScrapers
+      responses:
+        '200':
+          description: Scraper list retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scrapers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ScraperInfo'
+              example:
+                scrapers:
+                  - name: "espn"
+                    status: "healthy"
+                    rate_limit: "60 req/min"
+                    last_run: "2025-11-01T08:25:00Z"
+                    success_rate: 98.5
+                  - name: "nba_api"
+                    status: "healthy"
+                    rate_limit: "30 req/min"
+                    last_run: "2025-11-01T08:20:00Z"
+                    success_rate: 99.2
+                  - name: "basketball_reference"
+                    status: "healthy"
+                    rate_limit: "20 req/min"
+                    last_run: "2025-11-01T08:15:00Z"
+                    success_rate: 97.8
+                  - name: "hoopr"
+                    status: "healthy"
+                    rate_limit: "40 req/min"
+                    last_run: "2025-11-01T08:10:00Z"
+                    success_rate: 99.5
+
+components:
+  schemas:
+    SystemStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+          description: Overall system health
+        uptime_seconds:
+          type: integer
+          description: System uptime in seconds
+        reconciliation_cycles:
+          type: integer
+          description: Total reconciliation cycles completed
+        components:
+          type: object
+          properties:
+            reconciliation_daemon:
+              $ref: '#/components/schemas/ComponentStatus'
+            orchestrator:
+              $ref: '#/components/schemas/ComponentStatus'
+            task_queue:
+              $ref: '#/components/schemas/ComponentStatus'
+            s3:
+              $ref: '#/components/schemas/ComponentStatus'
+            dims:
+              $ref: '#/components/schemas/ComponentStatus'
+
+    ComponentStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, running, idle, degraded, unhealthy]
+        message:
+          type: string
+        pid:
+          type: integer
+          nullable: true
+        uptime:
+          type: string
+          nullable: true
+        objects:
+          type: integer
+          nullable: true
+        size_gb:
+          type: number
+          nullable: true
+        last_update_hours:
+          type: number
+          nullable: true
+
+    TaskQueue:
+      type: object
+      properties:
+        total_tasks:
+          type: integer
+          minimum: 0
+        by_priority:
+          type: object
+          properties:
+            critical:
+              type: integer
+            high:
+              type: integer
+            medium:
+              type: integer
+            low:
+              type: integer
+        by_source:
+          type: object
+          additionalProperties:
+            type: integer
+        estimated_completion_minutes:
+          type: integer
+          nullable: true
+
+    TaskRequest:
+      type: object
+      required:
+        - source
+        - data_type
+      properties:
+        source:
+          type: string
+          enum: [espn, nba_api, basketball_reference, hoopr]
+          description: Data source name
+        data_type:
+          type: string
+          description: Type of data to collect (games, boxscores, play_by_play, etc.)
+        date_range:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date
+            end:
+              type: string
+              format: date
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+          default: "medium"
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Additional metadata for the task
+
+    TaskResponse:
+      type: object
+      properties:
+        task_id:
+          type: string
+        status:
+          type: string
+          enum: [queued, running, completed, failed]
+        priority:
+          type: string
+        estimated_start:
+          type: string
+          format: date-time
+        position_in_queue:
+          type: integer
+
+    TaskStatus:
+      type: object
+      properties:
+        task_id:
+          type: string
+        status:
+          type: string
+          enum: [queued, running, completed, failed, cancelled]
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        files_collected:
+          type: integer
+        files_total:
+          type: integer
+          nullable: true
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        estimated_completion:
+          type: string
+          format: date-time
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string
+
+    ScraperInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        rate_limit:
+          type: string
+        last_run:
+          type: string
+          format: date-time
+        success_rate:
+          type: number
+          minimum: 0
+          maximum: 100
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+        details:
+          type: object
+          nullable: true
+          description: Additional error details

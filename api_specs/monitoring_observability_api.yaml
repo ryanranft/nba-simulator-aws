@@ -1,0 +1,383 @@
+openapi: 3.0.3
+info:
+  title: NBA Simulator - Monitoring & Observability API
+  description: |
+    API for monitoring system health, metrics publishing, and observability operations.
+
+    **Components:**
+    - DIMS (Data Inventory Management System) - Metrics tracking and validation
+    - CloudWatch Integration - Metrics publishing and alarms
+    - Health Monitoring - Component status and alerts
+
+    **Phase:** 0.0020 (Monitoring & Observability)
+  version: 1.0.0
+  contact:
+    name: NBA Simulator Team
+    email: nba-simulator@example.com
+
+servers:
+  - url: http://localhost:5001
+    description: Monitoring API server (future implementation)
+
+tags:
+  - name: DIMS
+    description: Data Inventory Management System operations
+  - name: CloudWatch
+    description: CloudWatch metrics and alarms
+  - name: Health
+    description: System health monitoring
+
+paths:
+  /api/v1/dims/metrics:
+    get:
+      tags: [DIMS]
+      summary: Get all DIMS metrics
+      description: Retrieve all tracked metrics from Data Inventory Management System
+      operationId: getDIMSMetrics
+      responses:
+        '200':
+          description: Metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DIMSMetricsResponse'
+              example:
+                timestamp: "2025-11-01T08:30:00Z"
+                total_metrics: 40
+                categories:
+                  s3_storage:
+                    total_objects: 172719
+                    total_size_gb: 126.4
+                    total_files: 172719
+                  code_base:
+                    python_files: 342
+                    test_files: 89
+                    ml_scripts: 67
+                  documentation:
+                    markdown_files: 1720
+                    total_size_mb: 251
+                  git_repository:
+                    total_commits: 2847
+                    book_recommendations_implemented: 214
+
+  /api/v1/dims/verify:
+    post:
+      tags: [DIMS]
+      summary: Verify DIMS metrics
+      description: |
+        Verify all metrics against current system state and detect drift.
+
+        Returns discrepancies where documented values differ from actual values.
+      operationId: verifyDIMSMetrics
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category:
+                  type: string
+                  description: Specific category to verify (optional)
+                  example: "s3_storage"
+                auto_update:
+                  type: boolean
+                  description: Automatically update metrics with drift
+                  default: false
+      responses:
+        '200':
+          description: Verification complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DIMSVerificationResponse'
+              example:
+                status: "completed"
+                timestamp: "2025-11-01T08:30:00Z"
+                total_metrics: 40
+                verified: 40
+                drift_detected: true
+                discrepancies:
+                  - metric: "s3_storage.total_objects"
+                    documented: 172500
+                    actual: 172719
+                    drift: 219
+                    drift_pct: 0.13
+                    severity: "minor"
+
+  /api/v1/cloudwatch/publish:
+    post:
+      tags: [CloudWatch]
+      summary: Publish metrics to CloudWatch
+      description: |
+        Publish metrics to AWS CloudWatch for monitoring and alarming.
+
+        **Supported metric types:**
+        - DIMS metrics
+        - ADCE health metrics
+        - S3 inventory metrics
+        - Cost metrics
+        - Performance metrics
+      operationId: publishCloudWatchMetrics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - metric_type
+              properties:
+                metric_type:
+                  type: string
+                  enum: [dims, adce, s3, costs, performance]
+                  description: Type of metrics to publish
+                dry_run:
+                  type: boolean
+                  description: Validate without actually publishing
+                  default: false
+      responses:
+        '200':
+          description: Metrics published successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloudWatchPublishResponse'
+              example:
+                status: "success"
+                namespace: "NBA-Simulator/DIMS"
+                published_count: 14
+                timestamp: "2025-11-01T08:30:00Z"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/cloudwatch/alarms:
+    get:
+      tags: [CloudWatch]
+      summary: List CloudWatch alarms
+      description: Get all NBA Simulator CloudWatch alarms and their states
+      operationId: listCloudWatchAlarms
+      responses:
+        '200':
+          description: Alarms retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alarms:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CloudWatchAlarm'
+              example:
+                alarms:
+                  - name: "NBA-Simulator-ADCE-HighQueueDepth"
+                    state: "OK"
+                    metric: "ADCETaskQueueDepth"
+                    threshold: 100
+                    current_value: 0
+                  - name: "NBA-Simulator-BudgetExceeded80Percent"
+                    state: "OK"
+                    metric: "BudgetUtilization"
+                    threshold: 80
+                    current_value: 17.2
+
+    post:
+      tags: [CloudWatch]
+      summary: Create CloudWatch alarms
+      description: Create all configured CloudWatch alarms
+      operationId: createCloudWatchAlarms
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sns_topic_arn:
+                  type: string
+                  description: SNS topic ARN for notifications
+                  example: "arn:aws:sns:us-east-1:123456789012:nba-simulator-alerts"
+      responses:
+        '201':
+          description: Alarms created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created_count:
+                    type: integer
+                  alarms:
+                    type: array
+                    items:
+                      type: string
+              example:
+                created_count: 5
+                alarms:
+                  - "NBA-Simulator-ADCE-HighQueueDepth"
+                  - "NBA-Simulator-BudgetExceeded80Percent"
+                  - "NBA-Simulator-BudgetExceeded95Percent"
+                  - "NBA-Simulator-S3-UploadFailures"
+                  - "NBA-Simulator-DIMS-ValidationDrift"
+
+  /api/v1/health/summary:
+    get:
+      tags: [Health]
+      summary: Get system health summary
+      description: |
+        Get comprehensive health summary across all components:
+        - ADCE (Autonomous Data Collection Engine)
+        - DIMS (Data Inventory Management System)
+        - S3 (Storage)
+        - CloudWatch (Monitoring)
+        - Scrapers (Data sources)
+      operationId: getHealthSummary
+      responses:
+        '200':
+          description: Health summary retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthSummary'
+              example:
+                overall_status: "healthy"
+                timestamp: "2025-11-01T08:30:00Z"
+                components:
+                  adce:
+                    status: "healthy"
+                    uptime_hours: 1.0
+                    tasks_in_queue: 0
+                  dims:
+                    status: "healthy"
+                    metrics_with_drift: 1
+                    last_verification: "2025-11-01T08:00:00Z"
+                  s3:
+                    status: "healthy"
+                    total_objects: 172719
+                    total_size_gb: 126.4
+                  cloudwatch:
+                    status: "healthy"
+                    alarms_in_alarm: 0
+                    alarms_total: 5
+                  scrapers:
+                    espn: "healthy"
+                    nba_api: "healthy"
+                    basketball_reference: "healthy"
+                    hoopr: "healthy"
+
+components:
+  schemas:
+    DIMSMetricsResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        total_metrics:
+          type: integer
+        categories:
+          type: object
+          additionalProperties: true
+
+    DIMSVerificationResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [completed, failed]
+        timestamp:
+          type: string
+          format: date-time
+        total_metrics:
+          type: integer
+        verified:
+          type: integer
+        drift_detected:
+          type: boolean
+        discrepancies:
+          type: array
+          items:
+            type: object
+            properties:
+              metric:
+                type: string
+              documented:
+                type: number
+              actual:
+                type: number
+              drift:
+                type: number
+              drift_pct:
+                type: number
+              severity:
+                type: string
+                enum: [minor, moderate, major]
+
+    CloudWatchPublishResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [success, error]
+        namespace:
+          type: string
+        published_count:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+
+    CloudWatchAlarm:
+      type: object
+      properties:
+        name:
+          type: string
+        state:
+          type: string
+          enum: [OK, ALARM, INSUFFICIENT_DATA]
+        metric:
+          type: string
+        threshold:
+          type: number
+        current_value:
+          type: number
+          nullable: true
+
+    HealthSummary:
+      type: object
+      properties:
+        overall_status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        components:
+          type: object
+          properties:
+            adce:
+              type: object
+            dims:
+              type: object
+            s3:
+              type: object
+            cloudwatch:
+              type: object
+            scrapers:
+              type: object
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        details:
+          type: object
+          nullable: true

@@ -1,0 +1,102 @@
+# CloudWatch Integration Configuration
+# Phase 0.0020: Monitoring & Observability
+
+version: "1.0.0"
+
+# Enable/disable CloudWatch integration globally
+enabled: true
+
+# AWS Configuration
+aws:
+  region: us-east-1
+
+# Namespace configuration
+namespaces:
+  dims: "NBA-Simulator/DIMS"
+  adce: "NBA-Simulator/ADCE"
+  s3: "NBA-Simulator/S3"
+  costs: "NBA-Simulator/Costs"
+  performance: "NBA-Simulator/Performance"
+  alerts: "NBA-Simulator/Alerts"
+
+# Publishing intervals (in seconds)
+publishing_intervals:
+  dims_metrics: 21600  # 6 hours
+  adce_metrics: 300    # 5 minutes
+  s3_metrics: 3600     # 1 hour
+  cost_metrics: 86400  # 24 hours
+  performance_metrics: 60  # 1 minute
+
+# Cost tracking
+cost_tracking:
+  enabled: true
+  budget_limit: 150.0  # USD per month
+  alert_thresholds:
+    - 50  # 50% of budget
+    - 80  # 80% of budget
+    - 95  # 95% of budget
+  services:
+    - S3
+    - EC2
+    - RDS
+    - CloudWatch
+    - Glue
+    - SageMaker
+
+# SNS Topics
+sns:
+  alerts_topic_name: "nba-simulator-alerts"
+  email_endpoints:
+    - ryanranft@example.com  # Replace with actual email
+
+# Dashboard configuration
+dashboards:
+  data_collection:
+    name: "NBA-Simulator-DataCollection"
+    enabled: true
+  performance:
+    name: "NBA-Simulator-Performance"
+    enabled: true
+  costs:
+    name: "NBA-Simulator-Costs"
+    enabled: true
+
+# Alarm configuration
+alarms:
+  adce_queue_depth:
+    enabled: true
+    threshold: 100
+    evaluation_periods: 2
+    period: 300
+  budget_utilization:
+    enabled: true
+    thresholds: [80, 95]
+    evaluation_periods: 1
+    period: 86400
+  s3_upload_failures:
+    enabled: true
+    threshold: 5
+    evaluation_periods: 2
+    period: 300
+  dims_validation_drift:
+    enabled: true
+    threshold: 10
+    evaluation_periods: 1
+    period: 3600
+
+# Metric retention
+retention:
+  high_resolution: 3  # hours (1-second resolution)
+  standard: 15        # days (1-minute resolution)
+  extended: 455       # days (1-hour resolution)
+
+# Performance profiling
+profiling:
+  enabled: true
+  sample_rate: 1.0  # 100% of operations (reduce in production)
+  track_operations:
+    - dims_verification
+    - adce_reconciliation
+    - scraper_execution
+    - s3_upload
+    - database_query
