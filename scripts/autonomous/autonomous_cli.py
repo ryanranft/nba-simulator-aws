@@ -51,12 +51,13 @@ class AutonomousCLI:
         self.log_file = Path("logs/autonomous_loop.log")
         self.health_port = 8080
 
-    def start(self, dry_run=False):
+    def start(self, dry_run=False, test_mode=False):
         """
         Start autonomous loop
 
         Args:
             dry_run: If True, start in dry-run mode
+            test_mode: If True, start in test mode (no reconciliation)
         """
         # Check if already running
         if self.is_running():
@@ -71,6 +72,9 @@ class AutonomousCLI:
 
         if dry_run:
             cmd.append("--dry-run")
+
+        if test_mode:
+            cmd.append("--test-mode")
 
         # Start in background
         try:
@@ -452,6 +456,11 @@ Examples:
         help="Start in dry-run mode (for start command)",
     )
     parser.add_argument(
+        "--test-mode",
+        action="store_true",
+        help="Start in test mode - skip reconciliation (for start command)",
+    )
+    parser.add_argument(
         "--tail",
         type=int,
         default=50,
@@ -467,7 +476,7 @@ Examples:
 
     try:
         if args.command == "start":
-            success = cli.start(dry_run=args.dry_run)
+            success = cli.start(dry_run=args.dry_run, test_mode=args.test_mode)
         elif args.command == "stop":
             success = cli.stop()
         elif args.command == "status":

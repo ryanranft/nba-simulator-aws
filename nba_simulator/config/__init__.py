@@ -1,17 +1,14 @@
 """
 Configuration Management Module
 
-Provides backward-compatible configuration loading from existing .env files
-and config/ directory without disrupting current infrastructure.
+Provides centralized configuration loading for:
+- Database connections
+- AWS services (S3, Glue, RDS)
+- Application settings
+
+Backward compatible with legacy .env format.
 """
 
-from nba_simulator.config.loader import ConfigLoader, load_config
-from nba_simulator.config.database import DatabaseConfig
-from nba_simulator.config.aws_services import AWSConfig
+from .loader import ConfigLoader, config
 
-__all__ = [
-    "ConfigLoader",
-    "load_config",
-    "DatabaseConfig",
-    "AWSConfig",
-]
+__all__ = ['ConfigLoader', 'config']

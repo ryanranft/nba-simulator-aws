@@ -1,11 +1,11 @@
 """
 ESPN Data Extractors
 
-ESPN scrapers for:
+Scrapers for ESPN data:
 - Play-by-play data
 - Box scores
-- Schedules
-- Game data
+- Game schedules
+- Team statistics
 """
 
 __all__ = []

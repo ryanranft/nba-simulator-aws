@@ -24,8 +24,14 @@ import argparse
 import asyncio
 import json
 import sys
+import warnings
 from datetime import datetime, timedelta
 from pathlib import Path
+
+# Suppress pkg_resources deprecation warning from sportsdataverse
+warnings.filterwarnings("ignore", message="pkg_resources is deprecated", category=UserWarning)
+# Suppress scripts.etl deprecation warning until modules are fully migrated
+warnings.filterwarnings("ignore", message="scripts.etl is deprecated", category=DeprecationWarning)
 
 # Import hoopR
 try:
@@ -35,9 +41,10 @@ except ImportError:
     print("Install: pip install sportsdataverse")
     sys.exit(1)
 
-# Import AsyncBaseScraper
+# Import AsyncBaseScraper and config loader
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from scripts.scrapers.async_scraper_base import AsyncBaseScraper
+from scripts.etl.async_scraper_base import AsyncBaseScraper
+from scripts.etl.scraper_config import get_scraper_config
 
 
 class HoopRIncrementalScraper(AsyncBaseScraper):
@@ -54,7 +61,12 @@ class HoopRIncrementalScraper(AsyncBaseScraper):
             dry_run: If True, don't upload to S3
             config_name: Name of config section in scraper_config.yaml
         """
-        super().__init__(config_name=config_name)
+        # Load config and pass to parent
+        config = get_scraper_config(config_name)
+        if not config:
+            raise ValueError(f"Could not load config for '{config_name}'")
+
+        super().__init__(config)
 
         self.days_back = days_back
         self.dry_run = dry_run
@@ -193,6 +205,10 @@ class HoopRIncrementalScraper(AsyncBaseScraper):
         print(f"Errors:          {self.stats['errors']}")
         print("=" * 70)
         print(f"\n✓ Complete: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+    async def scrape(self) -> None:
+        """Main scraping method - implements AsyncBaseScraper abstract method"""
+        await self.run()
 
 
 async def main_async():

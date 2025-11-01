@@ -26,6 +26,7 @@ import asyncio
 import json
 import logging
 import time
+import warnings
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Any
@@ -33,6 +34,9 @@ import sys
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
+
+# Suppress scripts.etl deprecation warning until modules are fully migrated
+warnings.filterwarnings("ignore", message="scripts.etl is deprecated", category=DeprecationWarning)
 
 # Import our new async infrastructure
 from scripts.etl.async_scraper_base import AsyncBaseScraper, ScraperConfig

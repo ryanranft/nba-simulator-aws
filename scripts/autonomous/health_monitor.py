@@ -182,9 +182,9 @@ class HealthMonitor:
     def _check_s3_access(self):
         """Check S3 bucket access"""
         try:
-            # Try to list S3 bucket
+            # Try to list S3 bucket (just check access, don't need full listing)
             result = subprocess.run(
-                ["aws", "s3", "ls", "s3://nba-sim-raw-data-lake/", "--max-items", "1"],
+                ["aws", "s3", "ls", "s3://nba-sim-raw-data-lake/", "--page-size", "1"],
                 capture_output=True,
                 text=True,
                 timeout=10,

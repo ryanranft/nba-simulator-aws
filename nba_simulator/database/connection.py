@@ -1,200 +1,140 @@
 """
 Database Connection Management
 
-Provides connection pooling and management for PostgreSQL database using
-existing credentials and infrastructure.
+Thread-safe connection pooling for PostgreSQL.
+MCP-compatible for use with Claude Code.
 """
 
-import os
 import psycopg2
-import psycopg2.extras
-import psycopg2.pool
-from typing import Optional, Any, List, Dict
+from psycopg2 import pool
 from contextlib import contextmanager
-from dotenv import load_dotenv
+from typing import Optional, List, Dict, Any, Tuple
+import logging
 
+from ..config import config
 
-# Load credentials from existing location
-load_dotenv("/Users/ryanranft/nba-sim-credentials.env")
-
+logger = logging.getLogger(__name__)
 
 class DatabaseConnection:
     """
-    Database connection manager with connection pooling.
-
-    Wraps existing psycopg2 functionality without breaking current scripts.
+    Thread-safe database connection pool manager.
+    
+    Usage:
+        db = DatabaseConnection()
+        with db.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM games LIMIT 1")
+                result = cur.fetchone()
     """
-
-    def __init__(self, database_url: Optional[str] = None, pool_size: int = 5):
+    
+    _instance = None
+    _pool = None
+    
+    def __new__(cls):
+        """Singleton pattern to ensure one pool per process"""
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+    
+    def __init__(self, min_connections: int = 2, max_connections: int = 10):
         """
-        Initialize database connection manager.
-
+        Initialize connection pool.
+        
         Args:
-            database_url: PostgreSQL connection URL (defaults to DATABASE_URL env var)
-            pool_size: Maximum number of connections in pool
-        """
-        self.database_url = database_url or os.getenv("DATABASE_URL")
-
-        if not self.database_url:
-            raise ValueError("DATABASE_URL not found in environment")
-
-        self.pool_size = pool_size
-        self._pool: Optional[psycopg2.pool.SimpleConnectionPool] = None
-
-    def _get_pool(self) -> psycopg2.pool.SimpleConnectionPool:
-        """
-        Get or create connection pool.
-
-        Returns:
-            Connection pool
+            min_connections: Minimum number of connections to maintain
+            max_connections: Maximum number of connections allowed
         """
         if self._pool is None:
-            self._pool = psycopg2.pool.SimpleConnectionPool(
-                1,  # min connections
-                self.pool_size,  # max connections
-                self.database_url,
-            )
-
-        return self._pool
-
+            db_config = config.load_database_config()
+            
+            try:
+                self._pool = psycopg2.pool.ThreadedConnectionPool(
+                    min_connections,
+                    max_connections,
+                    host=db_config['host'],
+                    port=db_config['port'],
+                    database=db_config['database'],
+                    user=db_config['user'],
+                    password=db_config['password']
+                )
+                logger.info("Database connection pool initialized")
+            except Exception as e:
+                logger.error(f"Failed to create connection pool: {e}")
+                raise
+    
     @contextmanager
     def get_connection(self):
         """
-        Get database connection from pool (context manager).
-
+        Get a connection from the pool.
+        
         Yields:
-            psycopg2 connection
-
-        Example:
+            psycopg2 connection object
+            
+        Usage:
             with db.get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("SELECT * FROM games LIMIT 10")
+                # Use connection
+                pass
         """
-        pool = self._get_pool()
-        conn = pool.getconn()
-
+        conn = None
         try:
+            conn = self._pool.getconn()
             yield conn
             conn.commit()
-        except Exception:
-            conn.rollback()
+        except Exception as e:
+            if conn:
+                conn.rollback()
+            logger.error(f"Database error: {e}")
             raise
         finally:
-            pool.putconn(conn)
-
-    @contextmanager
-    def get_cursor(self, cursor_factory=None):
+            if conn:
+                self._pool.putconn(conn)
+    
+    def execute_query(self, query: str, params: Optional[Tuple] = None) -> List[Dict[str, Any]]:
         """
-        Get database cursor (context manager).
-
+        Execute a SELECT query and return results as list of dicts.
+        
         Args:
-            cursor_factory: Optional cursor factory (e.g., RealDictCursor)
-
-        Yields:
-            psycopg2 cursor
-
-        Example:
-            with db.get_cursor(psycopg2.extras.RealDictCursor) as cursor:
-                cursor.execute("SELECT * FROM games LIMIT 10")
-                results = cursor.fetchall()
+            query: SQL query string
+            params: Optional query parameters
+            
+        Returns:
+            List of dictionaries (one per row)
         """
         with self.get_connection() as conn:
-            if cursor_factory:
-                cursor = conn.cursor(cursor_factory=cursor_factory)
-            else:
-                cursor = conn.cursor()
-
-            try:
-                yield cursor
-            finally:
-                cursor.close()
-
-    def execute_query(
-        self, sql: str, params: Optional[tuple] = None, fetch_one: bool = False
-    ) -> Any:
+            with conn.cursor() as cur:
+                cur.execute(query, params)
+                columns = [desc[0] for desc in cur.description] if cur.description else []
+                rows = cur.fetchall()
+                return [dict(zip(columns, row)) for row in rows]
+    
+    def execute_write(self, query: str, params: Optional[Tuple] = None) -> int:
         """
-        Execute SQL query and return results.
-
+        Execute an INSERT/UPDATE/DELETE query.
+        
         Args:
-            sql: SQL query
-            params: Query parameters (for parameterized queries)
-            fetch_one: If True, return single row; if False, return all rows
-
-        Returns:
-            Query results (list of tuples or single tuple)
-        """
-        with self.get_cursor() as cursor:
-            cursor.execute(sql, params)
-
-            if fetch_one:
-                return cursor.fetchone()
-            else:
-                return cursor.fetchall()
-
-    def execute_query_dict(
-        self, sql: str, params: Optional[tuple] = None, fetch_one: bool = False
-    ) -> Any:
-        """
-        Execute SQL query and return results as dictionaries.
-
-        Args:
-            sql: SQL query
-            params: Query parameters
-            fetch_one: If True, return single dict; if False, return list of dicts
-
-        Returns:
-            Query results as dictionaries
-        """
-        with self.get_cursor(psycopg2.extras.RealDictCursor) as cursor:
-            cursor.execute(sql, params)
-
-            if fetch_one:
-                return cursor.fetchone()
-            else:
-                return cursor.fetchall()
-
-    def execute_many(self, sql: str, params_list: List[tuple]) -> int:
-        """
-        Execute SQL query multiple times with different parameters.
-
-        Args:
-            sql: SQL query
-            params_list: List of parameter tuples
-
+            query: SQL query string
+            params: Optional query parameters
+            
         Returns:
             Number of rows affected
         """
-        with self.get_cursor() as cursor:
-            cursor.executemany(sql, params_list)
-            return cursor.rowcount
-
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, params)
+                return cur.rowcount
+    
     def close(self):
-        """Close all connections in pool"""
+        """Close all connections in the pool"""
         if self._pool:
             self._pool.closeall()
-            self._pool = None
+            logger.info("Database connection pool closed")
 
+# Convenience functions for backward compatibility
+def get_db_connection():
+    """Get database connection instance"""
+    return DatabaseConnection()
 
-# Global connection instance
-_global_connection: Optional[DatabaseConnection] = None
-
-
-def get_connection(
-    database_url: Optional[str] = None, pool_size: int = 5
-) -> DatabaseConnection:
-    """
-    Get or create global database connection instance.
-
-    Args:
-        database_url: PostgreSQL connection URL (defaults to DATABASE_URL env var)
-        pool_size: Maximum number of connections in pool
-
-    Returns:
-        Global DatabaseConnection instance
-    """
-    global _global_connection
-
-    if _global_connection is None:
-        _global_connection = DatabaseConnection(database_url, pool_size)
-
-    return _global_connection
+def execute_query(query: str, params: Optional[Tuple] = None) -> List[Dict[str, Any]]:
+    """Execute query using shared connection pool"""
+    db = get_db_connection()
+    return db.execute_query(query, params)

@@ -1,0 +1,47 @@
+[Unit]
+Description=ADCE Autonomous Loop - 24/7 Self-Healing NBA Data Collection
+After=network.target
+Documentation=https://github.com/ryanranft/nba-simulator-aws
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ryanranft
+Group=staff
+WorkingDirectory=/Users/ryanranft/nba-simulator-aws
+
+# Environment
+Environment="PATH=/Users/ryanranft/miniconda3/envs/nba-aws/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONPATH=/Users/ryanranft/nba-simulator-aws"
+EnvironmentFile=/Users/ryanranft/nba-sim-credentials.env
+
+# Main process
+ExecStart=/Users/ryanranft/miniconda3/envs/nba-aws/bin/python scripts/autonomous/autonomous_loop.py
+ExecStop=/Users/ryanranft/miniconda3/envs/nba-aws/bin/python scripts/autonomous/autonomous_cli.py stop
+
+# Restart policy
+Restart=always
+RestartSec=60
+StartLimitInterval=0
+
+# Process management
+KillMode=process
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Resource limits
+LimitNOFILE=65536
+MemoryLimit=2G
+CPUQuota=80%
+
+# Logging
+StandardOutput=append:/Users/ryanranft/nba-simulator-aws/logs/adce-autonomous.stdout.log
+StandardError=append:/Users/ryanranft/nba-simulator-aws/logs/adce-autonomous.stderr.log
+SyslogIdentifier=adce-autonomous
+
+# Security
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,52 +1,30 @@
 """
-NBA Simulator AWS - Python Package
+NBA Simulator AWS - Production Data Pipeline & Simulation System
 
-Version: 0.1.0 (Phase 1: Core Infrastructure)
-Created: October 29, 2025
-Status: Development
+A comprehensive basketball analytics platform combining:
+- Multi-source ETL pipelines (ESPN, Basketball Reference, NBA API, hoopR)
+- PostgreSQL data warehouse (40+ tables, 20M+ records)
+- S3 data lake (146,115+ files, 119+ GB)
+- Machine learning prediction models
+- Historical game simulation engine (1946-2025)
+- Phase 8: Box score snapshot generation system
 
-This package provides a structured interface to the NBA Simulator production system.
-It is designed to coexist with existing scripts/ directory without breaking functionality.
-
-Phase 1 Goals:
-- Backward-compatible configuration management
-- Database connection pooling
-- Common utilities (logging, constants, helpers)
-
-Design Principle: Parallel Coexistence
-- Existing scripts/ directory remains intact
-- New package provides structured interface
-- Zero breaking changes to production code
+Author: Ryan Ranft
+Created: 2025
+Refactored: October 2025
 """
 
-__version__ = "0.1.0"
-__status__ = "Phase 1 - Core Infrastructure"
-__created__ = "2025-10-29"
+__version__ = '2.0.0-alpha'
+__author__ = 'Ryan Ranft'
 
-# Phase 1 exports
-from nba_simulator.config import ConfigLoader, load_config, DatabaseConfig, AWSConfig
-from nba_simulator.database import (
-    DatabaseConnection,
-    get_connection,
-    execute_query,
-    execute_many,
-)
-from nba_simulator.utils import setup_logging, get_logger, ensure_dir, get_timestamp
-
+# Package metadata
 __all__ = [
-    # Config
-    "ConfigLoader",
-    "load_config",
-    "DatabaseConfig",
-    "AWSConfig",
-    # Database
-    "DatabaseConnection",
-    "get_connection",
-    "execute_query",
-    "execute_many",
-    # Utils
-    "setup_logging",
-    "get_logger",
-    "ensure_dir",
-    "get_timestamp",
+    'config',
+    'database', 
+    'utils'
 ]
+
+# Import submodules for convenient access
+from . import config
+from . import database
+from . import utils

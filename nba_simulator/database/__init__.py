@@ -1,16 +1,17 @@
 """
 Database Module
 
-Provides database connection pooling and query execution using existing
-PostgreSQL infrastructure.
+Provides connection pooling and query management for PostgreSQL.
 """
 
-from nba_simulator.database.connection import DatabaseConnection, get_connection
-from nba_simulator.database.queries import execute_query, execute_many
+from .connection import (
+    DatabaseConnection,
+    get_db_connection,
+    execute_query
+)
 
 __all__ = [
-    "DatabaseConnection",
-    "get_connection",
-    "execute_query",
-    "execute_many",
+    'DatabaseConnection',
+    'get_db_connection', 
+    'execute_query'
 ]

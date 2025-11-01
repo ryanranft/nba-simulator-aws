@@ -1,10 +1,11 @@
 """
-ETL Validation
+Data Validation
 
-Data validation framework for:
+Validate data quality and schema compliance:
 - Schema validation
 - Data quality checks
-- Cross-source verification
+- Cross-source validation
+- Completeness checks
 """
 
 __all__ = []

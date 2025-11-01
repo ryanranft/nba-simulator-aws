@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Service Identity -->
+    <key>Label</key>
+    <string>com.nba-simulator.adce-autonomous</string>
+
+    <!-- Description -->
+    <key>ServiceDescription</key>
+    <string>ADCE Autonomous Loop - 24/7 Self-Healing NBA Data Collection</string>
+
+    <!-- Working Directory -->
+    <key>WorkingDirectory</key>
+    <string>/Users/ryanranft/nba-simulator-aws</string>
+
+    <!-- Program and Arguments -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/ryanranft/miniconda3/envs/nba-aws/bin/python</string>
+        <string>scripts/autonomous/autonomous_loop.py</string>
+    </array>
+
+    <!-- Environment Variables -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/Users/ryanranft/miniconda3/envs/nba-aws/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>PYTHONPATH</key>
+        <string>/Users/ryanranft/nba-simulator-aws</string>
+    </dict>
+
+    <!-- Run at Load -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- Keep Alive -->
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+        <key>Crashed</key>
+        <true/>
+    </dict>
+
+    <!-- Restart Policy -->
+    <key>ThrottleInterval</key>
+    <integer>60</integer>
+
+    <!-- Logging -->
+    <key>StandardOutPath</key>
+    <string>/Users/ryanranft/nba-simulator-aws/logs/adce-autonomous.stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/ryanranft/nba-simulator-aws/logs/adce-autonomous.stderr.log</string>
+
+    <!-- Process Type -->
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <!-- Nice Value (lower priority) -->
+    <key>Nice</key>
+    <integer>10</integer>
+
+    <!-- Resource Limits -->
+    <key>SoftResourceLimits</key>
+    <dict>
+        <key>NumberOfFiles</key>
+        <integer>1024</integer>
+    </dict>
+
+    <key>HardResourceLimits</key>
+    <dict>
+        <key>NumberOfFiles</key>
+        <integer>2048</integer>
+    </dict>
+
+    <!-- Disabled by default (enable manually) -->
+    <key>Disabled</key>
+    <true/>
+
+</dict>
+</plist>

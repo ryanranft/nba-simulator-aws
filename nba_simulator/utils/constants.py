@@ -1,60 +1,48 @@
 """
-System-Wide Constants
+System-wide Constants
 
-Centralized constants for paths, configurations, and settings.
+Centralized constants for the NBA Simulator system.
 """
 
-from pathlib import Path
+# Database
+DEFAULT_DB_PORT = 5432
+DEFAULT_DB_NAME = 'nba_simulator'
 
-# Project paths
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-CONFIG_DIR = PROJECT_ROOT / "config"
-DATA_DIR = PROJECT_ROOT / "data"
-LOGS_DIR = PROJECT_ROOT / "logs"
-SCRIPTS_DIR = PROJECT_ROOT / "scripts"
-TESTS_DIR = PROJECT_ROOT / "tests"
-DOCS_DIR = PROJECT_ROOT / "docs"
+# S3
+DEFAULT_S3_BUCKET = 'nba-sim-raw-data-lake'
+DEFAULT_S3_REGION = 'us-east-1'
 
-# AWS Configuration
-S3_BUCKET = "nba-sim-raw-data-lake"
-AWS_REGION = "us-east-1"
-
-# Database Configuration
-DATABASE_SCHEMA = "public"
+# NBA
+NBA_FOUNDING_YEAR = 1946
+CURRENT_SEASON = 2024  # 2024-25 season
 
 # Data Sources
-DATA_SOURCES = {
-    "espn": "ESPN",
-    "basketball_ref": "Basketball Reference",
-    "hoopr": "hoopR",
-    "nba_api": "NBA API",
-    "kaggle": "Kaggle",
-}
+DATA_SOURCES = [
+    'espn',
+    'basketball_reference',
+    'nba_api',
+    'hoopr',
+    'betting'
+]
 
-# Supported Seasons
-SEASON_START_YEAR = 1946  # First NBA season
-SEASON_END_YEAR = 2025  # Current season
-
-# Game Constants
-QUARTERS_PER_GAME = 4
-MINUTES_PER_QUARTER = 12
-SECONDS_PER_QUARTER = 720
-
-# Table Names (most frequently used)
+# Table Names
 TABLES = {
-    "games": "games",
-    "players": "players",
-    "teams": "teams",
-    "play_by_play": "play_by_play",
-    "box_score_players": "box_score_players",
-    "box_score_teams": "box_score_teams",
-    "temporal_events": "temporal_events",
-    "hoopr_play_by_play": "hoopr_play_by_play",
+    'games': 'games',
+    'play_by_play': 'play_by_play',
+    'box_scores': 'box_scores',
+    'box_score_players': 'box_score_players',
+    'players': 'players',
+    'teams': 'teams',
+    'box_score_snapshots': 'box_score_snapshots',
+    'temporal_events': 'temporal_events',
+    'hoopr_schedule': 'hoopr_schedule',
+    'hoopr_play_by_play': 'hoopr_play_by_play'
 }
 
-# Status Constants
-STATUS_SCHEDULED = "scheduled"
-STATUS_IN_PROGRESS = "in_progress"
-STATUS_FINAL = "final"
-STATUS_POSTPONED = "postponed"
-STATUS_CANCELLED = "cancelled"
+# File Limits
+MAX_FILE_SIZE_MB = 100
+MAX_JSON_DEPTH = 10
+
+# Performance
+DEFAULT_BATCH_SIZE = 1000
+MAX_WORKERS = 10

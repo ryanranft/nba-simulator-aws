@@ -29,6 +29,13 @@ scrapers:
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings: {}
+    # CLI parameters this scraper accepts
+    accepted_parameters:
+      - season
+      - game_ids
+      - start_date
+      - end_date
+      - dry_run
   basketball_reference:
     base_url: https://www.basketball-reference.com
     rate_limit:
@@ -59,6 +66,15 @@ scrapers:
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings: {}
+    # CLI parameters this scraper accepts
+    accepted_parameters:
+      - season
+      - game_ids
+      - player_id
+      - team_id
+      - start_date
+      - end_date
+      - dry_run
   nba_api:
     base_url: https://stats.nba.com
     rate_limit:
@@ -662,6 +678,10 @@ scrapers:
       data_types:
       - play_by_play
       - schedule
+    # CLI parameters this scraper accepts
+    accepted_parameters:
+      - days
+      - dry_run
   hoopr_complete_endpoints:
     base_url: https://raw.githubusercontent.com/sportsdataverse/hoopR-data
     rate_limit:
@@ -1273,6 +1293,10 @@ scrapers:
       health_check_interval: 60
       alert_thresholds: {}
     custom_settings: {}
+    # CLI parameters this scraper accepts
+    accepted_parameters:
+      - days
+      - dry_run
   extract_boxscores_local:
     base_url: ''
     rate_limit:

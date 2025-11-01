@@ -1,10 +1,11 @@
 """
-ETL Data Loaders
+Data Loaders
 
-Data loaders for persisting to:
-- PostgreSQL RDS
-- S3 buckets
-- Local storage
+Load data to various destinations:
+- S3 uploads
+- Multi-schema RDS loading (public, odds, rag, raw_data)
+- Bulk operations
+- Schema routing
 """
 
 __all__ = []

@@ -1,8 +1,29 @@
 """
-ETL Base Infrastructure
+ETL Base Module
 
-Core infrastructure for async scraping, rate limiting, retry strategies,
-and error handling.
+Provides base classes and utilities for all NBA data scrapers:
+- AsyncBaseScraper: Base class for async scrapers
+- ScraperConfig: Configuration dataclass
+- ScraperStats: Statistics tracking
+- RateLimiter: Token bucket rate limiter
+- ScraperFactory: Factory for creating scrapers
+
+Version: 2.0 (Refactored)
+Created: November 1, 2025
 """
 
-__all__ = []
+from .async_scraper import (
+    AsyncBaseScraper,
+    ScraperConfig,
+    ScraperStats,
+    RateLimiter,
+    ScraperFactory,
+)
+
+__all__ = [
+    'AsyncBaseScraper',
+    'ScraperConfig',
+    'ScraperStats',
+    'RateLimiter',
+    'ScraperFactory',
+]

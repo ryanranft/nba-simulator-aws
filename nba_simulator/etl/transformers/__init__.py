@@ -1,10 +1,11 @@
 """
-ETL Transformers
+Data Transformers
 
-Data transformation and normalization for:
-- Multi-source data harmonization
-- Temporal event processing
-- Data deduplication
+Transform and normalize data from various sources:
+- Temporal events generation
+- Data normalization
+- Deduplication
+- Feature extraction
 """
 
 __all__ = []
