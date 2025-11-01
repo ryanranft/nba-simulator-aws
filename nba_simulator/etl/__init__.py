@@ -12,15 +12,9 @@ Author: Ryan Ranft
 Phase: 2 - ETL Pipeline Migration
 """
 
-__version__ = '2.0.0-alpha'
+__version__ = "2.0.0-alpha"
 
-__all__ = [
-    'base',
-    'extractors',
-    'transformers',
-    'loaders',
-    'validation'
-]
+__all__ = ["base", "extractors", "transformers", "loaders", "validation"]
 
 # Import submodules for convenient access
 from . import base

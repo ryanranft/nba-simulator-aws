@@ -43,6 +43,7 @@ from nba_simulator.utils import logger as base_logger
 
 class RateLimitState(Enum):
     """Rate limit state enumeration"""
+
     NORMAL = "normal"
     APPROACHING_LIMIT = "approaching_limit"
     RATE_LIMITED = "rate_limited"
@@ -52,6 +53,7 @@ class RateLimitState(Enum):
 @dataclass
 class RateLimitInfo:
     """Rate limit information"""
+
     current_rate: float
     max_rate: float
     state: RateLimitState
@@ -65,6 +67,7 @@ class RateLimitInfo:
 @dataclass
 class TokenBucketConfig:
     """Token bucket configuration"""
+
     capacity: int
     refill_rate: float  # tokens per second
     initial_tokens: Optional[int] = None
@@ -74,14 +77,11 @@ class TokenBucket:
     """Token bucket rate limiter implementation"""
 
     def __init__(
-        self,
-        capacity: int,
-        refill_rate: float,
-        initial_tokens: Optional[int] = None
+        self, capacity: int, refill_rate: float, initial_tokens: Optional[int] = None
     ):
         """
         Initialize token bucket.
-        
+
         Args:
             capacity: Maximum number of tokens
             refill_rate: Tokens added per second
@@ -146,7 +146,7 @@ class AdaptiveRateLimiter:
     ):
         """
         Initialize adaptive rate limiter.
-        
+
         Args:
             initial_rate: Starting requests per second
             max_rate: Maximum requests per second
@@ -168,8 +168,7 @@ class AdaptiveRateLimiter:
 
         # Token bucket for rate limiting
         self.token_bucket = TokenBucket(
-            capacity=int(max_rate),
-            refill_rate=initial_rate
+            capacity=int(max_rate), refill_rate=initial_rate
         )
 
         self.lock = asyncio.Lock()
@@ -206,7 +205,7 @@ class AdaptiveRateLimiter:
         self.state = RateLimitState.RATE_LIMITED
 
         # Extract Retry-After header
-        retry_after = headers.get('Retry-After')
+        retry_after = headers.get("Retry-After")
         if retry_after:
             try:
                 self.retry_after = int(retry_after)
@@ -219,8 +218,7 @@ class AdaptiveRateLimiter:
 
         # Update token bucket
         self.token_bucket = TokenBucket(
-            capacity=int(self.max_rate),
-            refill_rate=self.current_rate
+            capacity=int(self.max_rate), refill_rate=self.current_rate
         )
 
         self.logger.warning(
@@ -246,8 +244,7 @@ class AdaptiveRateLimiter:
 
             # Update token bucket
             self.token_bucket = TokenBucket(
-                capacity=int(self.max_rate),
-                refill_rate=self.current_rate
+                capacity=int(self.max_rate), refill_rate=self.current_rate
             )
 
         # Update state
@@ -327,8 +324,7 @@ class AdaptiveRateLimiter:
         self.successful_requests = 0
 
         self.token_bucket = TokenBucket(
-            capacity=int(self.max_rate),
-            refill_rate=self.initial_rate
+            capacity=int(self.max_rate), refill_rate=self.initial_rate
         )
 
         self.rate_history.clear()
@@ -341,14 +337,14 @@ class MultiDomainRateLimiter:
     def __init__(self, default_config: Dict[str, Any] = None):
         """
         Initialize multi-domain rate limiter.
-        
+
         Args:
             default_config: Default configuration for new domains
         """
         self.default_config = default_config or {
-            'initial_rate': 10.0,
-            'max_rate': 100.0,
-            'min_rate': 0.1,
+            "initial_rate": 10.0,
+            "max_rate": 100.0,
+            "min_rate": 0.1,
         }
         self.limiters: Dict[str, AdaptiveRateLimiter] = {}
         self.logger = base_logger
@@ -367,10 +363,7 @@ class MultiDomainRateLimiter:
         await limiter.acquire(tokens)
 
     async def record_response(
-        self,
-        domain: str,
-        status_code: int,
-        headers: Dict[str, str]
+        self, domain: str, status_code: int, headers: Dict[str, str]
     ) -> None:
         """Record response for domain"""
         limiter = self.get_limiter(domain)
@@ -388,9 +381,9 @@ class MultiDomainRateLimiter:
         stats = {}
         for domain, limiter in self.limiters.items():
             stats[domain] = {
-                'rate_info': limiter.get_rate_limit_info(),
-                'success_rate': limiter.get_success_rate(),
-                'recent_success_rate': limiter.get_recent_success_rate(),
+                "rate_info": limiter.get_rate_limit_info(),
+                "success_rate": limiter.get_success_rate(),
+                "recent_success_rate": limiter.get_recent_success_rate(),
             }
         return stats
 
@@ -401,7 +394,7 @@ class RateLimitMonitor:
     def __init__(self, multi_domain_limiter: MultiDomainRateLimiter):
         """
         Initialize rate limit monitor.
-        
+
         Args:
             multi_domain_limiter: MultiDomainRateLimiter to monitor
         """
@@ -415,58 +408,59 @@ class RateLimitMonitor:
         alerts = []
 
         for domain, domain_stats in stats.items():
-            rate_info = domain_stats['rate_info']
-            success_rate = domain_stats['success_rate']
-            recent_success_rate = domain_stats['recent_success_rate']
+            rate_info = domain_stats["rate_info"]
+            success_rate = domain_stats["success_rate"]
+            recent_success_rate = domain_stats["recent_success_rate"]
 
             # Check for issues
             if rate_info.state == RateLimitState.RATE_LIMITED:
-                alerts.append({
-                    'domain': domain,
-                    'type': 'rate_limited',
-                    'message': f"Domain {domain} is currently rate limited",
-                    'severity': 'high',
-                    'timestamp': datetime.now(timezone.utc),
-                })
+                alerts.append(
+                    {
+                        "domain": domain,
+                        "type": "rate_limited",
+                        "message": f"Domain {domain} is currently rate limited",
+                        "severity": "high",
+                        "timestamp": datetime.now(timezone.utc),
+                    }
+                )
 
             if success_rate < 0.5:
-                alerts.append({
-                    'domain': domain,
-                    'type': 'low_success_rate',
-                    'message': f"Domain {domain} has low success rate: {success_rate:.2%}",
-                    'severity': 'medium',
-                    'timestamp': datetime.now(timezone.utc),
-                })
+                alerts.append(
+                    {
+                        "domain": domain,
+                        "type": "low_success_rate",
+                        "message": f"Domain {domain} has low success rate: {success_rate:.2%}",
+                        "severity": "medium",
+                        "timestamp": datetime.now(timezone.utc),
+                    }
+                )
 
             if recent_success_rate < 0.3:
-                alerts.append({
-                    'domain': domain,
-                    'type': 'recent_failures',
-                    'message': f"Domain {domain} has recent failure rate: {1-recent_success_rate:.2%}",
-                    'severity': 'high',
-                    'timestamp': datetime.now(timezone.utc),
-                })
+                alerts.append(
+                    {
+                        "domain": domain,
+                        "type": "recent_failures",
+                        "message": f"Domain {domain} has recent failure rate: {1-recent_success_rate:.2%}",
+                        "severity": "high",
+                        "timestamp": datetime.now(timezone.utc),
+                    }
+                )
 
         self.alerts.extend(alerts)
 
-        return {
-            'stats': stats,
-            'alerts': alerts,
-            'total_alerts': len(self.alerts)
-        }
+        return {"stats": stats, "alerts": alerts, "total_alerts": len(self.alerts)}
 
     def get_recent_alerts(self, hours: int = 24) -> List[Dict[str, Any]]:
         """Get recent alerts"""
         cutoff_time = datetime.now(timezone.utc) - timedelta(hours=hours)
-        return [alert for alert in self.alerts if alert['timestamp'] >= cutoff_time]
+        return [alert for alert in self.alerts if alert["timestamp"] >= cutoff_time]
 
     def clear_old_alerts(self, hours: int = 24) -> int:
         """Clear old alerts"""
         cutoff_time = datetime.now(timezone.utc) - timedelta(hours=hours)
         old_count = len(self.alerts)
         self.alerts = [
-            alert for alert in self.alerts
-            if alert['timestamp'] >= cutoff_time
+            alert for alert in self.alerts if alert["timestamp"] >= cutoff_time
         ]
         cleared_count = old_count - len(self.alerts)
 
@@ -478,7 +472,7 @@ class RateLimitMonitor:
 
 # Example usage
 if __name__ == "__main__":
-    
+
     async def example_usage():
         """Demonstrate adaptive rate limiter usage"""
         # Single domain rate limiter
@@ -490,7 +484,7 @@ if __name__ == "__main__":
 
             # Simulate response
             if i % 5 == 0:  # Every 5th request is rate limited
-                await rate_limiter.record_response(429, {'Retry-After': '10'})
+                await rate_limiter.record_response(429, {"Retry-After": "10"})
                 print(f"Request {i+1}: Rate limited (429)")
             else:
                 await rate_limiter.record_response(200, {})
@@ -505,7 +499,7 @@ if __name__ == "__main__":
         # Multi-domain rate limiter
         multi_limiter = MultiDomainRateLimiter()
 
-        domains = ['espn.com', 'basketball-reference.com', 'nba.com']
+        domains = ["espn.com", "basketball-reference.com", "nba.com"]
 
         for domain in domains:
             await multi_limiter.acquire(domain)

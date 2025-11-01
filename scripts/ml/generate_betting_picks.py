@@ -153,8 +153,7 @@ def query_todays_odds(conn) -> pd.DataFrame:
 
 
 def match_predictions_to_odds(
-    predictions_df: pd.DataFrame,
-    odds_df: pd.DataFrame
+    predictions_df: pd.DataFrame, odds_df: pd.DataFrame
 ) -> pd.DataFrame:
     """
     Match predictions to odds by team names and date.
@@ -169,61 +168,63 @@ def match_predictions_to_odds(
     matched = []
 
     for _, pred_row in predictions_df.iterrows():
-        pred_home = normalize_team_name(pred_row['home_team'])
-        pred_away = normalize_team_name(pred_row['away_team'])
-        pred_date = pd.to_datetime(pred_row['game_date']).date()
+        pred_home = normalize_team_name(pred_row["home_team"])
+        pred_away = normalize_team_name(pred_row["away_team"])
+        pred_date = pd.to_datetime(pred_row["game_date"]).date()
 
         # Find matching odds
         for _, odds_row in odds_df.iterrows():
-            odds_home = normalize_team_name(odds_row['home_team'])
-            odds_away = normalize_team_name(odds_row['away_team'])
-            odds_date = pd.to_datetime(odds_row['commence_time']).date()
+            odds_home = normalize_team_name(odds_row["home_team"])
+            odds_away = normalize_team_name(odds_row["away_team"])
+            odds_date = pd.to_datetime(odds_row["commence_time"]).date()
 
             # Check if teams match (either direction)
-            home_match = (pred_home == odds_home or pred_home == odds_away)
-            away_match = (pred_away == odds_away or pred_away == odds_home)
-            date_match = (pred_date == odds_date)
+            home_match = pred_home == odds_home or pred_home == odds_away
+            away_match = pred_away == odds_away or pred_away == odds_home
+            date_match = pred_date == odds_date
 
             if home_match and away_match and date_match:
                 # Determine if odds are for home or away team
-                if normalize_team_name(odds_row['outcome_name']) == pred_home:
+                if normalize_team_name(odds_row["outcome_name"]) == pred_home:
                     # Odds for home team
-                    model_prob = pred_row['home_win_probability']
-                    team_bet = pred_row['home_team']
-                elif normalize_team_name(odds_row['outcome_name']) == pred_away:
+                    model_prob = pred_row["home_win_probability"]
+                    team_bet = pred_row["home_team"]
+                elif normalize_team_name(odds_row["outcome_name"]) == pred_away:
                     # Odds for away team
-                    model_prob = pred_row['away_win_probability']
-                    team_bet = pred_row['away_team']
+                    model_prob = pred_row["away_win_probability"]
+                    team_bet = pred_row["away_team"]
                 else:
                     continue
 
                 # Only include if this is the predicted winner
-                if team_bet != pred_row['predicted_winner']:
+                if team_bet != pred_row["predicted_winner"]:
                     continue
 
                 # Calculate metrics
-                implied_prob = american_odds_to_probability(odds_row['odds'])
+                implied_prob = american_odds_to_probability(odds_row["odds"])
                 edge = calculate_edge(model_prob, implied_prob)
-                ev = calculate_expected_value(model_prob, odds_row['odds'])
+                ev = calculate_expected_value(model_prob, odds_row["odds"])
 
-                matched.append({
-                    'game_id': pred_row['game_id'],
-                    'game_date': pred_row['game_date'],
-                    'home_team': pred_row['home_team'],
-                    'away_team': pred_row['away_team'],
-                    'predicted_winner': pred_row['predicted_winner'],
-                    'model_probability': model_prob,
-                    'confidence': pred_row['confidence'],
-                    'prediction_strength': pred_row['prediction_strength'],
-                    'bookmaker': odds_row['bookmaker_title'],
-                    'bookmaker_key': odds_row['bookmaker_key'],
-                    'recommendation': f"{team_bet} ML",
-                    'odds': odds_row['odds'],
-                    'market_probability': implied_prob,
-                    'edge': edge,
-                    'expected_value': ev,
-                    'event_id': odds_row['event_id'],
-                })
+                matched.append(
+                    {
+                        "game_id": pred_row["game_id"],
+                        "game_date": pred_row["game_date"],
+                        "home_team": pred_row["home_team"],
+                        "away_team": pred_row["away_team"],
+                        "predicted_winner": pred_row["predicted_winner"],
+                        "model_probability": model_prob,
+                        "confidence": pred_row["confidence"],
+                        "prediction_strength": pred_row["prediction_strength"],
+                        "bookmaker": odds_row["bookmaker_title"],
+                        "bookmaker_key": odds_row["bookmaker_key"],
+                        "recommendation": f"{team_bet} ML",
+                        "odds": odds_row["odds"],
+                        "market_probability": implied_prob,
+                        "edge": edge,
+                        "expected_value": ev,
+                        "event_id": odds_row["event_id"],
+                    }
+                )
 
     if not matched:
         return pd.DataFrame()
@@ -243,18 +244,18 @@ def format_picks_table(df_picks: pd.DataFrame) -> str:
     lines.append("")
 
     # Sort by expected value (descending)
-    df_sorted = df_picks.sort_values('expected_value', ascending=False)
+    df_sorted = df_picks.sort_values("expected_value", ascending=False)
 
     for _, pick in df_sorted.iterrows():
         game = f"{pick['away_team']} @ {pick['home_team']}"
-        recommendation = pick['recommendation']
-        bookmaker = pick['bookmaker']
-        odds = pick['odds']
-        model_prob = pick['model_probability']
-        market_prob = pick['market_probability']
-        edge = pick['edge']
-        ev = pick['expected_value']
-        confidence = pick['prediction_strength']
+        recommendation = pick["recommendation"]
+        bookmaker = pick["bookmaker"]
+        odds = pick["odds"]
+        model_prob = pick["model_probability"]
+        market_prob = pick["market_probability"]
+        edge = pick["edge"]
+        ev = pick["expected_value"]
+        confidence = pick["prediction_strength"]
 
         odds_str = f"+{odds}" if odds > 0 else str(odds)
 
@@ -322,12 +323,18 @@ def main():
         sys.exit(1)
 
     # Filter for high-confidence predictions
-    print(f"\nFiltering for predictions with confidence >= {args.min_confidence:.1%}...")
-    df_filtered = df_predictions[df_predictions['confidence'] >= args.min_confidence].copy()
+    print(
+        f"\nFiltering for predictions with confidence >= {args.min_confidence:.1%}..."
+    )
+    df_filtered = df_predictions[
+        df_predictions["confidence"] >= args.min_confidence
+    ].copy()
     print(f"✓ {len(df_filtered)} predictions meet confidence threshold")
 
     if len(df_filtered) == 0:
-        print("⚠️  No predictions meet the confidence threshold. Try lowering --min-confidence.")
+        print(
+            "⚠️  No predictions meet the confidence threshold. Try lowering --min-confidence."
+        )
         sys.exit(0)
 
     # Connect to database
@@ -339,12 +346,14 @@ def main():
             user=os.getenv("DB_USER"),
             password=os.getenv("DB_PASSWORD"),
             port=os.getenv("DB_PORT", 5432),
-            sslmode="require"
+            sslmode="require",
         )
         print("✓ Database connection established")
     except Exception as e:
         print(f"⚠️  Database connection failed: {e}")
-        print("   Make sure credentials are in /Users/ryanranft/nba-sim-credentials.env")
+        print(
+            "   Make sure credentials are in /Users/ryanranft/nba-sim-credentials.env"
+        )
         sys.exit(1)
 
     # Query today's odds
@@ -355,7 +364,9 @@ def main():
 
         if len(df_odds) == 0:
             print("⚠️  No odds found for today's games.")
-            print("   Make sure the odds-api scraper has run and collected today's data.")
+            print(
+                "   Make sure the odds-api scraper has run and collected today's data."
+            )
             conn.close()
             sys.exit(0)
     except Exception as e:
@@ -370,17 +381,21 @@ def main():
 
     if len(df_picks) == 0:
         print("⚠️  No matches found between predictions and odds.")
-        print("   Check team name variations or verify odds data exists for today's games.")
+        print(
+            "   Check team name variations or verify odds data exists for today's games."
+        )
         conn.close()
         sys.exit(0)
 
     # Filter by minimum edge if specified
     if args.min_edge > 0:
         before_count = len(df_picks)
-        df_picks = df_picks[df_picks['edge'] >= args.min_edge].copy()
+        df_picks = df_picks[df_picks["edge"] >= args.min_edge].copy()
         after_count = len(df_picks)
-        print(f"\nFiltered to {after_count} picks with edge >= {args.min_edge:.1%} "
-              f"({before_count - after_count} removed)")
+        print(
+            f"\nFiltered to {after_count} picks with edge >= {args.min_edge:.1%} "
+            f"({before_count - after_count} removed)"
+        )
 
     # Close database connection
     conn.close()
@@ -417,4 +432,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

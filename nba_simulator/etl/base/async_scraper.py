@@ -44,12 +44,14 @@ from nba_simulator.utils import logger as base_logger
 
 try:
     import boto3
+
     HAS_BOTO3 = True
 except ImportError:
     HAS_BOTO3 = False
 
 try:
     import yaml
+
     HAS_YAML = True
 except ImportError:
     HAS_YAML = False
@@ -58,6 +60,7 @@ except ImportError:
 @dataclass
 class ScraperConfig:
     """Configuration for async scrapers"""
+
     base_url: str
     rate_limit: float = 1.0  # seconds between requests
     timeout: int = 30
@@ -72,6 +75,7 @@ class ScraperConfig:
 @dataclass
 class ScraperStats:
     """Statistics tracking for scrapers"""
+
     requests_made: int = 0
     requests_successful: int = 0
     requests_failed: int = 0
@@ -104,7 +108,7 @@ class RateLimiter:
     def __init__(self, rate_limit: float):
         """
         Initialize rate limiter.
-        
+
         Args:
             rate_limit: Seconds between requests (e.g., 1.0 = 1 request per second)
         """
@@ -137,7 +141,7 @@ class RateLimiter:
 class AsyncScraper(ABC):
     """
     Base class for async NBA data scrapers.
-    
+
     All data source scrapers should inherit from this class.
     Provides rate limiting, retry logic, error handling, and storage.
     """
@@ -145,7 +149,7 @@ class AsyncScraper(ABC):
     def __init__(self, config: ScraperConfig):
         """
         Initialize async scraper.
-        
+
         Args:
             config: ScraperConfig with settings for this scraper
         """
@@ -159,7 +163,7 @@ class AsyncScraper(ABC):
 
         # Setup S3 if configured
         if config.s3_bucket and HAS_BOTO3:
-            self.s3_client = boto3.client('s3')
+            self.s3_client = boto3.client("s3")
         elif config.s3_bucket:
             self.logger.warning("S3 bucket configured but boto3 not installed")
 
@@ -187,23 +191,20 @@ class AsyncScraper(ABC):
         ssl_context.verify_mode = ssl.CERT_NONE
 
         connector = aiohttp.TCPConnector(
-            limit=self.config.max_concurrent,
-            ssl=ssl_context
+            limit=self.config.max_concurrent, ssl=ssl_context
         )
         timeout = aiohttp.ClientTimeout(total=self.config.timeout)
 
         headers = {
-            'User-Agent': self.config.user_agent,
-            'Accept': 'application/json, text/html, */*',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate',
-            'Connection': 'keep-alive',
+            "User-Agent": self.config.user_agent,
+            "Accept": "application/json, text/html, */*",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate",
+            "Connection": "keep-alive",
         }
 
         self._session = aiohttp.ClientSession(
-            connector=connector,
-            timeout=timeout,
-            headers=headers
+            connector=connector, timeout=timeout, headers=headers
         )
 
         self.logger.info(f"Started {self.__class__.__name__} scraper")
@@ -248,19 +249,16 @@ class AsyncScraper(ABC):
         return self._session
 
     async def fetch_url(
-        self,
-        url: str,
-        params: Optional[Dict] = None,
-        headers: Optional[Dict] = None
+        self, url: str, params: Optional[Dict] = None, headers: Optional[Dict] = None
     ) -> Optional[aiohttp.ClientResponse]:
         """
         Fetch a single URL with rate limiting and retry logic.
-        
+
         Args:
             url: URL to fetch
             params: Optional query parameters
             headers: Optional additional headers
-            
+
         Returns:
             Response object if successful, None otherwise
         """
@@ -279,20 +277,22 @@ class AsyncScraper(ABC):
             try:
                 self.stats.requests_made += 1
 
-                async with self._session.get(url, params=params, headers=request_headers) as response:
+                async with self._session.get(
+                    url, params=params, headers=request_headers
+                ) as response:
                     if response.status == 200:
                         self.stats.requests_successful += 1
                         return response
                     elif response.status == 429:
                         # Rate limited - wait longer
-                        wait_time = 60 * (2 ** attempt)
+                        wait_time = 60 * (2**attempt)
                         self.logger.warning(f"Rate limited (429), waiting {wait_time}s")
                         await asyncio.sleep(wait_time)
                         self.stats.retries_performed += 1
                         continue
                     elif response.status >= 500:
                         # Server error - retry
-                        wait_time = 2 ** attempt
+                        wait_time = 2**attempt
                         self.logger.warning(
                             f"Server error {response.status}, retrying in {wait_time}s"
                         )
@@ -307,14 +307,16 @@ class AsyncScraper(ABC):
                         return None
 
             except asyncio.TimeoutError:
-                wait_time = 2 ** attempt
+                wait_time = 2**attempt
                 self.logger.warning(f"Timeout for {url}, retrying in {wait_time}s")
                 await asyncio.sleep(wait_time)
                 self.stats.retries_performed += 1
                 continue
             except Exception as e:
-                wait_time = 2 ** attempt
-                self.logger.error(f"Error fetching {url}: {e}, retrying in {wait_time}s")
+                wait_time = 2**attempt
+                self.logger.error(
+                    f"Error fetching {url}: {e}, retrying in {wait_time}s"
+                )
                 await asyncio.sleep(wait_time)
                 self.stats.retries_performed += 1
                 continue
@@ -328,17 +330,15 @@ class AsyncScraper(ABC):
         return None
 
     async def fetch_urls(
-        self,
-        urls: List[str],
-        params_list: Optional[List[Dict]] = None
+        self, urls: List[str], params_list: Optional[List[Dict]] = None
     ) -> AsyncGenerator[aiohttp.ClientResponse, None]:
         """
         Fetch multiple URLs concurrently.
-        
+
         Args:
             urls: List of URLs to fetch
             params_list: Optional list of query parameters (must match urls length)
-            
+
         Yields:
             Response objects as they complete successfully
         """
@@ -368,7 +368,9 @@ class AsyncScraper(ABC):
             if response:
                 yield response
 
-    async def parse_json_response(self, response: aiohttp.ClientResponse) -> Optional[Dict]:
+    async def parse_json_response(
+        self, response: aiohttp.ClientResponse
+    ) -> Optional[Dict]:
         """Parse JSON response"""
         try:
             data = await response.json()
@@ -379,7 +381,9 @@ class AsyncScraper(ABC):
             self.stats.errors += 1
             return None
 
-    async def parse_text_response(self, response: aiohttp.ClientResponse) -> Optional[str]:
+    async def parse_text_response(
+        self, response: aiohttp.ClientResponse
+    ) -> Optional[str]:
         """Parse text response"""
         try:
             text = await response.text()
@@ -390,20 +394,15 @@ class AsyncScraper(ABC):
             self.stats.errors += 1
             return None
 
-    async def store_data(
-        self,
-        data: Any,
-        filename: str,
-        subdir: str = ""
-    ) -> bool:
+    async def store_data(self, data: Any, filename: str, subdir: str = "") -> bool:
         """
         Store data to local file and optionally S3.
-        
+
         Args:
             data: Data to store (dict, list, or string)
             filename: Filename to save as
             subdir: Optional subdirectory within output_dir
-            
+
         Returns:
             True if successful, False otherwise
         """
@@ -421,10 +420,10 @@ class AsyncScraper(ABC):
 
             # Write to local file
             if isinstance(data, (dict, list)):
-                async with aiofiles.open(file_path, 'w') as f:
+                async with aiofiles.open(file_path, "w") as f:
                     await f.write(json.dumps(data, indent=2))
             else:
-                async with aiofiles.open(file_path, 'w') as f:
+                async with aiofiles.open(file_path, "w") as f:
                     await f.write(str(data))
 
             # Upload to S3 if configured
@@ -450,7 +449,7 @@ class AsyncScraper(ABC):
                 self.s3_client.upload_file,
                 str(file_path),
                 self.config.s3_bucket,
-                s3_key
+                s3_key,
             )
             self.logger.debug(f"Uploaded {s3_key} to S3")
         except Exception as e:
@@ -469,7 +468,7 @@ class AsyncScraper(ABC):
     async def scrape(self) -> None:
         """
         Main scraping method - must be implemented by subclasses.
-        
+
         This is where the actual scraping logic goes.
         """
         pass
@@ -484,11 +483,11 @@ class ScraperFactory:
         if not HAS_YAML:
             raise ImportError("PyYAML not installed. Install with: pip install pyyaml")
 
-        with open(config_path, 'r') as f:
+        with open(config_path, "r") as f:
             config_data = yaml.safe_load(f)
 
         configs = {}
-        for scraper_name, config_dict in config_data.get('scrapers', {}).items():
+        for scraper_name, config_dict in config_data.get("scrapers", {}).items():
             configs[scraper_name] = ScraperConfig(**config_dict)
 
         return configs
@@ -497,47 +496,48 @@ class ScraperFactory:
     def create_config_from_env() -> ScraperConfig:
         """Create configuration from environment variables"""
         import os
+
         return ScraperConfig(
-            base_url=os.getenv('SCRAPER_BASE_URL', ''),
-            rate_limit=float(os.getenv('SCRAPER_RATE_LIMIT', '1.0')),
-            timeout=int(os.getenv('SCRAPER_TIMEOUT', '30')),
-            retry_attempts=int(os.getenv('SCRAPER_RETRY_ATTEMPTS', '3')),
-            max_concurrent=int(os.getenv('SCRAPER_MAX_CONCURRENT', '10')),
-            user_agent=os.getenv('SCRAPER_USER_AGENT', 'NBA-Simulator-Scraper/2.0'),
-            s3_bucket=os.getenv('SCRAPER_S3_BUCKET'),
-            output_dir=os.getenv('SCRAPER_OUTPUT_DIR', '/tmp/scraper_output'),
-            dry_run=os.getenv('SCRAPER_DRY_RUN', 'false').lower() == 'true',
+            base_url=os.getenv("SCRAPER_BASE_URL", ""),
+            rate_limit=float(os.getenv("SCRAPER_RATE_LIMIT", "1.0")),
+            timeout=int(os.getenv("SCRAPER_TIMEOUT", "30")),
+            retry_attempts=int(os.getenv("SCRAPER_RETRY_ATTEMPTS", "3")),
+            max_concurrent=int(os.getenv("SCRAPER_MAX_CONCURRENT", "10")),
+            user_agent=os.getenv("SCRAPER_USER_AGENT", "NBA-Simulator-Scraper/2.0"),
+            s3_bucket=os.getenv("SCRAPER_S3_BUCKET"),
+            output_dir=os.getenv("SCRAPER_OUTPUT_DIR", "/tmp/scraper_output"),
+            dry_run=os.getenv("SCRAPER_DRY_RUN", "false").lower() == "true",
         )
 
     @staticmethod
     def create_config_from_app() -> ScraperConfig:
         """Create configuration from nba_simulator app config"""
         s3_config = app_config.load_s3_config()
-        
+
         return ScraperConfig(
-            base_url='',
+            base_url="",
             rate_limit=1.0,
             timeout=30,
             retry_attempts=3,
             max_concurrent=10,
-            user_agent='NBA-Simulator-Scraper/2.0',
-            s3_bucket=s3_config.get('bucket'),
-            output_dir='/tmp/nba_scraper_output',
-            dry_run=False
+            user_agent="NBA-Simulator-Scraper/2.0",
+            s3_bucket=s3_config.get("bucket"),
+            output_dir="/tmp/nba_scraper_output",
+            dry_run=False,
         )
 
 
 # Example usage
 if __name__ == "__main__":
-    
+
     class ExampleScraper(AsyncScraper):
         """Example scraper for testing"""
-        
+
         async def scrape(self):
             urls = [
-                'https://httpbin.org/json',
-                'https://httpbin.org/json',
-                'https://httpbin.org/json',
+                "https://httpbin.org/json",
+                "https://httpbin.org/json",
+                "https://httpbin.org/json",
             ]
 
             async for response in self.fetch_urls(urls):
@@ -548,7 +548,7 @@ if __name__ == "__main__":
 
     # Example usage
     config = ScraperConfig(
-        base_url='https://httpbin.org',
+        base_url="https://httpbin.org",
         rate_limit=0.5,  # 0.5 seconds between requests = 2 req/sec
         max_concurrent=3,
     )

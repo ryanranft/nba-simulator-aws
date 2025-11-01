@@ -29,9 +29,13 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 # Suppress pkg_resources deprecation warning from sportsdataverse
-warnings.filterwarnings("ignore", message="pkg_resources is deprecated", category=UserWarning)
+warnings.filterwarnings(
+    "ignore", message="pkg_resources is deprecated", category=UserWarning
+)
 # Suppress scripts.etl deprecation warning until modules are fully migrated
-warnings.filterwarnings("ignore", message="scripts.etl is deprecated", category=DeprecationWarning)
+warnings.filterwarnings(
+    "ignore", message="scripts.etl is deprecated", category=DeprecationWarning
+)
 
 # Import hoopR
 try:

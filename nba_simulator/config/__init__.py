@@ -11,4 +11,4 @@ Backward compatible with legacy .env format.
 
 from .loader import ConfigLoader, config
 
-__all__ = ['ConfigLoader', 'config']
+__all__ = ["ConfigLoader", "config"]

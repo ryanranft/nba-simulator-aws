@@ -36,7 +36,9 @@ import sys
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 # Suppress scripts.etl deprecation warning until modules are fully migrated
-warnings.filterwarnings("ignore", message="scripts.etl is deprecated", category=DeprecationWarning)
+warnings.filterwarnings(
+    "ignore", message="scripts.etl is deprecated", category=DeprecationWarning
+)
 
 # Import our new async infrastructure
 from scripts.etl.async_scraper_base import AsyncBaseScraper, ScraperConfig

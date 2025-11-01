@@ -21,9 +21,9 @@ from .async_scraper import (
 )
 
 __all__ = [
-    'AsyncBaseScraper',
-    'ScraperConfig',
-    'ScraperStats',
-    'RateLimiter',
-    'ScraperFactory',
+    "AsyncBaseScraper",
+    "ScraperConfig",
+    "ScraperStats",
+    "RateLimiter",
+    "ScraperFactory",
 ]

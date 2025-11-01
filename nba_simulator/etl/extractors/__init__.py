@@ -9,10 +9,4 @@ Scrapers for all NBA data sources:
 - Kaggle: Historical datasets
 """
 
-__all__ = [
-    'espn',
-    'basketball_reference',
-    'hoopr',
-    'nba_api',
-    'kaggle'
-]
+__all__ = ["espn", "basketball_reference", "hoopr", "nba_api", "kaggle"]

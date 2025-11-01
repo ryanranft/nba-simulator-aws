@@ -14,15 +14,11 @@ Created: 2025
 Refactored: October 2025
 """
 
-__version__ = '2.0.0-alpha'
-__author__ = 'Ryan Ranft'
+__version__ = "2.0.0-alpha"
+__author__ = "Ryan Ranft"
 
 # Package metadata
-__all__ = [
-    'config',
-    'database', 
-    'utils'
-]
+__all__ = ["config", "database", "utils"]
 
 # Import submodules for convenient access
 from . import config
