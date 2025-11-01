@@ -132,3 +132,28 @@ inventory/outputs/prms/*.html
 inventory/outputs/prms/*.json
 .coverage
 htmlcov/
+
+# Refactoring planning docs (temporary, keep COMPLETE_REFACTORING_EXECUTION_PLAN.md in repo)
+CLAUDE_CODE_REFACTORING_INSTRUCTIONS.md
+COMPREHENSIVE_FILE_INVENTORY.md
+DATABASE_SCHEMA_EXPANSION.md
+MCP_FILESYSTEM_TEST.txt
+NEW_CHAT_HANDOFF_INSTRUCTIONS.md
+PHASE1_COMPLETION_REPORT.md
+PHASE_2_ETL_ADDENDUM.md
+PHASE_2_REFACTORING_PLAN_SUMMARY.md
+README_PHASE1.md
+SESSION_PROGRESS_LOG*.md
+refactoring_baseline.txt
+test_phase2_imports.py
+
+# Refactoring backups (local only)
+nba_simulator.backup.*/
+nba-simulator-refactored/
+
+# Temporary files and directories
+tmp/
+files.zip
+
+# Generated reports (local analysis only)
+reports/betting/
