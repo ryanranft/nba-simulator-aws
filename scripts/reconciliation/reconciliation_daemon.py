@@ -292,7 +292,10 @@ Examples:
   # Run daemon with default 1-hour interval
   python reconciliation_daemon.py
 
-  # Run with 2-hour interval
+  # Run with 15-minute interval (Week 3: Real-Time Reconciliation)
+  python reconciliation_daemon.py --interval-minutes 15
+
+  # Run with 2-hour interval (legacy)
   python reconciliation_daemon.py --interval-hours 2
 
   # Run once and exit (for testing)
@@ -307,10 +310,16 @@ Examples:
     )
 
     parser.add_argument(
+        "--interval-minutes",
+        type=int,
+        default=None,
+        help="Minutes between reconciliation runs (default: None, use --interval-hours)",
+    )
+    parser.add_argument(
         "--interval-hours",
         type=float,
         default=1.0,
-        help="Hours between reconciliation runs (default: 1.0)",
+        help="Hours between reconciliation runs (default: 1.0, legacy)",
     )
     parser.add_argument(
         "--run-once", action="store_true", help="Run one cycle and exit (for testing)"
@@ -328,9 +337,19 @@ Examples:
 
     args = parser.parse_args()
 
+    # Calculate interval in hours (support both minutes and hours for backward compat)
+    if args.interval_minutes is not None:
+        interval_hours = args.interval_minutes / 60.0
+        logger.info(
+            f"Using {args.interval_minutes}-minute interval ({interval_hours:.2f} hours)"
+        )
+    else:
+        interval_hours = args.interval_hours
+        logger.info(f"Using {interval_hours}-hour interval")
+
     # Initialize daemon
     daemon = ReconciliationDaemon(
-        interval_hours=args.interval_hours,
+        interval_hours=interval_hours,
         dry_run=args.dry_run,
         use_aws_inventory=args.use_aws_inventory,
     )

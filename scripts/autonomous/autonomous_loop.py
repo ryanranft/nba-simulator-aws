@@ -56,13 +56,19 @@ class AutonomousLoop:
     in a continuous self-healing loop with zero manual intervention.
     """
 
-    def __init__(self, config_file="config/autonomous_config.yaml", dry_run=False):
+    def __init__(
+        self,
+        config_file="config/autonomous_config.yaml",
+        dry_run=False,
+        test_mode=False,
+    ):
         """
         Initialize autonomous loop
 
         Args:
             config_file: Path to configuration file
             dry_run: If True, don't execute, just simulate
+            test_mode: If True, skip reconciliation daemon
         """
         self.config_file = Path(config_file)
         self.dry_run = dry_run
@@ -71,9 +77,18 @@ class AutonomousLoop:
         # Component processes
         self.reconciliation_daemon = None
         self.orchestrator_process = None
+        self.health_monitor = None
+        self.health_monitor_thread = None
 
         # Load configuration
         self.config = self._load_config()
+
+        # Test mode configuration
+        self.test_mode = self.config.get("test_mode", {})
+
+        # Override config if CLI flag provided
+        if test_mode:
+            self.test_mode["enabled"] = True
 
         # State tracking
         self.state = {
@@ -96,14 +111,25 @@ class AutonomousLoop:
         # Create log directory
         Path("logs").mkdir(exist_ok=True)
 
+        # Calculate reconciliation interval (support both minutes and hours for backward compat)
+        if "reconciliation_interval_minutes" in self.config:
+            self.reconciliation_interval_seconds = (
+                self.config["reconciliation_interval_minutes"] * 60
+            )
+            interval_display = f"{self.config['reconciliation_interval_minutes']}min"
+        else:
+            # Legacy: hours-based interval
+            self.reconciliation_interval_seconds = (
+                self.config.get("reconciliation_interval_hours", 1) * 3600
+            )
+            interval_display = f"{self.config.get('reconciliation_interval_hours', 1)}h"
+
         logger.info("=" * 80)
         logger.info("AUTONOMOUS LOOP CONTROLLER - ADCE Phase 4")
         logger.info("=" * 80)
         logger.info(f"Config: {self.config_file}")
         logger.info(f"Dry run: {self.dry_run}")
-        logger.info(
-            f"Reconciliation interval: {self.config['reconciliation_interval_hours']}h"
-        )
+        logger.info(f"Reconciliation interval: {interval_display}")
         logger.info(
             f"Min tasks to trigger orchestrator: {self.config['min_tasks_to_trigger']}"
         )
@@ -153,19 +179,41 @@ class AutonomousLoop:
         self.state["status"] = "running"
 
         try:
-            # Start health monitor in background thread
-            health_thread = threading.Thread(
-                target=self._run_health_monitor, daemon=True
+            # Start health monitor HTTP server in background thread
+            import sys
+            from pathlib import Path
+
+            # Add scripts/autonomous to path for import
+            autonomous_dir = Path(__file__).parent
+            if str(autonomous_dir) not in sys.path:
+                sys.path.insert(0, str(autonomous_dir))
+
+            from health_monitor import HealthMonitor
+
+            health_port = self.config.get("health_check_port", 8080)
+            self.health_monitor = HealthMonitor(port=health_port)
+            self.health_monitor_thread = threading.Thread(
+                target=self.health_monitor.start, daemon=True
             )
-            health_thread.start()
-            logger.info("✅ Health monitor started")
+            self.health_monitor_thread.start()
+            logger.info(f"✅ Health monitor HTTP server started on port {health_port}")
 
-            # Start reconciliation daemon
-            if not self._start_reconciliation_daemon():
-                logger.error("❌ Failed to start reconciliation daemon")
-                return False
+            # Give it a moment to start
+            time.sleep(1)
 
-            logger.info("✅ Reconciliation daemon started")
+            # Check if test mode is enabled
+            if self.test_mode.get("enabled", False):
+                logger.warning("=" * 80)
+                logger.warning("⚠️  TEST MODE ENABLED - Reconciliation daemon disabled")
+                logger.warning("⚠️  Will only process existing task queue")
+                logger.warning("=" * 80)
+            else:
+                # Start reconciliation daemon in normal mode
+                if not self._start_reconciliation_daemon():
+                    logger.error("❌ Failed to start reconciliation daemon")
+                    return False
+
+                logger.info("✅ Reconciliation daemon started")
 
             # Main control loop
             logger.info("\n🔄 Entering main control loop...")
@@ -193,12 +241,24 @@ class AutonomousLoop:
             return True
 
         try:
-            cmd = [
-                sys.executable,
-                "scripts/reconciliation/reconciliation_daemon.py",
-                "--interval-hours",
-                str(self.config["reconciliation_interval_hours"]),
-            ]
+            # Build command with appropriate interval flag (minutes or hours)
+            cmd = [sys.executable, "scripts/reconciliation/reconciliation_daemon.py"]
+
+            if "reconciliation_interval_minutes" in self.config:
+                cmd.extend(
+                    [
+                        "--interval-minutes",
+                        str(self.config["reconciliation_interval_minutes"]),
+                    ]
+                )
+            else:
+                # Legacy: use hours
+                cmd.extend(
+                    [
+                        "--interval-hours",
+                        str(self.config.get("reconciliation_interval_hours", 1)),
+                    ]
+                )
 
             logger.info(f"Starting reconciliation daemon: {' '.join(cmd)}")
 
@@ -230,20 +290,21 @@ class AutonomousLoop:
 
         Monitors task queue and triggers orchestrator when needed
         """
-        check_interval = 30  # Check every 30 seconds
+        check_interval = 10  # Check every 10 seconds (Week 3: faster response, was 30s)
         last_check = datetime.now() - timedelta(seconds=check_interval)
 
         while self.running:
             try:
-                # Check if reconciliation daemon is still running
-                if (
-                    self.reconciliation_daemon
-                    and self.reconciliation_daemon.poll() is not None
-                ):
-                    logger.error(
-                        "⚠️  Reconciliation daemon stopped unexpectedly, restarting..."
-                    )
-                    self._start_reconciliation_daemon()
+                # Check if reconciliation daemon is still running (skip in test mode)
+                if not self.test_mode.get("enabled", False):
+                    if (
+                        self.reconciliation_daemon
+                        and self.reconciliation_daemon.poll() is not None
+                    ):
+                        logger.error(
+                            "⚠️  Reconciliation daemon stopped unexpectedly, restarting..."
+                        )
+                        self._start_reconciliation_daemon()
 
                 # Check task queue periodically
                 if (datetime.now() - last_check).total_seconds() >= check_interval:
@@ -446,6 +507,16 @@ class AutonomousLoop:
         logger.info("\n🛑 Shutting down autonomous loop...")
         self.state["status"] = "stopped"
 
+        # Stop health monitor HTTP server
+        if self.health_monitor and self.health_monitor.server:
+            logger.info("Stopping health monitor...")
+            try:
+                self.health_monitor.server.shutdown()
+                self.health_monitor_thread.join(timeout=5)
+                logger.info("✅ Health monitor stopped")
+            except Exception as e:
+                logger.warning(f"⚠️ Error stopping health monitor: {e}")
+
         # Stop reconciliation daemon
         if self.reconciliation_daemon and self.reconciliation_daemon.poll() is None:
             logger.info("Stopping reconciliation daemon...")
@@ -525,12 +596,19 @@ Examples:
     parser.add_argument(
         "--dry-run", action="store_true", help="Dry run mode (no actual execution)"
     )
+    parser.add_argument(
+        "--test-mode",
+        action="store_true",
+        help="Test mode (skip reconciliation, for component testing)",
+    )
 
     args = parser.parse_args()
 
     # Initialize and start autonomous loop
     try:
-        loop = AutonomousLoop(config_file=args.config, dry_run=args.dry_run)
+        loop = AutonomousLoop(
+            config_file=args.config, dry_run=args.dry_run, test_mode=args.test_mode
+        )
 
         success = loop.start()
 

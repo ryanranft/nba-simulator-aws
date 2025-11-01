@@ -18,9 +18,13 @@ test_mode:
   #       dry_run prevents all execution
 
 # Reconciliation Configuration
-reconciliation_interval_hours: 1 # Run reconciliation every hour
+# Week 3 Enhancement: Real-Time Reconciliation (15-min cycles instead of 1 hour)
+reconciliation_interval_minutes: 15 # Run reconciliation every 15 minutes (4x faster gap detection)
 use_aws_inventory: true # Use AWS S3 Inventory when available
 fallback_to_sample: true # Fall back to sampling if inventory unavailable
+
+# Legacy support (deprecated, use reconciliation_interval_minutes)
+# reconciliation_interval_hours: 1
 
 # Orchestrator Configuration
 min_tasks_to_trigger: 1 # Minimum tasks in queue to trigger orchestrator
