@@ -568,3 +568,5 @@ if __name__ == "__main__":
         print(f"Recent alerts: {len(recent)}")
 
     asyncio.run(example_usage())
+
+

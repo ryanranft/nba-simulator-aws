@@ -568,3 +568,5 @@ if __name__ == "__main__":
             print(f"Validation errors for {scraper_name}: {errors}")
         else:
             print(f"Configuration for {scraper_name} is valid")
+
+

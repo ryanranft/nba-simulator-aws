@@ -18,12 +18,31 @@ Created: October 17, 2025
 
 import argparse
 import json
+import os
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import Dict, List, Optional
 
 import pandas as pd
 import requests
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Add parent directory to path to import fetch_game_state
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from scripts.ml.fetch_game_state import get_game_state
+
+# Load environment
+env_paths = [
+    "/Users/ryanranft/nba-sim-credentials.env",
+    "/Users/ryanranft/nba-simulator-aws/.env",
+    os.path.expanduser("~/.env")
+]
+
+for path in env_paths:
+    if os.path.exists(path):
+        load_dotenv(path)
+        break
 
 
 class UpcomingGamesFetcher:
@@ -102,6 +121,19 @@ class UpcomingGamesFetcher:
             game_date = event.get("date")  # ISO format: 2025-10-22T23:00Z
             game_name = event.get("name", "")  # e.g., "Lakers @ Warriors"
 
+            # Check if game is in progress and fetch game state
+            game_state = None
+            if status_type == "STATUS_IN_PROGRESS":
+                try:
+                    # Convert game_date to date object
+                    game_date_obj = datetime.fromisoformat(game_date.replace('Z', '+00:00')).date()
+                    game_state = get_game_state(str(game_id), game_date=game_date_obj)
+                    if game_state:
+                        print(f"  ✓ Found in-progress game state for {game_name}: Q{game_state['quarter']} {game_state['current_score_home']}-{game_state['current_score_away']}")
+                except Exception as e:
+                    print(f"  ⚠️  Error fetching game state for {game_name}: {e}")
+                    game_state = None
+
             # Extract competition info
             competitions = event.get("competitions", [])
             if not competitions:
@@ -153,7 +185,7 @@ class UpcomingGamesFetcher:
             # Status detail (e.g., "7:00 PM ET", "Final", "3rd Qtr")
             status_detail = event.get("status", {}).get("type", {}).get("detail", "")
 
-            return {
+            game_dict = {
                 "game_id": game_id,
                 "game_date": game_date,
                 "game_date_local": date.strftime("%Y-%m-%d"),
@@ -176,6 +208,12 @@ class UpcomingGamesFetcher:
                 ),
                 "espn_url": f"https://www.espn.com/nba/game/_/gameId/{game_id}",
             }
+
+            # Add game_state if available (for in-progress games)
+            if game_state is not None:
+                game_dict["game_state"] = game_state
+
+            return game_dict
 
         except (KeyError, IndexError, TypeError) as e:
             print(f"  ⚠️  Error parsing game event: {e}")

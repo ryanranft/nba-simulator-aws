@@ -1,0 +1,113 @@
+====================================================================================================
+BACKTEST RESULTS - ADVANCED MULTI-SIMULATOR FRAMEWORK
+====================================================================================================
+Generated: 2025-11-03 18:22:40
+
+SUMMARY METRICS
+----------------------------------------------------------------------------------------------------
+Model                     Games    Win Acc    Score MAE    Score RMSE   Brier      Calibration 
+----------------------------------------------------------------------------------------------------
+ensemble                  50           56.0%     2133.37     2141.71    0.2646       -0.26
+----------------------------------------------------------------------------------------------------
+
+====================================================================================================
+DETAILED RESULTS: ENSEMBLE
+====================================================================================================
+
+Games Tested: 50
+Win Probability Accuracy: 56.0%
+Score MAE (Mean Absolute Error): 2133.37 points
+Score RMSE (Root Mean Squared Error): 2141.71 points
+Brier Score (lower is better): 0.2646
+Calibration Slope (1.0 = perfect): -0.26
+
+Total Points MAE: 4266.73 points
+Total Points RMSE: 4276.11 points
+Margin MAE: 194.21 points
+Margin RMSE: 260.23 points
+
+ENHANCEMENT VERIFICATION
+----------------------------------------------------------------------------------------------------
+✓ 1. Rest Days Calculation: Present
+✓ 2. Strength of Schedule (SRS): Present
+    Home SRS: 80.73, Away SRS: 80.18
+✓ 3. Home/Away Splits: Present
+✓ 4. Matchup-Specific Adjustments: Present
+✓ 5. Star Player Impact: Present
+✓ 6. Roster Changes Detection: Present
+✓ 7. Dynamic Model Weighting: Present
+    Weights: Panel=0.40, Bayesian=0.30, Simultaneous=0.30
+✓ 8. Better Confidence Intervals: Present
+
+PREDICTION VALIDATION
+----------------------------------------------------------------------------------------------------
+Total Predictions: 50
+Home Score Valid (90-135): 0/50 (0.0%)
+Away Score Valid (90-135): 0/50 (0.0%)
+Total Valid (180-250): 0/50 (0.0%)
+All Validations Passed: 0/50 (0.0%)
+
+CONFIDENCE INTERVAL COVERAGE
+----------------------------------------------------------------------------------------------------
+Home Score Coverage:
+  50% Interval: 100.0% (target: ~50%)
+  80% Interval: 100.0% (target: ~80%)
+  95% Interval: 100.0% (target: ~95%)
+Away Score Coverage:
+  50% Interval: 100.0% (target: ~50%)
+  80% Interval: 100.0% (target: ~80%)
+  95% Interval: 100.0% (target: ~95%)
+Total Points Coverage:
+  50% Interval: 100.0% (target: ~50%)
+  80% Interval: 100.0% (target: ~80%)
+  95% Interval: 100.0% (target: ~95%)
+
+Top 10 Best Predictions (by margin error):
+  Los Angeles Lakers @ Milwaukee Bucks: Predicted 2254-2247, Actual 102-107 (Error: 11.7 pts)
+  Charlotte Bobcats @ Vancouver Grizzlies: Predicted 2115-2127, Actual 94-119 (Error: 12.7 pts)
+  Dallas Mavericks @ Los Angeles Clippers: Predicted 2237-2208, Actual 110-96 (Error: 14.9 pts)
+  Washington Bullets @ New Jersey Nets: Predicted 2143-2120, Actual 131-92 (Error: 16.1 pts)
+  Houston Rockets @ Utah Jazz: Predicted 2294-2305, Actual 122-113 (Error: 19.7 pts)
+  Indiana Pacers @ Cleveland Cavaliers: Predicted 2205-2186, Actual 117-129 (Error: 30.5 pts)
+  Vancouver Grizzlies @ Chicago Bulls: Predicted 2127-2163, Actual 121-124 (Error: 33.5 pts)
+  Washington Bullets @ New York Knicks: Predicted 2122-2152, Actual 117-94 (Error: 53.2 pts)
+  Golden State Warriors @ Sacramento Kings: Predicted 2292-2244, Actual 112-122 (Error: 58.6 pts)
+  Boston Celtics @ Toronto Raptors: Predicted 2265-2203, Actual 119-118 (Error: 61.2 pts)
+
+Top 10 Worst Predictions (by margin error):
+  Detroit Pistons @ Golden State Warriors: Predicted 2601-1857, Actual 111-93 (Error: 725.6 pts)
+  Detroit Pistons @ Phoenix Suns: Predicted 2553-1887, Actual 91-109 (Error: 683.8 pts)
+  Team 111836 @ Seattle SuperSonics: Predicted 2526-3146, Actual 117-89 (Error: 648.1 pts)
+  Team 111836 @ Philadelphia 76ers: Predicted 2437-2920, Actual 139-84 (Error: 538.2 pts)
+  Portland Trail Blazers @ Sacramento Kings: Predicted 2423-1997, Actual 85-105 (Error: 446.6 pts)
+  Phoenix Suns @ Detroit Pistons: Predicted 1998-2436, Actual 97-105 (Error: 429.7 pts)
+  Chicago Bulls @ Milwaukee Bucks: Predicted 2371-2014, Actual 111-107 (Error: 353.4 pts)
+  Boston Celtics @ Denver Nuggets: Predicted 2469-2125, Actual 103-107 (Error: 348.5 pts)
+  Miami Heat @ Charlotte Bobcats: Predicted 2314-1963, Actual 111-108 (Error: 347.8 pts)
+  Vancouver Grizzlies @ Dallas Mavericks: Predicted 2353-2052, Actual 116-121 (Error: 305.7 pts)
+
+====================================================================================================
+INTERPRETATION
+====================================================================================================
+
+Win Probability Accuracy:
+  - Percentage of games where predicted winner matches actual winner
+  - Baseline (random): 50%
+  - Target: >70%
+
+Score MAE (Mean Absolute Error):
+  - Average absolute difference between predicted and actual scores
+  - Lower is better
+  - Target: <5 points
+
+Brier Score:
+  - Measures probability calibration (lower is better)
+  - Perfect calibration: 0.00
+  - Range: 0.00 - 1.00
+
+Calibration Slope:
+  - Measures how well predicted probabilities match actual rates
+  - Perfect calibration: 1.0
+  - <1.0: Overconfident predictions
+  - >1.0: Underconfident predictions
+====================================================================================================
