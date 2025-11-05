@@ -42,7 +42,7 @@ class ValidationResult:
     is_valid: bool
     level: ValidationLevel
     message: str
-    field: Optional[str] = None
+    field_name: Optional[str] = None
     expected: Any = None
     actual: Any = None
     metadata: Dict[str, Any] = field(default_factory=dict)
@@ -50,8 +50,8 @@ class ValidationResult:
     def __str__(self) -> str:
         """String representation of validation result"""
         msg = f"[{self.level.value.upper()}] {self.message}"
-        if self.field:
-            msg += f" | Field: {self.field}"
+        if self.field_name:
+            msg += f" | Field: {self.field_name}"
         if self.expected is not None:
             msg += f" | Expected: {self.expected}, Got: {self.actual}"
         return msg
@@ -165,7 +165,7 @@ class BaseValidator:
             is_valid=is_valid,
             level=level,
             message=message,
-            field=field,
+            field_name=field,
             expected=expected,
             actual=actual,
             metadata=metadata,

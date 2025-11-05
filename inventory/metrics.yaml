@@ -1,6 +1,6 @@
 metadata:
   version: 1.0.0
-  last_updated: '2025-11-04T22:12:00.221435Z'
+  last_updated: '2025-11-04T23:28:22.753327Z'
   last_verified: '2025-10-21T19:00:00Z'
   verified_by: manual_verification
   system: DIMS v1.0.0
@@ -171,8 +171,8 @@ plus_minus_system:
       lines: 480
 code_base:
   python_files:
-    value: 1878
-    last_verified: '2025-11-04T21:39:54.012195Z'
+    value: 1886
+    last_verified: '2025-11-04T23:28:22.322204Z'
     verification_method: automated
     cached: false
     cache_expires: null
@@ -188,21 +188,21 @@ code_base:
     directory: scripts/pbp_to_boxscore/
     last_verified: '2025-10-21T14:00:00Z'
   test_files:
-    value: 673
-    last_verified: '2025-11-04T21:39:54.124628Z'
+    value: 675
+    last_verified: '2025-11-04T23:28:22.433526Z'
     verification_method: automated
     cached: false
     cache_expires: null
 documentation:
   markdown_files:
-    value: 1796
-    last_verified: '2025-11-04T16:30:24.993164Z'
+    value: 1800
+    last_verified: '2025-11-04T23:28:22.549789Z'
     verification_method: automated
     cached: false
     cache_expires: null
   total_size_mb:
-    value: 252
-    last_verified: '2025-10-26T17:50:02.742355Z'
+    value: 253
+    last_verified: '2025-11-04T23:28:22.648269Z'
     verification_method: automated
     cached: false
     cache_expires: null
