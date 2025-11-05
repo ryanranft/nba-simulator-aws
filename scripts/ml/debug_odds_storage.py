@@ -11,15 +11,15 @@ from datetime import date, datetime
 from dotenv import load_dotenv
 from pytz import timezone
 
-load_dotenv('/Users/ryanranft/nba-sim-credentials.env')
+load_dotenv("/Users/ryanranft/nba-sim-credentials.env")
 
 conn = psycopg2.connect(
-    host=os.getenv('DB_HOST'),
-    database=os.getenv('DB_NAME'),
-    user=os.getenv('DB_USER'),
-    password=os.getenv('DB_PASSWORD'),
-    port=os.getenv('DB_PORT', 5432),
-    sslmode='require'
+    host=os.getenv("DB_HOST"),
+    database=os.getenv("DB_NAME"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    port=os.getenv("DB_PORT", 5432),
+    sslmode="require",
 )
 
 cur = conn.cursor()
@@ -40,7 +40,8 @@ print(f"Total latest odds snapshots: {total_latest_odds}")
 print()
 
 # Check events by date (no timezone conversion)
-cur.execute("""
+cur.execute(
+    """
 SELECT 
     DATE(commence_time) as game_date_utc,
     COUNT(*) as num_events
@@ -49,7 +50,8 @@ WHERE commence_time >= NOW() - INTERVAL '7 days'
   AND commence_time <= NOW() + INTERVAL '7 days'
 GROUP BY DATE(commence_time)
 ORDER BY game_date_utc DESC
-""")
+"""
+)
 
 print("Events by UTC date (last 7 days + next 7 days):")
 for row in cur.fetchall():
@@ -58,7 +60,8 @@ print()
 
 # Check events with Chicago timezone conversion
 today = date.today()
-cur.execute("""
+cur.execute(
+    """
 SELECT 
     DATE(e.commence_time AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') as game_date_ct,
     COUNT(*) as num_events,
@@ -69,7 +72,8 @@ WHERE e.commence_time >= NOW() - INTERVAL '7 days'
   AND e.commence_time <= NOW() + INTERVAL '7 days'
 GROUP BY DATE(e.commence_time AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago')
 ORDER BY game_date_ct DESC
-""")
+"""
+)
 
 print(f"Events by Chicago date (today is {today}):")
 results = cur.fetchall()
@@ -80,7 +84,8 @@ for row in results:
 print()
 
 # Get most recent events regardless of date
-cur.execute("""
+cur.execute(
+    """
 SELECT 
     e.event_id,
     e.home_team,
@@ -96,7 +101,8 @@ WHERE e.created_at >= NOW() - INTERVAL '24 hours'
 GROUP BY e.event_id, e.home_team, e.away_team, e.commence_time, e.created_at
 ORDER BY e.created_at DESC
 LIMIT 20
-""")
+"""
+)
 
 print("Most recent events (last 24 hours):")
 results = cur.fetchall()
@@ -115,20 +121,23 @@ else:
     print()
 
 # Check if there are any odds snapshots without events
-cur.execute("""
+cur.execute(
+    """
 SELECT 
     COUNT(*) as num_orphaned_odds
 FROM odds.odds_snapshots os
 WHERE NOT EXISTS (
     SELECT 1 FROM odds.events e WHERE e.event_id = os.event_id
 )
-""")
+"""
+)
 orphaned = cur.fetchone()[0]
 print(f"Orphaned odds snapshots (no event): {orphaned}")
 print()
 
 # Check odds snapshots created recently
-cur.execute("""
+cur.execute(
+    """
 SELECT 
     COUNT(*) as num_snapshots,
     MIN(fetched_at) as earliest,
@@ -136,7 +145,8 @@ SELECT
 FROM odds.odds_snapshots
 WHERE fetched_at >= NOW() - INTERVAL '24 hours'
   AND is_latest = true
-""")
+"""
+)
 result = cur.fetchone()
 print(f"Odds snapshots created in last 24 hours: {result[0]}")
 if result[0] > 0:
@@ -149,4 +159,3 @@ conn.close()
 print("=" * 80)
 print("DEBUG COMPLETE")
 print("=" * 80)
-

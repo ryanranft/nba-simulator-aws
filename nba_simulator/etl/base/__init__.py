@@ -39,7 +39,6 @@ __all__ = [
     "ScraperStats",
     "RateLimiter",
     "ScraperFactory",
-    
     # Error handling
     "ScraperErrorHandler",
     "ErrorCategory",

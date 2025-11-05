@@ -15,6 +15,7 @@ from pathlib import Path
 from datetime import datetime
 import os
 
+
 def generate_html_dashboard(predictions_file: str, output_file: str = None):
     """Generate HTML dashboard from predictions CSV"""
 
@@ -23,9 +24,13 @@ def generate_html_dashboard(predictions_file: str, output_file: str = None):
 
     # Calculate stats
     total_games = len(df)
-    avg_confidence = df['confidence'].mean() * 100
-    avg_predicted_total = (df['predicted_home_score'] + df['predicted_away_score']).mean()
-    avg_predicted_margin = abs(df['predicted_home_score'] - df['predicted_away_score']).mean()
+    avg_confidence = df["confidence"].mean() * 100
+    avg_predicted_total = (
+        df["predicted_home_score"] + df["predicted_away_score"]
+    ).mean()
+    avg_predicted_margin = abs(
+        df["predicted_home_score"] - df["predicted_away_score"]
+    ).mean()
 
     # Generate HTML
     html = f"""<!DOCTYPE html>
@@ -184,26 +189,30 @@ def generate_html_dashboard(predictions_file: str, output_file: str = None):
 
     # Add game predictions
     for _, game in df.iterrows():
-        home_team = game['home_team']
-        away_team = game['away_team']
-        predicted_winner = game['predicted_winner']
-        home_score = game['predicted_home_score']
-        away_score = game['predicted_away_score']
-        home_prob = game['home_win_probability'] * 100
-        away_prob = game['away_win_probability'] * 100
-        confidence = game['confidence'] * 100
-        strength = game['prediction_strength']
-        model_agreement = game.get('model_agreement', 0) * 100 if pd.notna(game.get('model_agreement')) else 0
+        home_team = game["home_team"]
+        away_team = game["away_team"]
+        predicted_winner = game["predicted_winner"]
+        home_score = game["predicted_home_score"]
+        away_score = game["predicted_away_score"]
+        home_prob = game["home_win_probability"] * 100
+        away_prob = game["away_win_probability"] * 100
+        confidence = game["confidence"] * 100
+        strength = game["prediction_strength"]
+        model_agreement = (
+            game.get("model_agreement", 0) * 100
+            if pd.notna(game.get("model_agreement"))
+            else 0
+        )
         predicted_total = home_score + away_score
         predicted_margin = abs(home_score - away_score)
 
         # Confidence badge class
-        strength_class = strength.lower().replace(' ', '-')
+        strength_class = strength.lower().replace(" ", "-")
 
         # Individual model probabilities
-        panel_prob = game.get('panel_home_win_prob', None)
-        bayesian_prob = game.get('bayesian_home_win_prob', None)
-        simultaneous_prob = game.get('simultaneous_home_win_prob', None)
+        panel_prob = game.get("panel_home_win_prob", None)
+        bayesian_prob = game.get("bayesian_home_win_prob", None)
+        simultaneous_prob = game.get("simultaneous_home_win_prob", None)
 
         html += f"""
             <div class="game-card">
@@ -239,7 +248,11 @@ def generate_html_dashboard(predictions_file: str, output_file: str = None):
                 </div>"""
 
         # Model breakdown if available
-        if panel_prob is not None or bayesian_prob is not None or simultaneous_prob is not None:
+        if (
+            panel_prob is not None
+            or bayesian_prob is not None
+            or simultaneous_prob is not None
+        ):
             html += """
                 <div class="model-breakdown">
                     <div class="detail-label" style="margin-bottom: 10px;">Individual Model Probabilities:</div>"""
@@ -279,9 +292,12 @@ def generate_html_dashboard(predictions_file: str, output_file: str = None):
     # Save HTML
     if output_file is None:
         output_dir = Path(predictions_file).parent
-        output_file = output_dir / f"predictions_dashboard_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
+        output_file = (
+            output_dir
+            / f"predictions_dashboard_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
+        )
 
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
         f.write(html)
 
     # Create symlink to latest
@@ -301,16 +317,16 @@ def main():
         description="Generate HTML dashboard from predictions CSV"
     )
     parser.add_argument(
-        '--predictions',
+        "--predictions",
         type=str,
-        default='/tmp/nba_predictions/predictions_latest.csv',
-        help='Path to predictions CSV file'
+        default="/tmp/nba_predictions/predictions_latest.csv",
+        help="Path to predictions CSV file",
     )
     parser.add_argument(
-        '--output',
+        "--output",
         type=str,
         default=None,
-        help='Output HTML file path (default: auto-generated)'
+        help="Output HTML file path (default: auto-generated)",
     )
 
     args = parser.parse_args()
@@ -319,9 +335,9 @@ def main():
         print(f"Error: Predictions file not found: {args.predictions}")
         return
 
-    print("="*80)
+    print("=" * 80)
     print("GENERATING HTML DASHBOARD")
-    print("="*80)
+    print("=" * 80)
     print(f"\nPredictions file: {args.predictions}")
 
     output_file = generate_html_dashboard(args.predictions, args.output)
@@ -332,5 +348,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

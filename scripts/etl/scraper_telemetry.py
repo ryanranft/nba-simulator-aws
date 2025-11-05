@@ -602,5 +602,3 @@ if __name__ == "__main__":
         print("Metrics exported:", len(metrics["events"]), "events")
 
     asyncio.run(example_usage())
-
-

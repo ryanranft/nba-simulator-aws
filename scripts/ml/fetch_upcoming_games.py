@@ -36,7 +36,7 @@ from scripts.ml.fetch_game_state import get_game_state
 env_paths = [
     "/Users/ryanranft/nba-sim-credentials.env",
     "/Users/ryanranft/nba-simulator-aws/.env",
-    os.path.expanduser("~/.env")
+    os.path.expanduser("~/.env"),
 ]
 
 for path in env_paths:
@@ -126,10 +126,14 @@ class UpcomingGamesFetcher:
             if status_type == "STATUS_IN_PROGRESS":
                 try:
                     # Convert game_date to date object
-                    game_date_obj = datetime.fromisoformat(game_date.replace('Z', '+00:00')).date()
+                    game_date_obj = datetime.fromisoformat(
+                        game_date.replace("Z", "+00:00")
+                    ).date()
                     game_state = get_game_state(str(game_id), game_date=game_date_obj)
                     if game_state:
-                        print(f"  ✓ Found in-progress game state for {game_name}: Q{game_state['quarter']} {game_state['current_score_home']}-{game_state['current_score_away']}")
+                        print(
+                            f"  ✓ Found in-progress game state for {game_name}: Q{game_state['quarter']} {game_state['current_score_home']}-{game_state['current_score_away']}"
+                        )
                 except Exception as e:
                     print(f"  ⚠️  Error fetching game state for {game_name}: {e}")
                     game_state = None

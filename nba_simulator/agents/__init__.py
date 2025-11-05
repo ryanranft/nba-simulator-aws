@@ -16,28 +16,23 @@ Available Agents:
 
 Usage:
     from nba_simulator.agents import MasterAgent, QualityAgent
-    
+
     # Create agents
     master = MasterAgent(config={'max_retries': 3})
     quality = QualityAgent(config={'min_quality_score': 85.0})
-    
+
     # Register with master
     master.register_agent(quality)
-    
+
     # Initialize and execute
     master.initialize()
     master.execute()
-    
+
     # Get report
     report = master.generate_report()
 """
 
-from .base_agent import (
-    BaseAgent,
-    AgentState,
-    AgentPriority,
-    AgentMetrics
-)
+from .base_agent import BaseAgent, AgentState, AgentPriority, AgentMetrics
 
 from .master import MasterAgent, ExecutionPhase
 from .quality import QualityAgent, QualityCheck
@@ -50,27 +45,25 @@ from .bbref import BasketballReferenceAgent, BBRefTier
 
 __all__ = [
     # Base classes
-    'BaseAgent',
-    'AgentState',
-    'AgentPriority',
-    'AgentMetrics',
-    
+    "BaseAgent",
+    "AgentState",
+    "AgentPriority",
+    "AgentMetrics",
     # Concrete agents
-    'MasterAgent',
-    'QualityAgent',
-    'IntegrationAgent',
-    'NBAStatsAgent',
-    'DeduplicationAgent',
-    'HistoricalAgent',
-    'HooprAgent',
-    'BasketballReferenceAgent',
-    
+    "MasterAgent",
+    "QualityAgent",
+    "IntegrationAgent",
+    "NBAStatsAgent",
+    "DeduplicationAgent",
+    "HistoricalAgent",
+    "HooprAgent",
+    "BasketballReferenceAgent",
     # Additional exports
-    'ExecutionPhase',
-    'QualityCheck',
-    'IntegrationMatch',
-    'ConflictResolution',
-    'BBRefTier',
+    "ExecutionPhase",
+    "QualityCheck",
+    "IntegrationMatch",
+    "ConflictResolution",
+    "BBRefTier",
 ]
 
-__version__ = '1.0.0'
+__version__ = "1.0.0"

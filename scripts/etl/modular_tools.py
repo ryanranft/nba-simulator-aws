@@ -657,5 +657,3 @@ if __name__ == "__main__":
             print(f"  {tool_name}: {tool_stats['success_rate']:.2%} success rate")
 
     asyncio.run(example_usage())
-
-

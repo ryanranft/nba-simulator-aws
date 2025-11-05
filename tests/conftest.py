@@ -18,6 +18,7 @@ from unittest.mock import Mock, MagicMock
 # PROJECT CONFIGURATION
 # ============================================================================
 
+
 @pytest.fixture(scope="session")
 def project_root():
     """Return the project root directory."""
@@ -33,6 +34,7 @@ def test_data_dir(project_root):
 # ============================================================================
 # AWS CONFIGURATION FIXTURES
 # ============================================================================
+
 
 @pytest.fixture(scope="session")
 def aws_region():
@@ -51,13 +53,11 @@ def mock_s3_client():
     """Mock boto3 S3 client."""
     mock = MagicMock()
     mock.put_object.return_value = {"ETag": '"mock-etag"'}
-    mock.get_object.return_value = {
-        "Body": Mock(read=lambda: b'{"test": "data"}')
-    }
+    mock.get_object.return_value = {"Body": Mock(read=lambda: b'{"test": "data"}')}
     mock.list_objects_v2.return_value = {
         "Contents": [
             {"Key": "test/file1.json", "Size": 1024},
-            {"Key": "test/file2.json", "Size": 2048}
+            {"Key": "test/file2.json", "Size": 2048},
         ]
     }
     return mock
@@ -66,6 +66,7 @@ def mock_s3_client():
 # ============================================================================
 # DATABASE CONFIGURATION FIXTURES
 # ============================================================================
+
 
 @pytest.fixture(scope="session")
 def rds_config():
@@ -103,6 +104,7 @@ def mock_db_pool():
 # NBA DATA FIXTURES - GAMES
 # ============================================================================
 
+
 @pytest.fixture
 def sample_game_id():
     """Sample game ID for testing."""
@@ -121,7 +123,7 @@ def sample_game_data():
         "home_score": 108,
         "away_score": 104,
         "status": "Final",
-        "venue": "TD Garden"
+        "venue": "TD Garden",
     }
 
 
@@ -136,7 +138,7 @@ def sample_games_df():
         "away_team": ["NYK", "DEN", "PHX"],
         "home_score": [108, 115, 120],
         "away_score": [104, 110, 118],
-        "status": ["Final", "Final", "Final"]
+        "status": ["Final", "Final", "Final"],
     }
     return pd.DataFrame(data)
 
@@ -144,6 +146,7 @@ def sample_games_df():
 # ============================================================================
 # NBA DATA FIXTURES - PLAYERS
 # ============================================================================
+
 
 @pytest.fixture
 def sample_player_id():
@@ -161,7 +164,7 @@ def sample_player_data():
         "position": "F",
         "height": "6-9",
         "weight": "250",
-        "birth_date": "1984-12-30"
+        "birth_date": "1984-12-30",
     }
 
 
@@ -174,7 +177,7 @@ def sample_players_df():
         "team": ["LAL", "GSW", "PHX"],
         "position": ["F", "G", "F"],
         "height": ["6-9", "6-2", "6-10"],
-        "weight": ["250", "185", "240"]
+        "weight": ["250", "185", "240"],
     }
     return pd.DataFrame(data)
 
@@ -182,6 +185,7 @@ def sample_players_df():
 # ============================================================================
 # NBA DATA FIXTURES - TEAMS
 # ============================================================================
+
 
 @pytest.fixture
 def sample_team_data():
@@ -191,7 +195,7 @@ def sample_team_data():
         "team_name": "Los Angeles Lakers",
         "abbreviation": "LAL",
         "conference": "Western",
-        "division": "Pacific"
+        "division": "Pacific",
     }
 
 
@@ -200,11 +204,15 @@ def sample_teams_df():
     """Sample teams DataFrame for testing."""
     data = {
         "team_id": ["LAL", "BOS", "GSW", "NYK"],
-        "team_name": ["Los Angeles Lakers", "Boston Celtics", 
-                     "Golden State Warriors", "New York Knicks"],
+        "team_name": [
+            "Los Angeles Lakers",
+            "Boston Celtics",
+            "Golden State Warriors",
+            "New York Knicks",
+        ],
         "abbreviation": ["LAL", "BOS", "GSW", "NYK"],
         "conference": ["Western", "Eastern", "Western", "Eastern"],
-        "division": ["Pacific", "Atlantic", "Pacific", "Atlantic"]
+        "division": ["Pacific", "Atlantic", "Pacific", "Atlantic"],
     }
     return pd.DataFrame(data)
 
@@ -212,6 +220,7 @@ def sample_teams_df():
 # ============================================================================
 # NBA DATA FIXTURES - PLAY-BY-PLAY
 # ============================================================================
+
 
 @pytest.fixture
 def sample_pbp_event():
@@ -226,7 +235,7 @@ def sample_pbp_event():
         "event_type": "shot",
         "description": "Jayson Tatum makes 2-pt jump shot",
         "score_home": 2,
-        "score_away": 0
+        "score_away": 0,
     }
 
 
@@ -241,7 +250,7 @@ def sample_pbp_df():
         "team": ["BOS", "NYK", "BOS", "BOS", "NYK"],
         "event_type": ["shot", "shot", "rebound", "shot", "shot"],
         "score_home": [2, 2, 2, 4, 4],
-        "score_away": [0, 2, 2, 2, 4]
+        "score_away": [0, 2, 2, 2, 4],
     }
     return pd.DataFrame(data)
 
@@ -249,6 +258,7 @@ def sample_pbp_df():
 # ============================================================================
 # NBA DATA FIXTURES - BOX SCORES
 # ============================================================================
+
 
 @pytest.fixture
 def sample_box_score():
@@ -270,7 +280,7 @@ def sample_box_score():
         "fg3m": 2,
         "fg3a": 6,
         "ftm": 6,
-        "fta": 8
+        "fta": 8,
     }
 
 
@@ -287,7 +297,7 @@ def sample_box_scores_df():
         "rebounds": [8, 5, 9],
         "assists": [6, 8, 5],
         "fgm": [10, 11, 10],
-        "fga": [20, 22, 18]
+        "fga": [20, 22, 18],
     }
     return pd.DataFrame(data)
 
@@ -295,6 +305,7 @@ def sample_box_scores_df():
 # ============================================================================
 # ML FIXTURES - FEATURES & MODELS
 # ============================================================================
+
 
 @pytest.fixture
 def sample_features_df():
@@ -306,7 +317,7 @@ def sample_features_df():
         "home_defensive_rating": np.random.uniform(100, 120, 100),
         "away_defensive_rating": np.random.uniform(100, 120, 100),
         "home_pace": np.random.uniform(95, 105, 100),
-        "away_pace": np.random.uniform(95, 105, 100)
+        "away_pace": np.random.uniform(95, 105, 100),
     }
     return pd.DataFrame(data)
 
@@ -324,7 +335,7 @@ def sample_scores_df():
     np.random.seed(42)
     data = {
         "home_score": np.random.randint(90, 130, 100),
-        "away_score": np.random.randint(90, 130, 100)
+        "away_score": np.random.randint(90, 130, 100),
     }
     return pd.DataFrame(data)
 
@@ -334,9 +345,9 @@ def mock_ml_model():
     """Mock ML model for testing."""
     mock_model = MagicMock()
     mock_model.predict.return_value = np.array([1, 0, 1, 0, 1])
-    mock_model.predict_proba.return_value = np.array([
-        [0.3, 0.7], [0.6, 0.4], [0.2, 0.8], [0.7, 0.3], [0.4, 0.6]
-    ])
+    mock_model.predict_proba.return_value = np.array(
+        [[0.3, 0.7], [0.6, 0.4], [0.2, 0.8], [0.7, 0.3], [0.4, 0.6]]
+    )
     mock_model.score.return_value = 0.85
     return mock_model
 
@@ -345,6 +356,7 @@ def mock_ml_model():
 # API MOCK RESPONSES
 # ============================================================================
 
+
 @pytest.fixture
 def mock_espn_api_response():
     """Mock ESPN API response."""
@@ -352,21 +364,23 @@ def mock_espn_api_response():
         "id": "401584876",
         "date": "2024-10-23T19:30Z",
         "name": "New York Knicks at Boston Celtics",
-        "competitions": [{
-            "competitors": [
-                {
-                    "team": {"abbreviation": "BOS"},
-                    "score": "108",
-                    "homeAway": "home"
-                },
-                {
-                    "team": {"abbreviation": "NYK"},
-                    "score": "104",
-                    "homeAway": "away"
-                }
-            ],
-            "status": {"type": {"completed": True}}
-        }]
+        "competitions": [
+            {
+                "competitors": [
+                    {
+                        "team": {"abbreviation": "BOS"},
+                        "score": "108",
+                        "homeAway": "home",
+                    },
+                    {
+                        "team": {"abbreviation": "NYK"},
+                        "score": "104",
+                        "homeAway": "away",
+                    },
+                ],
+                "status": {"type": {"completed": True}},
+            }
+        ],
     }
 
 
@@ -393,6 +407,7 @@ def mock_basketball_reference_html():
 # ============================================================================
 # ETL FIXTURES - SCRAPERS & TRANSFORMERS
 # ============================================================================
+
 
 @pytest.fixture
 def mock_scraper():
@@ -423,6 +438,7 @@ def mock_loader():
 # AGENT & WORKFLOW FIXTURES
 # ============================================================================
 
+
 @pytest.fixture
 def mock_agent():
     """Mock autonomous agent for testing."""
@@ -439,7 +455,7 @@ def mock_workflow():
     mock.execute.return_value = {
         "status": "completed",
         "steps_executed": 10,
-        "duration": 120
+        "duration": 120,
     }
     return mock
 
@@ -447,6 +463,7 @@ def mock_workflow():
 # ============================================================================
 # CONFIGURATION FIXTURES
 # ============================================================================
+
 
 @pytest.fixture
 def sample_season():
@@ -457,30 +474,20 @@ def sample_season():
 @pytest.fixture
 def sample_date_range():
     """Sample date range for testing."""
-    return {
-        "start_date": "2024-10-23",
-        "end_date": "2024-10-30"
-    }
+    return {"start_date": "2024-10-23", "end_date": "2024-10-30"}
 
 
 @pytest.fixture
 def test_config():
     """Test configuration dictionary."""
     return {
-        "aws": {
-            "region": "us-east-1",
-            "s3_bucket": "nba-sim-raw-data-lake"
-        },
+        "aws": {"region": "us-east-1", "s3_bucket": "nba-sim-raw-data-lake"},
         "database": {
             "host": "localhost",
             "port": 5432,
-            "database": "nba_simulator_test"
+            "database": "nba_simulator_test",
         },
-        "etl": {
-            "batch_size": 100,
-            "max_retries": 3,
-            "rate_limit": 10
-        }
+        "etl": {"batch_size": 100, "max_retries": 3, "rate_limit": 10},
     }
 
 
@@ -488,29 +495,18 @@ def test_config():
 # PYTEST CONFIGURATION
 # ============================================================================
 
+
 def pytest_configure(config):
     """Register custom markers."""
-    config.addinivalue_line(
-        "markers", "unit: Unit tests (fast, isolated)"
-    )
+    config.addinivalue_line("markers", "unit: Unit tests (fast, isolated)")
     config.addinivalue_line(
         "markers", "integration: Integration tests requiring external resources"
     )
-    config.addinivalue_line(
-        "markers", "slow: Tests that take >1 second to run"
-    )
-    config.addinivalue_line(
-        "markers", "database: Tests requiring database connection"
-    )
-    config.addinivalue_line(
-        "markers", "s3: Tests requiring S3 access"
-    )
-    config.addinivalue_line(
-        "markers", "api: Tests requiring external API calls"
-    )
-    config.addinivalue_line(
-        "markers", "ml: Machine learning tests"
-    )
+    config.addinivalue_line("markers", "slow: Tests that take >1 second to run")
+    config.addinivalue_line("markers", "database: Tests requiring database connection")
+    config.addinivalue_line("markers", "s3: Tests requiring S3 access")
+    config.addinivalue_line("markers", "api: Tests requiring external API calls")
+    config.addinivalue_line("markers", "ml: Machine learning tests")
 
 
 def pytest_collection_modifyitems(config, items):
@@ -521,7 +517,7 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "integration" in item.keywords or "s3" in item.keywords:
                 item.add_marker(skip_aws)
-    
+
     # Skip database tests if database not configured
     if not os.getenv("RDS_HOST"):
         skip_db = pytest.mark.skip(reason="Database not configured")
@@ -533,6 +529,7 @@ def pytest_collection_modifyitems(config, items):
 # ============================================================================
 # TEST UTILITIES
 # ============================================================================
+
 
 @pytest.fixture
 def temp_test_dir(tmp_path):
@@ -564,24 +561,26 @@ def reset_environment_variables():
 # PERFORMANCE FIXTURES
 # ============================================================================
 
+
 @pytest.fixture
 def performance_timer():
     """Timer fixture for performance testing."""
+
     class Timer:
         def __init__(self):
             self.start_time = None
             self.end_time = None
-        
+
         def start(self):
             self.start_time = datetime.now()
-        
+
         def stop(self):
             self.end_time = datetime.now()
-        
+
         @property
         def elapsed(self):
             if self.start_time and self.end_time:
                 return (self.end_time - self.start_time).total_seconds()
             return None
-    
+
     return Timer()

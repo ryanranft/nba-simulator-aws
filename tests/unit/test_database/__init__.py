@@ -10,10 +10,10 @@ Schemas:
 """
 
 __all__ = [
-    'test_public_schema',
-    'test_odds_schema',
-    'test_rag_schema',
-    'test_raw_data_schema',
-    'test_connection',
-    'test_queries'
+    "test_public_schema",
+    "test_odds_schema",
+    "test_rag_schema",
+    "test_raw_data_schema",
+    "test_connection",
+    "test_queries",
 ]

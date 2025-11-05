@@ -207,7 +207,9 @@ class PredictionValidator:
                     "away_score": actual_away_score,
                     "correct": correct,
                     "confidence": pred.get("confidence", 0.5),
-                    "prediction_strength": pred.get("prediction_strength", pred.get("strength", "Unknown")),
+                    "prediction_strength": pred.get(
+                        "prediction_strength", pred.get("strength", "Unknown")
+                    ),
                     "home_win_probability": home_win_prob,
                 }
             )
@@ -230,22 +232,29 @@ class PredictionValidator:
 
         # Calculate score accuracy metrics
         score_metrics = {}
-        if "predicted_home_score" in df_merged.columns and "predicted_away_score" in df_merged.columns:
+        if (
+            "predicted_home_score" in df_merged.columns
+            and "predicted_away_score" in df_merged.columns
+        ):
             # Filter out rows with missing predicted scores
             df_with_scores = df_merged[
-                df_merged["predicted_home_score"].notna() & df_merged["predicted_away_score"].notna()
+                df_merged["predicted_home_score"].notna()
+                & df_merged["predicted_away_score"].notna()
             ].copy()
 
             if len(df_with_scores) > 0:
                 # Calculate score differences
                 df_with_scores["home_score_error"] = (
-                    df_with_scores["predicted_home_score"] - df_with_scores["home_score"]
+                    df_with_scores["predicted_home_score"]
+                    - df_with_scores["home_score"]
                 )
                 df_with_scores["away_score_error"] = (
-                    df_with_scores["predicted_away_score"] - df_with_scores["away_score"]
+                    df_with_scores["predicted_away_score"]
+                    - df_with_scores["away_score"]
                 )
                 df_with_scores["predicted_total"] = (
-                    df_with_scores["predicted_home_score"] + df_with_scores["predicted_away_score"]
+                    df_with_scores["predicted_home_score"]
+                    + df_with_scores["predicted_away_score"]
                 )
                 df_with_scores["actual_total"] = (
                     df_with_scores["home_score"] + df_with_scores["away_score"]
@@ -254,7 +263,8 @@ class PredictionValidator:
                     df_with_scores["predicted_total"] - df_with_scores["actual_total"]
                 )
                 df_with_scores["predicted_margin"] = (
-                    df_with_scores["predicted_home_score"] - df_with_scores["predicted_away_score"]
+                    df_with_scores["predicted_home_score"]
+                    - df_with_scores["predicted_away_score"]
                 )
                 df_with_scores["actual_margin"] = (
                     df_with_scores["home_score"] - df_with_scores["away_score"]
@@ -269,9 +279,13 @@ class PredictionValidator:
                 score_mae = (home_score_mae + away_score_mae) / 2
 
                 # Score RMSE (Root Mean Squared Error)
-                home_score_rmse = np.sqrt((df_with_scores["home_score_error"] ** 2).mean())
-                away_score_rmse = np.sqrt((df_with_scores["away_score_error"] ** 2).mean())
-                score_rmse = np.sqrt((home_score_rmse ** 2 + away_score_rmse ** 2) / 2)
+                home_score_rmse = np.sqrt(
+                    (df_with_scores["home_score_error"] ** 2).mean()
+                )
+                away_score_rmse = np.sqrt(
+                    (df_with_scores["away_score_error"] ** 2).mean()
+                )
+                score_rmse = np.sqrt((home_score_rmse**2 + away_score_rmse**2) / 2)
 
                 # Total Points MAE
                 total_points_mae = df_with_scores["total_error"].abs().mean()
@@ -284,7 +298,11 @@ class PredictionValidator:
                 if "home_win" in df_with_scores.columns:
                     actual_home_win = df_with_scores["home_win"].values
                 else:
-                    actual_home_win = (df_with_scores["actual_winner"] == df_with_scores["home_team"]).astype(int).values
+                    actual_home_win = (
+                        (df_with_scores["actual_winner"] == df_with_scores["home_team"])
+                        .astype(int)
+                        .values
+                    )
                 pred_home_win_prob = df_with_scores["home_win_probability"].values
                 brier_score = np.mean((pred_home_win_prob - actual_home_win) ** 2)
 
@@ -361,16 +379,23 @@ class PredictionValidator:
         print(f"  Accuracy: {validation_results['accuracy']:.1%}")
 
         # Score accuracy metrics
-        if "score_metrics" in validation_results and validation_results["score_metrics"]:
+        if (
+            "score_metrics" in validation_results
+            and validation_results["score_metrics"]
+        ):
             metrics = validation_results["score_metrics"]
             print(f"\nScore Accuracy Metrics:")
             print(f"  Home Score MAE: {metrics.get('home_score_mae', 0):.2f} points")
             print(f"  Away Score MAE: {metrics.get('away_score_mae', 0):.2f} points")
             print(f"  Average Score MAE: {metrics.get('score_mae', 0):.2f} points")
             print(f"  Average Score RMSE: {metrics.get('score_rmse', 0):.2f} points")
-            print(f"  Total Points MAE: {metrics.get('total_points_mae', 0):.2f} points")
+            print(
+                f"  Total Points MAE: {metrics.get('total_points_mae', 0):.2f} points"
+            )
             print(f"  Margin MAE: {metrics.get('margin_mae', 0):.2f} points")
-            print(f"  Brier Score: {metrics.get('brier_score', 0):.4f} (lower is better)")
+            print(
+                f"  Brier Score: {metrics.get('brier_score', 0):.4f} (lower is better)"
+            )
 
         print(f"\nAccuracy by Prediction Strength:")
         for strength, metrics in validation_results.get("by_strength", {}).items():
@@ -387,22 +412,38 @@ class PredictionValidator:
                 print(f"\n{status} {game['away_team']} @ {game['home_team']}")
 
                 # Winner prediction
-                print(f"  Winner: Predicted {game['predicted_winner']}, Actual {game['actual_winner']}")
+                print(
+                    f"  Winner: Predicted {game['predicted_winner']}, Actual {game['actual_winner']}"
+                )
 
                 # Score prediction
-                if pd.notna(game.get("predicted_home_score")) and pd.notna(game.get("predicted_away_score")):
-                    print(f"  Score: Predicted {game['home_team']} {game['predicted_home_score']:.1f} - {game['away_team']} {game['predicted_away_score']:.1f}")
-                    print(f"         Actual    {game['home_team']} {game['home_score']} - {game['away_team']} {game['away_score']}")
+                if pd.notna(game.get("predicted_home_score")) and pd.notna(
+                    game.get("predicted_away_score")
+                ):
+                    print(
+                        f"  Score: Predicted {game['home_team']} {game['predicted_home_score']:.1f} - {game['away_team']} {game['predicted_away_score']:.1f}"
+                    )
+                    print(
+                        f"         Actual    {game['home_team']} {game['home_score']} - {game['away_team']} {game['away_score']}"
+                    )
 
                     # Calculate errors
-                    home_error = game['predicted_home_score'] - game['home_score']
-                    away_error = game['predicted_away_score'] - game['away_score']
-                    total_error = (game['predicted_home_score'] + game['predicted_away_score']) - (game['home_score'] + game['away_score'])
-                    print(f"  Errors: Home {home_error:+.1f}, Away {away_error:+.1f}, Total {total_error:+.1f}")
+                    home_error = game["predicted_home_score"] - game["home_score"]
+                    away_error = game["predicted_away_score"] - game["away_score"]
+                    total_error = (
+                        game["predicted_home_score"] + game["predicted_away_score"]
+                    ) - (game["home_score"] + game["away_score"])
+                    print(
+                        f"  Errors: Home {home_error:+.1f}, Away {away_error:+.1f}, Total {total_error:+.1f}"
+                    )
                 else:
-                    print(f"  Score: Actual {game['home_team']} {game['home_score']} - {game['away_team']} {game['away_score']}")
+                    print(
+                        f"  Score: Actual {game['home_team']} {game['home_score']} - {game['away_team']} {game['away_score']}"
+                    )
 
-                print(f"  Strength: {game['prediction_strength']}, Confidence: {game['confidence']:.1%}")
+                print(
+                    f"  Strength: {game['prediction_strength']}, Confidence: {game['confidence']:.1%}"
+                )
 
             # Show incorrect predictions summary
             incorrect = df_details[~df_details["correct"]]

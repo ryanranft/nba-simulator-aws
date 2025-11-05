@@ -9,11 +9,11 @@ Components:
 
 Usage:
     from nba_simulator.etl.extractors.espn import ESPNScraper
-    
+
     async with ESPNScraper(config) as scraper:
         games = await scraper.scrape_schedule(season=2024)
 """
 
 from .scraper import ESPNScraper, scrape_espn_games
 
-__all__ = ['ESPNScraper', 'scrape_espn_games']
+__all__ = ["ESPNScraper", "scrape_espn_games"]

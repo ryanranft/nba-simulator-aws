@@ -14,12 +14,12 @@ Requirements:
 
 Usage:
     from nba_simulator.etl.extractors.hoopr import HoopRScraper
-    
+
     config = ScraperConfig(
         base_url="",  # Not used
         rate_limit=1.0
     )
-    
+
     async with HoopRScraper(config) as scraper:
         # Check if R is available
         if scraper.r_available:
@@ -30,4 +30,4 @@ Note: Requires R and hoopR package installation.
 
 from .scraper import HoopRScraper, scrape_hoopr_season
 
-__all__ = ['HoopRScraper', 'scrape_hoopr_season']
+__all__ = ["HoopRScraper", "scrape_hoopr_season"]

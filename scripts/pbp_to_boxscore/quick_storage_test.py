@@ -70,5 +70,3 @@ if __name__ == "__main__":
         print("\n🎉 9.0005 Storage System is working correctly!")
     else:
         print("\n💥 9.0005 Storage System has issues that need fixing.")
-
-

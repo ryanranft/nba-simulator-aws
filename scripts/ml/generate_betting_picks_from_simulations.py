@@ -26,7 +26,10 @@ from pathlib import Path
 # Add parent directory to path to import advanced simulator
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from scripts.ml.advanced_multi_simulator import AdvancedMultiSimulator, DatabaseConnector
+from scripts.ml.advanced_multi_simulator import (
+    AdvancedMultiSimulator,
+    DatabaseConnector,
+)
 
 warnings.filterwarnings("ignore")
 
@@ -34,7 +37,7 @@ warnings.filterwarnings("ignore")
 env_paths = [
     "/Users/ryanranft/nba-sim-credentials.env",
     "/Users/ryanranft/nba-simulator-aws/.env",
-    os.path.expanduser("~/.env")
+    os.path.expanduser("~/.env"),
 ]
 
 for path in env_paths:
@@ -83,7 +86,7 @@ def get_team_id_from_name(team_name: str, db: DatabaseConnector) -> Optional[str
     """
     result = db.query(query, params=(team_name, team_name))
     if result and len(result) > 0:
-        return result[0]['team_id']
+        return result[0]["team_id"]
     return None
 
 
@@ -96,7 +99,7 @@ def simulate_bet_win_rate(
     market_type: str,
     outcome_name: str,
     point: Optional[float],
-    n_simulations: int = 10000
+    n_simulations: int = 10000,
 ) -> float:
     """
     Simulate a bet and return win percentage.
@@ -118,7 +121,7 @@ def simulate_bet_win_rate(
             away_team_id=away_team_id,
             game_date=game_date,
             use_ensemble=True,
-            n_simulations=n_simulations
+            n_simulations=n_simulations,
         )
 
         # Get simulated scores (need to access individual simulation results)
@@ -126,14 +129,17 @@ def simulate_bet_win_rate(
         # For now, simulate based on predicted scores and variance
 
         # For spreads
-        if market_type == 'spreads' and point is not None:
+        if market_type == "spreads" and point is not None:
             predicted_margin = result.predicted_home_score - result.predicted_away_score
             outcome_normalized = normalize_team_name(outcome_name)
             home_normalized = normalize_team_name(home_team_name)
 
             spread = float(point)
 
-            if outcome_normalized in home_normalized or home_normalized in outcome_normalized:
+            if (
+                outcome_normalized in home_normalized
+                or home_normalized in outcome_normalized
+            ):
                 # Home team covering spread
                 # Use normal distribution approximation
                 # Margin ~ N(predicted_margin, std_dev)
@@ -151,17 +157,17 @@ def simulate_bet_win_rate(
                 return max(0.0, min(1.0, win_prob))
 
         # For totals
-        elif market_type == 'totals' and point is not None:
+        elif market_type == "totals" and point is not None:
             predicted_total = result.predicted_home_score + result.predicted_away_score
             total_line = float(point)
 
-            if 'Over' in outcome_name or outcome_name == 'Over':
+            if "Over" in outcome_name or outcome_name == "Over":
                 # Win if total > line
                 std_dev = 15.0  # Typical NBA total std dev
                 z_score = (total_line - predicted_total) / std_dev
                 win_prob = 1 - (0.5 + 0.5 * np.tanh(z_score))
                 return max(0.0, min(1.0, win_prob))
-            elif 'Under' in outcome_name or outcome_name == 'Under':
+            elif "Under" in outcome_name or outcome_name == "Under":
                 # Win if total < line
                 std_dev = 15.0
                 z_score = (total_line - predicted_total) / std_dev
@@ -169,11 +175,14 @@ def simulate_bet_win_rate(
                 return max(0.0, min(1.0, win_prob))
 
         # For moneyline
-        elif market_type == 'h2h':
+        elif market_type == "h2h":
             outcome_normalized = normalize_team_name(outcome_name)
             home_normalized = normalize_team_name(home_team_name)
 
-            if outcome_normalized in home_normalized or home_normalized in outcome_normalized:
+            if (
+                outcome_normalized in home_normalized
+                or home_normalized in outcome_normalized
+            ):
                 return result.home_win_prob
             else:
                 return result.away_win_prob
@@ -187,7 +196,7 @@ def simulate_bet_win_rate(
 
 def query_all_odds_from_db(conn, game_date: date) -> pd.DataFrame:
     """Query all odds types from database."""
-    chicago_tz = timezone('America/Chicago')
+    chicago_tz = timezone("America/Chicago")
 
     query = """
     SELECT
@@ -216,9 +225,9 @@ def query_all_odds_from_db(conn, game_date: date) -> pd.DataFrame:
     df = pd.read_sql(query, conn, params=(game_date,))
 
     if len(df) > 0:
-        df['commence_time'] = pd.to_datetime(df['commence_time'], utc=True)
-        df['commence_time_ct'] = df['commence_time'].dt.tz_convert(chicago_tz)
-        df['game_date_ct'] = df['commence_time_ct'].dt.date
+        df["commence_time"] = pd.to_datetime(df["commence_time"], utc=True)
+        df["commence_time_ct"] = df["commence_time"].dt.tz_convert(chicago_tz)
+        df["game_date_ct"] = df["commence_time_ct"].dt.date
 
     return df
 
@@ -229,7 +238,7 @@ def generate_betting_picks_from_simulations(
     odds_df: pd.DataFrame,
     game_date: date,
     min_win_pct: float = 0.60,
-    n_simulations: int = 10000
+    n_simulations: int = 10000,
 ) -> pd.DataFrame:
     """Generate betting picks by simulating each bet and counting wins."""
 
@@ -243,12 +252,12 @@ def generate_betting_picks_from_simulations(
         if idx % 10 == 0:
             print(f"  Progress: {idx}/{total_bets} bets simulated")
 
-        home_team = odds_row['home_team']
-        away_team = odds_row['away_team']
-        market_key = str(odds_row['market_key'])
-        outcome_name = str(odds_row['outcome_name'])
-        odds_value = float(odds_row['odds'])
-        point = odds_row.get('spread_or_total')
+        home_team = odds_row["home_team"]
+        away_team = odds_row["away_team"]
+        market_key = str(odds_row["market_key"])
+        outcome_name = str(odds_row["outcome_name"])
+        odds_value = float(odds_row["odds"])
+        point = odds_row.get("spread_or_total")
 
         # Simulate bet win rate
         win_pct = simulate_bet_win_rate(
@@ -260,7 +269,7 @@ def generate_betting_picks_from_simulations(
             market_type=market_key,
             outcome_name=outcome_name,
             point=point if pd.notna(point) else None,
-            n_simulations=n_simulations
+            n_simulations=n_simulations,
         )
 
         # Only include if win rate > threshold
@@ -268,12 +277,12 @@ def generate_betting_picks_from_simulations(
             continue
 
         # Create recommendation string
-        if market_key == 'h2h':
+        if market_key == "h2h":
             recommendation = f"{outcome_name} ML"
-        elif market_key == 'spreads':
+        elif market_key == "spreads":
             point_str = f"{float(point):+.1f}" if pd.notna(point) else ""
             recommendation = f"{outcome_name} {point_str}"
-        elif market_key == 'totals':
+        elif market_key == "totals":
             point_str = f"{float(point):.1f}" if pd.notna(point) else ""
             recommendation = f"{outcome_name} {point_str}"
         else:
@@ -284,22 +293,24 @@ def generate_betting_picks_from_simulations(
         edge = win_pct - implied_prob
         ev = calculate_expected_value(win_pct, odds_value)
 
-        matched.append({
-            'game_date': game_date,
-            'home_team': home_team,
-            'away_team': away_team,
-            'market_type': market_key,
-            'recommendation': recommendation,
-            'bookmaker': odds_row.get('bookmaker_title', 'Unknown'),
-            'bookmaker_key': odds_row.get('bookmaker_key', ''),
-            'odds': odds_value,
-            'point': point if pd.notna(point) else None,
-            'simulation_win_pct': win_pct,
-            'market_probability': implied_prob,
-            'edge': edge,
-            'expected_value': ev,
-            'event_id': str(odds_row.get('event_id', '')),
-        })
+        matched.append(
+            {
+                "game_date": game_date,
+                "home_team": home_team,
+                "away_team": away_team,
+                "market_type": market_key,
+                "recommendation": recommendation,
+                "bookmaker": odds_row.get("bookmaker_title", "Unknown"),
+                "bookmaker_key": odds_row.get("bookmaker_key", ""),
+                "odds": odds_value,
+                "point": point if pd.notna(point) else None,
+                "simulation_win_pct": win_pct,
+                "market_probability": implied_prob,
+                "edge": edge,
+                "expected_value": ev,
+                "event_id": str(odds_row.get("event_id", "")),
+            }
+        )
 
     if len(matched) == 0:
         return pd.DataFrame()
@@ -307,14 +318,18 @@ def generate_betting_picks_from_simulations(
     df = pd.DataFrame(matched)
 
     # Filter to best pick per unique bet type (by EV)
-    df['bet_id'] = df.apply(
-        lambda r: f"{r['home_team']}_{r['away_team']}_{r['market_type']}_{r['recommendation']}_{r['point']:.1f}" if pd.notna(r['point']) else f"{r['home_team']}_{r['away_team']}_{r['market_type']}_{r['recommendation']}",
-        axis=1
+    df["bet_id"] = df.apply(
+        lambda r: (
+            f"{r['home_team']}_{r['away_team']}_{r['market_type']}_{r['recommendation']}_{r['point']:.1f}"
+            if pd.notna(r["point"])
+            else f"{r['home_team']}_{r['away_team']}_{r['market_type']}_{r['recommendation']}"
+        ),
+        axis=1,
     )
 
-    best_picks = df.loc[df.groupby('bet_id')['expected_value'].idxmax()]
-    best_picks = best_picks.drop('bet_id', axis=1)
-    best_picks = best_picks.sort_values('expected_value', ascending=False)
+    best_picks = df.loc[df.groupby("bet_id")["expected_value"].idxmax()]
+    best_picks = best_picks.drop("bet_id", axis=1)
+    best_picks = best_picks.sort_values("expected_value", ascending=False)
 
     return best_picks.reset_index(drop=True)
 
@@ -359,6 +374,7 @@ def main():
     except Exception as e:
         print(f"⚠️  Error initializing simulator: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
@@ -366,11 +382,11 @@ def main():
     print("\nConnecting to PostgreSQL database...")
     try:
         conn = psycopg2.connect(
-            host=os.getenv('DB_HOST'),
-            port=os.getenv('DB_PORT'),
-            database=os.getenv('DB_NAME'),
-            user=os.getenv('DB_USER'),
-            password=os.getenv('DB_PASSWORD')
+            host=os.getenv("DB_HOST"),
+            port=os.getenv("DB_PORT"),
+            database=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
         )
         print("✓ Connected to database")
     except Exception as e:
@@ -405,17 +421,23 @@ def main():
             odds_df=df_odds,
             game_date=today,
             min_win_pct=args.min_win_pct,
-            n_simulations=args.n_simulations
+            n_simulations=args.n_simulations,
         )
 
-        print(f"\n✓ Generated {len(df_picks)} betting picks (win rate > {args.min_win_pct:.1%})")
+        print(
+            f"\n✓ Generated {len(df_picks)} betting picks (win rate > {args.min_win_pct:.1%})"
+        )
 
         if len(df_picks) > 0:
             print(f"\nBreakdown by market type:")
-            for market_type in df_picks['market_type'].unique():
-                count = len(df_picks[df_picks['market_type'] == market_type])
-                avg_win_pct = df_picks[df_picks['market_type'] == market_type]['simulation_win_pct'].mean()
-                print(f"  {market_type}: {count} bets (avg win rate: {avg_win_pct:.1%})")
+            for market_type in df_picks["market_type"].unique():
+                count = len(df_picks[df_picks["market_type"] == market_type])
+                avg_win_pct = df_picks[df_picks["market_type"] == market_type][
+                    "simulation_win_pct"
+                ].mean()
+                print(
+                    f"  {market_type}: {count} bets (avg win rate: {avg_win_pct:.1%})"
+                )
 
             # Save picks
             output_path = Path(args.output)
@@ -429,17 +451,22 @@ def main():
             print(f"{'='*80}")
             top_10 = df_picks.head(10)
             for idx, (_, row) in enumerate(top_10.iterrows(), 1):
-                point_str = f" ({row['point']:+.1f})" if pd.notna(row['point']) else ""
+                point_str = f" ({row['point']:+.1f})" if pd.notna(row["point"]) else ""
                 print(f"\n{idx}. {row['away_team']} @ {row['home_team']}")
                 print(f"   Pick: {row['recommendation']}{point_str}")
-                print(f"   Odds: {row['odds']:+.0f} | Win Rate: {row['simulation_win_pct']:.1%} | Market: {row['market_probability']:.1%}")
-                print(f"   Edge: {row['edge']:+.1%} | EV: {row['expected_value']:+.1%} | Book: {row['bookmaker']}")
+                print(
+                    f"   Odds: {row['odds']:+.0f} | Win Rate: {row['simulation_win_pct']:.1%} | Market: {row['market_probability']:.1%}"
+                )
+                print(
+                    f"   Edge: {row['edge']:+.1%} | EV: {row['expected_value']:+.1%} | Book: {row['bookmaker']}"
+                )
         else:
             print(f"\n⚠️  No bets found with win rate > {args.min_win_pct:.1%}")
 
     except Exception as e:
         print(f"⚠️  Error generating picks: {e}")
         import traceback
+
         traceback.print_exc()
         conn.close()
         sys.exit(1)
@@ -450,4 +477,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

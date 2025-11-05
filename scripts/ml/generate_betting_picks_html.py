@@ -49,13 +49,22 @@ def get_ev_color(ev: float) -> str:
         return "ev-negative"
 
 
-def fetch_player_props(conn, game_ids: list, game_date: date, date_range_days: int = 0) -> pd.DataFrame:
+def fetch_player_props(
+    conn, game_ids: list, game_date: date, date_range_days: int = 0
+) -> pd.DataFrame:
     """Fetch player props for given games."""
     player_prop_markets = [
-        'player_points', 'player_assists', 'player_rebounds',
-        'player_threes', 'player_points_rebounds', 'player_points_assists',
-        'player_points_rebounds_assists', 'player_steals', 'player_blocks',
-        'player_double_double', 'player_triple_double'
+        "player_points",
+        "player_assists",
+        "player_rebounds",
+        "player_threes",
+        "player_points_rebounds",
+        "player_points_assists",
+        "player_points_rebounds_assists",
+        "player_steals",
+        "player_blocks",
+        "player_double_double",
+        "player_triple_double",
     ]
 
     market_str = "', '".join(player_prop_markets)
@@ -142,23 +151,26 @@ def fetch_player_props(conn, game_ids: list, game_date: date, date_range_days: i
         return pd.DataFrame()
 
 
-def generate_html(picks_df: pd.DataFrame, output_path: Path, player_props_df: pd.DataFrame = None) -> str:
+def generate_html(
+    picks_df: pd.DataFrame, output_path: Path, player_props_df: pd.DataFrame = None
+) -> str:
     """Generate HTML visualization of betting picks."""
 
     # Import fetch_game_state to check for in-progress games
     import sys
     from pathlib import Path as PathLib
+
     sys.path.insert(0, str(PathLib(__file__).parent.parent.parent))
     from scripts.ml.fetch_game_state import get_game_state
     from datetime import date
 
     # Sort by expected value
-    picks_df = picks_df.sort_values('expected_value', ascending=False)
+    picks_df = picks_df.sort_values("expected_value", ascending=False)
 
     # Check for in-progress games and get game state
     game_states = {}
-    if 'game_id' in picks_df.columns:
-        for game_id in picks_df['game_id'].unique():
+    if "game_id" in picks_df.columns:
+        for game_id in picks_df["game_id"].unique():
             try:
                 game_state = get_game_state(str(game_id))
                 if game_state:
@@ -168,22 +180,22 @@ def generate_html(picks_df: pd.DataFrame, output_path: Path, player_props_df: pd
 
     # Calculate summary statistics
     total_bets = len(picks_df)
-    positive_ev_bets = (picks_df['expected_value'] > 0).sum()
-    strong_bets = (picks_df['expected_value'] > 0.05).sum()
-    very_strong_bets = (picks_df['expected_value'] > 0.20).sum()
-    games_covered = picks_df['game_id'].nunique()
-    market_types = picks_df['market_type'].unique()
+    positive_ev_bets = (picks_df["expected_value"] > 0).sum()
+    strong_bets = (picks_df["expected_value"] > 0.05).sum()
+    very_strong_bets = (picks_df["expected_value"] > 0.20).sum()
+    games_covered = picks_df["game_id"].nunique()
+    market_types = picks_df["market_type"].unique()
 
     # Group by market type
     by_market = {}
     for market_type in market_types:
-        by_market[market_type] = picks_df[picks_df['market_type'] == market_type].copy()
+        by_market[market_type] = picks_df[picks_df["market_type"] == market_type].copy()
 
     # Market type names
     market_names = {
-        'h2h': 'Moneyline',
-        'spreads': 'Point Spreads',
-        'totals': 'Totals (Over/Under)'
+        "h2h": "Moneyline",
+        "spreads": "Point Spreads",
+        "totals": "Totals (Over/Under)",
     }
 
     html = f"""<!DOCTYPE html>
@@ -465,11 +477,11 @@ def generate_html(picks_df: pd.DataFrame, output_path: Path, player_props_df: pd
 """
 
     for idx, (_, bet) in enumerate(top_10.iterrows(), 1):
-        point_str = f" ({bet['point']:+.1f})" if pd.notna(bet['point']) else ""
-        bet_recommendation = bet['recommendation'] + point_str
+        point_str = f" ({bet['point']:+.1f})" if pd.notna(bet["point"]) else ""
+        bet_recommendation = bet["recommendation"] + point_str
 
         # Check if game is in-progress and has game state
-        game_id = bet.get('game_id', '')
+        game_id = bet.get("game_id", "")
         game_state_info = ""
         if game_id in game_states:
             state = game_states[game_id]
@@ -494,7 +506,7 @@ def generate_html(picks_df: pd.DataFrame, output_path: Path, player_props_df: pd
 """
 
     # Market type sections
-    for market_type in ['h2h', 'spreads', 'totals']:
+    for market_type in ["h2h", "spreads", "totals"]:
         if market_type not in by_market or len(by_market[market_type]) == 0:
             continue
 
@@ -516,11 +528,11 @@ def generate_html(picks_df: pd.DataFrame, output_path: Path, player_props_df: pd
 """
 
         for _, bet in market_df.iterrows():
-            point_str = f" ({bet['point']:+.1f})" if pd.notna(bet['point']) else ""
-            bet_recommendation = bet['recommendation'] + point_str
+            point_str = f" ({bet['point']:+.1f})" if pd.notna(bet["point"]) else ""
+            bet_recommendation = bet["recommendation"] + point_str
 
             # Check if game is in-progress and has game state
-            game_id = bet.get('game_id', '')
+            game_id = bet.get("game_id", "")
             game_state_info = ""
             if game_id in game_states:
                 state = game_states[game_id]
@@ -548,7 +560,7 @@ def generate_html(picks_df: pd.DataFrame, output_path: Path, player_props_df: pd
 
     if player_props_df is not None and len(player_props_df) > 0:
         # Group player props by game
-        games_with_props = player_props_df['event_id'].unique()
+        games_with_props = player_props_df["event_id"].unique()
 
         html += """
         <div class="section">
@@ -556,20 +568,30 @@ def generate_html(picks_df: pd.DataFrame, output_path: Path, player_props_df: pd
 """
 
         # Get unique games from picks (with event_id if available)
-        if 'event_id' in picks_df.columns:
-            picks_games = picks_df.groupby(['game_id', 'home_team', 'away_team', 'event_id']).first().reset_index()
+        if "event_id" in picks_df.columns:
+            picks_games = (
+                picks_df.groupby(["game_id", "home_team", "away_team", "event_id"])
+                .first()
+                .reset_index()
+            )
         else:
-            picks_games = picks_df.groupby(['game_id', 'home_team', 'away_team']).first().reset_index()
-            picks_games['event_id'] = None
+            picks_games = (
+                picks_df.groupby(["game_id", "home_team", "away_team"])
+                .first()
+                .reset_index()
+            )
+            picks_games["event_id"] = None
 
         for _, game_row in picks_games.iterrows():
             # Match by event_id if available, otherwise by teams
-            if pd.notna(game_row.get('event_id')) and game_row.get('event_id'):
-                game_props = player_props_df[player_props_df['event_id'] == game_row['event_id']]
+            if pd.notna(game_row.get("event_id")) and game_row.get("event_id"):
+                game_props = player_props_df[
+                    player_props_df["event_id"] == game_row["event_id"]
+                ]
             else:
                 game_props = player_props_df[
-                    (player_props_df['home_team'] == game_row['home_team']) &
-                    (player_props_df['away_team'] == game_row['away_team'])
+                    (player_props_df["home_team"] == game_row["home_team"])
+                    & (player_props_df["away_team"] == game_row["away_team"])
                 ]
 
             if len(game_props) == 0:
@@ -584,13 +606,19 @@ def generate_html(picks_df: pd.DataFrame, output_path: Path, player_props_df: pd
 
             # Group by market type
             props_by_market = {}
-            for market_key in game_props['market_key'].unique():
-                market_props_subset = game_props[game_props['market_key'] == market_key]
-                market_name = market_props_subset.iloc[0]['market_name'] if len(market_props_subset) > 0 else market_key
+            for market_key in game_props["market_key"].unique():
+                market_props_subset = game_props[game_props["market_key"] == market_key]
+                market_name = (
+                    market_props_subset.iloc[0]["market_name"]
+                    if len(market_props_subset) > 0
+                    else market_key
+                )
                 props_by_market[market_key] = (market_name, market_props_subset)
 
             # Display props by market
-            for market_key, (market_name, market_props_subset) in sorted(props_by_market.items()):
+            for market_key, (market_name, market_props_subset) in sorted(
+                props_by_market.items()
+            ):
                 html += f"""
                 <div style="margin-bottom: 25px;">
                     <h4 style="font-size: 1.1em; color: #555; margin-bottom: 10px;">{market_name}</h4>
@@ -608,17 +636,21 @@ def generate_html(picks_df: pd.DataFrame, output_path: Path, player_props_df: pd
 """
 
                 # Group by player to show all lines for each player
-                for player_name in sorted(market_props_subset['player_name'].unique()):
-                    player_lines = market_props_subset[market_props_subset['player_name'] == player_name]
+                for player_name in sorted(market_props_subset["player_name"].unique()):
+                    player_lines = market_props_subset[
+                        market_props_subset["player_name"] == player_name
+                    ]
                     for _, prop in player_lines.iterrows():
-                        point_str = f"{prop['point']:.1f}" if pd.notna(prop['point']) else "N/A"
-                        outcome_name = str(prop['player_name'])
+                        point_str = (
+                            f"{prop['point']:.1f}" if pd.notna(prop["point"]) else "N/A"
+                        )
+                        outcome_name = str(prop["player_name"])
                         # Extract Over/Under from outcome if present
-                        if 'Over' in outcome_name or 'Under' in outcome_name:
+                        if "Over" in outcome_name or "Under" in outcome_name:
                             # Split to get player name and Over/Under
                             parts = outcome_name.split()
                             if len(parts) >= 2:
-                                player_display = ' '.join(parts[:-1])
+                                player_display = " ".join(parts[:-1])
                                 over_under = parts[-1]
                                 pick = f"{over_under} {point_str}"
                             else:
@@ -650,15 +682,37 @@ def generate_html(picks_df: pd.DataFrame, output_path: Path, player_props_df: pd
         games_without_props = []
         for _, game_row in picks_games.iterrows():
             # Check if this game has props
-            if pd.notna(game_row.get('event_id')) and game_row.get('event_id'):
-                has_props = len(player_props_df[player_props_df['event_id'] == game_row['event_id']]) > 0
+            if pd.notna(game_row.get("event_id")) and game_row.get("event_id"):
+                has_props = (
+                    len(
+                        player_props_df[
+                            player_props_df["event_id"] == game_row["event_id"]
+                        ]
+                    )
+                    > 0
+                )
             else:
+
                 def normalize_name(name):
-                    return name.lower().replace(' ', '').replace('.', '').replace('-', '')
-                has_props = len(player_props_df[
-                    (player_props_df['home_team'].apply(normalize_name) == normalize_name(game_row['home_team'])) &
-                    (player_props_df['away_team'].apply(normalize_name) == normalize_name(game_row['away_team']))
-                ]) > 0
+                    return (
+                        name.lower().replace(" ", "").replace(".", "").replace("-", "")
+                    )
+
+                has_props = (
+                    len(
+                        player_props_df[
+                            (
+                                player_props_df["home_team"].apply(normalize_name)
+                                == normalize_name(game_row["home_team"])
+                            )
+                            & (
+                                player_props_df["away_team"].apply(normalize_name)
+                                == normalize_name(game_row["away_team"])
+                            )
+                        ]
+                    )
+                    > 0
+                )
 
             if not has_props:
                 games_without_props.append(game_row)
@@ -710,7 +764,9 @@ def generate_html(picks_df: pd.DataFrame, output_path: Path, player_props_df: pd
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate HTML visualization of betting picks")
+    parser = argparse.ArgumentParser(
+        description="Generate HTML visualization of betting picks"
+    )
     parser.add_argument(
         "--picks",
         type=str,
@@ -764,8 +820,8 @@ def main():
 
             # Get unique event IDs from picks CSV
             event_ids = []
-            if 'event_id' in picks_df.columns:
-                event_ids = picks_df['event_id'].dropna().unique().tolist()
+            if "event_id" in picks_df.columns:
+                event_ids = picks_df["event_id"].dropna().unique().tolist()
 
             # Get all player props for today (and tomorrow, since games might be stored with UTC dates)
             today = date.today()
@@ -786,7 +842,9 @@ def main():
             if len(player_props_df) == 0:
                 # Get all player props from last 7 days
                 recent_date = today - timedelta(days=7)
-                player_props_df = fetch_player_props(conn, [], recent_date, date_range_days=7)
+                player_props_df = fetch_player_props(
+                    conn, [], recent_date, date_range_days=7
+                )
 
             if len(player_props_df) > 0:
                 print(f"✓ Loaded {len(player_props_df)} player props")
@@ -806,7 +864,7 @@ def main():
     # Save HTML
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         f.write(html_content)
 
     print(f"✓ Saved to: {output_path}")
@@ -817,4 +875,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

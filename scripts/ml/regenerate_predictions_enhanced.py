@@ -35,9 +35,9 @@ logger = logging.getLogger(__name__)
 def regenerate_predictions(input_csv: str, output_dir: str = "/tmp/nba_predictions"):
     """Regenerate predictions with enhanced confidence"""
 
-    logger.info("="*80)
+    logger.info("=" * 80)
     logger.info("REGENERATING PREDICTIONS WITH ENHANCED CONFIDENCE")
-    logger.info("="*80)
+    logger.info("=" * 80)
     logger.info("")
 
     # Load existing predictions
@@ -61,13 +61,13 @@ def regenerate_predictions(input_csv: str, output_dir: str = "/tmp/nba_predictio
         enhanced_predictions = []
 
         for idx, row in df_existing.iterrows():
-            game_id = row['game_id']
-            game_date = pd.to_datetime(row['game_date']).date()
+            game_id = row["game_id"]
+            game_date = pd.to_datetime(row["game_date"]).date()
 
             # Try to get team IDs from existing data or database
             # For now, use team names to look up IDs
-            home_team_name = row['home_team']
-            away_team_name = row['away_team']
+            home_team_name = row["home_team"]
+            away_team_name = row["away_team"]
 
             logger.info(f"Predicting: {away_team_name} @ {home_team_name}")
 
@@ -78,21 +78,27 @@ def regenerate_predictions(input_csv: str, output_dir: str = "/tmp/nba_predictio
                 FROM teams
                 WHERE team_name = %s OR team_name = %s
                 """
-                teams = simulator.db.query(query, params=(home_team_name, away_team_name))
+                teams = simulator.db.query(
+                    query, params=(home_team_name, away_team_name)
+                )
 
                 home_team_id = None
                 away_team_id = None
 
                 for _, team_row in teams.iterrows():
-                    if team_row['team_name'] == home_team_name:
-                        home_team_id = team_row['team_id']
-                    elif team_row['team_name'] == away_team_name:
-                        away_team_id = team_row['team_id']
+                    if team_row["team_name"] == home_team_name:
+                        home_team_id = team_row["team_id"]
+                    elif team_row["team_name"] == away_team_name:
+                        away_team_id = team_row["team_id"]
 
                 if not home_team_id or not away_team_id:
-                    logger.warning(f"  ⚠️  Could not find team IDs for {home_team_name} / {away_team_name}")
+                    logger.warning(
+                        f"  ⚠️  Could not find team IDs for {home_team_name} / {away_team_name}"
+                    )
                     # Use existing prediction with enhanced confidence
-                    enhanced_confidence = min(1.0, max(0.2, abs(row['home_win_probability'] - 0.5) * 2 * 1.3))
+                    enhanced_confidence = min(
+                        1.0, max(0.2, abs(row["home_win_probability"] - 0.5) * 2 * 1.3)
+                    )
 
                     if enhanced_confidence >= 0.75:
                         prediction_strength = "Very Strong"
@@ -105,19 +111,25 @@ def regenerate_predictions(input_csv: str, output_dir: str = "/tmp/nba_predictio
                     else:
                         prediction_strength = "Very Weak"
 
-                    enhanced_predictions.append({
-                        'game_id': game_id,
-                        'game_date': row['game_date'],
-                        'home_team': home_team_name,
-                        'away_team': away_team_name,
-                        'predicted_winner': row.get('predicted_winner', ''),
-                        'home_win_probability': row['home_win_probability'],
-                        'away_win_probability': row['away_win_probability'],
-                        'predicted_home_score': row.get('predicted_home_score', 110.0),
-                        'predicted_away_score': row.get('predicted_away_score', 108.0),
-                        'confidence': enhanced_confidence,
-                        'prediction_strength': prediction_strength,
-                    })
+                    enhanced_predictions.append(
+                        {
+                            "game_id": game_id,
+                            "game_date": row["game_date"],
+                            "home_team": home_team_name,
+                            "away_team": away_team_name,
+                            "predicted_winner": row.get("predicted_winner", ""),
+                            "home_win_probability": row["home_win_probability"],
+                            "away_win_probability": row["away_win_probability"],
+                            "predicted_home_score": row.get(
+                                "predicted_home_score", 110.0
+                            ),
+                            "predicted_away_score": row.get(
+                                "predicted_away_score", 108.0
+                            ),
+                            "confidence": enhanced_confidence,
+                            "prediction_strength": prediction_strength,
+                        }
+                    )
                     continue
 
                 # Get ensemble prediction with enhanced confidence
@@ -126,7 +138,7 @@ def regenerate_predictions(input_csv: str, output_dir: str = "/tmp/nba_predictio
                     away_team_id=away_team_id,
                     game_date=game_date,
                     use_ensemble=True,
-                    n_simulations=10000
+                    n_simulations=10000,
                 )
 
                 # Calculate prediction strength
@@ -145,26 +157,36 @@ def regenerate_predictions(input_csv: str, output_dir: str = "/tmp/nba_predictio
 
                 # Calculate model agreement
                 individual_probs = [r.home_win_prob for r in individual_results]
-                model_agreement = 1.0 - (np.std(individual_probs) if len(individual_probs) > 1 else 0.2)
+                model_agreement = 1.0 - (
+                    np.std(individual_probs) if len(individual_probs) > 1 else 0.2
+                )
                 model_agreement = max(0.0, min(1.0, model_agreement))
 
-                enhanced_predictions.append({
-                    'game_id': game_id,
-                    'game_date': row['game_date'],
-                    'home_team': home_team_name,
-                    'away_team': away_team_name,
-                    'predicted_winner': home_team_name if ensemble_result.home_win_prob > 0.5 else away_team_name,
-                    'home_win_probability': ensemble_result.home_win_prob,
-                    'away_win_probability': ensemble_result.away_win_prob,
-                    'predicted_home_score': ensemble_result.predicted_home_score,
-                    'predicted_away_score': ensemble_result.predicted_away_score,
-                    'confidence': confidence,
-                    'prediction_strength': prediction_strength,
-                    'model_agreement': model_agreement,
-                    'num_models': len(individual_results),
-                })
+                enhanced_predictions.append(
+                    {
+                        "game_id": game_id,
+                        "game_date": row["game_date"],
+                        "home_team": home_team_name,
+                        "away_team": away_team_name,
+                        "predicted_winner": (
+                            home_team_name
+                            if ensemble_result.home_win_prob > 0.5
+                            else away_team_name
+                        ),
+                        "home_win_probability": ensemble_result.home_win_prob,
+                        "away_win_probability": ensemble_result.away_win_prob,
+                        "predicted_home_score": ensemble_result.predicted_home_score,
+                        "predicted_away_score": ensemble_result.predicted_away_score,
+                        "confidence": confidence,
+                        "prediction_strength": prediction_strength,
+                        "model_agreement": model_agreement,
+                        "num_models": len(individual_results),
+                    }
+                )
 
-                logger.info(f"  ✓ Enhanced: {prediction_strength} ({confidence:.1%} confidence)")
+                logger.info(
+                    f"  ✓ Enhanced: {prediction_strength} ({confidence:.1%} confidence)"
+                )
 
             except Exception as e:
                 logger.error(f"  ✗ Error: {e}")
@@ -186,13 +208,13 @@ def regenerate_predictions(input_csv: str, output_dir: str = "/tmp/nba_predictio
         latest_path.symlink_to(output_path.name)
 
         logger.info("")
-        logger.info("="*80)
+        logger.info("=" * 80)
         logger.info("ENHANCED PREDICTIONS SUMMARY")
-        logger.info("="*80)
+        logger.info("=" * 80)
         logger.info("")
 
         for strength in ["Very Strong", "Strong", "Moderate", "Weak", "Very Weak"]:
-            count = len(df_enhanced[df_enhanced['prediction_strength'] == strength])
+            count = len(df_enhanced[df_enhanced["prediction_strength"] == strength])
             if count > 0:
                 logger.info(f"{strength}: {count} games")
 
@@ -202,16 +224,20 @@ def regenerate_predictions(input_csv: str, output_dir: str = "/tmp/nba_predictio
         logger.info("")
 
         # Display predictions
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("ENHANCED PREDICTIONS")
-        print("="*80)
+        print("=" * 80)
         print()
 
         for _, pred in df_enhanced.iterrows():
             print(f"{pred['away_team']} @ {pred['home_team']}")
-            print(f"  Predicted Winner: {pred['predicted_winner']} ({pred['home_win_probability']:.1%})")
-            print(f"  Confidence: {pred['confidence']:.1%} | Strength: {pred['prediction_strength']}")
-            if 'model_agreement' in pred and pd.notna(pred['model_agreement']):
+            print(
+                f"  Predicted Winner: {pred['predicted_winner']} ({pred['home_win_probability']:.1%})"
+            )
+            print(
+                f"  Confidence: {pred['confidence']:.1%} | Strength: {pred['prediction_strength']}"
+            )
+            if "model_agreement" in pred and pd.notna(pred["model_agreement"]):
                 print(f"  Model Agreement: {pred['model_agreement']:.1%}")
             print()
 
@@ -231,17 +257,15 @@ if __name__ == "__main__":
         "--predictions",
         type=str,
         default="/tmp/nba_predictions/predictions_latest.csv",
-        help="Path to existing predictions CSV"
+        help="Path to existing predictions CSV",
     )
     parser.add_argument(
         "--output-dir",
         type=str,
         default="/tmp/nba_predictions",
-        help="Output directory for enhanced predictions"
+        help="Output directory for enhanced predictions",
     )
 
     args = parser.parse_args()
 
     regenerate_predictions(args.predictions, args.output_dir)
-
-

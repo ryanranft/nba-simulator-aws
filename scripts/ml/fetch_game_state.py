@@ -34,8 +34,7 @@ from dotenv import load_dotenv
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -43,7 +42,7 @@ logger = logging.getLogger(__name__)
 env_paths = [
     "/Users/ryanranft/nba-sim-credentials.env",
     "/Users/ryanranft/nba-simulator-aws/.env",
-    os.path.expanduser("~/.env")
+    os.path.expanduser("~/.env"),
 ]
 
 for path in env_paths:
@@ -55,7 +54,7 @@ for path in env_paths:
 def get_game_state(
     game_id: str,
     db_conn: Optional[psycopg2.extensions.connection] = None,
-    game_date: Optional[date] = None
+    game_date: Optional[date] = None,
 ) -> Optional[Dict[str, Any]]:
     """
     Get the most recent game state for a given game_id.
@@ -88,11 +87,11 @@ def get_game_state(
     if conn is None:
         try:
             conn = psycopg2.connect(
-                host=os.getenv('DB_HOST'),
-                database=os.getenv('DB_NAME'),
-                user=os.getenv('DB_USER'),
-                password=os.getenv('DB_PASSWORD'),
-                port=os.getenv('DB_PORT', 5432)
+                host=os.getenv("DB_HOST"),
+                database=os.getenv("DB_NAME"),
+                user=os.getenv("DB_USER"),
+                password=os.getenv("DB_PASSWORD"),
+                port=os.getenv("DB_PORT", 5432),
             )
             close_conn = True
         except Exception as e:
@@ -127,13 +126,33 @@ def get_game_state(
 
             # Convert to dictionary
             game_state = {
-                'current_score_home': int(result['current_score_home']) if result['current_score_home'] is not None else 0,
-                'current_score_away': int(result['current_score_away']) if result['current_score_away'] is not None else 0,
-                'quarter': int(result['quarter']) if result['quarter'] is not None else 1,
-                'game_clock_seconds': int(result['game_clock_seconds']) if result['game_clock_seconds'] is not None else None,
-                'game_status': str(result['game_status']) if result['game_status'] else 'unknown',
-                'score_differential': int(result['score_differential']) if result['score_differential'] is not None else 0,
-                'state_time': result['state_time']
+                "current_score_home": (
+                    int(result["current_score_home"])
+                    if result["current_score_home"] is not None
+                    else 0
+                ),
+                "current_score_away": (
+                    int(result["current_score_away"])
+                    if result["current_score_away"] is not None
+                    else 0
+                ),
+                "quarter": (
+                    int(result["quarter"]) if result["quarter"] is not None else 1
+                ),
+                "game_clock_seconds": (
+                    int(result["game_clock_seconds"])
+                    if result["game_clock_seconds"] is not None
+                    else None
+                ),
+                "game_status": (
+                    str(result["game_status"]) if result["game_status"] else "unknown"
+                ),
+                "score_differential": (
+                    int(result["score_differential"])
+                    if result["score_differential"] is not None
+                    else 0
+                ),
+                "state_time": result["state_time"],
             }
 
             logger.info(
@@ -158,7 +177,7 @@ def get_game_state_by_team_names(
     home_team_name: str,
     away_team_name: str,
     game_date: date,
-    db_conn: Optional[psycopg2.extensions.connection] = None
+    db_conn: Optional[psycopg2.extensions.connection] = None,
 ) -> Optional[Dict[str, Any]]:
     """
     Get game state by team names and game date.
@@ -183,11 +202,11 @@ def get_game_state_by_team_names(
     if conn is None:
         try:
             conn = psycopg2.connect(
-                host=os.getenv('DB_HOST'),
-                database=os.getenv('DB_NAME'),
-                user=os.getenv('DB_USER'),
-                password=os.getenv('DB_PASSWORD'),
-                port=os.getenv('DB_PORT', 5432)
+                host=os.getenv("DB_HOST"),
+                database=os.getenv("DB_NAME"),
+                user=os.getenv("DB_USER"),
+                password=os.getenv("DB_PASSWORD"),
+                port=os.getenv("DB_PORT", 5432),
             )
             close_conn = True
         except Exception as e:
@@ -215,17 +234,22 @@ def get_game_state_by_team_names(
         away_lower = away_team_name.lower()
 
         with conn.cursor() as cursor:
-            cursor.execute(query, (
-                game_date,
-                f'%{home_lower}%',
-                f'%{home_team_name.replace(" ", "%")}%',
-                f'%{away_lower}%',
-                f'%{away_team_name.replace(" ", "%")}%'
-            ))
+            cursor.execute(
+                query,
+                (
+                    game_date,
+                    f"%{home_lower}%",
+                    f'%{home_team_name.replace(" ", "%")}%',
+                    f"%{away_lower}%",
+                    f'%{away_team_name.replace(" ", "%")}%',
+                ),
+            )
             result = cursor.fetchone()
 
             if result is None:
-                logger.debug(f"No game found for {away_team_name} @ {home_team_name} on {game_date}")
+                logger.debug(
+                    f"No game found for {away_team_name} @ {home_team_name} on {game_date}"
+                )
                 return None
 
             game_id = result[0]
@@ -234,7 +258,9 @@ def get_game_state_by_team_names(
             return get_game_state(game_id, db_conn=conn, game_date=game_date)
 
     except Exception as e:
-        logger.error(f"Error finding game state for {away_team_name} @ {home_team_name} on {game_date}: {e}")
+        logger.error(
+            f"Error finding game state for {away_team_name} @ {home_team_name} on {game_date}: {e}"
+        )
         return None
 
     finally:
@@ -252,8 +278,8 @@ def calculate_remaining_time(game_state: Dict[str, Any]) -> float:
     Returns:
         Remaining time in minutes (float)
     """
-    quarter = game_state.get('quarter', 1)
-    game_clock_seconds = game_state.get('game_clock_seconds', 0) or 0
+    quarter = game_state.get("quarter", 1)
+    game_clock_seconds = game_state.get("game_clock_seconds", 0) or 0
 
     # Calculate quarters remaining
     if quarter <= 4:
@@ -288,6 +314,7 @@ if __name__ == "__main__":
         game_state = get_game_state(args.game_id)
     elif args.home_team and args.away_team and args.game_date:
         from datetime import datetime
+
         game_date = datetime.strptime(args.game_date, "%Y-%m-%d").date()
         game_state = get_game_state_by_team_names(
             args.home_team, args.away_team, game_date
@@ -298,7 +325,9 @@ if __name__ == "__main__":
 
     if game_state:
         print(f"\nGame State:")
-        print(f"  Score: {game_state['current_score_home']} - {game_state['current_score_away']}")
+        print(
+            f"  Score: {game_state['current_score_home']} - {game_state['current_score_away']}"
+        )
         print(f"  Quarter: {game_state['quarter']}")
         print(f"  Time remaining: {game_state['game_clock_seconds']} seconds")
         print(f"  Status: {game_state['game_status']}")
@@ -308,4 +337,3 @@ if __name__ == "__main__":
         print(f"  Remaining time: {remaining:.1f} minutes")
     else:
         print("No game state found (game may not be in progress)")
-

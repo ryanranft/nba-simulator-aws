@@ -46,17 +46,19 @@ def get_odds_api_key() -> Optional[str]:
             # Try to load from the centralized secrets path used by odds-api
             secrets_path = "/Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/odds-api/.env.odds_api.production/ODDS_API_KEY_ODDS_API_WORKFLOW.env"
             if os.path.exists(secrets_path):
-                with open(secrets_path, 'r') as f:
+                with open(secrets_path, "r") as f:
                     api_key = f.read().strip()
                     if api_key:
-                        os.environ['ODDS_API_KEY'] = api_key
+                        os.environ["ODDS_API_KEY"] = api_key
         except Exception as e:
             pass  # Silently fail and return None
 
     return api_key
 
 
-def fetch_odds_from_api(api_key: str, include_player_props: bool = False) -> Optional[List[Dict]]:
+def fetch_odds_from_api(
+    api_key: str, include_player_props: bool = False
+) -> Optional[List[Dict]]:
     """Fetch current NBA odds from The Odds API."""
     url = f"{ODDS_API_BASE}/sports/{SPORT}/odds"
     markets_to_use = MARKETS_WITH_PROPS if include_player_props else MARKETS
@@ -94,7 +96,9 @@ def fetch_odds_from_api(api_key: str, include_player_props: bool = False) -> Opt
         return None
 
 
-def get_or_create_bookmaker(conn, cursor, bookmaker_key: str, bookmaker_title: str) -> int:
+def get_or_create_bookmaker(
+    conn, cursor, bookmaker_key: str, bookmaker_title: str
+) -> int:
     """Get or create bookmaker and return bookmaker_id."""
     cursor.execute(
         """
@@ -144,7 +148,12 @@ def get_or_create_market_type(conn, cursor, market_key: str, market_name: str) -
         return cursor.fetchone()[0]
 
 
-def store_odds_data(conn, odds_data: List[Dict], target_date: Optional[date] = None, include_player_props: bool = False):
+def store_odds_data(
+    conn,
+    odds_data: List[Dict],
+    target_date: Optional[date] = None,
+    include_player_props: bool = False,
+):
     """Store odds data in database."""
     cursor = conn.cursor()
 
@@ -155,14 +164,17 @@ def store_odds_data(conn, odds_data: List[Dict], target_date: Optional[date] = N
 
     for event in odds_data:
         event_id = event.get("id")
-        commence_time = datetime.fromisoformat(event["commence_time"].replace("Z", "+00:00"))
+        commence_time = datetime.fromisoformat(
+            event["commence_time"].replace("Z", "+00:00")
+        )
 
         # Filter by date if specified (check both UTC date and CT date)
         if target_date:
             commence_date_utc = commence_time.date()
             # Convert to Chicago timezone for date comparison
             from pytz import timezone
-            chicago_tz = timezone('America/Chicago')
+
+            chicago_tz = timezone("America/Chicago")
             commence_time_ct = commence_time.astimezone(chicago_tz)
             commence_date_ct = commence_time_ct.date()
 
@@ -200,7 +212,9 @@ def store_odds_data(conn, odds_data: List[Dict], target_date: Optional[date] = N
             bookmaker_key = bookmaker.get("key", "")
             bookmaker_title = bookmaker.get("title", bookmaker_key)
 
-            bookmaker_id = get_or_create_bookmaker(conn, cursor, bookmaker_key, bookmaker_title)
+            bookmaker_id = get_or_create_bookmaker(
+                conn, cursor, bookmaker_key, bookmaker_title
+            )
 
             # Store odds for each market
             for market in bookmaker.get("markets", []):
@@ -208,7 +222,11 @@ def store_odds_data(conn, odds_data: List[Dict], target_date: Optional[date] = N
                 market_name = market.get("last_update", "")
 
                 # Skip markets we don't want (only if not including player props)
-                if not include_player_props and market_key not in ["h2h", "spreads", "totals"]:
+                if not include_player_props and market_key not in [
+                    "h2h",
+                    "spreads",
+                    "totals",
+                ]:
                     continue
 
                 market_type_id = get_or_create_market_type(
@@ -239,7 +257,15 @@ def store_odds_data(conn, odds_data: List[Dict], target_date: Optional[date] = N
                         (event_id, bookmaker_id, market_type_id, outcome_name, price, point, last_update, is_latest)
                         VALUES (%s, %s, %s, %s, %s, %s, %s, TRUE)
                         """,
-                        (event_id, bookmaker_id, market_type_id, outcome_name, price, point, last_update_dt),
+                        (
+                            event_id,
+                            bookmaker_id,
+                            market_type_id,
+                            outcome_name,
+                            price,
+                            point,
+                            last_update_dt,
+                        ),
                     )
 
                     odds_stored += 1
@@ -251,7 +277,9 @@ def store_odds_data(conn, odds_data: List[Dict], target_date: Optional[date] = N
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Fetch odds directly from The Odds API")
+    parser = argparse.ArgumentParser(
+        description="Fetch odds directly from The Odds API"
+    )
     parser.add_argument(
         "--date",
         type=str,
@@ -292,7 +320,9 @@ def main():
         print("Fetching all upcoming games...")
 
     # Fetch odds
-    odds_data = fetch_odds_from_api(api_key, include_player_props=args.include_player_props)
+    odds_data = fetch_odds_from_api(
+        api_key, include_player_props=args.include_player_props
+    )
     if not odds_data:
         print("❌ Failed to fetch odds")
         sys.exit(1)
@@ -315,7 +345,9 @@ def main():
 
     try:
         # Store odds
-        store_odds_data(conn, odds_data, target_date, include_player_props=args.include_player_props)
+        store_odds_data(
+            conn, odds_data, target_date, include_player_props=args.include_player_props
+        )
 
         print("\n" + "=" * 80)
         print("✅ ODDS FETCH COMPLETE")
@@ -327,4 +359,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

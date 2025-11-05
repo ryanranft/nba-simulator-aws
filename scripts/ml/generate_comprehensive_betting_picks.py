@@ -43,7 +43,7 @@ warnings.filterwarnings("ignore")
 env_paths = [
     "/Users/ryanranft/nba-sim-credentials.env",
     "/Users/ryanranft/nba-simulator-aws/.env",
-    os.path.expanduser("~/.env")
+    os.path.expanduser("~/.env"),
 ]
 
 for path in env_paths:
@@ -94,12 +94,14 @@ def calculate_spread_probability(predicted_margin: float, spread: float) -> floa
     return max(0.01, min(0.99, prob))
 
 
-def calculate_total_probability(predicted_total: float, total_line: float, outcome: str) -> float:
+def calculate_total_probability(
+    predicted_total: float, total_line: float, outcome: str
+) -> float:
     """Calculate probability for over/under."""
-    if 'Over' in outcome or outcome == 'Over':
+    if "Over" in outcome or outcome == "Over":
         diff = predicted_total - total_line
         prob = 0.5 + (diff * 0.02)
-    elif 'Under' in outcome or outcome == 'Under':
+    elif "Under" in outcome or outcome == "Under":
         diff = total_line - predicted_total
         prob = 0.5 + (diff * 0.02)
     else:
@@ -109,7 +111,7 @@ def calculate_total_probability(predicted_total: float, total_line: float, outco
 
 def query_all_odds_from_db(conn, game_date: date) -> pd.DataFrame:
     """Query all odds types from database."""
-    chicago_tz = timezone('America/Chicago')
+    chicago_tz = timezone("America/Chicago")
 
     query = """
     SELECT
@@ -137,9 +139,9 @@ def query_all_odds_from_db(conn, game_date: date) -> pd.DataFrame:
     df = pd.read_sql(query, conn, params=(game_date,))
 
     if len(df) > 0:
-        df['commence_time'] = pd.to_datetime(df['commence_time'], utc=True)
-        df['commence_time_ct'] = df['commence_time'].dt.tz_convert(chicago_tz)
-        df['game_date_ct'] = df['commence_time_ct'].dt.date
+        df["commence_time"] = pd.to_datetime(df["commence_time"], utc=True)
+        df["commence_time_ct"] = df["commence_time"].dt.tz_convert(chicago_tz)
+        df["game_date_ct"] = df["commence_time_ct"].dt.date
 
     return df
 
@@ -155,7 +157,7 @@ def simulate_bet_win_rate(
     home_team_name: str,
     away_team_name: str,
     n_simulations: int = 10000,
-    game_state: Optional[Dict[str, Any]] = None
+    game_state: Optional[Dict[str, Any]] = None,
 ) -> float:
     """
     Simulate a bet and return actual win percentage from simulations.
@@ -184,7 +186,7 @@ def simulate_bet_win_rate(
             game_date=game_date,
             use_ensemble=True,
             n_simulations=n_simulations,
-            game_state=game_state
+            game_state=game_state,
         )
 
         # Get predicted scores from simulation result
@@ -208,7 +210,7 @@ def simulate_bet_win_rate(
         predicted_margin = predicted_home_score - predicted_away_score
 
         # For spreads
-        if market_type == 'spreads' and point is not None:
+        if market_type == "spreads" and point is not None:
             spread = float(point)
             outcome_normalized = normalize_team_name(outcome_name)
             home_normalized = normalize_team_name(home_team_name)
@@ -216,7 +218,10 @@ def simulate_bet_win_rate(
             # Use normal distribution approximation for margin
             std_dev = 12.0  # Typical NBA game margin std dev
 
-            if outcome_normalized in home_normalized or home_normalized in outcome_normalized:
+            if (
+                outcome_normalized in home_normalized
+                or home_normalized in outcome_normalized
+            ):
                 # Home team covering spread: win if margin > spread
                 # z_score = (spread - predicted_margin) / std_dev
                 # If predicted_margin > spread, z_score is negative, so norm.cdf(z_score) < 0.5
@@ -224,10 +229,12 @@ def simulate_bet_win_rate(
                 z_score = (spread - predicted_margin) / std_dev
                 try:
                     from scipy.stats import norm
+
                     win_prob = 1 - norm.cdf(z_score)
                 except ImportError:
                     # Approximate CDF using error function
                     import math
+
                     win_prob = 0.5 * (1 - math.erf(z_score / math.sqrt(2)))
                     win_prob = 1 - win_prob
             else:
@@ -244,41 +251,47 @@ def simulate_bet_win_rate(
                 z_score = (spread - predicted_margin) / std_dev
                 try:
                     from scipy.stats import norm
+
                     # Away covers if margin < spread (for +spread), which is complementary to home covering
                     win_prob = norm.cdf(z_score)
                 except ImportError:
                     # Approximate CDF using error function
                     import math
+
                     win_prob = 0.5 * (1 + math.erf(z_score / math.sqrt(2)))
 
             return max(0.0, min(1.0, win_prob))
 
         # For totals
-        elif market_type == 'totals' and point is not None:
+        elif market_type == "totals" and point is not None:
             total_line = float(point)
 
-            if 'Over' in outcome_name or outcome_name == 'Over':
+            if "Over" in outcome_name or outcome_name == "Over":
                 # Win if total > line
                 std_dev = 15.0  # Typical NBA total std dev
                 z_score = (total_line - predicted_total) / std_dev
                 try:
                     from scipy.stats import norm
+
                     win_prob = 1 - norm.cdf(z_score)
                 except ImportError:
                     # Approximate CDF using error function
                     import math
+
                     win_prob = 0.5 * (1 - math.erf(z_score / math.sqrt(2)))
                     win_prob = 1 - win_prob
-            elif 'Under' in outcome_name or outcome_name == 'Under':
+            elif "Under" in outcome_name or outcome_name == "Under":
                 # Win if total < line
                 std_dev = 15.0
                 z_score = (total_line - predicted_total) / std_dev
                 try:
                     from scipy.stats import norm
+
                     win_prob = norm.cdf(z_score)
                 except ImportError:
                     # Approximate CDF using error function
                     import math
+
                     win_prob = 0.5 * (1 - math.erf(z_score / math.sqrt(2)))
                     win_prob = 1 - win_prob
             else:
@@ -287,11 +300,14 @@ def simulate_bet_win_rate(
             return max(0.0, min(1.0, win_prob))
 
         # For moneyline
-        elif market_type == 'h2h':
+        elif market_type == "h2h":
             outcome_normalized = normalize_team_name(outcome_name)
             home_normalized = normalize_team_name(home_team_name)
 
-            if outcome_normalized in home_normalized or home_normalized in outcome_normalized:
+            if (
+                outcome_normalized in home_normalized
+                or home_normalized in outcome_normalized
+            ):
                 return result.home_win_prob
             else:
                 return result.away_win_prob
@@ -337,9 +353,9 @@ def get_team_id_from_name(team_name: str, db_conn) -> Optional[str]:
 
     # Try common name variations
     name_variations = {
-        '76ers': ['philadelphia 76ers', 'sixers', 'philadelphia'],
-        'clippers': ['la clippers', 'l.a. clippers', 'los angeles clippers'],
-        'lakers': ['la lakers', 'l.a. lakers', 'los angeles lakers'],
+        "76ers": ["philadelphia 76ers", "sixers", "philadelphia"],
+        "clippers": ["la clippers", "l.a. clippers", "los angeles clippers"],
+        "lakers": ["la lakers", "l.a. lakers", "los angeles lakers"],
     }
 
     team_lower = team_name.lower()
@@ -367,28 +383,32 @@ def validate_complementary_probabilities(game_picks: List[Dict]) -> List[Dict]:
 
     # Group picks by game and spread
     for pick in game_picks:
-        if pick['market_type'] == 'spreads' and pd.notna(pick.get('point')):
-            spread = abs(float(pick['point']))
-            game_key = (pick['game_id'], spread)
+        if pick["market_type"] == "spreads" and pd.notna(pick.get("point")):
+            spread = abs(float(pick["point"]))
+            game_key = (pick["game_id"], spread)
 
-            if 'home' in pick['recommendation'].lower() or pick['recommendation'].startswith(pick['home_team']):
+            if "home" in pick["recommendation"].lower() or pick[
+                "recommendation"
+            ].startswith(pick["home_team"]):
                 if game_key not in spread_probs:
                     spread_probs[game_key] = {}
-                spread_probs[game_key]['home_prob'] = pick['model_probability']
-            elif 'away' in pick['recommendation'].lower() or pick['recommendation'].startswith(pick['away_team']):
+                spread_probs[game_key]["home_prob"] = pick["model_probability"]
+            elif "away" in pick["recommendation"].lower() or pick[
+                "recommendation"
+            ].startswith(pick["away_team"]):
                 if game_key not in spread_probs:
                     spread_probs[game_key] = {}
-                spread_probs[game_key]['away_prob'] = pick['model_probability']
+                spread_probs[game_key]["away_prob"] = pick["model_probability"]
 
     # Validate and fix complementary probabilities
     for pick in game_picks:
-        if pick['market_type'] == 'spreads' and pd.notna(pick.get('point')):
-            spread = abs(float(pick['point']))
-            game_key = (pick['game_id'], spread)
+        if pick["market_type"] == "spreads" and pd.notna(pick.get("point")):
+            spread = abs(float(pick["point"]))
+            game_key = (pick["game_id"], spread)
 
             if game_key in spread_probs:
-                home_prob = spread_probs[game_key].get('home_prob')
-                away_prob = spread_probs[game_key].get('away_prob')
+                home_prob = spread_probs[game_key].get("home_prob")
+                away_prob = spread_probs[game_key].get("away_prob")
 
                 if home_prob is not None and away_prob is not None:
                     # Check if probabilities are complementary (sum should be ~1.0)
@@ -400,15 +420,19 @@ def validate_complementary_probabilities(game_picks: List[Dict]) -> List[Dict]:
                             # Both high - this is wrong, keep the one with higher probability
                             # and set the other to complementary
                             if home_prob > away_prob:
-                                pick['model_probability'] = home_prob
+                                pick["model_probability"] = home_prob
                                 # Mark away as invalid (will be filtered)
-                                if 'away' in pick['recommendation'].lower() or pick['recommendation'].startswith(pick['away_team']):
-                                    pick['model_probability'] = 1.0 - home_prob
+                                if "away" in pick["recommendation"].lower() or pick[
+                                    "recommendation"
+                                ].startswith(pick["away_team"]):
+                                    pick["model_probability"] = 1.0 - home_prob
                             else:
-                                pick['model_probability'] = away_prob
+                                pick["model_probability"] = away_prob
                                 # Mark home as invalid (will be filtered)
-                                if 'home' in pick['recommendation'].lower() or pick['recommendation'].startswith(pick['home_team']):
-                                    pick['model_probability'] = 1.0 - away_prob
+                                if "home" in pick["recommendation"].lower() or pick[
+                                    "recommendation"
+                                ].startswith(pick["home_team"]):
+                                    pick["model_probability"] = 1.0 - away_prob
 
         validated.append(pick)
 
@@ -419,7 +443,7 @@ def match_predictions_to_all_markets(
     predictions_df: pd.DataFrame,
     odds_df: pd.DataFrame,
     simulator: Optional[AdvancedMultiSimulator] = None,
-    db_conn: Optional[psycopg2.extensions.connection] = None
+    db_conn: Optional[psycopg2.extensions.connection] = None,
 ) -> pd.DataFrame:
     """Match predictions to all market types and calculate edges using actual simulation win rates."""
 
@@ -434,47 +458,61 @@ def match_predictions_to_all_markets(
     games_with_errors = []
 
     for _, pred_row in predictions_df.iterrows():
-        game_id = pred_row['game_id']
-        pred_home = normalize_team_name(pred_row['home_team'])
-        pred_away = normalize_team_name(pred_row['away_team'])
-        pred_date = pd.to_datetime(pred_row['game_date']).date()
+        game_id = pred_row["game_id"]
+        pred_home = normalize_team_name(pred_row["home_team"])
+        pred_away = normalize_team_name(pred_row["away_team"])
+        pred_date = pd.to_datetime(pred_row["game_date"]).date()
 
         games_processed.add(game_id)
 
         # Use realistic averages (scores from advanced sim are inflated)
         predicted_total = 224.0  # NBA average
-        home_win_prob = pred_row['home_win_probability']
-        away_win_prob = pred_row['away_win_probability']
+        home_win_prob = pred_row["home_win_probability"]
+        away_win_prob = pred_row["away_win_probability"]
         predicted_margin = (home_win_prob - 0.5) * 14  # Convert prob to spread
 
         for _, odds_row in odds_df.iterrows():
-            odds_home = normalize_team_name(odds_row['home_team'])
-            odds_away = normalize_team_name(odds_row['away_team'])
-            odds_date = odds_row.get('game_date_ct', today)
+            odds_home = normalize_team_name(odds_row["home_team"])
+            odds_away = normalize_team_name(odds_row["away_team"])
+            odds_date = odds_row.get("game_date_ct", today)
             if pd.isna(odds_date):
                 odds_date = today
 
             # Match teams and date
-            home_match = (pred_home == odds_home or pred_home in odds_home or odds_home in pred_home)
-            away_match = (pred_away == odds_away or pred_away in odds_away or odds_away in pred_away)
-            date_match = (pred_date == today and odds_date == today)
+            home_match = (
+                pred_home == odds_home
+                or pred_home in odds_home
+                or odds_home in pred_home
+            )
+            away_match = (
+                pred_away == odds_away
+                or pred_away in odds_away
+                or odds_away in pred_away
+            )
+            date_match = pred_date == today and odds_date == today
 
             if not (home_match and away_match and date_match):
                 continue
 
-            market_key = str(odds_row['market_key'])
-            outcome_name = str(odds_row['outcome_name'])
-            odds_value = float(odds_row['odds'])
-            point = odds_row.get('spread_or_total')
+            market_key = str(odds_row["market_key"])
+            outcome_name = str(odds_row["outcome_name"])
+            odds_value = float(odds_row["odds"])
+            point = odds_row.get("spread_or_total")
 
             model_prob = None
             recommendation = None
 
             # Calculate model probability based on market type
-            if market_key == 'h2h':
+            if market_key == "h2h":
                 # Moneyline
-                if normalize_team_name(outcome_name) == normalize_team_name(pred_row['predicted_winner']):
-                    model_prob = home_win_prob if pred_row['predicted_winner'] == pred_row['home_team'] else away_win_prob
+                if normalize_team_name(outcome_name) == normalize_team_name(
+                    pred_row["predicted_winner"]
+                ):
+                    model_prob = (
+                        home_win_prob
+                        if pred_row["predicted_winner"] == pred_row["home_team"]
+                        else away_win_prob
+                    )
                     recommendation = f"{pred_row['predicted_winner']} ML"
 
                     # Only show moneyline bets that win >60% of simulations
@@ -483,7 +521,7 @@ def match_predictions_to_all_markets(
                 else:
                     continue
 
-            elif market_key == 'spreads':
+            elif market_key == "spreads":
                 if pd.isna(point):
                     continue
                 spread = float(point)
@@ -498,8 +536,8 @@ def match_predictions_to_all_markets(
                 # Calculate spread probability using predicted scores from predictions CSV
                 # Use the predicted scores directly (they're already from simulations)
                 # Normalize scores first if needed
-                pred_home_score = pred_row.get('predicted_home_score', 110.0)
-                pred_away_score = pred_row.get('predicted_away_score', 110.0)
+                pred_home_score = pred_row.get("predicted_home_score", 110.0)
+                pred_away_score = pred_row.get("predicted_away_score", 110.0)
 
                 # Normalize if inflated (scores > 200 are likely inflated)
                 if pred_home_score > 200 or pred_away_score > 200:
@@ -518,6 +556,7 @@ def match_predictions_to_all_markets(
 
                 try:
                     from scipy.stats import norm
+
                     if pred_home in outcome_lower or outcome_lower in pred_home:
                         # Home team covering spread: win if margin > spread
                         # For home -8.0: win if margin > 8.0
@@ -529,6 +568,7 @@ def match_predictions_to_all_markets(
                 except ImportError:
                     # Approximate CDF using error function
                     import math
+
                     if pred_home in outcome_lower or outcome_lower in pred_home:
                         model_prob = 0.5 * (1 - math.erf(z_score / math.sqrt(2)))
                         model_prob = 1 - model_prob
@@ -541,21 +581,21 @@ def match_predictions_to_all_markets(
                 if model_prob < 0.60:
                     continue
 
-            elif market_key == 'totals':
+            elif market_key == "totals":
                 if pd.isna(point):
                     continue
                 total_line = float(point)
-                if 'Over' in outcome_name or outcome_name == 'Over':
+                if "Over" in outcome_name or outcome_name == "Over":
                     recommendation = f"Over {total_line:.1f}"
-                elif 'Under' in outcome_name or outcome_name == 'Under':
+                elif "Under" in outcome_name or outcome_name == "Under":
                     recommendation = f"Under {total_line:.1f}"
                 else:
                     continue
 
                 # Calculate total probability using predicted scores from predictions CSV
                 # Use the predicted scores directly (they're already from simulations)
-                pred_home_score = pred_row.get('predicted_home_score', 110.0)
-                pred_away_score = pred_row.get('predicted_away_score', 110.0)
+                pred_home_score = pred_row.get("predicted_home_score", 110.0)
+                pred_away_score = pred_row.get("predicted_away_score", 110.0)
 
                 # Normalize if inflated (scores > 200 are likely inflated)
                 if pred_home_score > 200 or pred_away_score > 200:
@@ -573,7 +613,8 @@ def match_predictions_to_all_markets(
 
                 try:
                     from scipy.stats import norm
-                    if 'Over' in outcome_name or outcome_name == 'Over':
+
+                    if "Over" in outcome_name or outcome_name == "Over":
                         # Over wins if total > line
                         model_prob = 1 - norm.cdf(z_score)
                     else:
@@ -582,7 +623,8 @@ def match_predictions_to_all_markets(
                 except ImportError:
                     # Approximate CDF using error function
                     import math
-                    if 'Over' in outcome_name or outcome_name == 'Over':
+
+                    if "Over" in outcome_name or outcome_name == "Over":
                         model_prob = 0.5 * (1 - math.erf(z_score / math.sqrt(2)))
                         model_prob = 1 - model_prob
                     else:
@@ -606,26 +648,28 @@ def match_predictions_to_all_markets(
             edge = calculate_edge(model_prob, implied_prob)
             ev = calculate_expected_value(model_prob, odds_value)
 
-            matched.append({
-                'game_id': pred_row['game_id'],
-                'game_date': pred_date,
-                'home_team': pred_row['home_team'],
-                'away_team': pred_row['away_team'],
-                'predicted_winner': pred_row['predicted_winner'],
-                'model_probability': model_prob,
-                'confidence': pred_row.get('confidence', 0),
-                'prediction_strength': pred_row.get('prediction_strength', 'N/A'),
-                'market_type': market_key,
-                'recommendation': recommendation,
-                'bookmaker': odds_row.get('bookmaker_title', 'Unknown'),
-                'bookmaker_key': odds_row.get('bookmaker_key', ''),
-                'odds': odds_value,
-                'point': point,
-                'market_probability': implied_prob,
-                'edge': edge,
-                'expected_value': ev,
-                'event_id': str(odds_row.get('event_id', '')),
-            })
+            matched.append(
+                {
+                    "game_id": pred_row["game_id"],
+                    "game_date": pred_date,
+                    "home_team": pred_row["home_team"],
+                    "away_team": pred_row["away_team"],
+                    "predicted_winner": pred_row["predicted_winner"],
+                    "model_probability": model_prob,
+                    "confidence": pred_row.get("confidence", 0),
+                    "prediction_strength": pred_row.get("prediction_strength", "N/A"),
+                    "market_type": market_key,
+                    "recommendation": recommendation,
+                    "bookmaker": odds_row.get("bookmaker_title", "Unknown"),
+                    "bookmaker_key": odds_row.get("bookmaker_key", ""),
+                    "odds": odds_value,
+                    "point": point,
+                    "market_probability": implied_prob,
+                    "edge": edge,
+                    "expected_value": ev,
+                    "event_id": str(odds_row.get("event_id", "")),
+                }
+            )
 
     if len(matched) == 0:
         print(f"\n⚠️  Warning: No bets matched. Games processed: {len(games_processed)}")
@@ -643,7 +687,9 @@ def match_predictions_to_all_markets(
     # Print debug info
     print(f"\n✓ Matched {len(df_matched)} bets from {len(games_processed)} games")
     if games_with_errors:
-        print(f"  ⚠️  {len(games_with_errors)} errors encountered (using fallback probabilities)")
+        print(
+            f"  ⚠️  {len(games_with_errors)} errors encountered (using fallback probabilities)"
+        )
 
     return df_validated
 
@@ -691,11 +737,11 @@ def main():
     print("\nConnecting to PostgreSQL database...")
     try:
         conn = psycopg2.connect(
-            host=os.getenv('DB_HOST'),
-            port=os.getenv('DB_PORT'),
-            database=os.getenv('DB_NAME'),
-            user=os.getenv('DB_USER'),
-            password=os.getenv('DB_PASSWORD')
+            host=os.getenv("DB_HOST"),
+            port=os.getenv("DB_PORT"),
+            database=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
         )
         print("✓ Connected to database")
     except Exception as e:
@@ -735,8 +781,12 @@ def main():
     simulator = None  # Not needed - we use predictions CSV directly
 
     # Match predictions to odds
-    print(f"\nMatching predictions to odds (using predicted scores from simulations)...")
-    df_matched = match_predictions_to_all_markets(df_predictions, df_odds, simulator=None, db_conn=None)
+    print(
+        f"\nMatching predictions to odds (using predicted scores from simulations)..."
+    )
+    df_matched = match_predictions_to_all_markets(
+        df_predictions, df_odds, simulator=None, db_conn=None
+    )
 
     if len(df_matched) == 0:
         print("⚠️  No matches found between predictions and odds.")
@@ -748,7 +798,7 @@ def main():
 
     # Filter by EV
     print(f"\nFiltering bets (min EV: {args.min_ev:.1%})...")
-    df_filtered = df_matched[df_matched['expected_value'] >= args.min_ev].copy()
+    df_filtered = df_matched[df_matched["expected_value"] >= args.min_ev].copy()
     print(f"✓ {len(df_filtered)} bets meet EV threshold")
 
     if len(df_filtered) == 0:
@@ -757,7 +807,7 @@ def main():
         sys.exit(0)
 
     # Sort by expected value
-    df_sorted = df_filtered.sort_values('expected_value', ascending=False)
+    df_sorted = df_filtered.sort_values("expected_value", ascending=False)
 
     # Save output
     if args.output:
@@ -765,12 +815,16 @@ def main():
     else:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_dir = os.path.dirname(args.predictions)
-        output_path = os.path.join(output_dir, f"advanced_betting_picks_{timestamp}.csv")
+        output_path = os.path.join(
+            output_dir, f"advanced_betting_picks_{timestamp}.csv"
+        )
 
     df_sorted.to_csv(output_path, index=False)
 
     # Create symlink
-    latest_path = os.path.join(os.path.dirname(output_path), "advanced_betting_picks_latest.csv")
+    latest_path = os.path.join(
+        os.path.dirname(output_path), "advanced_betting_picks_latest.csv"
+    )
     if os.path.exists(latest_path) or os.path.islink(latest_path):
         os.remove(latest_path)
     os.symlink(os.path.basename(output_path), latest_path)
@@ -781,27 +835,31 @@ def main():
     print(f"{'='*100}\n")
 
     # Group by market type
-    for market_type in ['h2h', 'spreads', 'totals']:
+    for market_type in ["h2h", "spreads", "totals"]:
         market_name = {
-            'h2h': 'MONEYLINE',
-            'spreads': 'POINT SPREADS',
-            'totals': 'TOTALS (OVER/UNDER)'
+            "h2h": "MONEYLINE",
+            "spreads": "POINT SPREADS",
+            "totals": "TOTALS (OVER/UNDER)",
         }.get(market_type, market_type.upper())
 
-        df_market = df_sorted[df_sorted['market_type'] == market_type]
+        df_market = df_sorted[df_sorted["market_type"] == market_type]
 
         if len(df_market) > 0:
             print(f"{market_name} ({len(df_market)} bets):")
             print("-" * 100)
 
             for idx, (_, row) in enumerate(df_market.head(10).iterrows(), 1):
-                point_str = f" ({row['point']:+.1f})" if pd.notna(row['point']) else ""
-                odds_value = row['odds']
+                point_str = f" ({row['point']:+.1f})" if pd.notna(row["point"]) else ""
+                odds_value = row["odds"]
                 odds_str = f"{odds_value:+.0f}" if pd.notna(odds_value) else "N/A"
                 print(f"{idx}. {row['away_team']} @ {row['home_team']}")
                 print(f"   Pick: {row['recommendation']}{point_str}")
-                print(f"   Odds: {odds_str} | Model: {row['model_probability']:.1%} | Market: {row['market_probability']:.1%}")
-                print(f"   Edge: {row['edge']:+.1%} | EV: {row['expected_value']:+.1%} | Book: {row['bookmaker']}")
+                print(
+                    f"   Odds: {odds_str} | Model: {row['model_probability']:.1%} | Market: {row['market_probability']:.1%}"
+                )
+                print(
+                    f"   Edge: {row['edge']:+.1%} | EV: {row['expected_value']:+.1%} | Book: {row['bookmaker']}"
+                )
                 print()
             print()
 
@@ -823,5 +881,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

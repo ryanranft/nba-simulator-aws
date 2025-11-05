@@ -9,8 +9,4 @@ Tests for configuration loading and management including:
 - YAML configuration support
 """
 
-__all__ = [
-    'test_loader',
-    'test_aws_config',
-    'test_database_config'
-]
+__all__ = ["test_loader", "test_aws_config", "test_database_config"]

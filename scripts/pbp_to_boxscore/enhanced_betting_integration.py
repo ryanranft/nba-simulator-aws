@@ -692,5 +692,3 @@ if __name__ == "__main__":
         traceback.print_exc()
 
     print("\n✅ Enhanced Betting Integration System test completed!")
-
-

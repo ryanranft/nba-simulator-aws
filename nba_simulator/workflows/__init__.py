@@ -12,29 +12,29 @@ Key Components:
 
 Example Usage:
     from nba_simulator.workflows import BaseWorkflow, WorkflowTask, WorkflowPriority
-    
+
     class MyWorkflow(BaseWorkflow):
         def _validate_config(self) -> bool:
             return True
-        
+
         def _build_tasks(self) -> List[WorkflowTask]:
             return [
                 WorkflowTask(task_id="task1", task_name="Scrape Data", task_type="scrape"),
                 WorkflowTask(task_id="task2", task_name="Transform Data", task_type="transform",
                             dependencies=["task1"])
             ]
-        
+
         def _execute_task(self, task: WorkflowTask) -> Any:
             # Task execution logic
             pass
-        
+
         def get_workflow_info(self) -> Dict[str, Any]:
             return {
                 "name": "My Workflow",
                 "version": "1.0.0",
                 "description": "Example workflow"
             }
-    
+
     # Use workflow
     workflow = MyWorkflow("my_workflow", "etl")
     workflow.initialize()
@@ -50,17 +50,36 @@ from .base_workflow import (
     WorkflowMetrics,
 )
 
+from .dispatcher import (
+    WorkflowDispatcher,
+    DispatchTask,
+    TaskPriority,
+    TaskStatus,
+    HandlerType,
+    HandlerInterface,
+    DispatcherStats,
+    create_dispatch_task,
+)
+
 __all__ = [
     # Base Classes
-    'BaseWorkflow',
-    
+    "BaseWorkflow",
+    "HandlerInterface",
+    # Dispatcher
+    "WorkflowDispatcher",
     # Enums
-    'WorkflowState',
-    'WorkflowPriority',
-    
+    "WorkflowState",
+    "WorkflowPriority",
+    "TaskPriority",
+    "TaskStatus",
+    "HandlerType",
     # Data Classes
-    'WorkflowTask',
-    'WorkflowMetrics',
+    "WorkflowTask",
+    "WorkflowMetrics",
+    "DispatchTask",
+    "DispatcherStats",
+    # Utility Functions
+    "create_dispatch_task",
 ]
 
-__version__ = '1.0.0'
+__version__ = "1.1.0"  # Bumped for dispatcher addition

@@ -1,20 +1,20 @@
 metadata:
   version: 1.0.0
-  last_updated: '2025-11-01T12:15:16.686245Z'
+  last_updated: '2025-11-04T21:39:54.233165Z'
   last_verified: '2025-10-21T19:00:00Z'
   verified_by: manual_verification
   system: DIMS v1.0.0
   notes: Initial metrics from comprehensive verification on 2025-10-21
 s3_storage:
   total_objects:
-    value: 172905
-    last_verified: '2025-11-01T07:19:34.167471Z'
+    value: 172951
+    last_verified: '2025-11-04T16:30:24.671835Z'
     verification_method: automated
     cached: false
     cache_expires: null
   total_size_gb:
-    value: 119.31
-    last_verified: '2025-10-30T15:16:15.391289Z'
+    value: 119.32
+    last_verified: '2025-11-04T16:01:55.691958Z'
     verification_method: automated
     cached: false
     cache_expires: null
@@ -26,16 +26,16 @@ s3_storage:
     cache_expires: null
 prediction_system:
   total_lines:
-    value: 2103
-    last_verified: '2025-10-21T14:00:00Z'
-    verification_method: wc_command
+    value: 2145
+    last_verified: '2025-11-04T16:01:55.809100Z'
+    verification_method: automated
     cached: false
     cache_expires: null
   fetch_upcoming_games_lines:
-    value: 303
+    value: 345
     path: scripts/ml/fetch_upcoming_games.py
-    last_verified: '2025-10-26T22:20:36Z'
-    verification_method: wc_command
+    last_verified: '2025-11-04T16:01:55.917452Z'
+    verification_method: automated
     cached: false
     cache_expires: null
   fetch_recent_player_data_lines:
@@ -171,15 +171,15 @@ plus_minus_system:
       lines: 480
 code_base:
   python_files:
-    value: 1791
-    last_verified: '2025-11-01T12:04:28.730652Z'
+    value: 1878
+    last_verified: '2025-11-04T21:39:54.012195Z'
     verification_method: automated
     cached: false
     cache_expires: null
   ml_scripts:
-    value: 61
+    value: 72
     directory: scripts/ml/
-    last_verified: '2025-10-31T17:38:22.510315Z'
+    last_verified: '2025-11-04T16:30:24.893283Z'
     verification_method: automated
     cached: false
     cache_expires: null
@@ -188,15 +188,15 @@ code_base:
     directory: scripts/pbp_to_boxscore/
     last_verified: '2025-10-21T14:00:00Z'
   test_files:
-    value: 647
-    last_verified: '2025-11-01T12:04:28.842349Z'
+    value: 673
+    last_verified: '2025-11-04T21:39:54.124628Z'
     verification_method: automated
     cached: false
     cache_expires: null
 documentation:
   markdown_files:
-    value: 1790
-    last_verified: '2025-11-01T08:58:22.200987Z'
+    value: 1796
+    last_verified: '2025-11-04T16:30:24.993164Z'
     verification_method: automated
     cached: false
     cache_expires: null
