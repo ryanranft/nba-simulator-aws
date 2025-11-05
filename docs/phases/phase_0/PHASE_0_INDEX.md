@@ -28,6 +28,50 @@ Phase 0 establishes the complete data collection infrastructure for the NBA temp
 
 ---
 
+## Implementation Structure
+
+**Phase 0 code is organized across multiple locations:**
+
+### Main Package (`nba_simulator/`)
+Core v2.0 refactored infrastructure - production-ready Python package:
+- `config/` - Configuration management
+- `database/` - Database utilities
+- `agents/` - AI agent framework
+- `workflows/` - BaseWorkflow framework
+- `etl/` - ETL base classes (AsyncScraper, extractors)
+- `monitoring/` - DIMS, PRMS, health monitoring
+- `validation/` - Validation framework
+
+### Phase 0 Sub-Phase Implementations (`scripts/0_00XX/`)
+**⚠️ ACTIVE CODE - NOT ARCHIVED**
+
+These directories contain **sub-phase-specific CLIs and utilities** that complement the main package:
+- `scripts/0_0010/` - PostgreSQL JSONB + temporal query interface (3 files)
+- `scripts/0_0011/` - RAG pipeline CLI + embedding tools (9 files)
+- `scripts/0_0012/` - RAG LLM integration utilities
+- Other `scripts/0_00XX/` - Phase 0 sub-phase implementations
+
+**Total:** 27 Python files providing phase-specific functionality
+
+### Workflow Runners (`scripts/workflows/`)
+CLI entry points for Phase 0 Python workflows:
+- `overnight_unified_cli.py` - Nightly multi-source collection
+- `validation_cli.py` - 3-source validation workflow
+- `daily_update_cli.py` - Daily ESPN updates
+
+### Archives (Relocated - November 5, 2025)
+**All archived content moved to:** `~/sports-simulator-archives/nba/`
+
+**Previously archived in project:**
+- `scripts/archive/deprecated/` - 14+ deprecated ETL scrapers → Relocated
+- `scripts/archive/pre_python_migration/` - 3 shell workflows (migrated Nov 4) → Relocated
+- `docs/phases/phase_0/archive/` - 43 MongoDB implementation files → Relocated
+- Empty directories removed: `archive/`, `docs/archive/`, `docs/phases/archive/`, `logs/archive/`
+
+**See:** `ARCHIVES.md` in project root for archive access details
+
+---
+
 ## Sub-Phases
 
 | # | Sub-Phase | Status | Priority | Completed | Description |
