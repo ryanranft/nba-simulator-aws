@@ -1,0 +1,17 @@
+[Unit]
+Description=NBA Simulator - Overnight Unified Workflow Timer
+Documentation=https://github.com/ryanranft/nba-simulator-aws
+Requires=overnight-unified.service
+
+[Timer]
+# Run daily at 3:00 AM local time
+OnCalendar=*-*-* 03:00:00
+# If system was down at scheduled time, run immediately on next boot
+Persistent=true
+# Random delay to avoid resource contention (0-30 minutes)
+RandomizedDelaySec=1800
+# Accuracy window (can run ±5 minutes)
+AccuracySec=5min
+
+[Install]
+WantedBy=timers.target

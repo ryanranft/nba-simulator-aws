@@ -1,0 +1,65 @@
+# NBA Simulator AWS - Workflow Cron Schedule
+# Installation: crontab -e (add these lines)
+# Or: crontab deployment/cron/nba-workflows.crontab
+
+# Environment variables
+SHELL=/bin/bash
+PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin
+PYTHONPATH=/Users/ryanranft/nba-simulator-aws
+PROJECT_DIR=/Users/ryanranft/nba-simulator-aws
+PYTHON=/opt/homebrew/bin/python3
+
+# Logging
+MAILTO=""  # Disable email notifications (use journald instead)
+
+# ============================================================================
+# Workflow Schedule
+# ============================================================================
+
+# Overnight Multi-Source Unified Workflow
+# Runs daily at 3:00 AM - Comprehensive data collection from all sources
+0 3 * * * cd $PROJECT_DIR && $PYTHON scripts/workflows/overnight_unified_cli.py >> logs/cron/overnight-unified.log 2>&1
+
+# 3-Source Validation Workflow
+# Runs daily at 4:00 AM - Cross-validates ESPN, hoopR, NBA API after overnight workflow
+0 4 * * * cd $PROJECT_DIR && $PYTHON scripts/workflows/validation_cli.py >> logs/cron/validation.log 2>&1
+
+# Daily ESPN Update Workflow
+# Runs every 6 hours (00:00, 06:00, 12:00, 18:00) - Quick ESPN updates
+0 */6 * * * cd $PROJECT_DIR && $PYTHON scripts/workflows/daily_update_cli.py >> logs/cron/daily-update.log 2>&1
+
+# ============================================================================
+# Log Rotation (Weekly)
+# ============================================================================
+
+# Rotate workflow logs every Sunday at 2:00 AM
+0 2 * * 0 cd $PROJECT_DIR && find logs/cron -name "*.log" -type f -mtime +7 -exec gzip {} \; && find logs/cron -name "*.log.gz" -type f -mtime +30 -delete
+
+# ============================================================================
+# Health Checks (Optional)
+# ============================================================================
+
+# Check ADCE autonomous loop health every 30 minutes
+*/30 * * * * cd $PROJECT_DIR && $PYTHON scripts/autonomous/autonomous_cli.py status --quiet || echo "$(date): ADCE health check failed" >> logs/cron/health.log 2>&1
+
+# ============================================================================
+# Notes
+# ============================================================================
+#
+# Installation:
+#   1. Create log directory: mkdir -p logs/cron
+#   2. Install crontab: crontab deployment/cron/nba-workflows.crontab
+#   3. Verify: crontab -l
+#
+# Monitoring:
+#   - View logs: tail -f logs/cron/overnight-unified.log
+#   - Check cron status: systemctl status cron  (Linux)
+#   - Check cron status: sudo launchctl list | grep cron  (macOS)
+#
+# Alternative to cron:
+#   - Use systemd timers (Linux): deployment/systemd/*.timer
+#   - Use LaunchAgent (macOS): deployment/launchd/*.plist
+#
+# Disabling:
+#   - Comment out lines with # prefix
+#   - Or: crontab -r (removes entire crontab)

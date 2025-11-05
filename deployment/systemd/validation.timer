@@ -1,0 +1,17 @@
+[Unit]
+Description=NBA Simulator - 3-Source Validation Timer
+Documentation=https://github.com/ryanranft/nba-simulator-aws
+Requires=validation.service
+
+[Timer]
+# Run daily at 4:00 AM local time (after overnight workflow)
+OnCalendar=*-*-* 04:00:00
+# If system was down at scheduled time, run immediately on next boot
+Persistent=true
+# Random delay to avoid resource contention (0-15 minutes)
+RandomizedDelaySec=900
+# Accuracy window (can run ±5 minutes)
+AccuracySec=5min
+
+[Install]
+WantedBy=timers.target

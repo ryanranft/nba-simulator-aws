@@ -103,6 +103,8 @@ class WorkflowTask:
     end_time: Optional[datetime] = None
     retry_count: int = 0
     max_retries: int = 3
+    retry_delay_seconds: int = 60  # Delay between retries
+    is_critical: bool = True  # If False, workflow continues on failure
 
     @property
     def can_retry(self) -> bool:

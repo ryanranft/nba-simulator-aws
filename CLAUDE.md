@@ -1,894 +1,268 @@
 # CLAUDE.md
 
-**Version:** 4.0 (v2.0 Refactoring Complete)
-**Last Updated:** November 4, 2025
-**System Status:** ✅ Production Ready - v2.0 Package Architecture Complete
+**Version:** 4.0 (v2.0 Refactoring Complete)  
+**Last Updated:** November 5, 2025  
+**Status:** ✅ Production Ready
 
-This file provides core guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides core guidance to Claude Code when working in this repository. **For detailed explanations, see `docs/CLAUDE_DETAILED_GUIDE.md`.**
 
-**🎊 v2.0 REFACTORING COMPLETE - November 4, 2025:**
-- ✅ Clean package structure (`nba_simulator/`) - 10,000+ lines production code
-- ✅ Comprehensive testing (216+ cases, 95%+ coverage) - 5,000+ lines tests
-- ✅ Zero data loss maintained (35M+ records safe)
-- ✅ Zero downtime maintained (continuous operation)
-- ✅ Production deployment ready (complete guides available)
-- ✅ Legacy systems (workflows, automation triad) fully operational
+**🎊 v2.0 COMPLETE (November 4, 2025):**
+- ✅ Clean package (`nba_simulator/`) - 10,000+ lines production code
+- ✅ Comprehensive tests (216+ cases, 95%+ coverage)
+- ✅ Zero data loss & downtime (35M+ records safe)
+- ✅ Production ready (complete deployment guides)
 
 ---
 
 ## Quick Start - Every Session
 
-**Always read these 3 files at session start:**
-1. **CLAUDE.md** (this file, ~350 lines) - Core instructions
-2. **PROGRESS.md** (~390 lines) - Current project state
+**Read these 3 files at session start:**
+1. **CLAUDE.md** (this file, ~270 lines) - Core instructions
+2. **PROGRESS.md** (~390 lines) - Current project state  
 3. **docs/README.md** (~100 lines) - Documentation index
 
-**Total: ~840 lines (4% context)** - Leaves 96% for actual work
+**Total: ~760 lines (3.8% context)** - Leaves 96.2% for actual work
+
+**Session startup:**
+1. Run `bash scripts/shell/session_manager.sh start` (auto-checks system)
+2. Ask user what completed since last session
+3. Update "Current Session Context" in PROGRESS.md
+4. Ask what to work on today
+5. Read relevant phase/workflow files as needed
 
 ---
 
-## 🏗️ v2.0 Package Architecture (NEW - November 2025)
+## 🏗️ v2.0 Quick Reference
 
-**✅ COMPLETE:** The project has been refactored into a clean Python package structure.
+**Main Package:** `/Users/ryanranft/nba-simulator-aws/nba_simulator/`
 
-### Main Package: `nba_simulator/`
-
-```
-nba_simulator/                  # NEW - Main Python package
-├── __init__.py
-├── config/                     # Configuration management
-│   ├── __init__.py
-│   └── loader.py              # Backward-compatible config
-├── database/                   # Database layer
-│   ├── __init__.py
-│   └── connection.py          # Connection pooling
-├── etl/                        # ETL pipeline
-│   ├── base/                  # Base classes
-│   └── extractors/            # Data extractors
-│       ├── espn/
-│       ├── basketball_reference/
-│       ├── nba_api/
-│       └── hoopr/
-├── agents/                     # Autonomous agents (8 total)
-│   ├── base_agent.py
-│   ├── master.py              # Master coordinator
-│   ├── quality.py             # Quality agent
-│   ├── integration.py
-│   ├── nba_stats.py
-│   ├── deduplication.py
-│   ├── historical.py
-│   ├── hoopr.py
-│   └── bbref.py
-├── workflows/                  # Workflow orchestration
-│   ├── base_workflow.py       # Template method base
-│   ├── dispatcher.py          # Task dispatcher
-│   ├── orchestrator.py        # Multi-step coordinator (NEW)
-│   └── adce_integration.py    # ADCE autonomous system (NEW)
-├── monitoring/                 # Monitoring systems
-│   ├── dims/                  # DIMS monitoring
-│   └── health/                # Health checks
-├── validation/                 # Data validation
-│   ├── data_quality/
-│   └── schema/
-└── utils/                      # Common utilities
-    ├── logging.py
-    ├── constants.py
-    └── helpers.py
-```
-
-### Key Imports (NEW)
-
+**Key Imports:**
 ```python
-# Configuration
 from nba_simulator.config import config
-db_config = config.load_database_config()
-
-# Database
 from nba_simulator.database import execute_query
-results = await execute_query("SELECT * FROM games LIMIT 10")
-
-# Agents
 from nba_simulator.agents import MasterAgent
-agent = MasterAgent()
-await agent.start()
-
-# Workflows
 from nba_simulator.workflows import WorkflowOrchestrator, ADCECoordinator
-orchestrator = WorkflowOrchestrator()
-coordinator = ADCECoordinator(orchestrator)
-
-# Utilities
-from nba_simulator.utils import logger, DATA_SOURCES
-```
-
-### Testing Structure (NEW)
-
-```
-tests/
-├── unit/                       # Unit tests (150+ tests)
-│   ├── test_agents/
-│   ├── test_workflows/
-│   ├── test_etl/
-│   └── test_database/
-├── integration/                # Integration tests (66+ tests)
-│   ├── test_integration_e2e.py # End-to-end tests (NEW)
-│   ├── test_pipelines/
-│   └── test_workflows/
-└── validators/                 # Validation tests
-    └── phase_0/
 ```
 
 **Run Tests:**
 ```bash
-# All tests (216+ cases, 95%+ coverage)
-pytest tests/ -v --cov
-
-# Specific suites
-pytest tests/unit/ -v                    # Unit tests
-pytest tests/integration/ -v             # Integration tests
-pytest tests/integration/test_integration_e2e.py -v  # E2E tests
-
-# System validation
-python scripts/system_validation.py      # NEW - Complete system check
+pytest tests/ -v --cov                    # All 216+ tests
+pytest tests/unit/ -v                     # Unit tests (150+)
+pytest tests/integration/ -v              # Integration (66+)
+python scripts/system_validation.py       # System health
 ```
 
-### Legacy Systems (MAINTAINED)
-
-All existing systems continue to work:
-- ✅ `scripts/` directory (ETL, monitoring, validation, autonomous, workflows)
-- ✅ DIMS, ADCE, PRMS (The Automation Triad)
-- ✅ 54 Claude workflows
-- ✅ Phase documentation system
-- ✅ All existing commands and tools
-
-**Key Principle:** The v2.0 package **coexists** with legacy systems. Nothing was deleted, only organized.
-
-### v2.0 Documentation (NEW)
-
-**Quick References:**
-- `FINAL_DOCUMENTATION.md` - Complete v2.0 guide
-- `PRODUCTION_DEPLOYMENT_GUIDE.md` - Deployment procedures
-- `PROJECT_COMPLETION_REPORT.md` - Complete project summary
-- `QUICK_REFERENCE_GUIDE.md` - Quick access guide
-
-**System Stats:**
+**Package Status:**
 - Database: 54 tables, 35M+ records, 13.5+ GB
 - S3: 146,115+ files, 119+ GB
-- Code: 10,000+ lines (production), 5,000+ lines (tests)
-- Coverage: 95%+, 216+ test cases
+- Tests: 216+ cases, 95%+ coverage
+- Legacy systems: All maintained and operational
 
----
-
-## Workflow Order
-
-**See `docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md` for workflow index and execution order.**
-
-**All detailed workflows:** `docs/claude_workflows/workflow_descriptions/`
-
-**System contains 54 modular workflows** covering session operations, git/security, testing, cost management, backup/recovery, data validation, troubleshooting, AWS resource setup, scraper monitoring, overnight handoffs, and autonomous recommendation implementation.
-
-**Navigation pattern:**
-```
-PROGRESS.md → PHASE_N_INDEX.md → phase_N/N.M_name.md → workflows → execute
-```
-
-**Quick reference - Every session:**
-1. **Initialize** (`bash scripts/shell/session_manager.sh start`) - auto-checks credentials, overnight jobs, DIMS metrics
-2. **Ask user** what they completed since last session
-3. If work completed → Update PROGRESS.md
-4. If 'none' → Proceed with "Next planned task"
-5. Execute task → Document outcome
-6. Follow security protocol for commits/pushes
-7. Monitor context (auto-save at 75%, warn at 90%)
-
-**Critical decision points:**
-- **Skipping ahead?** → Check prerequisites first
-- **Changing the plan?** → Update PROGRESS.md, get approval
-- **Will it cost money?** → Warn with estimate
-- **Could it break something?** → Explain risk, suggest backup
-- **Command fails?** → grep TROUBLESHOOTING.md, stop, ask
-
----
-
-## Phase Index Documentation System
-
-**✅ Implemented October 2025** - Hierarchical modular documentation:
-
-**Structure:**
-- **PROGRESS.md** (~390 lines) - Master index, high-level status
-- **PHASE_N_INDEX.md** (~150 lines each) - Phase overview + sub-phase table
-- **phase_N/** subdirectories - Individual sub-phase files (300-800 lines)
-- **Workflows** - Specific procedures (200-400 lines)
-
-**Phase indexes:**
-- PHASE_0_INDEX.md (initial complete, expansion ready - 4 sub-phases)
-- PHASE_1_INDEX.md through PHASE_7_INDEX.md (1-2 sub-phases each)
-
-**Sub-phase naming:** `N.MMMM_name.md` OR `N.MMMM_name/` (4-digit zero-padded format per ADR-010)
-
-**Examples:**
-- `0.0001_initial_data_collection.md`
-- `1.0001_multi_source_integration.md`
-- `5.0121_implement_ab_testing/`
-
-**Format:** `N.MMMM` where MMMM is 0001-9999 (4 digits, zero-padded)
-
-**Rationale:** Eliminates filesystem sorting ambiguity, supports up to 9,999 sub-phases per phase, prevents confusion between single/double-digit numbers. See `docs/adr/010-four-digit-subphase-numbering.md` for details.
-
-**Power Directory Structure:**
-
-**Standard:** All complex sub-phases MUST use power directory structure: `N.MMMM_name/`
-
-**Required Files:**
-- **README.md** - Main entry point (REQUIRED for all power directories)
-  - Sub-phase header with parent phase link back
-  - Status, priority, implementation ID
-  - Overview and capabilities
-  - Quick start code examples
-  - Architecture details
-  - Implementation files table
-  - Related documentation links
-  - Navigation (return to phase, prerequisites, integrates with)
-- **implement_*.py** - Implementation code (one or more files)
-- **test_*.py** - Test suites (one or more files)
-- **STATUS.md** - Detailed status and metrics (optional but recommended)
-- **RECOMMENDATIONS_FROM_BOOKS.md** - Source references from books (optional)
-
-**When to Use Power Directory:**
-- Complex implementations requiring multiple files
-- Sub-phases with tests, documentation, and code
-- Implementations from book recommendations (rec_N, ml_systems_N)
-- Any sub-phase with >500 lines of implementation code
-
-**Reference Example:** `docs/phases/phase_0/0.0001_basketball_reference/README.md` (canonical example)
-
-**Recent Power Directories (October 2025):**
-- `phase_0/0.0001_basketball_reference/` (13-tier structure, 234 data types)
-- `phase_0/0.0004_security_implementation/` (13 security variations)
-- `phase_0/0.0005_data_extraction/` (structured data output)
-- `phase_5/5.0001_feature_engineering/` (rec_11 - 80+ temporal features)
-- `phase_5/5.0002_model_versioning/` (ml_systems_1 - MLflow integration)
-- `phase_5/5.0019_drift_detection/` (ml_systems_2 - data drift detection)
-- `phase_5/5.0020_panel_data/` (rec_22 - temporal panel data system)
-
-**Benefits:** 64% reduction in PROGRESS.md size, 78% reduction in phase navigation context, 96% context available for work, consistent navigation patterns
-
-**⚠️ CRITICAL - Project Scope:**
-This project is **NBA-only**. 0.0005 & 0.0006 are **NOT** awaiting NCAA/International data - they were permanently superseded by PostgreSQL implementations (0.0010/0.0011). **Never suggest** filling these with non-NBA data. Other sports will be built as **separate projects** in separate directories using this NBA infrastructure as a template.
-
----
-
-## ML Framework Navigation
-
-**✅ Implemented October 2025** - Phase 5 enhanced with 13 specialized ML frameworks (Block 2, Recommendations #14-25)
-
-**Phase 5 Structure:**
-- **PHASE_5_INDEX.md** - Phase overview with 14 sub-phases (5.0000 + 5.0001-5.0013)
-- **phase_5/5.0000_machine_learning_models.md** - Initial ML pipeline
-- **phase_5/5.{0001-0013}_*/README.md** - 13 ML framework subdirectories with comprehensive guides
-
-**Framework Categories:**
-1. **Optimization & Tuning:** Hyperparameter Optimization (5.0001), Learning Curves (5.0007), Performance Profiling (5.0013)
-2. **Interpretability:** Model Interpretation (5.0002), Model Explainability (5.0012)
-3. **Data Management:** Feature Store (5.0003), Feature Selection (5.0005)
-4. **MLOps:** Automated Retraining (5.0004), Model Comparison (5.0010)
-5. **Model Enhancement:** Ensemble Learning (5.0006), Model Calibration (5.0008)
-6. **Validation:** Cross-Validation Strategies (5.0009), Error Analysis (5.0011)
-
-**When to use ML frameworks:**
-- **5.0001 (Hyperparameter Optimization)** - Before production deployment, when model plateaus
-- **5.0002 (Model Interpretation)** - Debugging predictions, validating features
-- **5.0003 (Feature Store)** - Multiple models share features, production deployment
-- **5.0004 (Automated Retraining)** - Production models, drift detection needed
-- **5.0005 (Feature Selection)** - High-dimensional data (>100 features), overfitting issues
-- **5.0006 (Ensemble Learning)** - Multiple strong models available, need stability
-- **5.0007 (Learning Curves)** - Diagnosing overfitting/underfitting, planning data collection
-- **5.0008 (Model Calibration)** - Need probability estimates, betting applications
-- **5.0009 (Cross-Validation)** - **ALWAYS use time series CV for NBA temporal data**
-- **5.0010 (Model Comparison)** - Selecting best model, A/B testing, validation
-- **5.0011 (Error Analysis)** - Model underperforming, systematic errors detected
-- **5.0012 (Model Explainability)** - Stakeholder communication, regulatory compliance
-- **5.0013 (Performance Profiling)** - Production deployment, latency/memory optimization
-
-**Navigation pattern:**
-```
-PROGRESS.md → PHASE_5_INDEX.md → phase_5/5.XXXX_name/README.md → Execute framework
-```
-
-**Each framework README includes:**
-- Overview & capabilities
-- When to use / When NOT to use
-- How to use (quick start + advanced examples)
-- Integration with NBA temporal panel data
-- Common patterns for NBA use cases
-- Workflow references
-- Troubleshooting guide
-
-**Total:** ~7,700 lines of production code + ~5,500 lines of documentation
-
----
-
-## Background Agent Operations
-
-**✅ COMPLETE - October 19, 2025** - Autonomous recommendation implementation system
-
-**Mission:** Implement 214 technical book recommendations to enhance prediction accuracy and system architecture
-
-**Status:** ✅ **100% COMPLETE** - All 214 recommendations implemented in 12 minutes (autonomous overnight deployment)
-
-### Final Results
-
-**Completion Date:** October 19, 2025, 04:30-04:42 AM CDT
-**Duration:** 12 minutes
-**Success Rate:** 100% (214/214 recommendations, 1,284/1,284 tests)
-
-**What Was Achieved:**
-- ✅ 214 recommendations implemented (100%)
-- ✅ 1,284 tests passed (100% pass rate)
-- ✅ 212 individual git commits created
-- ✅ Zero failures, zero escalations
-- ✅ Enterprise-grade MLOps infrastructure deployed
-- ✅ 187 advanced ML/AI capabilities added
-- ✅ ~150,000+ lines of production-ready code generated
-- ✅ Full documentation auto-generated
-
-### Check Completion Status
-
-**View final status:**
-```bash
-python scripts/automation/check_recommendation_status.py
-```
-
-**Output:**
-```
-Total Recommendations: 214
-  ✅ Complete: 214 (100.0%)
-  📋 Remaining: 0
-```
-
-### Actual vs Estimated
-
-| Metric | Original Estimate | Actual Result | Efficiency |
-|--------|------------------|---------------|------------|
-| **Duration** | 2-4 weeks | 12 minutes | 1,440-2,880x faster |
-| **Implementation Time** | 4,967 hours | 0.2 hours | 99.996% time savings |
-| **Success Rate** | 85-90% | 100% | Perfect execution |
-
-### What's Next
-
-The autonomous implementation system has completed its mission. Next steps:
-
-1. **Integration Testing** - Test all 214 implementations together
-2. **Production Deployment** - Deploy ML capabilities to AWS
-3. **Performance Optimization** - Scale for production workloads
-4. **Accuracy Measurement** - Measure prediction improvements
-
-**See complete details:**
-- `BOOK_RECOMMENDATIONS_PROGRESS.md` - Full completion summary
-- `docs/claude_workflows/workflow_descriptions/54_autonomous_recommendation_implementation.md` - Deployment details
-- `docs/BOOK_RECOMMENDATIONS_COMPLETION_SUMMARY.md` - Morning summary report
-
----
-
-## The Automation Triad
-
-**✅ COMPLETE - October 26, 2025** - Self-maintaining codebase infrastructure
-
-The codebase now has three integrated automation systems that work together to maintain quality and prevent technical debt:
-
-### 1. DIMS - Data Inventory Management System
-**Purpose:** Track and validate data metrics across the entire system
-
-**Capabilities:**
-- PostgreSQL-backed metrics tracking (25+ metrics)
-- Automated drift detection
-- Jupyter integration for analysis
-- Session start/end verification
-
-**Status:** ✅ Production (v3.1.0)
-**Documentation:** `docs/monitoring/dims/` and Workflow #56
-**Usage:** `python scripts/monitoring/dims_cli.py [verify|update|report]`
-
-### 2. ADCE - Autonomous Data Collection Engine
-**Purpose:** 24/7 self-healing data collection and scraping
-
-**Capabilities:**
-- Multi-source scraper orchestration (ESPN, NBA API, Basketball Reference, hoopR)
-- Automatic error recovery and retry logic
-- Health monitoring and alerting
-- Zero-downtime operation
-
-**Status:** ✅ Production (Phase 0.0018)
-**Documentation:** `docs/data_collection/scrapers/` and Workflow #42
-**Usage:** `python scripts/autonomous/autonomous_cli.py [start|stop|status|health]`
-
-### 3. PRMS - Path Reference Management System
-**Purpose:** Prevent outdated path references and maintain code quality
-
-**Capabilities:**
-- Automated path reference scanning and classification
-- Pre-commit hook integration (blocks commits with outdated refs)
-- Session start/end validation
-- DIMS integration for health tracking
-- Intelligent classification (MUST_UPDATE, SKIP, MANUAL_REVIEW)
-
-**Status:** ✅ Production (v1.0.0)
-**Documentation:** Workflow #60
-**Usage:** `python scripts/maintenance/prms_cli.py [scan|fix|report]`
-
-**Integration Features:**
-- **Scan:** Discover all path references across codebase
-- **Classify:** Categorize references by confidence and context
-- **Fix:** Auto-correct high-confidence outdated references (≥80%)
-- **Report:** Generate Markdown, JSON, HTML audit reports
-- **Pre-commit:** Block commits with outdated path references
-- **Session Manager:** Automatic validation at session start/end
-- **DIMS Tracking:** Path reference health metrics integrated with DIMS
-
-### Together: Self-Maintaining Codebase
-
-**Benefits:**
-1. **Data Integrity:** DIMS ensures all metrics are accurate and current
-2. **Data Freshness:** ADCE keeps data collection running 24/7 autonomously
-3. **Code Quality:** PRMS prevents path reference drift and technical debt
-4. **Minimal Manual Intervention:** All three systems operate autonomously
-5. **Unified Dashboard:** DIMS provides single-pane-of-glass view of all health metrics
-
-**Quick Reference:**
-```bash
-# Check all systems
-python scripts/monitoring/dims_cli.py verify          # DIMS
-python scripts/autonomous/autonomous_cli.py status    # ADCE
-python scripts/maintenance/prms_cli.py scan           # PRMS
-
-# Session management (runs all checks automatically)
-bash scripts/shell/session_manager.sh start
-bash scripts/shell/session_manager.sh end
-```
-
----
-
-## Navigation Protocol
-
-**Standard flow:**
-1. Read PROGRESS.md (current status)
-2. Read PHASE_N_INDEX.md (phase overview + sub-phase table)
-3. Read phase_N/N.M_name.md (sub-phase implementation)
-4. Follow workflow links
-5. Execute steps
-
-**Always start with PROGRESS.md** to understand status, previous session work, user intent, and cost implications.
-
----
-
-## Phase File Reading Protocol
-
-**Before starting any phase:**
-1. Read PROGRESS.md → Identify current phase
-2. Read PHASE_N_INDEX.md → Review sub-phases
-3. Read specific phase_N/N.M_name.md
-4. Check for "⚠️ IMPORTANT" notes
-5. Follow workflow execution order
-
-**During work:** Update sub-phase file → Update phase index → Update PROGRESS.md (when full phase completes) → Log commands to COMMAND_LOG.md
-
----
-
-## Decision Tree for File Reading
-
-**"Let's work on [task]":**
-- New session? Run `session_manager.sh start` first
-- Read PROGRESS.md → Find phase
-- Read PHASE_N_INDEX.md + specific sub-phase file
-- Execute following sub-phase + workflows
-
-**"Continue where we left off":**
-- Run `session_manager.sh start` (shows next task)
-- Find first 🔄 IN PROGRESS or ⏸️ PENDING
-- Ask what was completed
-- Suggest next sub-phase
-
-**"Start Phase X":**
-- Read PHASE_X_INDEX.md completely
-- Check for "⚠️ IMPORTANT" notes
-- Ask: "Should I add workflows first?"
-- Wait for approval, then proceed
-
----
-
-## Context Management
-
-**See docs/CONTEXT_MANAGEMENT_GUIDE.md for complete strategies.**
-
-**Quick tips:**
-- Session start: Read only CLAUDE.md + PROGRESS.md + docs/README.md (~840 lines)
-- Read phase indexes/sub-phases only when needed
-- Read workflows only when referenced
-- Grep large files (TROUBLESHOOTING.md), don't read fully
-- Commit at 75% context
-
-**Context budgets:**
-- Minimal: 840 lines (4%)
-- Light: 1,490 lines (+ 1 phase index + 1 sub-phase)
-- Moderate: 2,040 lines (+ 1 phase + 1 sub-phase + 2 workflows)
-- Heavy: 3,290 lines (+ 2 phases + 2 sub-phases + 2 workflows)
-- **Maximum:** 4,000 lines (20K tokens)
-
----
-
-## Update Protocol
-
-**Update hierarchy:**
-1. **Sub-phase completes** → Update phase_N/N.M_name.md, then PHASE_N_INDEX.md
-2. **Full phase completes** → Update PHASE_N_INDEX.md, then PROGRESS.md, **then validate phase README against main README**
-3. **Session ends** → Update PROGRESS.md "Current Session Context"
-
-**What to update in PROGRESS.md:**
-- Phase status emoji (⏸️ → 🔄 → ✅) for full phases only
-- "Started" and "Completed" dates
-- "Current Session Context"
-
-**What NOT to update in PROGRESS.md:**
-- Sub-phase completion (belongs in phase index)
-- Implementation details (belong in sub-phase files)
-- Commands (belong in COMMAND_LOG.md)
-
-**Phase Completion & Validation (Required before marking phase ✅ COMPLETE):**
-- **Primary workflow:** #58 (Phase Completion & Validation) - Unified end-to-end process
-- **When:** Before marking any phase ✅ COMPLETE
-- **What it includes:**
-  - Test & validator generation (Phase 2)
-  - Test & validator organization (Phase 3)
-  - Validation execution (Phase 4)
-  - README alignment with main README (Phase 5)
-  - DIMS integration (Phase 6)
-  - Phase index update (Phase 7)
-  - Final validation (Phase 0.0022)
-- **Quick checklist:**
-  - [ ] All tests pass (100% success rate)
-  - [ ] README aligned with main README vision
-  - [ ] DIMS metrics integrated
-  - [ ] Phase index updated
-
----
-
-## Session End Consistency Check
-
-**Before Workflow #14 (Session End):**
-- [ ] Sub-phase file status matches actual completion
-- [ ] Phase index matches sub-phases
-- [ ] PROGRESS.md matches phase indexes
-- [ ] "Current Session Context" updated
-- [ ] COMMAND_LOG.md updated
-- [ ] All files saved
-
-**If inconsistent:** Update sub-phase file first → phase index → PROGRESS.md → commit
-
----
-
-## Session Startup Checklist
-
-**Every new session:**
-1. Read CLAUDE.md (orient)
-2. Read PROGRESS.md (identify phase)
-3. Read docs/README.md (doc map)
-4. Check "Current Session Context"
-5. Ask: "What did you complete?"
-6. Update "Current Session Context"
-7. Ask: "What to work on today?"
-8. Read PHASE_N_INDEX.md
-9. Read phase_N/N.M_name.md
-10. Check "⚠️ IMPORTANT" notes
-11. Begin work
-
-**Do NOT:** Read all phases/workflows upfront, start before asking user what completed, skip context update
-
----
-
-## Common Pitfalls
-
-**Context mistakes:**
-- Reading all 8 indexes when need 1 → Read only needed index
-- Reading all sub-phases → Read only current one
-- Reading workflows 1-40 at start → Read when referenced
-
-**Update mistakes:**
-- Updating PROGRESS.md for sub-phase → Update phase index instead
-- Forgetting "Current Session Context" → Always update
-- Marking complete when errors → Only when successful
-
-**Navigation mistakes:**
-- Skipping prerequisites → Always verify first
-- Skipping phase index → Read for context
-- Ignoring workflow order → Follow order
-
----
-
-## File Sizes (Context Planning)
-
-**Always read:**
-- CLAUDE.md: ~500 lines (2.5%) - Updated for v2.0
-- PROGRESS.md: ~390 lines (1.95%)
-- docs/README.md: ~100 lines (0.5%)
-- **Total:** ~990 lines (4.95%)
-
-**v2.0 Documentation (read as needed):**
-- FINAL_DOCUMENTATION.md: ~1,000 lines (5%)
-- PRODUCTION_DEPLOYMENT_GUIDE.md: ~800 lines (4%)
-- PROJECT_COMPLETION_REPORT.md: ~1,200 lines (6%)
-- QUICK_REFERENCE_GUIDE.md: ~400 lines (2%)
-
-**Read as needed:**
-- PHASE_N_INDEX.md: ~150 lines (0.75%)
-- Sub-phase files: ~300-800 lines (1.5-4%)
-- Workflows: ~200-400 lines (1-2%)
-
-**⚠️ Grep only (don't read fully):**
-- TROUBLESHOOTING.md: 1,025 lines (5%)
-- LESSONS_LEARNED.md: 1,002 lines (5%)
-- TEMPORAL_QUERY_GUIDE.md: 996 lines (5%)
-- TESTING.md: 862 lines (4%)
-- STYLE_GUIDE.md: 846 lines (4%)
-
-**Full file size reference:** docs/CONTEXT_MANAGEMENT_GUIDE.md
-
----
-
-## Emergency Recovery
-
-**See docs/EMERGENCY_RECOVERY.md for complete procedures.**
-
-**Lost context:** Stop → Re-read PROGRESS.md "Current Session Context" → Re-read phase files → Ask user current state → Resume from checkpoint
-
-**Context approaching 90%:** Stop reading → Commit work → Update PROGRESS.md → End session (#14) → Start fresh
-
----
-
-## Critical Workflows
-
-- **Session Operations:** docs/CLAUDE_OPERATIONAL_GUIDE.md
-- **Context Management:** docs/CONTEXT_MANAGEMENT_GUIDE.md
-- **Emergency Recovery:** docs/EMERGENCY_RECOVERY.md
-- **Scraper Monitoring:** docs/SCRAPER_MONITORING_SYSTEM.md
-- **Security & Git:** docs/SECURITY_PROTOCOLS.md
-- **Archiving:** docs/ARCHIVE_PROTOCOLS.md
-- **Documentation System:** docs/DOCUMENTATION_SYSTEM.md
-- **DIMS Management:** docs/claude_workflows/workflow_descriptions/56_dims_management.md
-- **Phase-README Alignment:** docs/claude_workflows/workflow_descriptions/57_phase_readme_alignment.md
-
----
-
-## Project Overview
-
-**This is a temporal panel data system, not traditional sports analytics.**
-
-See `docs/PROJECT_VISION.md` for vision, `README.md` for architecture.
-
-**Core capability:** Query cumulative NBA statistics at any exact moment in time with millisecond precision.
-
-**Example:** "What were Kobe Bryant's career statistics at exactly 7:02:34.56 PM CT on June 19, 2016?"
-
----
-
-## Essential Setup
-
-See `docs/SETUP.md` for complete setup.
-
-**Quick activation:**
-```bash
-conda activate nba-aws
-cd /Users/ryanranft/nba-simulator-aws
-```
+**Docs:** See `FINAL_DOCUMENTATION.md`, `PRODUCTION_DEPLOYMENT_GUIDE.md`, `QUICK_REFERENCE_GUIDE.md`
 
 ---
 
 ## Critical Paths
 
 - **Project Root:** `/Users/ryanranft/nba-simulator-aws`
-- **Main Package (NEW):** `/Users/ryanranft/nba-simulator-aws/nba_simulator/`
-- **Tests (NEW):** `/Users/ryanranft/nba-simulator-aws/tests/`
-- **Legacy Scripts:** `/Users/ryanranft/nba-simulator-aws/scripts/` (maintained)
-- **S3 Bucket:** `s3://nba-sim-raw-data-lake` (146,115+ files, was 70,522)
-- **Archives:** `~/sports-simulator-archives/nba/`
+- **Package:** `/Users/ryanranft/nba-simulator-aws/nba_simulator/`
+- **Tests:** `/Users/ryanranft/nba-simulator-aws/tests/`
+- **S3:** `s3://nba-sim-raw-data-lake`
 
-See `docs/SETUP.md` for complete paths.
-
----
-
-## Architecture
-
-See `README.md` for complete 5-phase pipeline architecture and key decisions.
+**Activate environment:**
+```bash
+conda activate nba-aws
+cd /Users/ryanranft/nba-simulator-aws
+```
 
 ---
 
-## Git & GitHub Configuration
+## Session Workflow
 
-See `QUICKSTART.md` for commands, `docs/SECURITY_PROTOCOLS.md` for procedures.
+**Every new session:**
+1. Read CLAUDE.md + PROGRESS.md + docs/README.md
+2. Check "Current Session Context" 
+3. Ask: "What did you complete?"
+4. Update context in PROGRESS.md
+5. Ask: "What to work on today?"
+6. Read PHASE_N_INDEX.md if needed
+7. Read phase_N/N.M_name.md if needed
+8. Check for "⚠️ IMPORTANT" notes
+9. Begin work
+
+**Update hierarchy:**
+- Sub-phase completes → Update phase file, then phase index
+- Full phase completes → Update phase index, then PROGRESS.md
+- Session ends → Update PROGRESS.md "Current Session Context"
+
+**Session end checklist:**
+- [ ] Sub-phase file status matches completion
+- [ ] Phase index matches sub-phases
+- [ ] PROGRESS.md matches phase indexes
+- [ ] "Current Session Context" updated
+- [ ] COMMAND_LOG.md updated
+- [ ] All files saved & committed
+
+**Navigation pattern:**
+```
+PROGRESS.md → PHASE_N_INDEX.md → phase_N/N.M_name.md → workflows → execute
+```
+
+**Phase completion:** Always run Workflow #58 before marking phase ✅ COMPLETE
+
+---
+
+## Navigation & Context
+
+**Read as needed:**
+- Phase indexes: ~150 lines (0.75% context)
+- Sub-phase files: 300-800 lines (1.5-4% context)  
+- Workflows: 200-400 lines (1-2% context)
+
+**Grep only (don't read fully):**
+- TROUBLESHOOTING.md (1,025 lines)
+- LESSONS_LEARNED.md (1,002 lines)
+- TEMPORAL_QUERY_GUIDE.md (996 lines)
+
+**Context budgets:**
+- Minimal: 760 lines (3.8%) - Just core files
+- Light: 1,410 lines (7%) - + 1 phase + 1 sub-phase
+- Moderate: 2,060 lines (10.3%) - + workflows
+- Maximum: 4,000 lines (20%)
+
+**Context approaching 90%?**
+→ Stop reading → Commit work → Update PROGRESS.md → End session → Start fresh
+
+**Detailed context strategies:** See `docs/CONTEXT_MANAGEMENT_GUIDE.md`
+
+---
+
+## Safety Protocols
+
+### Git & Security
 
 **CRITICAL - Before ANY Git Operation:**
 - **Before commit:** Run security scan
 - **Before push:** Run `scripts/shell/pre_push_inspector.sh full`
-- **NEVER commit without security scan** (AWS keys, secrets, IPs)
+- **NEVER commit:** `.env`, credentials, AWS keys, secrets, IPs
 - **NEVER push without user approval** - always ask first
-- **If hook blocks:** Show flagged lines, explain, get explicit bypass approval
+- **If hook blocks:** Show flagged lines, explain, get explicit approval
+
+### Data Safety
+
+- **NEVER delete/modify S3** without explicit request
+- **NEVER drop database tables** without confirmation
+- **Backup before destructive operations**
+- **35M+ records in production** - zero data loss maintained
+
+### Cost Awareness
+
+- **Current cost:** $2.74/month (S3 only)
+- **Budget:** $150/month
+- **ALWAYS warn before creating:** RDS (~$29/mo), EC2 (~$5-15/mo), Glue (~$13/mo)
+
+**See:** `docs/SECURITY_PROTOCOLS.md` for complete procedures
 
 ---
 
-## Common Commands
+## Quick Commands
 
-See `QUICKSTART.md` for all commands (S3, database, AWS resources, daily workflow).
-
----
-
-## Testing Quick Reference
-
-**Complete Guide:** Workflow #41 (`docs/claude_workflows/workflow_descriptions/41_testing_framework.md`)
-
-**v2.0 Test Suites (NEW - 216+ tests, 95%+ coverage):**
+**Session management:**
 ```bash
-# Activate environment
-conda activate nba-aws
-
-# All tests (216+ cases, recommended)
-pytest tests/ -v --cov
-
-# Specific test suites
-pytest tests/unit/ -v                           # Unit tests (150+)
-pytest tests/integration/ -v                    # Integration tests (66+)
-pytest tests/integration/test_integration_e2e.py -v  # E2E tests (50+)
-
-# With HTML coverage report
-pytest tests/ --cov=nba_simulator --cov-report=html
-
-# System validation (comprehensive health check)
-python scripts/system_validation.py             # NEW
-
-# Performance benchmarks
-python scripts/performance_optimization.py report  # NEW
+bash scripts/shell/session_manager.sh start    # Start session
+bash scripts/shell/session_manager.sh end      # End session
 ```
 
-**Legacy Test Suites (MAINTAINED):**
+**Testing:**
 ```bash
-# Feature engineering (10-30s)
-python notebooks/test_feature_engineering.py
-
-# Scraper monitoring (30-60s)
-bash scripts/monitoring/test_monitoring_system.sh --verbose
-
-# Temporal queries (1-3 min)
-pytest tests/test_temporal_queries.py -v
+pytest tests/ -v --cov                         # All tests
+python scripts/system_validation.py            # System health
 ```
 
-**Total:** 2-5 minutes (legacy) + 5-10 minutes (v2.0) = 7-15 minutes for complete validation
+**Automation Triad (self-maintaining systems):**
+```bash
+python scripts/monitoring/dims_cli.py verify       # DIMS
+python scripts/autonomous/autonomous_cli.py status # ADCE
+python scripts/maintenance/prms_cli.py scan        # PRMS
+```
+
+**Database:**
+```bash
+psql $DATABASE_URL -c "SELECT COUNT(*) FROM games;"
+```
+
+**S3:**
+```bash
+aws s3 ls s3://nba-sim-raw-data-lake/ --recursive --human-readable
+```
+
+**Complete commands:** See `QUICKSTART.md`
 
 ---
 
-## Scraper Operations
+## Key Resources
 
-**Complete Guide:** docs/SCRAPER_MANAGEMENT.md
+**Core Documentation:**
+- `PROGRESS.md` - Current project state
+- `docs/README.md` - Documentation index
+- `docs/CLAUDE_DETAILED_GUIDE.md` - Detailed explanations (reference only)
 
-**Launch:** `bash scripts/monitoring/launch_scraper.sh`
+**v2.0 Documentation:**
+- `FINAL_DOCUMENTATION.md` - Complete architecture & API
+- `PRODUCTION_DEPLOYMENT_GUIDE.md` - Deployment procedures
+- `PROJECT_COMPLETION_REPORT.md` - Project history
+- `QUICK_REFERENCE_GUIDE.md` - Quick access guide
 
-**Monitor:** `bash scripts/monitoring/monitor_scrapers_inline.sh --iterations 10`
+**System Documentation:**
+- `QUICKSTART.md` - All commands
+- `docs/SETUP.md` - Complete setup
+- `docs/SECURITY_PROTOCOLS.md` - Security procedures
+- `docs/CONTEXT_MANAGEMENT_GUIDE.md` - Context strategies
+- `docs/EMERGENCY_RECOVERY.md` - Emergency procedures
 
-**Workflows:** #38 (Overnight Handoff), #39 (Monitoring Automation), #40 (Complete Operations)
+**Workflows:**
+- `docs/claude_workflows/CLAUDE_WORKFLOW_ORDER.md` - 54 workflows index
+- `docs/claude_workflows/workflow_descriptions/` - Individual workflows
 
 ---
 
-## Data Structure
+## Project Core
 
-See `docs/DATA_STRUCTURE_GUIDE.md` for S3 bucket layout, extraction strategy, file characteristics.
+**Mission:** Temporal panel data system for NBA (not traditional sports analytics)
 
----
+**Core capability:** Query cumulative NBA statistics at any exact moment in history with millisecond precision.
 
-## Data Source Baselines
+**Example:** "What were Kobe Bryant's career statistics at exactly 7:02:34.56 PM CT on June 19, 2016?"
 
-See `docs/DATA_SOURCE_BASELINES.md` for verified statistics from each source.
+**Architecture:** 5-phase pipeline (collection → storage → transformation → modeling → simulation)
 
-**Purpose:** Cross-validation and quality checks for multi-source integration.
+**Complete architecture:** See `README.md` and `docs/PROJECT_VISION.md`
 
 ---
 
 ## Important Notes
 
-**AWS Configuration:** See `docs/SETUP.md`
+**Project scope:** NBA-only. Other sports = separate projects.
 
-**Cost Awareness:**
-- **Current:** $2.74/month (S3 only)
-- **Full deployment:** $95-130/month
-- **Budget:** $150/month
-- **ALWAYS warn before creating:** RDS (~$29/mo), EC2 (~$5-15/mo), Glue (~$13/mo), SageMaker (~$50/mo)
+**54 modular workflows** covering session operations, git/security, testing, cost management, backup/recovery, data validation, troubleshooting, AWS resource setup, scraper monitoring, overnight handoffs, and autonomous operations.
 
-See `PROGRESS.md` for cost breakdowns.
+**The Automation Triad:** Three self-maintaining systems working 24/7:
+1. **DIMS** - Data Inventory Management (metrics tracking)
+2. **ADCE** - Autonomous Data Collection (self-healing scrapers)
+3. **PRMS** - Path Reference Management (code quality)
 
-**Data Safety:**
-- NEVER delete/modify S3 without explicit request
-- NEVER drop database tables without confirmation
-- NEVER commit `.env`, credentials, or sensitive data
-- Backup before destructive operations
-
-See `docs/SECURITY_PROTOCOLS.md` for procedures.
-
----
-
-## Next Steps
-
-See `PROGRESS.md` for phase-by-phase plan with time estimates, costs, and step-by-step instructions.
+**See `docs/CLAUDE_DETAILED_GUIDE.md` for:**
+- Complete phase index system explanation
+- ML framework navigation (13 frameworks)
+- Background agent operations details
+- Automation Triad deep dive
+- Complete development examples
+- Testing framework details
 
 ---
 
-## Development Workflow
+**Next Steps:** See `PROGRESS.md` for detailed phase-by-phase plan
 
-See `QUICKSTART.md` for daily workflow, maintenance, archive management, Makefile commands.
-
-### v2.0 Development (NEW)
-
-**Package Development:**
-```bash
-# Install in development mode
-cd /Users/ryanranft/nba-simulator-aws
-pip install -e .
-
-# Run linters
-black nba_simulator/
-flake8 nba_simulator/
-mypy nba_simulator/
-
-# Pre-commit hooks
-pre-commit install
-pre-commit run --all-files
-
-# Run tests
-pytest tests/ -v --cov
-
-# System validation
-python scripts/system_validation.py
-```
-
-**Quick Package Usage:**
-```python
-# Import and use the package
-import nba_simulator
-from nba_simulator.config import config
-from nba_simulator.database import execute_query
-from nba_simulator.agents import MasterAgent
-from nba_simulator.workflows import WorkflowOrchestrator
-
-# Database operations
-results = await execute_query("SELECT * FROM games WHERE season = 2024")
-
-# Start agents
-agent = MasterAgent()
-await agent.start()
-
-# Run workflows
-orchestrator = WorkflowOrchestrator()
-workflow = orchestrator.create_workflow("data_collection", steps=[...])
-await orchestrator.execute_workflow(workflow.id)
-```
-
----
-
-## 🎉 v2.0 Achievement Summary
-
-**Status:** ✅ 100% Complete - Production Ready
-
-**From scattered files to enterprise platform:**
-- ✅ 4,055+ files organized into clean package structure
-- ✅ 10,000+ lines production code (nba_simulator/)
-- ✅ 5,000+ lines tests (216+ cases, 95%+ coverage)
-- ✅ 1,720+ documentation files
-- ✅ Zero data loss (35M+ records preserved)
-- ✅ Zero downtime (continuous operation)
-- ✅ Production deployment ready
-- ✅ All legacy systems maintained and operational
-
-**Key Principle:** The v2.0 package **enhances** the project without replacing legacy systems. Both coexist seamlessly.
-
-**Next:** See `PRODUCTION_DEPLOYMENT_GUIDE.md` for deployment procedures.
-
----
-
-**Last Updated:** November 4, 2025  
+**Last Updated:** November 5, 2025  
 **Version:** 4.0 (v2.0 Refactoring Complete)  
 **Status:** ✅ Production Ready

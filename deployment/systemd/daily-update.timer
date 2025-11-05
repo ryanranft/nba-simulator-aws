@@ -1,0 +1,17 @@
+[Unit]
+Description=NBA Simulator - Daily Update Timer
+Documentation=https://github.com/ryanranft/nba-simulator-aws
+Requires=daily-update.service
+
+[Timer]
+# Run every 6 hours (00:00, 06:00, 12:00, 18:00)
+OnCalendar=*-*-* 00,06,12,18:00:00
+# If system was down at scheduled time, run immediately on next boot
+Persistent=true
+# Random delay to avoid resource contention (0-10 minutes)
+RandomizedDelaySec=600
+# Accuracy window (can run ±3 minutes)
+AccuracySec=3min
+
+[Install]
+WantedBy=timers.target

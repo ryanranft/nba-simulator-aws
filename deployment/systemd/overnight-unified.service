@@ -1,0 +1,36 @@
+[Unit]
+Description=NBA Simulator - Overnight Multi-Source Unified Workflow
+Documentation=https://github.com/ryanranft/nba-simulator-aws
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ryanranft
+Group=staff
+WorkingDirectory=/Users/ryanranft/nba-simulator-aws
+Environment="PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONPATH=/Users/ryanranft/nba-simulator-aws"
+
+# Execute workflow
+ExecStart=/opt/homebrew/bin/python3 scripts/workflows/overnight_unified_cli.py
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=nba-overnight-unified
+
+# Resource limits
+MemoryMax=4G
+CPUQuota=200%
+TimeoutStartSec=3600
+TimeoutStopSec=600
+
+# Restart policy
+Restart=on-failure
+RestartSec=300
+StartLimitBurst=3
+StartLimitIntervalSec=24h
+
+[Install]
+WantedBy=multi-user.target
