@@ -69,7 +69,7 @@ from ..agents import (
     NBAStatsAgent,
     DeduplicationAgent,
     HistoricalAgent,
-    HoopRAgent,
+    HooprAgent,
     BasketballReferenceAgent,
 )
 
@@ -148,7 +148,9 @@ class DispatchTask:
 
         # Generate task ID if not provided
         if not self.task_id:
-            self.task_id = f"{self.handler}_{self.operation}_{self.created_at.timestamp()}"
+            self.task_id = (
+                f"{self.handler}_{self.operation}_{self.created_at.timestamp()}"
+            )
 
     def mark_queued(self):
         """Mark task as queued"""
