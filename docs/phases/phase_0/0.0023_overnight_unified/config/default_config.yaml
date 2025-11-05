@@ -1,0 +1,79 @@
+# Overnight Unified Workflow - Default Configuration
+#
+# This configuration file defines all parameters for the overnight unified
+# workflow that collects data from multiple sources, rebuilds unified database,
+# detects discrepancies, and exports ML-ready datasets.
+#
+# Version: 2.0.0
+# Created: [Date TBD]
+
+# Project paths
+project_dir: /Users/ryanranft/nba-simulator-aws
+log_dir: logs/overnight
+reports_dir: reports
+ml_quality_dir: data/ml_quality
+
+# Database paths
+databases:
+  espn_db: /tmp/espn_local.db
+  hoopr_db: /tmp/hoopr_local.db
+  unified_db: /tmp/unified_nba.db
+
+# Scraping parameters
+scraping:
+  # ESPN: Number of days back to scrape (default: 14)
+  # Covers ~1 week of games with buffer for late-posted data
+  espn_days_back: 14
+
+  # hoopR: Number of days back to scrape (default: 7)
+  # Shorter window since hoopR updates faster
+  hoopr_days_back: 7
+
+  # Basketball Reference: Which season to scrape (default: "current")
+  # Options: "current", "2024-25", "2023-24", etc.
+  basketball_reference_season: current
+
+# Notification settings
+notification:
+  # Enable/disable email notifications (default: false)
+  enabled: false
+
+  # Email recipient (required if enabled=true)
+  email_recipient: ""
+
+# Backup settings
+backup:
+  # Enable/disable database backups (default: true)
+  enabled: true
+
+  # Number of days to keep backups (default: 7)
+  # Older backups are automatically deleted
+  retention_days: 7
+
+# Cleanup settings
+cleanup:
+  # Number of days to keep log files (default: 30)
+  log_retention_days: 30
+
+# DIMS (Data Inventory Management System) integration
+dims:
+  # Enable/disable DIMS integration (default: true)
+  enabled: true
+
+  # Report metrics to DIMS after workflow completion (default: true)
+  report_metrics: true
+
+# Advanced settings (usually not needed)
+advanced:
+  # Maximum retries per task (default: 3)
+  max_retries: 3
+
+  # Retry delay in seconds (default: 60)
+  retry_delay_seconds: 60
+
+  # Task timeout in seconds (default: 3600)
+  task_timeout_seconds: 3600
+
+  # Enable parallel scraping (default: true)
+  # If true, ESPN, hoopR, and Basketball Reference scrapers run in parallel
+  parallel_scraping: true

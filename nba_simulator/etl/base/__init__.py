@@ -16,7 +16,7 @@ Updated: Day 1 - Added error handling
 """
 
 from .async_scraper import (
-    AsyncBaseScraper,
+    AsyncScraper as AsyncBaseScraper,  # Alias for backward compatibility
     ScraperConfig,
     ScraperStats,
     RateLimiter,

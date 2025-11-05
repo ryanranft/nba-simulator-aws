@@ -1,0 +1,22 @@
+# 3-Source Validation Workflow - Default Configuration
+#
+# Cross-validates ESPN, hoopR, and NBA API data sources.
+#
+# Version: 2.0.0
+# Created: [Date TBD]
+
+# Project paths
+project_dir: /Users/ryanranft/nba-simulator-aws
+log_dir: logs/overnight
+reports_dir: reports/validation
+
+# Scraping parameters
+scraping:
+  # Number of days back to scrape (default: 3)
+  # Validation workflow always uses a short window
+  days_back: 3
+
+# DIMS integration
+dims:
+  # Enable/disable DIMS integration (default: true)
+  enabled: true

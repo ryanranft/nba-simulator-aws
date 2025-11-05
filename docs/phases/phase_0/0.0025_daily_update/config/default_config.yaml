@@ -1,0 +1,33 @@
+# Daily ESPN Update Workflow - Default Configuration
+#
+# Automated ESPN data collection, database updates, and catalog maintenance.
+#
+# Version: 2.0.0
+# Created: [Date TBD]
+
+# Project paths
+project_dir: /Users/ryanranft/nba-simulator-aws
+log_dir: /tmp
+espn_scraper_dir: ~/0espn
+local_db: /tmp/espn_local.db
+
+# Data catalog settings
+catalog:
+  file: docs/DATA_CATALOG.md
+  update_script: scripts/utils/update_data_catalog.py
+  rebuild_script: scripts/db/create_local_espn_database.py
+
+# Git settings
+git:
+  # Auto-commit catalog changes (default: false)
+  auto_commit: false
+
+# Notification settings
+notification:
+  # Slack webhook URL (leave empty to disable)
+  slack_webhook: ""
+
+# Cleanup settings
+cleanup:
+  # Number of days to keep log files (default: 7)
+  log_retention_days: 7
