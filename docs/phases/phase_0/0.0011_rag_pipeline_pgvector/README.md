@@ -147,22 +147,22 @@ for entity_id, content, metadata, similarity in results:
 
 ```bash
 # Initialize database schema
-python scripts/0_11/main.py init
+python scripts/0_0011/main.py init
 
 # Generate embeddings for players
-python scripts/0_11/main.py embed --entity-type player --limit 100
+python scripts/0_0011/main.py embed --entity-type player --limit 100
 
 # Generate embeddings for games
-python scripts/0_11/main.py embed --entity-type game --limit 50
+python scripts/0_0011/main.py embed --entity-type game --limit 50
 
 # Semantic search
-python scripts/0_11/main.py search "best three point shooters in Lakers history"
+python scripts/0_0011/main.py search "best three point shooters in Lakers history"
 
 # Find similar entities
-python scripts/0_11/main.py compare --entity-type player --entity-id "jamesle01"
+python scripts/0_0011/main.py compare --entity-type player --entity-id "jamesle01"
 
 # View statistics
-python scripts/0_11/main.py stats
+python scripts/0_0011/main.py stats
 ```
 
 ### Implementation Files
@@ -180,43 +180,43 @@ python scripts/0_11/main.py stats
    - Statistics tracking
 
 **Core Pipeline:**
-3. `scripts/0_11/embedding_pipeline.py` (425 lines)
+3. `scripts/0_0011/embedding_pipeline.py` (425 lines)
    - Player & game text generation
    - Batch processing with progress tracking
    - Cost estimation ($0.0001/1K tokens)
 
-4. `scripts/0_11/openai_embedder.py` (315 lines)
+4. `scripts/0_0011/openai_embedder.py` (315 lines)
    - OpenAI text-embedding-ada-002 integration
    - Rate limiting (60K tokens/min)
    - Retry logic with exponential backoff
    - Cost tracking
 
-5. `scripts/0_11/batch_processor.py` (270 lines)
+5. `scripts/0_0011/batch_processor.py` (270 lines)
    - Batch processing orchestration
    - Error handling & recovery
    - Metadata extraction
    - Progress reporting
 
 **Search & Query:**
-6. `scripts/0_11/vector_search.py` (295 lines)
+6. `scripts/0_0011/vector_search.py` (295 lines)
    - Cosine similarity search
    - Hybrid search (keyword + semantic)
    - Find similar entities
    - Filter by metadata
 
-7. `scripts/0_11/rag_queries.py` (335 lines)
+7. `scripts/0_0011/rag_queries.py` (335 lines)
    - RAG context retrieval
    - Player comparison queries
    - Temporal integration
    - JSONB data enrichment
 
-8. `scripts/0_11/semantic_search.py` (100 lines)
+8. `scripts/0_0011/semantic_search.py` (100 lines)
    - High-level search API
    - Convenience methods
    - Unified interface
 
 **CLI & Testing:**
-9. `scripts/0_11/main.py` (210 lines)
+9. `scripts/0_0011/main.py` (210 lines)
    - Command-line interface
    - init, embed, search, compare, stats commands
    - Unified workflow
@@ -769,7 +769,7 @@ OVERALL: 7/7 checks passed (100%)
 
 ```python
 # tests/manual_test_rag.py
-from scripts.0_11.semantic_search import SemanticSearch
+from scripts.0_0011.semantic_search import SemanticSearch
 
 # Test vector similarity
 search = SemanticSearch()

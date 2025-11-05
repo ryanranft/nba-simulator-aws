@@ -11,7 +11,7 @@
 
 ## Overview
 
-Automated daily ESPN data collection, processing, and catalog updates. This workflow replaces the shell script `scripts/workflows/daily_espn_update.sh` with a production-grade Python implementation.
+Automated daily ESPN data collection, processing, and catalog updates. This workflow replaces the shell script `scripts/archive/pre_python_migration/daily_espn_update.sh` with a production-grade Python implementation.
 
 **Migration Details:**
 - **Original:** `daily_espn_update.sh` (391 lines)

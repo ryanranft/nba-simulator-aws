@@ -1,7 +1,7 @@
 """
 3-Source Validation Workflow - Cross-Source Data Quality Checks
 
-Replaces: scripts/workflows/overnight_3_source_validation.sh
+Replaces: scripts/archive/pre_python_migration/overnight_3_source_validation.sh
 
 This workflow scrapes recent data from 3 sources (ESPN, hoopR, NBA API), then
 cross-validates to detect discrepancies. Features graceful degradation - continues

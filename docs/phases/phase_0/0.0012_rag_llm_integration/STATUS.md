@@ -20,7 +20,7 @@
 4. `llm_integration.py` - 418 lines - OpenAI integration, streaming, caching
 
 **Application Layer:**
-5. `scripts/0_12/main.py` - 342 lines - Complete CLI (query, interactive, metrics modes)
+5. `scripts/0_0012/main.py` - 342 lines - Complete CLI (query, interactive, metrics modes)
 6. `config/rag_llm_config.yaml` - 151 lines - Full configuration
 7. `tests/phases/phase_0/test_0_0012.py` - 86 lines - Comprehensive test suite
 
@@ -104,17 +104,17 @@ pytest tests/phases/phase_0/test_0_0012.py -v
 
 ### Single Query
 ```bash
-python scripts/0_12/main.py query "Who were the best three-point shooters in 2022?" --verbose
+python scripts/0_0012/main.py query "Who were the best three-point shooters in 2022?" --verbose
 ```
 
 ### Interactive Mode
 ```bash
-python scripts/0_12/main.py interactive --model gpt-3.5-turbo
+python scripts/0_0012/main.py interactive --model gpt-3.5-turbo
 ```
 
 ### View Metrics
 ```bash
-python scripts/0_12/main.py metrics
+python scripts/0_0012/main.py metrics
 ```
 
 ---

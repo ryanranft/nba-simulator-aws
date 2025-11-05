@@ -500,7 +500,7 @@ def get_player_performance_with_context(player_id, timestamp):
 ```python
 # tests/test_jsonb_storage.py
 import pytest
-from scripts.db.jsonb_helpers import JSONBQueryHelper
+from scripts.0_0010.main import JSONBQueryHelper
 
 def test_jsonb_insert():
     """Test inserting JSON data"""
@@ -610,7 +610,7 @@ def migrate_from_mongodb():
 ### Quick Start
 
 ```python
-from scripts.0_10.temporal_queries import TemporalJSONBQueries
+from scripts.0_0010.temporal_queries import TemporalJSONBQueries
 
 # Query player stats at exact timestamp
 with TemporalJSONBQueries() as queries:
@@ -675,7 +675,7 @@ with TemporalJSONBQueries() as queries:
 The existing `JSONBQueryHelper` class now includes temporal integration:
 
 ```python
-from scripts.0_10.main import JSONBQueryHelper
+from scripts.0_0010.main import JSONBQueryHelper
 
 with JSONBQueryHelper() as helper:
     # Get game performance with career context
@@ -753,7 +753,7 @@ SELECT * FROM raw_data.temporal_data_availability;
 ### Files Added
 
 **New Implementation Files:**
-1. `scripts/0_10/temporal_queries.py` (~600 lines)
+1. `scripts/0_0010/temporal_queries.py` (~600 lines)
    - Core temporal query integration class
    - Main entry point for temporal capabilities
 
@@ -766,7 +766,7 @@ SELECT * FROM raw_data.temporal_data_availability;
    - Unit, integration, performance, validation tests
 
 **Modified Files:**
-1. `scripts/0_10/main.py` (+150 lines)
+1. `scripts/0_0010/main.py` (+150 lines)
    - Added temporal methods to JSONBQueryHelper
    - Maintains backward compatibility
 

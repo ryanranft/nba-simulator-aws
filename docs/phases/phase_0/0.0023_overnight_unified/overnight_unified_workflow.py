@@ -1,7 +1,7 @@
 """
 Overnight Unified Workflow - Multi-Source Data Collection and Quality Tracking
 
-Replaces: scripts/workflows/overnight_multi_source_unified.sh
+Replaces: scripts/archive/pre_python_migration/overnight_multi_source_unified.sh
 
 This workflow automates nightly data collection from multiple sources (ESPN, hoopR,
 Basketball Reference), rebuilds a unified database with quality scores, detects

@@ -11,7 +11,7 @@
 
 ## Overview
 
-Simplified overnight workflow for cross-validating 3 data sources: ESPN, hoopR, and NBA API. This workflow replaces the shell script `scripts/workflows/overnight_3_source_validation.sh` with a production-grade Python implementation.
+Simplified overnight workflow for cross-validating 3 data sources: ESPN, hoopR, and NBA API. This workflow replaces the shell script `scripts/archive/pre_python_migration/overnight_3_source_validation.sh` with a production-grade Python implementation.
 
 **Migration Details:**
 - **Original:** `overnight_3_source_validation.sh` (259 lines)

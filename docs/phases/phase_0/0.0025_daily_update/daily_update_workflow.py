@@ -1,7 +1,7 @@
 """
 Daily ESPN Update Workflow - Automated Data Collection and Catalog Maintenance
 
-Replaces: scripts/workflows/daily_espn_update.sh
+Replaces: scripts/archive/pre_python_migration/daily_espn_update.sh
 
 This workflow automates daily ESPN data collection, database updates, and
 DATA_CATALOG.md maintenance with optional Slack notifications and git commits.

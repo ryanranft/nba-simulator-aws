@@ -11,7 +11,7 @@
 
 ## Overview
 
-Automated nightly workflow for multi-source data collection, quality tracking, and unified database maintenance. This workflow replaces the shell script `scripts/workflows/overnight_multi_source_unified.sh` with a production-grade Python implementation using the `BaseWorkflow` framework.
+Automated nightly workflow for multi-source data collection, quality tracking, and unified database maintenance. This workflow replaces the shell script `scripts/archive/pre_python_migration/overnight_multi_source_unified.sh` with a production-grade Python implementation using the `BaseWorkflow` framework.
 
 **Migration Details:**
 - **Original:** `overnight_multi_source_unified.sh` (513 lines)
