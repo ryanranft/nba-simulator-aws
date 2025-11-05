@@ -7,7 +7,7 @@ SHELL=/bin/bash
 PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin
 PYTHONPATH=/Users/ryanranft/nba-simulator-aws
 PROJECT_DIR=/Users/ryanranft/nba-simulator-aws
-PYTHON=/opt/homebrew/bin/python3
+PYTHON=/Users/ryanranft/miniconda3/envs/nba-aws/bin/python3
 
 # Logging
 MAILTO=""  # Disable email notifications (use journald instead)
