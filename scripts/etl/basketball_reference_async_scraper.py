@@ -42,11 +42,11 @@ warnings.filterwarnings(
 
 # Import our new async infrastructure
 from scripts.etl.async_scraper_base import AsyncBaseScraper, ScraperConfig
-from scripts.etl.scraper_error_handler import ScraperErrorHandler
-from scripts.etl.scraper_telemetry import ScraperTelemetry
-from scripts.etl.scraper_config import ScraperConfigManager, get_scraper_config
+from nba_simulator.etl.base import ScraperErrorHandler
+from nba_simulator.etl.monitoring import ScraperTelemetry
+from nba_simulator.etl.config import ScraperConfigManager, get_scraper_config
 from scripts.etl.intelligent_extraction import BasketballReferenceExtractionStrategy
-from scripts.etl.modular_tools import ToolComposer
+from nba_simulator.etl.tools import ToolComposer
 
 
 class BasketballReferenceAsyncScraper(AsyncBaseScraper):

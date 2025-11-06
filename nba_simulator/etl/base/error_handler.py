@@ -18,6 +18,107 @@ from datetime import datetime, timedelta
 from nba_simulator.utils import logger
 
 
+# Custom Exception Classes for Scrapers
+class ScraperException(Exception):
+    """Base exception for scraper errors"""
+
+    pass
+
+
+class NetworkError(ScraperException):
+    """Network-related errors (connection, timeout)"""
+
+    pass
+
+
+class RateLimitError(ScraperException):
+    """Rate limit exceeded (429 errors)"""
+
+    pass
+
+
+class ServerError(ScraperException):
+    """Server errors (500-599 status codes)"""
+
+    pass
+
+
+class ClientError(ScraperException):
+    """Client errors (400-499 status codes)"""
+
+    pass
+
+
+class ContentError(ScraperException):
+    """Content parsing/validation errors"""
+
+    pass
+
+
+class CircuitBreaker:
+    """
+    Circuit breaker pattern for failing operations.
+
+    Prevents cascading failures by temporarily disabling operations
+    that are experiencing high failure rates.
+    """
+
+    def __init__(
+        self,
+        failure_threshold: int = 5,
+        timeout: timedelta = timedelta(minutes=5),
+        name: str = "default",
+    ):
+        self.failure_threshold = failure_threshold
+        self.timeout = timeout
+        self.name = name
+        self.failure_count = 0
+        self.last_failure_time: Optional[datetime] = None
+        self.is_open = False
+
+    def record_success(self) -> None:
+        """Record a successful operation"""
+        self.failure_count = 0
+        self.is_open = False
+        self.last_failure_time = None
+
+    def record_failure(self) -> None:
+        """Record a failed operation"""
+        self.failure_count += 1
+        self.last_failure_time = datetime.now()
+
+        if self.failure_count >= self.failure_threshold:
+            self.is_open = True
+            logger.warning(
+                f"Circuit breaker '{self.name}' opened after {self.failure_count} failures"
+            )
+
+    def can_execute(self) -> bool:
+        """Check if operation can be executed"""
+        if not self.is_open:
+            return True
+
+        # Check if timeout has passed
+        if self.last_failure_time:
+            time_since_failure = datetime.now() - self.last_failure_time
+            if time_since_failure >= self.timeout:
+                logger.info(
+                    f"Circuit breaker '{self.name}' timeout expired, allowing retry"
+                )
+                self.is_open = False
+                self.failure_count = 0
+                return True
+
+        return False
+
+    def reset(self) -> None:
+        """Manually reset the circuit breaker"""
+        self.failure_count = 0
+        self.is_open = False
+        self.last_failure_time = None
+        logger.info(f"Circuit breaker '{self.name}' manually reset")
+
+
 class ErrorSeverity(Enum):
     """Error severity levels for classification"""
 

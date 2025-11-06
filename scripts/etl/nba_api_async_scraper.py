@@ -35,10 +35,10 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 # Import our new async infrastructure
 from scripts.etl.async_scraper_base import AsyncBaseScraper, ScraperConfig
-from scripts.etl.scraper_error_handler import ScraperErrorHandler, CircuitBreaker
-from scripts.etl.scraper_telemetry import ScraperTelemetry
-from scripts.etl.scraper_config import ScraperConfigManager, get_scraper_config
-from scripts.etl.modular_tools import ToolComposer
+from nba_simulator.etl.base import ScraperErrorHandler, CircuitBreaker
+from nba_simulator.etl.monitoring import ScraperTelemetry
+from nba_simulator.etl.config import ScraperConfigManager, get_scraper_config
+from nba_simulator.etl.tools import ToolComposer
 
 try:
     from nba_api.stats.endpoints import *

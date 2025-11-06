@@ -30,6 +30,15 @@ from .error_handler import (
     ErrorContext,
     create_error_handler,
     safe_execute,
+    # Exception classes
+    ScraperException,
+    NetworkError,
+    RateLimitError,
+    ServerError,
+    ClientError,
+    ContentError,
+    # Circuit breaker
+    CircuitBreaker,
 )
 
 __all__ = [
@@ -46,4 +55,13 @@ __all__ = [
     "ErrorContext",
     "create_error_handler",
     "safe_execute",
+    # Exception classes
+    "ScraperException",
+    "NetworkError",
+    "RateLimitError",
+    "ServerError",
+    "ClientError",
+    "ContentError",
+    # Circuit breaker
+    "CircuitBreaker",
 ]

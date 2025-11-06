@@ -34,7 +34,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 # Import our new async infrastructure
 from scripts.etl.async_scraper_base import AsyncBaseScraper, ScraperConfig
-from scripts.etl.scraper_error_handler import (
+from nba_simulator.etl.base import (
     ScraperErrorHandler,
     NetworkError,
     RateLimitError,
@@ -42,8 +42,8 @@ from scripts.etl.scraper_error_handler import (
     ClientError,
     ContentError,
 )
-from scripts.etl.scraper_telemetry import ScraperTelemetry, TelemetryManager
-from scripts.etl.scraper_config import ScraperConfigManager, get_scraper_config
+from nba_simulator.etl.monitoring import ScraperTelemetry, TelemetryManager
+from nba_simulator.etl.config import ScraperConfigManager, get_scraper_config
 
 
 class ESPNAsyncScraper(AsyncBaseScraper):
