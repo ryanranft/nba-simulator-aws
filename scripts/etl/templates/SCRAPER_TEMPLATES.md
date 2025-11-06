@@ -45,7 +45,7 @@ from datetime import datetime
 
 # Import shared infrastructure
 from scripts.etl.async_scraper_base import AsyncBaseScraper
-from scripts.etl.scraper_config import ScraperConfigManager
+from nba_simulator.etl.config import ScraperConfigManager
 
 # Setup logging
 logging.basicConfig(
@@ -212,7 +212,7 @@ from datetime import datetime, timedelta
 
 # Import shared infrastructure
 from scripts.etl.async_scraper_base import AsyncBaseScraper
-from scripts.etl.scraper_config import ScraperConfigManager
+from nba_simulator.etl.config import ScraperConfigManager
 
 # Setup logging
 logging.basicConfig(
@@ -385,7 +385,7 @@ from typing import Dict, List, Optional
 
 # Import shared infrastructure
 from scripts.etl.async_scraper_base import AsyncBaseScraper
-from scripts.etl.scraper_config import ScraperConfigManager
+from nba_simulator.etl.config import ScraperConfigManager
 
 # Setup logging
 logging.basicConfig(

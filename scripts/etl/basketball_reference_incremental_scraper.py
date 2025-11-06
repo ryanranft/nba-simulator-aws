@@ -61,11 +61,12 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 # Import shared infrastructure
 from scripts.etl.async_scraper_base import AsyncBaseScraper
-from scripts.etl.scraper_config import ScraperConfigManager
+from nba_simulator.etl.config import ScraperConfigManager
 
 # Basketball Reference library (synchronous)
 try:
     from basketball_reference_web_scraper import client
+
     HAS_BBREF = True
 except ImportError:
     HAS_BBREF = False
@@ -75,8 +76,7 @@ except ImportError:
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -100,17 +100,21 @@ class BasketballReferenceIncrementalScraper(AsyncBaseScraper):
         super().__init__(config)
 
         # Custom settings from config
-        self.data_types = config.custom_settings.get('data_types', ['season_totals', 'advanced_totals'])
-        self.include_combined_values = config.custom_settings.get('include_combined_values', True)
+        self.data_types = config.custom_settings.get(
+            "data_types", ["season_totals", "advanced_totals"]
+        )
+        self.include_combined_values = config.custom_settings.get(
+            "include_combined_values", True
+        )
         self.also_previous_season = also_previous_season
 
         # Statistics tracking
         self.scrape_stats = {
-            'seasons_scraped': 0,
-            'data_types_scraped': 0,
-            'total_records': 0,
-            'successes': 0,
-            'failures': 0
+            "seasons_scraped": 0,
+            "data_types_scraped": 0,
+            "total_records": 0,
+            "successes": 0,
+            "failures": 0,
         }
 
         logger.info(f"Initialized {self.__class__.__name__}")
@@ -156,8 +160,7 @@ class BasketballReferenceIncrementalScraper(AsyncBaseScraper):
 
             # Make synchronous API call (library is not async)
             totals = await asyncio.to_thread(
-                client.players_season_totals,
-                season_end_year=season
+                client.players_season_totals, season_end_year=season
             )
 
             if totals:
@@ -168,25 +171,21 @@ class BasketballReferenceIncrementalScraper(AsyncBaseScraper):
                 filename = f"player_season_totals.json"
                 subdir = f"season_totals/{season}"
 
-                await self.store_data(
-                    data=data,
-                    filename=filename,
-                    subdir=subdir
-                )
+                await self.store_data(data=data, filename=filename, subdir=subdir)
 
-                self.scrape_stats['total_records'] += len(data)
-                self.scrape_stats['successes'] += 1
+                self.scrape_stats["total_records"] += len(data)
+                self.scrape_stats["successes"] += 1
 
                 logger.info(f"  ✓ Season totals: {len(data)} player records")
                 return True
             else:
                 logger.warning(f"  ⚠️  No season totals data returned")
-                self.scrape_stats['failures'] += 1
+                self.scrape_stats["failures"] += 1
                 return False
 
         except Exception as e:
             logger.error(f"  ❌ Failed to scrape season totals: {e}")
-            self.scrape_stats['failures'] += 1
+            self.scrape_stats["failures"] += 1
             # Let AsyncBaseScraper handle retry logic
             raise
 
@@ -210,7 +209,7 @@ class BasketballReferenceIncrementalScraper(AsyncBaseScraper):
             totals = await asyncio.to_thread(
                 client.players_advanced_season_totals,
                 season_end_year=season,
-                include_combined_values=self.include_combined_values
+                include_combined_values=self.include_combined_values,
             )
 
             if totals:
@@ -221,25 +220,21 @@ class BasketballReferenceIncrementalScraper(AsyncBaseScraper):
                 filename = f"player_advanced_totals.json"
                 subdir = f"advanced_totals/{season}"
 
-                await self.store_data(
-                    data=data,
-                    filename=filename,
-                    subdir=subdir
-                )
+                await self.store_data(data=data, filename=filename, subdir=subdir)
 
-                self.scrape_stats['total_records'] += len(data)
-                self.scrape_stats['successes'] += 1
+                self.scrape_stats["total_records"] += len(data)
+                self.scrape_stats["successes"] += 1
 
                 logger.info(f"  ✓ Advanced totals: {len(data)} player records")
                 return True
             else:
                 logger.warning(f"  ⚠️  No advanced totals data returned")
-                self.scrape_stats['failures'] += 1
+                self.scrape_stats["failures"] += 1
                 return False
 
         except Exception as e:
             logger.error(f"  ❌ Failed to scrape advanced totals: {e}")
-            self.scrape_stats['failures'] += 1
+            self.scrape_stats["failures"] += 1
             raise
 
     async def scrape(self) -> None:
@@ -257,8 +252,12 @@ class BasketballReferenceIncrementalScraper(AsyncBaseScraper):
         current_season = self.get_current_season()
 
         print(f"Current NBA season: {current_season-1}-{current_season}")
-        print(f"Rate limit: {1/self.config.rate_limit.requests_per_second:.1f}s between requests")
-        print(f"S3 upload: {'Enabled' if self.config.storage.upload_to_s3 else 'Disabled'}")
+        print(
+            f"Rate limit: {1/self.config.rate_limit.requests_per_second:.1f}s between requests"
+        )
+        print(
+            f"S3 upload: {'Enabled' if self.config.storage.upload_to_s3 else 'Disabled'}"
+        )
         if self.config.dry_run:
             print("⚠️  DRY RUN MODE - No changes will be made")
         print()
@@ -287,8 +286,8 @@ class BasketballReferenceIncrementalScraper(AsyncBaseScraper):
             # Scrape advanced totals
             await self.scrape_advanced_totals(season)
 
-            self.scrape_stats['seasons_scraped'] += 1
-            self.scrape_stats['data_types_scraped'] += 2
+            self.scrape_stats["seasons_scraped"] += 1
+            self.scrape_stats["data_types_scraped"] += 2
 
         # Print summary
         self.print_summary()
@@ -307,7 +306,7 @@ class BasketballReferenceIncrementalScraper(AsyncBaseScraper):
         print("=" * 70)
         print()
 
-        if self.scrape_stats['failures'] == 0:
+        if self.scrape_stats["failures"] == 0:
             print("✅ All data scraped successfully!")
         else:
             print(f"⚠️  {self.scrape_stats['failures']} scraping operations failed")
@@ -387,8 +386,7 @@ Off-season:
 
     # Run scraper
     async with BasketballReferenceIncrementalScraper(
-        config,
-        also_previous_season=args.also_previous_season
+        config, also_previous_season=args.also_previous_season
     ) as scraper:
         await scraper.scrape()
 

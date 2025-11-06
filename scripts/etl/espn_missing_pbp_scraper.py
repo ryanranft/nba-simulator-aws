@@ -35,7 +35,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 # Import our new async infrastructure
 from scripts.etl.async_scraper_base import AsyncBaseScraper, ScraperConfig
-from scripts.etl.scraper_config import ScraperConfigManager
+from nba_simulator.etl.config import ScraperConfigManager
 
 
 class ESPNMissingPbpScraper(AsyncBaseScraper):

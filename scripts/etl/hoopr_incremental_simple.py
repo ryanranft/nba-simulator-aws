@@ -48,7 +48,7 @@ except ImportError:
 # Import AsyncBaseScraper and config loader
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from scripts.etl.async_scraper_base import AsyncBaseScraper
-from scripts.etl.scraper_config import get_scraper_config
+from nba_simulator.etl.config import get_scraper_config
 
 
 class HoopRIncrementalScraper(AsyncBaseScraper):

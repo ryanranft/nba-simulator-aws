@@ -52,12 +52,11 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 # Import shared infrastructure
 from scripts.etl.async_scraper_base import AsyncBaseScraper
-from scripts.etl.scraper_config import ScraperConfigManager
+from nba_simulator.etl.config import ScraperConfigManager
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -80,21 +79,29 @@ class ESPNIncrementalScraper(AsyncBaseScraper):
         super().__init__(config)
 
         # Custom settings from config
-        self.days_back = days_back if days_back is not None else config.custom_settings.get('default_days_back', 14)
-        self.db_path = config.custom_settings.get('database_path', '/tmp/espn_local.db')
-        self.load_to_database = config.custom_settings.get('load_to_database', True)
+        self.days_back = (
+            days_back
+            if days_back is not None
+            else config.custom_settings.get("default_days_back", 14)
+        )
+        self.db_path = config.custom_settings.get("database_path", "/tmp/espn_local.db")
+        self.load_to_database = config.custom_settings.get("load_to_database", True)
 
         # Endpoint paths
-        self.scoreboard_endpoint = config.custom_settings.get('endpoints', {}).get('scoreboard', '/scoreboard')
-        self.pbp_endpoint = config.custom_settings.get('endpoints', {}).get('playbyplay', '/playbyplay')
+        self.scoreboard_endpoint = config.custom_settings.get("endpoints", {}).get(
+            "scoreboard", "/scoreboard"
+        )
+        self.pbp_endpoint = config.custom_settings.get("endpoints", {}).get(
+            "playbyplay", "/playbyplay"
+        )
 
         # Statistics tracking
         self.scrape_stats = {
-            'games_found': 0,
-            'games_new': 0,
-            'games_updated': 0,
-            'games_skipped': 0,
-            'days_processed': 0
+            "games_found": 0,
+            "games_new": 0,
+            "games_updated": 0,
+            "games_skipped": 0,
+            "days_processed": 0,
         }
 
         logger.info(f"Initialized {self.__class__.__name__}")
@@ -108,11 +115,13 @@ class ESPNIncrementalScraper(AsyncBaseScraper):
         cursor = conn.cursor()
 
         try:
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT MAX(game_date)
                 FROM games
                 WHERE has_pbp = 1
-            """)
+            """
+            )
 
             latest_date = cursor.fetchone()[0]
 
@@ -124,7 +133,9 @@ class ESPNIncrementalScraper(AsyncBaseScraper):
 
         except sqlite3.OperationalError:
             # Table doesn't exist yet
-            logger.warning("Games table doesn't exist, starting from days_back days ago")
+            logger.warning(
+                "Games table doesn't exist, starting from days_back days ago"
+            )
             return datetime.now() - timedelta(days=self.days_back)
         finally:
             cursor.close()
@@ -182,7 +193,7 @@ class ESPNIncrementalScraper(AsyncBaseScraper):
 
         if self.config.dry_run:
             logger.info(f"[DRY RUN] Would load game {game_data['game_id']} to database")
-            self.scrape_stats['games_new'] += 1
+            self.scrape_stats["games_new"] += 1
             return
 
         # Run database operations in thread pool (SQLite is synchronous)
@@ -225,28 +236,45 @@ class ESPNIncrementalScraper(AsyncBaseScraper):
                 pbp_event_count = len(plays)
 
             # Insert or update game
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT OR REPLACE INTO games (
                     game_id, game_date, season, game_type, status,
                     home_team, away_team, home_score, away_score,
                     quarters_played, has_pbp, pbp_event_count,
                     json_file_path, created_at, updated_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-            """, (
-                game_id,
-                game_date,
-                int(game_date[:4]) if int(game_date[5:7]) >= 10 else int(game_date[:4]) + 1,  # season
-                competitions.get("type", {}).get("abbreviation", "REG") if competitions else "REG",  # game_type
-                game_data.get("status", {}).get("type", {}).get("name", "Final"),  # status
-                home_team,
-                away_team,
-                home_score,
-                away_score,
-                competitions.get("status", {}).get("period", 4) if competitions else 4,  # quarters_played
-                1 if pbp_event_count > 0 else 0,
-                pbp_event_count,
-                None,  # json_file_path
-            ))
+            """,
+                (
+                    game_id,
+                    game_date,
+                    (
+                        int(game_date[:4])
+                        if int(game_date[5:7]) >= 10
+                        else int(game_date[:4]) + 1
+                    ),  # season
+                    (
+                        competitions.get("type", {}).get("abbreviation", "REG")
+                        if competitions
+                        else "REG"
+                    ),  # game_type
+                    game_data.get("status", {})
+                    .get("type", {})
+                    .get("name", "Final"),  # status
+                    home_team,
+                    away_team,
+                    home_score,
+                    away_score,
+                    (
+                        competitions.get("status", {}).get("period", 4)
+                        if competitions
+                        else 4
+                    ),  # quarters_played
+                    1 if pbp_event_count > 0 else 0,
+                    pbp_event_count,
+                    None,  # json_file_path
+                ),
+            )
 
             # Load play-by-play if available
             if pbp_data and pbp_event_count > 0:
@@ -255,7 +283,8 @@ class ESPNIncrementalScraper(AsyncBaseScraper):
 
                 plays = pbp_data.get("plays", [])
                 for play in plays:
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                         INSERT INTO play_by_play (
                             game_id, sequence_number, period, clock_display,
                             clock_seconds, home_score, away_score,
@@ -263,28 +292,32 @@ class ESPNIncrementalScraper(AsyncBaseScraper):
                             description, coordinate_x, coordinate_y,
                             raw_json
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, (
-                        game_id,
-                        play.get("sequenceNumber"),
-                        play.get("period", {}).get("number"),
-                        play.get("clock", {}).get("displayValue"),
-                        play.get("clock", {}).get("value"),
-                        play.get("homeScore"),
-                        play.get("awayScore"),
-                        play.get("team", {}).get("id"),
-                        play.get("scoringPlay", False),
-                        play.get("type", {}).get("text"),
-                        play.get("text"),
-                        play.get("coordinate", {}).get("x"),
-                        play.get("coordinate", {}).get("y"),
-                        json.dumps(play),
-                    ))
+                    """,
+                        (
+                            game_id,
+                            play.get("sequenceNumber"),
+                            play.get("period", {}).get("number"),
+                            play.get("clock", {}).get("displayValue"),
+                            play.get("clock", {}).get("value"),
+                            play.get("homeScore"),
+                            play.get("awayScore"),
+                            play.get("team", {}).get("id"),
+                            play.get("scoringPlay", False),
+                            play.get("type", {}).get("text"),
+                            play.get("text"),
+                            play.get("coordinate", {}).get("x"),
+                            play.get("coordinate", {}).get("y"),
+                            json.dumps(play),
+                        ),
+                    )
 
             conn.commit()
-            self.scrape_stats['games_new'] += 1
+            self.scrape_stats["games_new"] += 1
 
         except Exception as e:
-            logger.error(f"Error loading game {game_data.get('game_id')} to database: {e}")
+            logger.error(
+                f"Error loading game {game_data.get('game_id')} to database: {e}"
+            )
             conn.rollback()
             raise
         finally:
@@ -311,9 +344,15 @@ class ESPNIncrementalScraper(AsyncBaseScraper):
 
         print(f"Database: {self.db_path}")
         print(f"Latest game in DB: {latest_date.strftime('%Y-%m-%d')}")
-        print(f"Scraping range: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')} ({total_days} days)")
-        print(f"Rate limit: {1/self.config.rate_limit.requests_per_second:.1f}s between requests")
-        print(f"S3 upload: {'Enabled' if self.config.storage.upload_to_s3 else 'Disabled'}")
+        print(
+            f"Scraping range: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')} ({total_days} days)"
+        )
+        print(
+            f"Rate limit: {1/self.config.rate_limit.requests_per_second:.1f}s between requests"
+        )
+        print(
+            f"S3 upload: {'Enabled' if self.config.storage.upload_to_s3 else 'Disabled'}"
+        )
         if self.config.dry_run:
             print("⚠️  DRY RUN MODE - No changes will be made")
         print()
@@ -344,7 +383,7 @@ class ESPNIncrementalScraper(AsyncBaseScraper):
                 continue
 
             print(f"({len(events)} games)")
-            self.scrape_stats['games_found'] += len(events)
+            self.scrape_stats["games_found"] += len(events)
 
             # Process each game
             for event in events:
@@ -355,16 +394,28 @@ class ESPNIncrementalScraper(AsyncBaseScraper):
                 # Get game name
                 competitions = event.get("competitions", [])
                 if competitions:
-                    home_abbr = competitions[0].get("competitors", [{}])[0].get("team", {}).get("abbreviation", "UNK")
-                    away_abbr = competitions[0].get("competitors", [{}])[1].get("team", {}).get("abbreviation", "UNK")
+                    home_abbr = (
+                        competitions[0]
+                        .get("competitors", [{}])[0]
+                        .get("team", {})
+                        .get("abbreviation", "UNK")
+                    )
+                    away_abbr = (
+                        competitions[0]
+                        .get("competitors", [{}])[1]
+                        .get("team", {})
+                        .get("abbreviation", "UNK")
+                    )
                     game_name = f"{away_abbr} @ {home_abbr}"
                 else:
                     game_name = f"Game {game_id}"
 
                 # Check if game exists
                 if self.game_exists(game_id) and not self.config.dry_run:
-                    print(f"  ⏭️  {game_name} (ID: {game_id}) - already exists, skipping")
-                    self.scrape_stats['games_skipped'] += 1
+                    print(
+                        f"  ⏭️  {game_name} (ID: {game_id}) - already exists, skipping"
+                    )
+                    self.scrape_stats["games_skipped"] += 1
                     continue
 
                 print(f"  🏀 {game_name} (ID: {game_id})")
@@ -384,7 +435,7 @@ class ESPNIncrementalScraper(AsyncBaseScraper):
                 if self.config.storage.upload_to_s3 and not self.config.dry_run:
                     combined_data = {
                         "game": game_data,
-                        "playbyplay": pbp_data if pbp_data else {}
+                        "playbyplay": pbp_data if pbp_data else {},
                     }
                     filename = f"game_{game_id}.json"
                     subdir = f"{date_display[:7]}/{date_display}"  # YYYY-MM/YYYY-MM-DD
@@ -393,7 +444,7 @@ class ESPNIncrementalScraper(AsyncBaseScraper):
                 # Load to database (preserved)
                 await self.load_game_to_db(game_data, pbp_data)
 
-            self.scrape_stats['days_processed'] += 1
+            self.scrape_stats["days_processed"] += 1
             current_date += timedelta(days=1)
 
         # Print summary

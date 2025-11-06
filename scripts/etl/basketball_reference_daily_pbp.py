@@ -64,7 +64,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 # Import shared infrastructure
 from scripts.etl.async_scraper_base import AsyncBaseScraper
-from scripts.etl.scraper_config import ScraperConfigManager
+from nba_simulator.etl.config import ScraperConfigManager
 
 # Setup logging
 logging.basicConfig(

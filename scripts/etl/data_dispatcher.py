@@ -47,7 +47,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 # Import base scraper and configuration
 from scripts.etl.async_scraper_base import AsyncBaseScraper, ScraperStats
-from scripts.etl.scraper_config import ScraperConfig, ScraperConfigManager
+from nba_simulator.etl.config import ScraperConfig, ScraperConfigManager
 
 # Import concrete scraper implementations
 try:

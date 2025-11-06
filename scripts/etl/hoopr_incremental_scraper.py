@@ -46,7 +46,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 # Import shared infrastructure
 from scripts.etl.async_scraper_base import AsyncBaseScraper
-from scripts.etl.scraper_config import ScraperConfigManager
+from nba_simulator.etl.config import ScraperConfigManager
 
 # Import sportsdataverse (hoopR Python wrapper)
 try:
@@ -84,7 +84,9 @@ class HoopRIncrementalScraper(AsyncBaseScraper):
         super().__init__(config)
 
         # Custom settings from config
-        self.db_path = config.custom_settings.get("database_path", "/tmp/hoopr_local.db")
+        self.db_path = config.custom_settings.get(
+            "database_path", "/tmp/hoopr_local.db"
+        )
         self.days_back = days_back or config.custom_settings.get("default_days_back", 7)
         self.load_to_database = config.custom_settings.get("load_to_database", True)
         self.backup_to_s3 = config.custom_settings.get("backup_to_s3", True)
@@ -126,12 +128,16 @@ class HoopRIncrementalScraper(AsyncBaseScraper):
                 return datetime.strptime(latest_date, "%Y-%m-%d")
             else:
                 # If no games, start from default days back
-                self.logger.info(f"No games in database, using default lookback: {self.days_back} days")
+                self.logger.info(
+                    f"No games in database, using default lookback: {self.days_back} days"
+                )
                 return datetime.now() - timedelta(days=self.days_back)
 
         except (sqlite3.OperationalError, sqlite3.DatabaseError) as e:
             # Database or table doesn't exist yet
-            self.logger.warning(f"Database not initialized (this is expected for first run): {e}")
+            self.logger.warning(
+                f"Database not initialized (this is expected for first run): {e}"
+            )
             self.logger.info(f"Using default lookback: {self.days_back} days")
             return datetime.now() - timedelta(days=self.days_back)
 
@@ -166,7 +172,9 @@ class HoopRIncrementalScraper(AsyncBaseScraper):
         """Load schedule data to hoopR database."""
 
         if self.config.dry_run:
-            self.logger.info(f"[DRY RUN] Would load {len(schedule_df)} schedule records")
+            self.logger.info(
+                f"[DRY RUN] Would load {len(schedule_df)} schedule records"
+            )
             return
 
         conn = sqlite3.connect(self.db_path)
@@ -288,7 +296,9 @@ class HoopRIncrementalScraper(AsyncBaseScraper):
         try:
             filename = f"hoopr_schedule_{season}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
             schedule_json = schedule_df.to_json(orient="records")
-            success = await self.store_data(json.loads(schedule_json), filename, "schedule")
+            success = await self.store_data(
+                json.loads(schedule_json), filename, "schedule"
+            )
             if success:
                 self.logger.info(f"  ✓ Schedule backed up to S3: {filename}")
         except Exception as e:
@@ -299,7 +309,9 @@ class HoopRIncrementalScraper(AsyncBaseScraper):
         try:
             filename = f"hoopr_pbp_{game_id}_{game_date}.json"
             pbp_json = pbp_df.to_json(orient="records")
-            success = await self.store_data(json.loads(pbp_json), filename, "play_by_play")
+            success = await self.store_data(
+                json.loads(pbp_json), filename, "play_by_play"
+            )
             if success:
                 self.logger.debug(f"    ✓ PBP backed up to S3: {filename}")
         except Exception as e:
@@ -330,7 +342,9 @@ class HoopRIncrementalScraper(AsyncBaseScraper):
 
         try:
             # Load schedule for current season (wrap sync library call in async)
-            schedule_df = await asyncio.to_thread(load_nba_schedule, seasons=[current_season])
+            schedule_df = await asyncio.to_thread(
+                load_nba_schedule, seasons=[current_season]
+            )
 
             if schedule_df is None or len(schedule_df) == 0:
                 self.logger.error("❌ No schedule data returned from hoopR")
@@ -398,7 +412,9 @@ class HoopRIncrementalScraper(AsyncBaseScraper):
                 try:
                     # Load play-by-play for this specific season (wrap sync library call in async)
                     # Note: hoopR loads entire season PBP, so we filter after
-                    pbp_df = await asyncio.to_thread(load_nba_pbp, seasons=[current_season])
+                    pbp_df = await asyncio.to_thread(
+                        load_nba_pbp, seasons=[current_season]
+                    )
 
                     if pbp_df is not None and len(pbp_df) > 0:
                         # Convert to pandas if it's a Polars DataFrame
@@ -409,12 +425,16 @@ class HoopRIncrementalScraper(AsyncBaseScraper):
                         game_pbp = pbp_df[pbp_df["game_id"] == int(game_id)]
 
                         if len(game_pbp) > 0:
-                            self.logger.info(f"    ✓ Found {len(game_pbp):,} PBP events")
+                            self.logger.info(
+                                f"    ✓ Found {len(game_pbp):,} PBP events"
+                            )
                             self.load_pbp_to_db(game_pbp, game_id)
 
                             # Backup PBP to S3 if enabled
                             if self.backup_to_s3:
-                                await self._backup_pbp_to_s3(game_pbp, game_id, game_date)
+                                await self._backup_pbp_to_s3(
+                                    game_pbp, game_id, game_date
+                                )
 
                             self.scrape_stats["games_new"] += 1
                         else:
@@ -473,7 +493,9 @@ Purpose:
     )
 
     parser.add_argument(
-        "--dry-run", action="store_true", help="Dry run mode - don't modify database or S3"
+        "--dry-run",
+        action="store_true",
+        help="Dry run mode - don't modify database or S3",
     )
 
     parser.add_argument(
@@ -499,7 +521,9 @@ Purpose:
 
         logger.info(f"✅ Loaded hoopR Incremental configuration")
         logger.info(f"   Database: {config.custom_settings.get('database_path')}")
-        logger.info(f"   Days back: {args.days_back or config.custom_settings.get('default_days_back')}")
+        logger.info(
+            f"   Days back: {args.days_back or config.custom_settings.get('default_days_back')}"
+        )
         logger.info(f"   S3 bucket: {config.storage.s3_bucket}")
         logger.info(f"   Dry run: {config.dry_run}")
         logger.info("")

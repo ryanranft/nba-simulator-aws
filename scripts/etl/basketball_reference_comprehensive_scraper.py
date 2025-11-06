@@ -49,7 +49,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 # Import our async infrastructure
 try:
     from scripts.etl.async_scraper_base import AsyncBaseScraper, ScraperConfig
-    from scripts.etl.scraper_config import get_scraper_config
+    from nba_simulator.etl.config import get_scraper_config
 except ImportError:
     # Fallback for testing
     class AsyncBaseScraper:

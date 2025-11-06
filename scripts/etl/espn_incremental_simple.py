@@ -32,11 +32,13 @@ Migrated: October 22, 2025
 # 5. Use self.rate_limiter.acquire() before requests
 # 6. Use self.store_data() for S3 uploads
 #
-# Uncomment these imports when ready:
-# import sys
-# from pathlib import Path
-# sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-# from scripts.etl.async_scraper_base import AsyncBaseScraper
+# Import AsyncBaseScraper framework
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from scripts.etl.async_scraper_base import AsyncBaseScraper
+from nba_simulator.etl.config import ScraperConfigManager
 
 import argparse
 import json

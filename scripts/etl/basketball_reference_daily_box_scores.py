@@ -54,7 +54,7 @@ from typing import List, Dict
 # Import AsyncBaseScraper framework
 sys.path.append(str(Path(__file__).parent.parent.parent))
 from scripts.etl.async_scraper_base import AsyncBaseScraper
-from scripts.etl.scraper_config import ScraperConfigManager
+from nba_simulator.etl.config import ScraperConfigManager
 
 
 class DailyBoxScoreCoordinator(AsyncBaseScraper):
