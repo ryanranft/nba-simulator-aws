@@ -45,7 +45,9 @@ from scripts.etl.async_scraper_base import AsyncBaseScraper, ScraperConfig
 from nba_simulator.etl.base import ScraperErrorHandler
 from nba_simulator.etl.monitoring import ScraperTelemetry
 from nba_simulator.etl.config import ScraperConfigManager, get_scraper_config
-from scripts.etl.intelligent_extraction import BasketballReferenceExtractionStrategy
+from nba_simulator.etl.extractors.intelligent import (
+    BasketballReferenceExtractionStrategy,
+)
 from nba_simulator.etl.tools import ToolComposer
 
 

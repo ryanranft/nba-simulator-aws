@@ -47,27 +47,11 @@ from datetime import datetime, timezone
 # Import from new package structure
 from nba_simulator.etl.base import ScraperConfig, RateLimiter, ScraperErrorHandler
 from nba_simulator.etl.monitoring import ScraperTelemetry
-
-# NOTE: intelligent_extraction not yet migrated, conditional import
-try:
-    from nba_simulator.etl.extractors.intelligent import (
-        ExtractionManager,
-        ESPNExtractionStrategy,
-        BasketballReferenceExtractionStrategy,
-    )
-except ImportError:
-    # Fallback to legacy import during migration
-    try:
-        from scripts.etl.intelligent_extraction import (
-            ExtractionManager,
-            ESPNExtractionStrategy,
-            BasketballReferenceExtractionStrategy,
-        )
-    except ImportError:
-        # Create stub if not available
-        ExtractionManager = None
-        ESPNExtractionStrategy = None
-        BasketballReferenceExtractionStrategy = None
+from nba_simulator.etl.extractors.intelligent import (
+    ExtractionManager,
+    ESPNExtractionStrategy,
+    BasketballReferenceExtractionStrategy,
+)
 
 
 @dataclass
@@ -271,19 +255,11 @@ class ParseTool(BaseTool):
 
     def __init__(self, tool_config: ToolConfig):
         super().__init__(tool_config)
-        self.extraction_manager = tool_config.extraction_manager
-        if self.extraction_manager is None and ExtractionManager is not None:
-            self.extraction_manager = ExtractionManager()
-            self._setup_extraction_strategies()
+        self.extraction_manager = tool_config.extraction_manager or ExtractionManager()
+        self._setup_extraction_strategies()
 
     def _setup_extraction_strategies(self) -> None:
         """Setup extraction strategies"""
-        if ExtractionManager is None:
-            self.logger.warning(
-                "ExtractionManager not available, skipping strategy setup"
-            )
-            return
-
         self.extraction_manager.add_strategy("espn", ESPNExtractionStrategy())
         self.extraction_manager.add_strategy(
             "basketball_reference", BasketballReferenceExtractionStrategy()
@@ -306,35 +282,18 @@ class ParseTool(BaseTool):
     ) -> Optional[Dict[str, Any]]:
         """Parse HTTP response content"""
         try:
-            if content_type == "json":
-                content = await response.text()
-                if self.extraction_manager:
-                    result = await self.extraction_manager.extract_with_fallback(
-                        content, "json", extraction_strategy
-                    )
-                else:
-                    # Fallback to simple JSON parsing
-                    return await self.parse_json(content)
-            elif content_type == "html":
-                content = await response.text()
-                if self.extraction_manager:
-                    result = await self.extraction_manager.extract_with_fallback(
-                        content, "html", extraction_strategy
-                    )
-                else:
-                    # Fallback to text parsing
-                    return await self.parse_text(content)
-            else:
-                self.logger.error(f"Unsupported content type: {content_type}")
-                self._record_operation(False)
-                return None
+            content = await response.text()
 
-            if hasattr(result, "success") and result.success:
+            # Use extraction manager with strategy
+            result = await self.extraction_manager.extract_with_fallback(
+                content, content_type, extraction_strategy
+            )
+
+            if result.success:
                 self._record_operation(True)
                 return result.data
             else:
-                if hasattr(result, "errors"):
-                    self.logger.error(f"Parsing failed: {result.errors}")
+                self.logger.error(f"Parsing failed: {result.errors}")
                 self._record_operation(False)
                 return None
 
