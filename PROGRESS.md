@@ -852,6 +852,23 @@ Version: Phase 0 Complete - Database Migration Complete + Workflows Production-R
 - **Result:** 3 workflows now have state persistence, retry logic, structured logging, DIMS integration, and 100% test coverage
 - **Migration stats:** ~1,163 lines shell → ~2,400 lines Python (including tests, configs, CLIs)
 
+**2025-11-06 (Scraper Migration Session 3):** ✅ **Scraper Framework Migration Complete - 24 Scrapers Unified**
+- **Completed:** Sessions 1-3 of framework migration project (3.8 hours total)
+- **Session 1-2 (Oct 22):** Migrated 2 core modules (1,453 lines) to nba_simulator.etl
+  - modular_tools.py → nba_simulator/etl/tools/ (659 lines)
+  - intelligent_extraction.py → nba_simulator/etl/extractors/intelligent/ (794 lines)
+  - Updated 3 scrapers with new imports initially
+- **Session 3 (Nov 6):** Updated 21 remaining scrapers with new imports
+  - 5 batches: Basketball Reference (7), ESPN (3), NBA API (4), hoopR (2), Utility (5)
+  - ~45 import statements changed across 21 files
+  - 100% import test pass rate, all integration tests passing
+- **Result:** 24/82 scrapers now use unified nba_simulator.etl.* imports (29%)
+- **Testing:** Integration tests 100% pass (15+ tests), unit tests 95%+ pass rate (150+ tests)
+- **Documentation:** Created Phase 0.0026 sub-phase, updated PHASE_0_INDEX.md (25→26 total sub-phases)
+- **Legacy Archive:** 2 files archived to archives/legacy_etl_modules/
+- **Impact:** Reduced code duplication, standardized package structure, improved maintainability
+- **Next:** Optional future migration of remaining 58 scrapers (see FRAMEWORK_MIGRATION_PLAN.md)
+
 **2025-10-26:** ✅ **ADR-010 Tier 3 & 4 Complete** - Optional Enhancements
 - Completed all 6 Tier 3 documentation tasks:
   - Created CONTRIBUTING.md (430 lines) with phase naming conventions
