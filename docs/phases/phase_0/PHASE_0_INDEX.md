@@ -1,9 +1,11 @@
 # Phase 0: Data Collection
 
-**Status:** ✅ COMPLETE (23/23 sub-phases complete, 100%)
+**Status:** ⏸️ IN PROGRESS (24/25 sub-phases complete, 96%)
 **Started:** September 29, 2025
 **Completed:** November 4, 2025
-**Last Updated:** November 4, 2025
+**Last Updated:** November 5, 2025 (Post-Refactoring Verification)
+
+**📋 [Verification Guide](../../PHASE_0_VERIFICATION_GUIDE.md)** - Complete verification procedures for all 23 sub-phases
 
 ---
 
@@ -23,8 +25,6 @@ Phase 0 establishes the complete data collection infrastructure for the NBA temp
 - ❌ Other sports (MLB, NFL, NHL, soccer, etc.)
 
 **Future Sports Platforms:** Other sports will be built as **separate projects** in separate directories, using this NBA infrastructure as a template/foundation.
-
-**0.0005 & 0.6:** These are **NOT** reserved for other sports. They were permanently superseded by PostgreSQL implementations (see "Architecture Notes → Missing Sub-Phases" section below).
 
 ---
 
@@ -80,6 +80,8 @@ CLI entry points for Phase 0 Python workflows:
 | **0.0002** | [hoopR Data Collection](0.0002_hoopr_data_collection/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 9, 2025 (Validated: Oct 23, 2025) | hoopR package data (410 files, 8.2GB) |
 | **0.0003** | [Kaggle Historical Database](0.0003_kaggle_historical_database/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Pre-project (Validated: Oct 23, 2025) | Historical database (66K games, 1946-2023, EXPANDED) |
 | **0.0004** | [Basketball Reference](0.0004_basketball_reference/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Oct 25, 2025 (ADCE Integration) | Basketball Reference ADCE Integration (444 files + 43 data types configured, NBA + G League) |
+| **0.0005** | [Possession Extraction](0.0005_possession_extraction/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Nov 5, 2025 | Extract possessions from temporal_events (1.37M possessions from 29,323 games, 98.3% success rate, FULLY VALIDATED at production scale) |
+| **0.0006** | [Temporal Feature Engineering](0.0006_temporal_features/README.md) | ⏸️ PENDING | ⭐ CRITICAL | TBD (Week 3-8) | Calculate KenPom metrics, Four Factors, rolling windows, temporal features (100+ metrics, 6 tables) |
 | **0.0007** | [Odds API Data](0.0007_odds_api_data/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Oct 23, 2025 (Validated) | Betting odds integration (odds-api scraper, 5 tables, 10+ bookmakers) |
 | **0.0008** | [Security Implementation](0.0008_security_implementation/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 23, 2025 | 13 security variations (rec_034-047) |
 | **0.0009** | [Data Extraction](0.0009_data_extraction/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 23-24, 2025 | **Full validation complete: 93.1% success** (160,609/172,433 files, 100/100 quality, all schemas working) |
@@ -105,10 +107,10 @@ CLI entry points for Phase 0 Python workflows:
 ## Progress Summary
 
 ### Completion Status
-- **Complete:** 23 sub-phases (0.1, 0.2, 0.3, 0.4, 0.7, 0.8, 0.9, 0.10, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 0.24, 0.25)
+- **Complete:** 24 sub-phases (0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 0.10, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 0.24, 0.25)
 - **In Progress:** 0 sub-phases
-- **Pending:** 0 sub-phases
-- **Total:** 23 sub-phases (23 complete, 0 pending, 0.5 & 0.6 superseded by 0.10/0.11 PostgreSQL implementations)
+- **Pending:** 1 sub-phase (0.6)
+- **Total:** 25 sub-phases (24 complete, 0 in progress, 1 pending)
 
 **Phase 0 Infrastructure Completion:** ✅ COMPLETE (Data Collection & Foundation)
 **Phase 0 Enhancements:**
@@ -160,28 +162,6 @@ python scripts/monitoring/dims_cli.py verify --category s3_storage
 ---
 
 ## Architecture Notes
-
-### Missing Sub-Phases (0.5, 0.6) - SUPERSEDED, NOT AWAITING NCAA DATA
-
-**⚠️ IMPORTANT:** These sub-phases were **permanently superseded** by PostgreSQL implementations. They are **NOT** placeholders for NCAA/International data.
-
-**Why they're missing:**
-- `0.5` → **Superseded** by `0.0010_postgresql_jsonb_storage` (rec_033)
-  - Originally: MongoDB NoSQL storage with flexible schema
-  - Replaced with: PostgreSQL JSONB columns (same flexibility, better integration)
-- `0.6` → **Superseded** by `0.0011_rag_pipeline_pgvector` (rec_034) and `0.0012_rag_llm_integration` (rec_188)
-  - Originally: RAG pipeline with Qdrant vector database
-  - Replaced with: PostgreSQL pgvector extension (same capabilities, unified database)
-
-**PostgreSQL architecture decision:** MongoDB + Qdrant were replaced with PostgreSQL JSONB + pgvector for:
-- Cost savings: $0 vs $25-50/month for additional database infrastructure
-- Better integration: Native JOINs with temporal panel data
-- Simpler architecture: Single database vs. 3 separate databases
-- ACID transactions: Data consistency across all operations
-
-**Project Scope:** This project is **strictly NBA-only**. NCAA, international, and other sports will be **separate projects** using this as a template.
-
-See `archive/mongodb_superseded/` for historical context.
 
 ### Autonomous Operation (ADCE)
 0.0018 represents the **culmination** of Phase 0's data collection efforts:

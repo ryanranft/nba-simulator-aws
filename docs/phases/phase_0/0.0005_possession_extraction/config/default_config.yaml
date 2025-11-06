@@ -1,0 +1,193 @@
+# Phase 0.0005: Possession Extraction Configuration
+# Default configuration for possession extraction workflow
+
+# Project paths
+project_dir: /Users/ryanranft/nba-simulator-aws
+log_dir: logs/possession_extraction
+reports_dir: reports/possession_extraction
+
+# Database configuration
+database:
+  host: localhost
+  port: 5432
+  dbname: nba_data
+  user: nba_admin
+  # password: set via environment variable NBA_DB_PASSWORD
+  
+# Source and target tables
+source_table: temporal_events
+target_table: temporal_possession_stats
+
+# Possession detection rules
+possession_detection:
+  # Minimum possession duration (seconds)
+  min_duration: 0.5
+  
+  # Maximum possession duration (seconds)
+  # Typical possessions: 8-24 seconds
+  # Max includes shot clock resets
+  max_duration: 35.0
+  
+  # Start events (possession begins)
+  start_events:
+    - defensive_rebound
+    - steal
+    - inbound
+    - jump_ball_won
+    - technical_foul_shot_made  # Offense retains possession
+    - made_free_throw_last      # After opponent scores
+    
+  # End events (possession terminates)
+  end_events:
+    - shot_made
+    - shot_missed
+    - turnover
+    - end_of_period
+    - foul_before_shot          # If it gives possession to defense
+    - violation                 # Lane violation, 3-second, etc.
+    
+  # Events that continue possession
+  continuation_events:
+    - offensive_rebound         # Possession continues
+    - offensive_foul_no_change  # Some offensive fouls don't change possession
+    
+  # Edge cases requiring special handling
+  edge_cases:
+    handle_technical_fouls: true
+    handle_flagrant_fouls: true
+    handle_double_fouls: true
+    handle_simultaneous_fouls: true
+    handle_end_of_period: true
+    handle_overtime: true
+
+# Validation settings
+validation:
+  # Dean Oliver validation
+  enable_oliver_validation: true
+  oliver_tolerance_pct: 5.0     # Within 5% is acceptable
+  oliver_formula_coefficients:
+    fta_coefficient: 0.44       # Standard Oliver coefficient
+  
+  # Duration validation
+  check_duration_bounds: true
+  warn_if_duration_outlier: true
+  outlier_threshold_seconds: 35.0
+  
+  # Logical consistency checks
+  verify_possession_chains: true
+  check_orphaned_events: true
+  max_orphaned_events_pct: 1.0  # Fail if >1% events orphaned
+  
+  # Score validation
+  verify_score_progression: true
+  check_impossible_scores: true
+
+# Processing configuration
+processing:
+  # Batch size for database queries
+  batch_size: 1000
+  
+  # Number of games to process in parallel
+  # Set to 1 for debugging, 4-8 for production
+  parallel_games: 4
+  
+  # Retry configuration
+  max_retries: 3
+  retry_delay_seconds: 5
+  retry_backoff_multiplier: 2.0
+  
+  # Memory management
+  max_events_in_memory: 100000
+  clear_cache_every_n_games: 100
+
+# Output settings
+output:
+  # Save validation reports
+  save_reports: true
+  report_format: markdown        # Options: markdown, json, csv
+  report_details: full           # Options: full, summary, minimal
+  
+  # Save detailed logs
+  detailed_logging: true
+  log_level: INFO                # DEBUG, INFO, WARNING, ERROR
+  log_rotation: true
+  log_retention_days: 30
+  
+  # Progress reporting
+  show_progress_bar: true
+  progress_update_interval: 10   # Games
+
+# Context flags
+context_detection:
+  # Clutch time: last 5 minutes, score within 5 points
+  clutch_time:
+    enabled: true
+    time_remaining_minutes: 5
+    score_differential_max: 5
+    
+  # Garbage time: >20 point differential, <5 minutes
+  garbage_time:
+    enabled: true
+    time_remaining_minutes: 5
+    score_differential_min: 20
+    
+  # Fastbreak: possession < 8 seconds
+  fastbreak:
+    enabled: true
+    max_duration_seconds: 8.0
+    
+  # Timeout detection
+  timeout_detection:
+    enabled: true
+
+# DIMS integration
+dims:
+  enabled: true
+  report_metrics: true
+  
+  # Metrics to report
+  metrics:
+    - possessions_extracted
+    - games_processed
+    - events_processed
+    - validation_pass_rate
+    - avg_possessions_per_game
+    - processing_duration_seconds
+    - database_write_duration
+    - oliver_validation_errors
+    - orphaned_events_count
+    - avg_possession_duration
+    - fastbreak_pct
+    - clutch_possessions_count
+  
+  # Health check intervals
+  health_check_interval_seconds: 300
+  report_interval_seconds: 600
+
+# Performance tuning
+performance:
+  # Database connection pooling
+  connection_pool_size: 10
+  connection_pool_overflow: 20
+  
+  # Query optimization
+  use_prepared_statements: true
+  enable_query_cache: true
+  
+  # Indexing
+  verify_indexes_on_startup: true
+  create_indexes_if_missing: true
+
+# Feature flags (for phased rollout)
+features:
+  # Enable advanced context detection
+  advanced_context: true
+  
+  # Enable player-level attribution
+  player_attribution: true
+  
+  # Enable shot quality metrics
+  shot_quality: true
+  
+  # Enable real-time processing (future)
+  real_time_processing: false
