@@ -77,6 +77,150 @@ cd /Users/ryanranft/nba-simulator-aws
 
 ---
 
+## Database Credentials
+
+**Credentials managed using hierarchical secrets structure**
+See: `/Users/ryanranft/Desktop/++/big_cat_bets_assets/SECRETS_STRUCTURE.md`
+
+**Location:** `/Users/ryanranft/Desktop/++/big_cat_bets_assets/sports_assets/big_cat_bets_simulators/NBA/nba-simulator-aws/`
+
+**Contexts:**
+- **Production (WORKFLOW):** AWS RDS PostgreSQL
+  - Directory: `.env.nba_simulator_aws.production/`
+  - Naming: `RDS_*_NBA_SIMULATOR_AWS_WORKFLOW.env`
+  - Database: `nba_simulator` @ RDS (35M+ records)
+
+- **Development (DEVELOPMENT):** Local PostgreSQL or RDS Dev
+  - Directory: `.env.nba_simulator_aws.development/`
+  - Naming: `POSTGRES_*_NBA_SIMULATOR_AWS_DEVELOPMENT.env` (local) or `RDS_*_NBA_SIMULATOR_AWS_DEVELOPMENT.env` (RDS)
+  - Local databases: `nba_simulator` (15 tables), `nba_unified` (10 tables)
+
+- **Test (TEST):** Local PostgreSQL test database
+  - Directory: `.env.nba_simulator_aws.test/`
+  - Naming: `POSTGRES_*_NBA_SIMULATOR_AWS_TEST.env`
+  - Database: `nba_simulator_test`
+
+**Loading credentials:**
+```bash
+# Auto-load with session manager
+bash scripts/shell/session_manager.sh start
+
+# Manual load
+source /Users/ryanranft/load_secrets_universal.sh
+
+# Python (auto-detects context from ENVIRONMENT variable)
+python3 -c "from nba_simulator.config import config; print(config.load_database_config())"
+```
+
+**Context switching:**
+```bash
+# Use local PostgreSQL (default)
+export ENVIRONMENT=development
+
+# Use production RDS
+export ENVIRONMENT=production
+```
+
+**Available credentials:**
+- `RDS_HOST_NBA_SIMULATOR_AWS_WORKFLOW` - RDS endpoint
+- `RDS_DATABASE_NBA_SIMULATOR_AWS_WORKFLOW` - Database name
+- `RDS_USERNAME_NBA_SIMULATOR_AWS_WORKFLOW` - Username
+- `RDS_PASSWORD_NBA_SIMULATOR_AWS_WORKFLOW` - Password
+- `RDS_PORT_NBA_SIMULATOR_AWS_WORKFLOW` - Port (5432)
+- `POSTGRES_HOST_NBA_SIMULATOR_AWS_DEVELOPMENT` - Local host (localhost)
+- `POSTGRES_DB_NBA_SIMULATOR_AWS_DEVELOPMENT` - Local database name
+- `POSTGRES_USER_NBA_SIMULATOR_AWS_DEVELOPMENT` - Local user
+- `POSTGRES_PASSWORD_NBA_SIMULATOR_AWS_DEVELOPMENT` - Local password (empty for trust auth)
+- `POSTGRES_PORT_NBA_SIMULATOR_AWS_DEVELOPMENT` - Local port (5432)
+
+**Never commit:**
+- `.env` files in project root
+- `/Users/ryanranft/nba-sim-credentials.env` (legacy file)
+- Any files in `.env.nba_simulator_aws.*` directories
+- Credentials are outside Git repo ✅
+
+---
+
+## Database Schema Architecture
+
+**Production Standard:** `raw_data` schema (Phase 0.10+)
+
+**Local databases now match production** with `raw_data` schema alongside legacy `master` schema.
+
+### Schema Overview
+
+| Schema | Purpose | Status | Tables |
+|--------|---------|--------|--------|
+| `raw_data` | **Production standard** - JSONB storage for multi-source data | ✅ Active | nba_games, nba_players, nba_teams, nba_misc, schema_version |
+| `rag` | RAG/embeddings pipeline (Phase 0.11) | ✅ Active | nba_embeddings, play_embeddings, document_embeddings |
+| `master` | Legacy development schema | ⚠️ Deprecated | nba_games, nba_plays, espn_file_validation |
+
+### Design Philosophy
+
+**raw_data schema:**
+- Document-oriented with JSONB `data` column
+- Flexible for multi-source ingestion (hoopR, ESPN, nba_api)
+- ACID guarantees with PostgreSQL benefits
+- Created by: `scripts/db/migrations/0_10_schema.sql`
+
+**rag schema:**
+- Specialized for embeddings and semantic search
+- pgvector extension with HNSW indexes
+- Separate from raw_data for performance isolation
+- Created by: `scripts/db/migrations/0_11_schema.sql`
+
+### Running Migrations
+
+**Create raw_data schema locally:**
+```bash
+export POSTGRES_DB=nba_simulator
+export POSTGRES_USER=ryanranft
+export POSTGRES_HOST=localhost
+psql -U $POSTGRES_USER $POSTGRES_DB -f scripts/db/migrations/0_10_schema.sql
+```
+
+**Create rag schema locally:**
+```bash
+psql -U $POSTGRES_USER $POSTGRES_DB -f scripts/db/migrations/0_11_schema.sql
+```
+
+### Schema-Agnostic Validators
+
+**Phase 0 validators support multiple schemas:**
+
+```bash
+# Validate raw_data schema (default)
+python validators/phases/phase_0/validate_0_0010.py
+
+# Validate with --schema flag
+python validators/phases/phase_0/validate_0_0010.py --schema=raw_data
+python validators/phases/phase_0/validate_0_0010.py --schema=master
+
+# RAG validator (defaults to rag schema)
+python validators/phases/phase_0/validate_0_0011.py
+python validators/phases/phase_0/validate_0_0011.py --schema=rag
+```
+
+**Validators with --schema support:**
+- `validate_0_0010.py` - PostgreSQL JSONB Storage (raw_data/master)
+- `validate_0_0011.py` - RAG Pipeline (rag)
+
+### Migration Status
+
+**✅ Migration Complete (November 5, 2025):**
+- ✅ **31,241 games** migrated from `master` → `raw_data`
+- ✅ **44,826 file validations** migrated
+- ✅ **14.1M play-by-play records** summarized and embedded
+- ✅ **100% validation** pass rate (row counts, data quality, play counts, spot checks)
+- ✅ **23 seconds** migration time (1,331.6 games/sec)
+- ✅ **Zero errors** during migration
+- ✅ Both schemas coexist (raw_data + master preserved for rollback)
+- ✅ Validators support both schemas
+
+**See:** `docs/MIGRATION_REPORT.md` for complete migration details
+
+---
+
 ## Session Workflow
 
 **Every new session:**

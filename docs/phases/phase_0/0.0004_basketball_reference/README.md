@@ -9,26 +9,26 @@
 
 ---
 
-## ⚠️ IMPLEMENTATION STATUS (October 25, 2025)
+## ⚠️ IMPLEMENTATION STATUS (November 7, 2025)
 
-**IMPLEMENTED:** 43 data types across Tiers 1-9 and 11
-- ✅ **NBA (Tiers 1-9):** 33 types - Complete modern NBA + historical leagues (ABA/BAA/Early NBA)
-- ✅ **G League (Tier 11):** 10 types - Complete G League ecosystem (2002-2025)
+**IMPLEMENTED:** 43 data types across Tiers 1-11
+- ✅ **Tier 1 (IMMEDIATE):** 5 critical game data types
+- ✅ **Tier 2 (IMMEDIATE):** 4 advanced analytics types
+- ✅ **Tiers 3-9 (HIGH-LOW):** 24 NBA types (tracking, profiles, historical, situational, defense, aggregates, matchups)
+- ✅ **Tier 10 (Archives):** 6 historical archive types (1947-present)
+- ✅ **Tier 11 (G League):** 3 G League data types (2002-2025)
+
+**Collection Status:** Daily autonomous @ 4:00 AM (November 7, 2025 restoration)
+- Runtime: 3-4 hours
+- Daily data: 2-5 GB
+- Features: 300+ ML features available
 
 **NOT IMPLEMENTED (Reserved for Future Expansion):**
-- ⏸️ **Tier 10 (WNBA):** 16 types - Marked EXECUTE but not extracted
-- ⏸️ **Tier 12 (International):** 40 types - Marked OPTIONAL, not extracted
-- ⏸️ **Tier 13 (NCAA):** 10 types - Marked OPTIONAL, not extracted
+- ⏸️ **WNBA:** Not extracted (separate project scope)
+- ⏸️ **International:** Not extracted (separate project scope)
+- ⏸️ **NCAA:** Not extracted (separate project scope)
 
-**Current Focus:** Autonomous collection of implemented 43 types (6-9 weeks estimated)
-
-**Priority Order (Option A):**
-1. NBA Modern (Tiers 1-4): 16 types → 3-4 weeks
-2. NBA Advanced (Tiers 5-8): 14 types → 2-3 weeks
-3. Historical Leagues (Tier 9): 3 types (ABA/BAA) → 1 week
-4. G League (Tier 11): 10 types → 1 week
-
-**See:** [BASKETBALL_REFERENCE_ADCE_DEPLOYMENT.md](../../../../BASKETBALL_REFERENCE_ADCE_DEPLOYMENT.md) for complete deployment details
+**See:** [COMPREHENSIVE_COLLECTION.md](COMPREHENSIVE_COLLECTION.md) for complete documentation
 
 ---
 
@@ -45,7 +45,12 @@
 **Get current Basketball Reference metrics (always up-to-date):**
 ```bash
 python scripts/monitoring/dims_cli.py verify --category s3_storage
+python scripts/monitoring/dims_cli.py show --category basketball_reference_comprehensive
 ```
+
+**Historical milestones:**
+- **Oct 25, 2025 (ADCE Integration):** 444 files, 99.9 MB, 14 data categories
+- **Nov 7, 2025 (Comprehensive Restoration):** 43 data types, daily autonomous collection @ 4 AM
 
 **See also:** Workflow #56 (DIMS Management), `inventory/metrics.yaml`
 

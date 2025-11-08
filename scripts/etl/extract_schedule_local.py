@@ -5,7 +5,7 @@ Local ETL Script: Extract NBA Schedule Data from S3 to RDS
 Extracts 10% of relevant fields from ESPN JSON schedule files.
 Reads directly from S3 and writes to RDS PostgreSQL (no Glue required).
 
-Input: s3://nba-sim-raw-data-lake/schedule/*.json
+Input: s3://nba-sim-raw-data-lake/espn_schedules/*.json
 Output: RDS PostgreSQL table: games
 
 Usage:
@@ -56,7 +56,7 @@ def validate_environment():
 def get_s3_files_for_year(year: int) -> List[str]:
     """Get list of schedule JSON files for a specific year from S3"""
     s3 = boto3.client("s3")
-    prefix = "schedule/"
+    prefix = "espn_schedules/"
 
     # List all schedule files
     paginator = s3.get_paginator("list_objects_v2")

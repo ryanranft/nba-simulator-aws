@@ -207,8 +207,15 @@ class PossessionDetector:
         """
         Detect possession boundaries from event stream.
 
-        This is the main entry point for possession detection. Takes a sorted
-        list of events and returns a list of detected possessions.
+        REWRITTEN (Nov 5, 2025) to fix critical flaw: Only detected ~46 possessions/game
+        instead of ~200 because it only looked for jump balls.
+
+        New algorithm properly tracks possession changes:
+        - Made shots → opponent gets ball (inbound) [~90-110 per game]
+        - Defensive rebounds → rebounding team gets ball [~40-50 per game]
+        - Turnovers → opponent gets ball [~25-30 per game]
+        - Steals → stealing team gets ball [~10-20 per game]
+        - Offensive rebounds → same team keeps ball (NO possession change)
 
         Args:
             events: List of event dictionaries sorted by (period, clock)
@@ -239,118 +246,576 @@ class PossessionDetector:
         possessions = []
         current_possession_events = []
         possession_number = 0
-        in_possession = False
         current_offensive_team_id = None
 
-        # 4. Iterate through events
-        for i, event in enumerate(events):
-            event_type = event.get("event_type", "").lower()
+        def get_opponent_team(team_id):
+            """
+            Get opponent team ID.
 
-            # Check if this starts a new possession
-            if self.is_start_event(event, current_offensive_team_id):
-                # If we were tracking a possession, close it first
-                if in_possession and current_possession_events:
-                    possession = self._build_possession(
-                        current_possession_events, possession_number, metadata
-                    )
-                    if possession:
-                        possessions.append(possession)
-                        possession_number += 1
-
-                # Start new possession
-                current_possession_events = [event]
-                in_possession = True
-                # Update offensive team based on the start event
-                current_offensive_team_id = event.get("team_id")
-                logger.debug(
-                    f"Started possession #{possession_number} at event {i}: {event_type}, team={current_offensive_team_id}"
+            Returns the opponent's team ID given a team ID.
+            If unknown team_id provided, defaults to home team as opponent.
+            """
+            if team_id == home_team_id:
+                return away_team_id
+            elif team_id == away_team_id:
+                return home_team_id
+            else:
+                # CRITICAL FIX: Unknown team - log error and default to home team
+                logger.error(
+                    f"Unknown team_id {team_id} (not {home_team_id} or {away_team_id}), "
+                    f"defaulting to home team {home_team_id}"
                 )
+                return home_team_id
 
-            # Check if this ends the current possession
-            elif self.is_end_event(event, current_offensive_team_id):
-                if in_possession:
-                    # Add this final event to possession
-                    current_possession_events.append(event)
+        def get_event_description(event):
+            """
+            Get event description from event_data JSONB field.
 
-                    # Build and save possession
-                    possession = self._build_possession(
-                        current_possession_events, possession_number, metadata
-                    )
-                    if possession:
-                        possessions.append(possession)
-                        possession_number += 1
+            FIX #6: Correctly parse home_description/visitor_description from event_data
+            instead of looking for non-existent 'description' field.
 
-                    # Reset for next possession
-                    current_possession_events = []
-                    in_possession = False
-                    current_offensive_team_id = None
-                    logger.debug(
-                        f"Ended possession #{possession_number-1} at event {i}: {event_type}"
-                    )
-                else:
-                    # End event without start - might be beginning of game
+            Args:
+                event: Event dictionary with event_data JSONB field
+
+            Returns:
+                str: Combined description text (lowercase) or empty string
+            """
+            event_data = event.get("event_data", {})
+            if not event_data:
+                return ""
+
+            home_desc = (event_data.get("home_description") or "").lower()
+            visitor_desc = (event_data.get("visitor_description") or "").lower()
+            neutral_desc = (event_data.get("neutral_description") or "").lower()
+
+            # Combine all descriptions
+            combined = " ".join([home_desc, visitor_desc, neutral_desc]).strip()
+            return combined
+
+        def infer_team_from_event_data(event):
+            """
+            Infer team_id from event_data when team_id is NULL.
+
+            For rebounds without team_id, parse home_description or visitor_description
+            to determine which team got the rebound.
+
+            FIX #4: Now case-insensitive and checks for multiple keywords.
+
+            Args:
+                event: Event dictionary with event_data JSONB field
+
+            Returns:
+                int: team_id (home_team_id or away_team_id) or None if cannot infer
+            """
+            event_data = event.get("event_data", {})
+            if not event_data:
+                return None
+
+            # FIX #4: Use .lower() for case-insensitive matching
+            home_desc = (event_data.get("home_description") or "").lower()
+            visitor_desc = (event_data.get("visitor_description") or "").lower()
+
+            # Keywords that indicate team action (not just "Rebound")
+            team_keywords = ["rebound", "reb", "defensive rebound", "offensive rebound"]
+
+            # Check if home team made the play
+            if home_desc and any(keyword in home_desc for keyword in team_keywords):
+                logger.debug(f"Inferred home team from: {home_desc}")
+                return home_team_id
+
+            # Check if visitor/away team made the play
+            if visitor_desc and any(
+                keyword in visitor_desc for keyword in team_keywords
+            ):
+                logger.debug(f"Inferred away team from: {visitor_desc}")
+                return away_team_id
+
+            # Could not infer team
+            logger.debug(
+                f"Cannot infer team from event_data: home='{home_desc}', visitor='{visitor_desc}'"
+            )
+            return None
+
+        def close_possession(events_list, poss_num, team_id, reason=""):
+            """
+            Close current possession and add to list.
+
+            CRITICAL FIX (Bug #1): Now requires team_id parameter to pass to _build_possession.
+            This prevents context loss when event lists are empty or minimal.
+
+            Args:
+                events_list: List of events in the possession
+                poss_num: Current possession number
+                team_id: Offensive team ID for this possession
+                reason: Reason for closing (for logging)
+
+            Returns:
+                Updated possession number
+            """
+            nonlocal consecutive_empty_possessions
+
+            if not events_list:
+                consecutive_empty_possessions += 1
+                if consecutive_empty_possessions > 5:
                     logger.warning(
-                        f"End event without possession start at {i}: {event_type}"
+                        f"Too many consecutive empty possessions ({consecutive_empty_possessions}) - may indicate logic error"
                     )
+                return poss_num
 
-            # Check if this continues the current possession
-            elif self.is_continuation_event(event, current_offensive_team_id):
-                if in_possession:
-                    current_possession_events.append(event)
-                    logger.debug(
-                        f"Continuation event in possession at {i}: {event_type}"
-                    )
-                else:
-                    logger.warning(
-                        f"Continuation event without possession at {i}: {event_type}"
-                    )
-
-            # Regular event during possession
-            elif in_possession:
-                current_possession_events.append(event)
-
-        # 5. Handle any unclosed possession at end of game
-        if in_possession and current_possession_events:
-            # Force close the possession
+            consecutive_empty_possessions = 0  # Reset counter
             possession = self._build_possession(
-                current_possession_events, possession_number, metadata
+                events_list, poss_num, metadata, team_id
             )
             if possession:
                 possessions.append(possession)
-                logger.info(f"Closed final possession at end of game")
+                logger.debug(
+                    f"Closed possession #{poss_num}: {len(events_list)} events, team={possession.offensive_team_id}, reason={reason}"
+                )
+                return poss_num + 1
+            return poss_num
 
-        # 6. Validate and merge possessions if needed
-        if self.validation.verify_possession_chains:
-            logger.info("Validating possession chains...")
-            validated_possessions = []
-            for poss in possessions:
-                # For now, we'll accept all possessions
-                # Full validation would check the event list in each possession
-                validated_possessions.append(poss)
-            possessions = validated_possessions
+        def start_possession(team_id, start_event, reason=""):
+            """Start new possession for given team."""
+            logger.debug(
+                f"Started possession for team {team_id} at event {start_event.get('event_id')}, reason={reason}"
+            )
+            return [start_event]
 
-        # 7. Merge possessions if configured
-        if self.possession_detection.merge_offensive_rebounds:
-            logger.info("Merging possessions with offensive rebounds...")
-            possessions = self.merge_possessions_if_needed(possessions)
+        # FIX #3: Add validation logging to track possession changes
+        possession_change_counter = {
+            "made_shot": 0,
+            "defensive_rebound": 0,
+            "turnover": 0,
+            "offensive_foul": 0,
+            "violation": 0,
+            "jump_ball": 0,
+            "period_end": 0,
+            "team_correction": 0,
+        }
 
+        # Phase 5: Safeguards - track empty possessions
+        consecutive_empty_possessions = 0
+
+        # 4. Iterate through events with state machine logic
+        for i, event in enumerate(events):
+            event_type = event.get("event_type", "").lower()
+
+            # CRITICAL FIX: Use normalize_team_id() to ensure consistent type conversion
+            event_team_id = normalize_team_id(event.get("team_id"))
+
+            # For rebounds with NULL team_id, try to infer from event_data
+            if event_team_id is None and event_type == "rebound":
+                event_team_id = infer_team_from_event_data(event)
+                if event_team_id:
+                    logger.debug(f"Inferred team_id {event_team_id} for rebound event")
+
+            # Initialize first possession if not started yet
+            if current_offensive_team_id is None and event_team_id:
+                # Start first possession with first event
+                current_possession_events = start_possession(
+                    event_team_id, event, "first_event"
+                )
+                current_offensive_team_id = event_team_id
+                continue  # Skip to next event
+
+            # FIX #4: Guard against empty possession state (sync error recovery)
+            if current_offensive_team_id and not current_possession_events:
+                # We closed previous possession but haven't started new one yet
+                # This indicates state machine may be out of sync
+                if event_team_id and event_team_id != current_offensive_team_id:
+                    # Event is by different team - switch possession
+                    logger.debug(
+                        f"Empty possession state - switching from {current_offensive_team_id} to {event_team_id} "
+                        f"(event_type={event_type}, event_id={event.get('event_id')})"
+                    )
+                    current_offensive_team_id = event_team_id
+
+                # Start new possession with this event
+                current_possession_events = start_possession(
+                    current_offensive_team_id or event_team_id,
+                    event,
+                    "empty_state_recovery",
+                )
+                if not current_offensive_team_id:
+                    current_offensive_team_id = event_team_id
+                continue
+
+            # POSSESSION CHANGE EVENT #1: Made Shot → Opponent Inbounds
+            if event_type == "made_shot":
+                # SMARTER LOGIC: Trust the made_shot event type over team_id matching
+                # The team that made the shot is the shooter (use event's team_id)
+                shooter_team = (
+                    event_team_id if event_team_id else current_offensive_team_id
+                )
+
+                if not shooter_team:
+                    # Can't determine shooter - skip this event
+                    logger.warning(f"Made shot with no team info - skipping")
+                    continue
+
+                # Log if team mismatch (data quality indicator, not error)
+                if (
+                    current_offensive_team_id
+                    and event_team_id
+                    and event_team_id != current_offensive_team_id
+                ):
+                    logger.debug(
+                        f"Team mismatch on made_shot: expected {current_offensive_team_id}, "
+                        f"got {event_team_id} - using event's team"
+                    )
+
+                # Add event and close possession (use shooter's team for possession)
+                current_possession_events.append(event)
+                possession_number = close_possession(
+                    current_possession_events,
+                    possession_number,
+                    shooter_team,  # Use actual shooter's team
+                    "made_shot",
+                )
+                possession_change_counter["made_shot"] += 1
+
+                # Opponent gets ball (use shooter's team for opponent lookup)
+                opponent_team = get_opponent_team(shooter_team)
+                current_possession_events = []
+                current_offensive_team_id = opponent_team
+
+                logger.debug(
+                    f"Team {opponent_team} gets ball after made shot by {shooter_team}"
+                )
+
+            # POSSESSION CHANGE EVENT #2: Defensive Rebound
+            elif event_type == "rebound":
+                # FIX #6d: Improved handling for rebounds with NULL team_id
+                if event_team_id is None:
+                    # Try to infer from event_data first (most reliable)
+                    inferred_team = infer_team_from_event_data(event)
+
+                    if inferred_team:
+                        event_team_id = inferred_team
+                        logger.debug(
+                            f"Inferred team {event_team_id} from event_data for rebound "
+                            f"(event_id={event.get('event_id')})"
+                        )
+                    elif current_offensive_team_id and i > 0:
+                        # Check previous event to determine rebound type
+                        prev_event = events[i - 1]
+                        prev_type = prev_event.get("event_type", "").lower()
+
+                        if "missed" in prev_type:
+                            # Previous event was missed shot - likely defensive rebound
+                            event_team_id = get_opponent_team(current_offensive_team_id)
+                            logger.debug(
+                                f"NULL rebound after missed shot - assuming defensive by team {event_team_id} "
+                                f"(event_id={event.get('event_id')})"
+                            )
+                        else:
+                            # No missed shot before this - could be offensive rebound or ambiguous
+                            # Skip rather than guess wrong
+                            logger.warning(
+                                f"Skipping rebound with NULL team_id - cannot determine type, no previous missed shot "
+                                f"(event_id={event.get('event_id')}, prev_type={prev_type})"
+                            )
+                            continue
+                    else:
+                        # No active possession yet or first event - skip this rebound
+                        logger.warning(
+                            f"Skipping rebound event - NULL team_id and no context available "
+                            f"(event_id={event.get('event_id')})"
+                        )
+                        continue
+
+                if current_offensive_team_id is None:
+                    # First possession of game - rebound starts it
+                    current_possession_events = start_possession(
+                        event_team_id, event, "first_rebound"
+                    )
+                    current_offensive_team_id = event_team_id
+                elif event_team_id != current_offensive_team_id:
+                    # Defensive rebound - possession changes
+                    current_possession_events.append(event)
+                    possession_number = close_possession(
+                        current_possession_events,
+                        possession_number,
+                        current_offensive_team_id,
+                        "defensive_rebound",
+                    )
+                    # Track possession change
+                    possession_change_counter["defensive_rebound"] += 1
+                    # Rebounding team gets ball
+                    current_possession_events = []
+                    current_offensive_team_id = event_team_id
+                    # Don't add rebound event to next possession
+                    logger.debug(
+                        f"Team {event_team_id} gets ball after defensive rebound"
+                    )
+                else:
+                    # Offensive rebound - possession continues
+                    current_possession_events.append(event)
+                    logger.debug(f"Offensive rebound - possession continues")
+
+                # Phase 3: Recovery logic - if we have a rebound but no active possession, start one
+                if not current_possession_events and event_team_id:
+                    logger.debug(
+                        f"Rebound with no active possession - starting new possession for {event_team_id}"
+                    )
+                    current_possession_events = start_possession(
+                        event_team_id, event, "rebound_recovery"
+                    )
+                    current_offensive_team_id = event_team_id
+
+            # POSSESSION CHANGE EVENT #3: Turnover
+            elif event_type == "turnover":
+                # SMARTER LOGIC: Trust the turnover event type
+                # The team that turned it over loses possession
+                turnover_team = (
+                    event_team_id if event_team_id else current_offensive_team_id
+                )
+
+                if not turnover_team:
+                    # Can't determine who turned it over - add to current possession
+                    logger.warning(
+                        f"Turnover with no team info - adding to current possession"
+                    )
+                    if current_possession_events:
+                        current_possession_events.append(event)
+                    continue
+
+                # Log if team mismatch (data quality indicator)
+                if (
+                    current_offensive_team_id
+                    and event_team_id
+                    and event_team_id != current_offensive_team_id
+                ):
+                    logger.debug(
+                        f"Team mismatch on turnover: expected {current_offensive_team_id}, "
+                        f"got {event_team_id} - using event's team"
+                    )
+
+                # Add event and close possession
+                current_possession_events.append(event)
+                possession_number = close_possession(
+                    current_possession_events,
+                    possession_number,
+                    turnover_team,  # Use actual turnover team
+                    "turnover",
+                )
+                possession_change_counter["turnover"] += 1
+
+                # Opponent gets ball
+                opponent_team = get_opponent_team(turnover_team)
+                current_possession_events = []
+                current_offensive_team_id = opponent_team
+
+                logger.debug(
+                    f"Team {opponent_team} gets ball after turnover by {turnover_team}"
+                )
+
+            # NOTE: "steal" event type removed (Bug #3 fix) - doesn't exist in database
+            # Steals are already captured as turnover events above
+
+            # POSSESSION START EVENT #4: Jump Ball
+            elif event_type == "jump_ball":
+                # Close previous possession if any
+                if current_possession_events:
+                    possession_number = close_possession(
+                        current_possession_events,
+                        possession_number,
+                        current_offensive_team_id,
+                        "jump_ball",
+                    )
+                    # Track possession change
+                    possession_change_counter["jump_ball"] += 1
+                # Start new possession (jump ball winner gets ball)
+                current_possession_events = start_possession(
+                    event_team_id, event, "jump_ball"
+                )
+                current_offensive_team_id = event_team_id
+
+            # POSSESSION END EVENT: Missed Shot (only ends if followed by defensive rebound)
+            elif event_type == "missed_shot":
+                # SMARTER LOGIC: Trust the missed shot event
+                # If team doesn't match, it means we lost track - switch to shooter's team
+                if current_offensive_team_id != event_team_id and event_team_id:
+                    logger.debug(
+                        f"Team mismatch on missed_shot: expected {current_offensive_team_id}, "
+                        f"got {event_team_id} - switching to event's team"
+                    )
+
+                    # Close current (wrong) possession if it has events
+                    if current_possession_events:
+                        possession_number = close_possession(
+                            current_possession_events,
+                            possession_number,
+                            current_offensive_team_id,
+                            "team_correction",
+                        )
+                        possession_change_counter["team_correction"] += 1
+
+                    # Start new possession for actual shooter
+                    current_possession_events = []
+                    current_offensive_team_id = event_team_id
+
+                # Add missed shot to current possession (don't close yet - wait for rebound)
+                current_possession_events.append(event)
+
+            # CONTINUATION EVENT: Free Throws
+            elif event_type == "free_throw":
+                # Free throws continue possession (or end it if made on final attempt)
+                if current_offensive_team_id == event_team_id:
+                    current_possession_events.append(event)
+                else:
+                    current_possession_events.append(event)
+
+            # SPECIAL EVENT: Period End
+            elif event_type == "period_end":
+                # Close possession at end of period
+                if current_possession_events:
+                    current_possession_events.append(event)
+                    possession_number = close_possession(
+                        current_possession_events,
+                        possession_number,
+                        current_offensive_team_id,
+                        "period_end",
+                    )
+                    # Track possession change
+                    possession_change_counter["period_end"] += 1
+                    current_possession_events = []
+                    current_offensive_team_id = None
+
+            # FIX #6a: POSSESSION CHANGE EVENT - Offensive Fouls
+            elif event_type == "foul":
+                # Parse event description to determine foul type
+                description = get_event_description(event)
+
+                # FIX: Be more specific with offensive foul detection to avoid false positives
+                # Only match explicit offensive foul language
+                is_offensive_foul = (
+                    "offensive foul" in description
+                    or "charging foul" in description
+                    or " charge "
+                    in description  # Space-bounded to avoid "discharge", "charged"
+                    or description.startswith("charge ")
+                    or description.endswith(" charge")
+                    or "clear path" in description
+                    or "clearpath" in description
+                )
+
+                if is_offensive_foul and current_offensive_team_id == event_team_id:
+                    # Offensive foul by offensive team - possession changes
+                    current_possession_events.append(event)
+                    possession_number = close_possession(
+                        current_possession_events,
+                        possession_number,
+                        current_offensive_team_id,
+                        "offensive_foul",
+                    )
+                    # Track possession change
+                    possession_change_counter["offensive_foul"] += 1
+                    # Opponent gets ball
+                    opponent_team = get_opponent_team(event_team_id)
+                    current_possession_events = []
+                    current_offensive_team_id = opponent_team
+                    logger.debug(
+                        f"Team {opponent_team} gets ball after offensive foul by {event_team_id}: '{description[:50]}'"
+                    )
+                else:
+                    # Regular defensive foul - possession continues
+                    if current_offensive_team_id:
+                        current_possession_events.append(event)
+
+            # FIX #6b: POSSESSION CHANGE EVENT - Violations
+            elif event_type == "other":
+                # Parse description to check if it's a violation
+                description = get_event_description(event)
+
+                is_violation = "violation" in description
+
+                if is_violation and event_team_id:
+                    # Violation - possession changes to opponent
+                    if (
+                        current_possession_events
+                        and current_offensive_team_id == event_team_id
+                    ):
+                        current_possession_events.append(event)
+                        possession_number = close_possession(
+                            current_possession_events,
+                            possession_number,
+                            current_offensive_team_id,
+                            "violation",
+                        )
+                        # Track possession change
+                        possession_change_counter["violation"] += 1
+                        # Opponent gets ball
+                        opponent_team = get_opponent_team(event_team_id)
+                        current_possession_events = []
+                        current_offensive_team_id = opponent_team
+                        logger.debug(
+                            f"Team {opponent_team} gets ball after violation by {event_team_id}"
+                        )
+                    else:
+                        # Edge case: violation before possession established or by wrong team
+                        if current_offensive_team_id:
+                            current_possession_events.append(event)
+                else:
+                    # Non-violation "other" event
+                    if current_offensive_team_id:
+                        current_possession_events.append(event)
+
+            # ALL OTHER EVENTS: Add to current possession
+            else:
+                if current_offensive_team_id:
+                    current_possession_events.append(event)
+                elif event_type not in ["", "unknown"]:
+                    # Event before first possession starts
+                    logger.debug(f"Event {event_type} before first possession")
+
+        # 5. Handle any unclosed possession at end of game
+        if current_possession_events:
+            possession_number = close_possession(
+                current_possession_events,
+                possession_number,
+                current_offensive_team_id,
+                "end_of_game",
+            )
+
+        # Log possession change statistics
+        total_changes = sum(possession_change_counter.values())
         logger.info(
             f"Detected {len(possessions)} possessions from {len(events)} events "
             f"in game {game_id}"
+        )
+        logger.info(
+            f"Possession changes by type (total={total_changes}): "
+            f"made_shot={possession_change_counter['made_shot']}, "
+            f"def_reb={possession_change_counter['defensive_rebound']}, "
+            f"turnover={possession_change_counter['turnover']}, "
+            f"off_foul={possession_change_counter['offensive_foul']}, "
+            f"violation={possession_change_counter['violation']}, "
+            f"jump_ball={possession_change_counter['jump_ball']}, "
+            f"period_end={possession_change_counter['period_end']}"
         )
 
         return possessions
 
     def _build_possession(
-        self, events: List[Dict], possession_number: int, metadata: Dict
+        self,
+        events: List[Dict],
+        possession_number: int,
+        metadata: Dict,
+        offensive_team_id: int,
     ) -> Optional[PossessionBoundary]:
         """
         Build a PossessionBoundary object from a list of events.
+
+        CRITICAL FIX (Bug #1): Now accepts offensive_team_id as parameter instead of
+        inferring from events. This prevents context loss when possessions have
+        empty or minimal event lists.
 
         Args:
             events: List of events in the possession
             possession_number: Sequential number for this possession
             metadata: Game metadata dict
+            offensive_team_id: Team ID that has offensive possession (must be provided)
 
         Returns:
             PossessionBoundary object or None if invalid
@@ -363,7 +828,8 @@ class PossessionDetector:
 
         # Extract basic info
         try:
-            offensive_team_id = self.determine_offensive_team(events)
+            # CRITICAL FIX: Use provided offensive_team_id instead of inferring
+            # offensive_team_id = self.determine_offensive_team(events)  # OLD WAY
             defensive_team_id = (
                 metadata["away_team_id"]
                 if offensive_team_id == metadata["home_team_id"]
@@ -604,9 +1070,12 @@ class PossessionDetector:
 
         Handles game clock logic (counts down from 12:00 to 0:00 each period).
 
+        FIX #5: Now properly handles period boundaries to avoid negative durations
+        and 700s+ outliers.
+
         Args:
-            start_event: Event dictionary with clock_minutes, clock_seconds
-            end_event: Event dictionary with clock_minutes, clock_seconds
+            start_event: Event dictionary with clock_minutes, clock_seconds, period
+            end_event: Event dictionary with clock_minutes, clock_seconds, period
 
         Returns:
             Duration in seconds (positive float)
@@ -616,6 +1085,10 @@ class PossessionDetector:
         start_secs = start_event.get("clock_seconds") or 0.0
         end_mins = end_event.get("clock_minutes") or 0
         end_secs = end_event.get("clock_seconds") or 0.0
+
+        # FIX #5: Extract period information
+        start_period = start_event.get("period", 1)
+        end_period = end_event.get("period", 1)
 
         # Convert to float if needed
         try:
@@ -633,18 +1106,30 @@ class PossessionDetector:
         start_total = start_mins * 60 + start_secs
         end_total = end_mins * 60 + end_secs
 
-        # Duration is the difference (start is higher than end in game clock)
-        duration = start_total - end_total
+        # FIX #5: Check for period boundary
+        if start_period != end_period:
+            # Possession spans multiple periods - use only time in start period
+            # The possession ended at period boundary, so duration is from start to 0:00
+            logger.debug(
+                f"Possession spans periods {start_period} → {end_period}, "
+                f"using start period time only: {start_total}s"
+            )
+            duration = start_total  # Time from possession start to period end
+        else:
+            # Normal case: same period
+            duration = start_total - end_total
 
         # Validate duration is positive and within bounds
         min_duration = self.possession_detection.min_duration
         max_duration = self.possession_detection.max_duration
 
         if duration < 0:
-            logger.warning(
-                f"Negative duration calculated: {duration}s - possibly period boundary"
+            # FIX #5: This should rarely happen now, but handle gracefully
+            logger.error(
+                f"Negative duration: {duration}s (periods: {start_period} → {end_period}), "
+                f"returning 0"
             )
-            duration = abs(duration)
+            return 0.0
 
         if duration < min_duration or duration > max_duration:
             logger.warning(
@@ -936,6 +1421,37 @@ class PossessionDetector:
 # Utility functions for possession detection
 
 
+def normalize_team_id(team_id) -> Optional[int]:
+    """
+    Convert team_id to integer, handling various input types.
+
+    Handles string, float, int, and scientific notation formats.
+    Returns None for invalid or None inputs.
+
+    Args:
+        team_id: Team ID in any format (int, str, float, or None)
+
+    Returns:
+        Integer team ID, or None if invalid
+
+    Examples:
+        normalize_team_id(1610612747) -> 1610612747
+        normalize_team_id("1610612747") -> 1610612747
+        normalize_team_id(1.610612747e9) -> 1610612747
+        normalize_team_id("invalid") -> None
+        normalize_team_id(None) -> None
+    """
+    if team_id is None:
+        return None
+
+    try:
+        # Convert to float first (handles scientific notation), then to int
+        return int(float(team_id))
+    except (ValueError, TypeError, OverflowError):
+        logger.warning(f"Invalid team_id: {team_id} (type: {type(team_id).__name__})")
+        return None
+
+
 def validate_event_list(events: List[Dict]) -> bool:
     """
     Validate that event list has required fields and is properly sorted.
@@ -1011,28 +1527,27 @@ def extract_game_metadata(events: List[Dict]) -> Dict:
     }
 
     # Determine home/away teams by looking at all events
-    # Home team typically has 'home' in team description or is listed first
+    # CRITICAL FIX: Normalize team_id BEFORE adding to set to avoid spurious IDs
     teams_seen = set()
     for event in events:
-        team_id = event.get("team_id")
+        team_id = normalize_team_id(event.get("team_id"))
         if team_id:
-            teams_seen.add(team_id)
+            teams_seen.add(team_id)  # Now all integers
 
-    # Assume first two unique team IDs are home and away (convert to integers)
+    # Assume first two unique team IDs are home and away (already integers)
     teams_list = sorted(list(teams_seen))  # Sort for consistency
 
-    def to_int(team_id):
-        if team_id:
-            try:
-                return int(float(team_id))
-            except (ValueError, TypeError):
-                return 0
-        return 0
-
     if len(teams_list) >= 2:
-        metadata["home_team_id"] = to_int(teams_list[0])
-        metadata["away_team_id"] = to_int(teams_list[1])
+        metadata["home_team_id"] = teams_list[0]  # Already int
+        metadata["away_team_id"] = teams_list[1]  # Already int
+    elif len(teams_list) == 1:
+        # Only one team found - use it for both (edge case)
+        logger.warning(f"Only one team found in events: {teams_list[0]}")
+        metadata["home_team_id"] = teams_list[0]
+        metadata["away_team_id"] = teams_list[0]
     else:
+        # No valid teams found
+        logger.error("No valid team IDs found in events")
         metadata["home_team_id"] = 0
         metadata["away_team_id"] = 0
 

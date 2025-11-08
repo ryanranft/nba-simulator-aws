@@ -5,7 +5,7 @@ Local ETL Script: Extract NBA Box Score Data from S3 to RDS
 Extracts comprehensive box score data (team + player stats) from ESPN JSON files.
 Reads directly from S3 and writes to RDS PostgreSQL (no Glue required).
 
-Input: s3://nba-sim-raw-data-lake/box_scores/*.json
+Input: s3://nba-sim-raw-data-lake/espn_box_scores/*.json
 Output: RDS PostgreSQL tables: box_score_teams, box_score_players
 
 Usage:
@@ -361,7 +361,7 @@ def process_year(year: int, dry_run: bool = False) -> Dict:
     }
 
     for i, game_id in enumerate(game_ids, 1):
-        s3_key = f"box_scores/{game_id}.json"
+        s3_key = f"espn_box_scores/{game_id}.json"
 
         try:
             # Download and parse JSON

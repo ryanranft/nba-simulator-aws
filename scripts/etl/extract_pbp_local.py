@@ -5,7 +5,7 @@ Local ETL Script: Extract NBA Play-by-Play Data from S3 to RDS
 Extracts 10% of relevant fields from ESPN JSON pbp files.
 Reads directly from S3 and writes to RDS PostgreSQL (no Glue required).
 
-Input: s3://nba-sim-raw-data-lake/pbp/*.json
+Input: s3://nba-sim-raw-data-lake/espn_play_by_play/*.json
 Output: RDS PostgreSQL table: play_by_play
 
 Usage:
@@ -172,7 +172,7 @@ def process_year(year: int, dry_run: bool = False) -> Dict:
     plays_to_insert = []
 
     for i, game_id in enumerate(game_ids, 1):
-        s3_key = f"pbp/{game_id}.json"
+        s3_key = f"espn_play_by_play/{game_id}.json"
 
         try:
             # Download and parse JSON

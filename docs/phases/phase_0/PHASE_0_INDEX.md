@@ -77,9 +77,9 @@ CLI entry points for Phase 0 Python workflows:
 | # | Sub-Phase | Status | Priority | Completed | Description |
 |---|-----------|--------|----------|-----------|-------------|
 | **0.0001** | [Initial Data Collection](0.0001_initial_data_collection/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 23, 2025 | ESPN data upload (172,719 files, 118GB) |
-| **0.0002** | [hoopR Data Collection](0.0002_hoopr_data_collection/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 9, 2025 (Validated: Oct 23, 2025) | hoopR package data (410 files, 8.2GB) |
+| **0.0002** | [hoopR Data Collection](0.0002_hoopr_data_collection/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Oct 9, 2025 (Validated: Oct 23, 2025) | hoopR package data (410 files, 8.2GB) **+ Nov 7: 152 endpoints daily @ 3 AM** |
 | **0.0003** | [Kaggle Historical Database](0.0003_kaggle_historical_database/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Pre-project (Validated: Oct 23, 2025) | Historical database (66K games, 1946-2023, EXPANDED) |
-| **0.0004** | [Basketball Reference](0.0004_basketball_reference/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Oct 25, 2025 (ADCE Integration) | Basketball Reference ADCE Integration (444 files + 43 data types configured, NBA + G League) |
+| **0.0004** | [Basketball Reference](0.0004_basketball_reference/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Oct 25, 2025 (ADCE Integration) | Basketball Reference ADCE Integration (444 files + 43 data types configured, NBA + G League) **+ Nov 7: 43 types daily @ 4 AM** |
 | **0.0005** | [Possession Extraction](0.0005_possession_extraction/README.md) | ✅ COMPLETE ✓ | ⭐ CRITICAL | Nov 5, 2025 | Extract possessions from temporal_events (INFRASTRUCTURE COMPLETE: 2,480 lines production code, 41-column schema ready, E2E tests ready, deployment script ready - READY FOR SCHEMA DEPLOYMENT) |
 | **0.0006** | [Temporal Feature Engineering](0.0006_temporal_features/README.md) | ⏸️ PENDING | ⭐ CRITICAL | TBD (Week 3-8) | Calculate KenPom metrics, Four Factors, rolling windows, temporal features (100+ metrics, 6 tables) |
 | **0.0007** | [Odds API Data](0.0007_odds_api_data/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Oct 23, 2025 (Validated) | Betting odds integration (odds-api scraper, 5 tables, 10+ bookmakers) |

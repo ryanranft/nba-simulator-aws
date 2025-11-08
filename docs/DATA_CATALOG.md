@@ -28,7 +28,7 @@
 
 ## Quick Reference
 
-**Last Full Update:** October 09, 2025 03:45 PM CT
+**Last Full Update:** November 05, 2025 12:09 PM CT
 
 | Source | Date Range | Status | Games | PBP Events | Files | Size | Location |
 |--------|-----------|--------|-------|-----------|-------|------|----------|
@@ -100,8 +100,9 @@
 | **Total Games** | 44,826 | All regular season + playoffs |
 | **Games with PBP** | 31,241 | 69.7% coverage |
 | **Total PBP Events** | 14,114,618 | In RDS `temporal_events` table |
-| **S3 Files** | 70,522 | JSON format |
-| **S3 Size** | 119 GB | `s3://nba-sim-raw-data-lake/espn/` |
+| **S3 Files (Baseline)** | 146,115 | JSON format (October 1, 2025) |
+| **S3 Files (Current)** | 147,396 | JSON format (November 6, 2025, +1,281 files) |
+| **S3 Size** | ~119 GB | ESPN data in `espn_*` folders |
 | **Local Database** | 1.7 GB | `/tmp/espn_local.db` (SQLite) |
 
 ### Coverage by Era
@@ -117,18 +118,25 @@
 - Modern era has near-complete coverage (94.4%)
 - Early era (1993-2001) has metadata but sparse PBP events
 
-### File Structure
+### File Structure (Updated November 6, 2025)
+
+**Note:** ESPN data reorganized with `espn_*` prefixes for multi-source clarity.
 
 ```
-s3://nba-sim-raw-data-lake/espn/
-├── {season}/          # e.g., "2024", "2023"
-│   └── {game_id}/     # e.g., "401584800"
-│       ├── boxscore.json      # Team/player box scores
-│       ├── gameinfo.json      # Game metadata
-│       ├── playbyplay.json    # PBP events
-│       ├── rosters.json       # Team rosters
-│       └── summary.json       # Game summary
+s3://nba-sim-raw-data-lake/
+├── espn_schedules/         # 11,633 files - Daily game schedules
+│   └── {YYYYMMDD}.json    # e.g., "20230410.json"
+├── espn_play_by_play/      # 44,826 files - Play-by-play game data
+│   └── {game_id}.json     # e.g., "401584800.json"
+├── espn_box_scores/        # 44,836 files - Box score statistics
+│   └── {game_id}.json     # e.g., "401584800.json"
+└── espn_team_stats/        # 46,101 files - Team statistics
+    └── {game_id}.json     # e.g., "401584800.json"
 ```
+
+**Total ESPN Files:** 147,396 (as of November 6, 2025)
+**Baseline (October 1, 2025):** 146,115 files
+**Growth:** +1,281 files from ADCE autonomous collection
 
 ### Data Quality
 
@@ -177,7 +185,7 @@ s3://nba-sim-raw-data-lake/espn/
 | Metric | Value | Notes |
 |--------|-------|-------|
 | **Total Seasons** | 24 seasons | 2002-2025 (complete) |
-| **Total Games** | 30,758 | Verified from RDS schedule table |
+| **Total Games** | 44,826 | Verified from RDS schedule table |
 | **PBP Events** | 13,074,829 | Loaded to RDS `hoopr_play_by_play` |
 | **Player Box Scores** | 785,505 | Loaded to RDS `hoopr_player_box` |
 | **Team Box Scores** | 59,670 | Loaded to RDS `hoopr_team_box` |

@@ -74,8 +74,7 @@ from scripts.monitoring.dims.workflow_integration import WorkflowIntegration
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -95,25 +94,31 @@ def cmd_verify(core: DIMSCore, cache: DIMSCache, args) -> int:
         print(f"Documented Value: {result['documented']}")
         print(f"Actual Value:     {result['actual']}")
         print(f"Drift:            {result['drift']}")
-        print(f"Drift %:          {result['drift_pct']}%" if result['drift_pct'] is not None else "")
+        print(
+            f"Drift %:          {result['drift_pct']}%"
+            if result["drift_pct"] is not None
+            else ""
+        )
         print(f"Status:           {result['status'].upper()}")
         print(f"Severity:         {result['severity'].upper()}")
         print(f"Message:          {result['message']}")
         print("=" * 80)
 
-        if args.update and result['status'] not in ('ok', 'error'):
+        if args.update and result["status"] not in ("ok", "error"):
             logger.info(f"Auto-updating {args.category}.{args.metric}...")
             core.update_metric(
                 args.category,
                 args.metric,
-                result['actual'],
-                verification_method='automated',
-                verified_by='dims_cli'
+                result["actual"],
+                verification_method="automated",
+                verified_by="dims_cli",
             )
             core.save_metrics()
-            print(f"\n✓ Updated {args.category}.{args.metric}: {result['documented']} → {result['actual']}")
+            print(
+                f"\n✓ Updated {args.category}.{args.metric}: {result['documented']} → {result['actual']}"
+            )
 
-        return 0 if result['status'] in ('ok', 'minor') else 1
+        return 0 if result["status"] in ("ok", "minor") else 1
 
     else:
         # Verify all metrics
@@ -136,35 +141,35 @@ def cmd_verify(core: DIMSCore, cache: DIMSCache, args) -> int:
         print(f"  ℹ New:         {results['summary']['new']}")
         print("=" * 80)
 
-        if results['discrepancies']:
+        if results["discrepancies"]:
             print("\nDISCREPANCIES:")
             print("-" * 80)
 
-            for disc in results['discrepancies']:
+            for disc in results["discrepancies"]:
                 print(f"\n{disc['metric']}")
                 print(f"  Documented: {disc['documented']}")
                 print(f"  Actual:     {disc['actual']}")
                 print(f"  Drift:      {disc['drift']}")
-                if disc['drift_pct'] is not None:
+                if disc["drift_pct"] is not None:
                     print(f"  Drift %:    {disc['drift_pct']}%")
                 print(f"  Status:     {disc['status'].upper()}")
                 print(f"  Severity:   {disc['severity'].upper()}")
                 print(f"  Message:    {disc['message']}")
 
-                if args.update and disc['status'] not in ('ok', 'error', 'new'):
+                if args.update and disc["status"] not in ("ok", "error", "new"):
                     # Extract category and metric name
-                    parts = disc['metric'].split('.')
+                    parts = disc["metric"].split(".")
                     if len(parts) >= 2:
                         category = parts[0]
-                        metric = '.'.join(parts[1:])
+                        metric = ".".join(parts[1:])
 
                         logger.info(f"Auto-updating {category}.{metric}...")
                         core.update_metric(
                             category,
                             metric,
-                            disc['actual'],
-                            verification_method='automated',
-                            verified_by='dims_cli'
+                            disc["actual"],
+                            verification_method="automated",
+                            verified_by="dims_cli",
                         )
                         print(f"    → Updated to {disc['actual']}")
 
@@ -172,7 +177,7 @@ def cmd_verify(core: DIMSCore, cache: DIMSCache, args) -> int:
                 core.save_metrics()
                 print("\n✓ Metrics saved")
 
-        return 0 if not results['drift_detected'] else 1
+        return 0 if not results["drift_detected"] else 1
 
 
 def cmd_update(core: DIMSCore, cache: DIMSCache, args) -> int:
@@ -196,8 +201,8 @@ def cmd_update(core: DIMSCore, cache: DIMSCache, args) -> int:
             args.category,
             args.metric,
             new_value,
-            verification_method='automated',
-            verified_by='dims_cli'
+            verification_method="automated",
+            verified_by="dims_cli",
         )
         core.save_metrics()
 
@@ -207,17 +212,62 @@ def cmd_update(core: DIMSCore, cache: DIMSCache, args) -> int:
 
         return 0
 
+    elif args.category:
+        # Update all metrics in a specific category
+        logger.info(f"Updating all metrics in category: {args.category}...")
+
+        metrics_config = core.config.get("metrics", {})
+
+        if args.category not in metrics_config:
+            logger.error(f"Category not found: {args.category}")
+            print(f"\n✗ Category '{args.category}' not found in config")
+            print(f"  Available categories: {', '.join(metrics_config.keys())}")
+            return 1
+
+        updated = 0
+        failed = 0
+
+        for metric_name, metric_def in metrics_config[args.category].items():
+            if not metric_def.get("enabled", True):
+                continue
+
+            logger.info(f"Updating {args.category}.{metric_name}...")
+
+            new_value = core.calculate_metric(args.category, metric_name)
+
+            if new_value is None:
+                logger.error(f"Failed to calculate {args.category}.{metric_name}")
+                failed += 1
+                continue
+
+            core.update_metric(
+                args.category,
+                metric_name,
+                new_value,
+                verification_method="automated",
+                verified_by="dims_cli",
+            )
+            updated += 1
+
+        core.save_metrics()
+
+        print(f"\n✓ Update complete for category: {args.category}")
+        print(f"  Updated: {updated}")
+        print(f"  Failed:  {failed}")
+
+        return 0 if failed == 0 else 1
+
     else:
         # Update all metrics
         logger.info("Updating all metrics...")
 
-        metrics_config = core.config.get('metrics', {})
+        metrics_config = core.config.get("metrics", {})
         updated = 0
         failed = 0
 
         for category, metrics in metrics_config.items():
             for metric_name, metric_def in metrics.items():
-                if not metric_def.get('enabled', True):
+                if not metric_def.get("enabled", True):
                     continue
 
                 logger.info(f"Updating {category}.{metric_name}...")
@@ -233,8 +283,8 @@ def cmd_update(core: DIMSCore, cache: DIMSCache, args) -> int:
                     category,
                     metric_name,
                     new_value,
-                    verification_method='automated',
-                    verified_by='dims_cli'
+                    verification_method="automated",
+                    verified_by="dims_cli",
                 )
                 updated += 1
 
@@ -253,10 +303,12 @@ def cmd_generate(core: DIMSCore, output_manager: DIMSOutputManager, args) -> int
 
     if args.format:
         # Generate specific format
-        if args.format == 'markdown':
-            success = output_manager.generate_markdown(core.metrics, 'master_inventory')
-            success &= output_manager.generate_markdown(core.metrics, 'collection_inventory')
-        elif args.format == 'json':
+        if args.format == "markdown":
+            success = output_manager.generate_markdown(core.metrics, "master_inventory")
+            success &= output_manager.generate_markdown(
+                core.metrics, "collection_inventory"
+            )
+        elif args.format == "json":
             success = output_manager.generate_json(core.metrics)
         else:
             logger.error(f"Unknown format: {args.format}")
@@ -289,7 +341,7 @@ def cmd_generate(core: DIMSCore, output_manager: DIMSOutputManager, args) -> int
 
 def cmd_cache(cache: DIMSCache, args) -> int:
     """Cache management command."""
-    if args.operation == 'info':
+    if args.operation == "info":
         # Show cache info
         info = cache.get_cache_info()
 
@@ -301,7 +353,7 @@ def cmd_cache(cache: DIMSCache, args) -> int:
         print(f"Entries:              {info.get('entries', 0)}")
         print(f"Default TTL (hours):  {info.get('default_ttl_hours', 'N/A')}")
 
-        ttl_overrides = info.get('ttl_overrides', {})
+        ttl_overrides = info.get("ttl_overrides", {})
         if ttl_overrides:
             print("\nTTL Overrides:")
             for metric, ttl in ttl_overrides.items():
@@ -311,14 +363,14 @@ def cmd_cache(cache: DIMSCache, args) -> int:
 
         return 0
 
-    elif args.operation == 'clear':
+    elif args.operation == "clear":
         # Clear all cache
         logger.info("Clearing all cache...")
         cache.clear_all()
         print("\n✓ Cache cleared")
         return 0
 
-    elif args.operation == 'cleanup':
+    elif args.operation == "cleanup":
         # Cleanup expired cache
         logger.info("Cleaning up expired cache...")
         count = cache.cleanup()
@@ -371,7 +423,7 @@ def cmd_info(core: DIMSCore, cache: DIMSCache) -> int:
     print(f"Metrics Path:             {sys_info['metrics_path']}")
     print()
     print("Features:")
-    for feature, enabled in sys_info['features'].items():
+    for feature, enabled in sys_info["features"].items():
         status = "✓" if enabled else "✗"
         print(f"  {status} {feature}")
     print()
@@ -410,7 +462,8 @@ def cmd_migrate(core: DIMSCore) -> int:
     logger.info("Running database migration...")
 
     from pathlib import Path
-    schema_path = core.project_root / 'sql' / 'dims_schema.sql'
+
+    schema_path = core.project_root / "sql" / "dims_schema.sql"
 
     if not schema_path.exists():
         print(f"\n✗ Schema file not found: {schema_path}")
@@ -440,7 +493,7 @@ def cmd_approve(core: DIMSCore, args) -> int:
         print("Enable it in inventory/config.yaml: features.approval_workflow: true")
         return 1
 
-    if args.action == 'list':
+    if args.action == "list":
         # List pending approvals
         pending = core.approval.get_pending_approvals()
 
@@ -465,7 +518,7 @@ def cmd_approve(core: DIMSCore, args) -> int:
 
         return 0
 
-    elif args.action == 'review':
+    elif args.action == "review":
         # Review specific approval
         if not args.id:
             print("\n✗ Approval ID required (use --id)")
@@ -489,17 +542,17 @@ def cmd_approve(core: DIMSCore, args) -> int:
         print(f"Requested By: {approval['requested_by']}")
         print(f"Requested At: {approval['requested_at']}")
 
-        if approval['reviewed_by']:
+        if approval["reviewed_by"]:
             print(f"Reviewed By: {approval['reviewed_by']}")
             print(f"Reviewed At: {approval['reviewed_at']}")
-            if approval['review_notes']:
+            if approval["review_notes"]:
                 print(f"Notes: {approval['review_notes']}")
 
         print("=" * 80)
 
         return 0
 
-    elif args.action == 'accept':
+    elif args.action == "accept":
         # Accept approval
         if not args.id:
             print("\n✗ Approval ID required (use --id)")
@@ -507,9 +560,9 @@ def cmd_approve(core: DIMSCore, args) -> int:
 
         success = core.approval.approve(
             args.id,
-            reviewed_by=args.reviewer or 'dims_cli',
+            reviewed_by=args.reviewer or "dims_cli",
             review_notes=args.notes,
-            auto_apply=not args.no_auto_apply
+            auto_apply=not args.no_auto_apply,
         )
 
         if success:
@@ -520,30 +573,30 @@ def cmd_approve(core: DIMSCore, args) -> int:
                 approval = core.approval.get_approval(args.id)
                 if approval:
                     core.update_metric(
-                        approval['metric_category'],
-                        approval['metric_name'],
-                        approval['new_value'],
-                        verification_method='approved',
-                        verified_by=args.reviewer or 'dims_cli'
+                        approval["metric_category"],
+                        approval["metric_name"],
+                        approval["new_value"],
+                        verification_method="approved",
+                        verified_by=args.reviewer or "dims_cli",
                     )
                     core.save_metrics()
-                    print(f"✓ Change applied: {approval['metric_category']}.{approval['metric_name']}")
+                    print(
+                        f"✓ Change applied: {approval['metric_category']}.{approval['metric_name']}"
+                    )
 
             return 0
         else:
             print(f"\n✗ Failed to accept approval {args.id}")
             return 1
 
-    elif args.action == 'reject':
+    elif args.action == "reject":
         # Reject approval
         if not args.id:
             print("\n✗ Approval ID required (use --id)")
             return 1
 
         success = core.approval.reject(
-            args.id,
-            reviewed_by=args.reviewer or 'dims_cli',
-            review_notes=args.notes
+            args.id, reviewed_by=args.reviewer or "dims_cli", review_notes=args.notes
         )
 
         if success:
@@ -565,7 +618,7 @@ def cmd_events(core: DIMSCore, args) -> int:
         print("Enable it in inventory/config.yaml: features.event_driven: true")
         return 1
 
-    if args.action == 'status':
+    if args.action == "status":
         # Show event stats
         stats = core.events.get_stats()
 
@@ -584,7 +637,7 @@ def cmd_events(core: DIMSCore, args) -> int:
 
         return 0
 
-    elif args.action == 'test':
+    elif args.action == "test":
         # Test event handler
         if not args.event_type:
             print("\n✗ Event type required (use --event-type)")
@@ -596,33 +649,33 @@ def cmd_events(core: DIMSCore, args) -> int:
         print(f"EVENT TEST: {args.event_type}")
         print("=" * 80)
 
-        if result['success']:
+        if result["success"]:
             print(f"✓ Hook configured: {result['hook_name']}")
             print(f"Metric Patterns: {result['metric_patterns']}")
             print(f"Would Trigger: {result['trigger_count']} metrics")
             print()
             print("Metrics:")
-            for metric in result['metrics_would_trigger']:
+            for metric in result["metrics_would_trigger"]:
                 print(f"  - {metric}")
         else:
             print(f"✗ Error: {result['error']}")
 
         print("=" * 80)
 
-        return 0 if result['success'] else 1
+        return 0 if result["success"] else 1
 
-    elif args.action == 'trigger':
+    elif args.action == "trigger":
         # Manually trigger event
         if not args.event_type:
             print("\n✗ Event type required (use --event-type)")
             return 1
 
-        result = core.events.handle_event(args.event_type, 'manual_trigger')
+        result = core.events.handle_event(args.event_type, "manual_trigger")
 
         print(f"\n✓ Event triggered: {args.event_type}")
         print(f"Metrics triggered: {len(result['metrics_triggered'])}")
 
-        return 0 if result['success'] else 1
+        return 0 if result["success"] else 1
 
     else:
         print(f"\n✗ Unknown events action: {args.action}")
@@ -643,13 +696,13 @@ def cmd_notebook(core: DIMSCore, args) -> int:
     import subprocess
     import shutil
 
-    notebook_path = Path(core.project_root) / 'notebooks' / 'dims_explorer.ipynb'
+    notebook_path = Path(core.project_root) / "notebooks" / "dims_explorer.ipynb"
 
     if not notebook_path.exists():
         print(f"\n✗ Notebook not found: {notebook_path}")
         return 1
 
-    if args.action == 'launch':
+    if args.action == "launch":
         # Launch Jupyter notebook
         print("\n🚀 Launching DIMS Explorer Notebook...")
         print(f"Notebook: {notebook_path}")
@@ -659,8 +712,7 @@ def cmd_notebook(core: DIMSCore, args) -> int:
 
         try:
             subprocess.run(
-                ['jupyter', 'lab', str(notebook_path)],
-                cwd=str(core.project_root)
+                ["jupyter", "lab", str(notebook_path)], cwd=str(core.project_root)
             )
             return 0
         except KeyboardInterrupt:
@@ -671,25 +723,34 @@ def cmd_notebook(core: DIMSCore, args) -> int:
             print("  pip install jupyterlab")
             return 1
 
-    elif args.action == 'export':
+    elif args.action == "export":
         # Export notebook as HTML
-        output_dir = Path(core.project_root) / 'inventory' / 'exports'
+        output_dir = Path(core.project_root) / "inventory" / "exports"
         output_dir.mkdir(parents=True, exist_ok=True)
 
         from datetime import datetime
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        output_path = output_dir / f'dims_report_{timestamp}.html'
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_path = output_dir / f"dims_report_{timestamp}.html"
 
         print(f"\n📊 Exporting notebook to HTML...")
         print(f"Output: {output_path}")
 
         try:
             result = subprocess.run(
-                ['jupyter', 'nbconvert', '--to', 'html', '--execute',
-                 '--output', str(output_path), str(notebook_path)],
+                [
+                    "jupyter",
+                    "nbconvert",
+                    "--to",
+                    "html",
+                    "--execute",
+                    "--output",
+                    str(output_path),
+                    str(notebook_path),
+                ],
                 cwd=str(core.project_root),
                 capture_output=True,
-                text=True
+                text=True,
             )
 
             if result.returncode == 0:
@@ -732,26 +793,26 @@ def cmd_workflow(core: DIMSCore, args) -> int:
     print("=" * 80)
 
     try:
-        if args.workflow == 'file-inventory':
+        if args.workflow == "file-inventory":
             result = integration.run_file_inventory(update=True)
             print(f"\n✓ File inventory complete")
             print(f"  Total files documented: {result['total_files']}")
             print(f"  Last updated: {result['last_updated']}")
             print(f"\n  Categories:")
-            for category, count in result['categories'].items():
+            for category, count in result["categories"].items():
                 print(f"    - {category}: {count}")
 
-        elif args.workflow == 'local-inventory':
-            mode = args.mode or 'quick'
+        elif args.workflow == "local-inventory":
+            mode = args.mode or "quick"
             result = integration.run_local_data_inventory(mode=mode)
             print(f"\n✓ Local data inventory complete ({mode} mode)")
             print(f"  Archives: {result['archives_size_gb']} GB")
             print(f"  Temp data: {result['temp_size_gb']} GB")
             print(f"  Project: {result['project_size_gb']} GB")
-            if mode == 'full':
+            if mode == "full":
                 print(f"  Total files: {result['total_files']}")
 
-        elif args.workflow == 'aws-inventory':
+        elif args.workflow == "aws-inventory":
             result = integration.run_aws_data_inventory()
             print(f"\n✓ AWS data inventory complete")
             print(f"\n  S3:")
@@ -762,19 +823,19 @@ def cmd_workflow(core: DIMSCore, args) -> int:
             print(f"    Allocated storage: {result['rds_allocated_gb']} GB")
             print(f"\n  💰 Estimated cost: ${result['estimated_cost_usd']:.2f}/month")
 
-        elif args.workflow == 'gap-analysis':
+        elif args.workflow == "gap-analysis":
             result = integration.run_data_gap_analysis()
             print(f"\n✓ Data gap analysis complete")
             print(f"  Total games: {result['total_games']}")
             print(f"  Missing box scores: {result['missing_games']}")
             print(f"  Missing play-by-play: {result['games_without_pbp']}")
 
-            if result['missing_games'] > 0 or result['games_without_pbp'] > 0:
+            if result["missing_games"] > 0 or result["games_without_pbp"] > 0:
                 print(f"\n  ⚠️  Data gaps detected!")
             else:
                 print(f"\n  ✅ No data gaps found")
 
-        elif args.workflow == 'sync-status':
+        elif args.workflow == "sync-status":
             result = integration.run_sync_status_check()
             print(f"\n✓ Sync status check complete")
             print(f"  S3 files: {result['s3_files']:,}")
@@ -782,14 +843,14 @@ def cmd_workflow(core: DIMSCore, args) -> int:
             print(f"  Drift: {result['drift_pct']:.1f}%")
             print(f"  Status: {result['status'].upper()}")
 
-            if result['status'] == 'synced':
+            if result["status"] == "synced":
                 print(f"\n  ✅ Local and S3 are synchronized")
-            elif result['status'] in ['minor_drift', 'moderate_drift']:
+            elif result["status"] in ["minor_drift", "moderate_drift"]:
                 print(f"\n  ⚠️  Drift detected - consider running sync")
-            elif result['status'] == 'major_drift':
+            elif result["status"] == "major_drift":
                 print(f"\n  🔴 MAJOR drift - URGENT sync recommended")
 
-        elif args.workflow == 'all':
+        elif args.workflow == "all":
             print("\n📊 Running all workflow integrations...\n")
             result = integration.run_all_workflows()
 
@@ -808,6 +869,7 @@ def cmd_workflow(core: DIMSCore, args) -> int:
     except Exception as e:
         logger.error(f"Workflow failed: {e}")
         import traceback
+
         traceback.print_exc()
         return 1
 
@@ -815,70 +877,112 @@ def cmd_workflow(core: DIMSCore, args) -> int:
 def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
-        description='DIMS - Data Inventory Management System CLI',
+        description="DIMS - Data Inventory Management System CLI",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=__doc__
+        epilog=__doc__,
     )
 
-    subparsers = parser.add_subparsers(dest='command', help='Command to execute')
+    subparsers = parser.add_subparsers(dest="command", help="Command to execute")
 
     # Verify command
-    verify_parser = subparsers.add_parser('verify', help='Verify metrics')
-    verify_parser.add_argument('--update', action='store_true', help='Auto-update metrics with drift')
-    verify_parser.add_argument('--category', help='Metric category to verify')
-    verify_parser.add_argument('--metric', help='Metric name to verify')
+    verify_parser = subparsers.add_parser("verify", help="Verify metrics")
+    verify_parser.add_argument(
+        "--update", action="store_true", help="Auto-update metrics with drift"
+    )
+    verify_parser.add_argument("--category", help="Metric category to verify")
+    verify_parser.add_argument("--metric", help="Metric name to verify")
 
     # Update command
-    update_parser = subparsers.add_parser('update', help='Update metrics')
-    update_parser.add_argument('--category', help='Metric category to update')
-    update_parser.add_argument('--metric', help='Metric name to update')
+    update_parser = subparsers.add_parser("update", help="Update metrics")
+    update_parser.add_argument("--category", help="Metric category to update")
+    update_parser.add_argument("--metric", help="Metric name to update")
 
     # Generate command
-    generate_parser = subparsers.add_parser('generate', help='Generate outputs')
-    generate_parser.add_argument('--format', choices=['markdown', 'json', 'html', 'jupyter'], help='Output format')
+    generate_parser = subparsers.add_parser("generate", help="Generate outputs")
+    generate_parser.add_argument(
+        "--format",
+        choices=["markdown", "json", "html", "jupyter"],
+        help="Output format",
+    )
 
     # Cache command
-    cache_parser = subparsers.add_parser('cache', help='Cache management')
-    cache_parser.add_argument('operation', choices=['info', 'clear', 'cleanup'], help='Cache operation')
+    cache_parser = subparsers.add_parser("cache", help="Cache management")
+    cache_parser.add_argument(
+        "operation", choices=["info", "clear", "cleanup"], help="Cache operation"
+    )
 
     # History command
-    history_parser = subparsers.add_parser('history', help='View metric history')
-    history_parser.add_argument('metric_path', help='Metric path (e.g., s3_storage.total_objects)')
-    history_parser.add_argument('--days', type=int, default=30, help='Number of days to look back')
+    history_parser = subparsers.add_parser("history", help="View metric history")
+    history_parser.add_argument(
+        "metric_path", help="Metric path (e.g., s3_storage.total_objects)"
+    )
+    history_parser.add_argument(
+        "--days", type=int, default=30, help="Number of days to look back"
+    )
 
     # Info command
-    subparsers.add_parser('info', help='Show system information')
+    subparsers.add_parser("info", help="Show system information")
 
     # Snapshot command
-    subparsers.add_parser('snapshot', help='Create snapshot of current metrics')
+    subparsers.add_parser("snapshot", help="Create snapshot of current metrics")
 
     # Migrate command (Phase 2)
-    subparsers.add_parser('migrate', help='Run database schema migration')
+    subparsers.add_parser("migrate", help="Run database schema migration")
 
     # Approve command (Phase 2)
-    approve_parser = subparsers.add_parser('approve', help='Approval workflow management')
-    approve_parser.add_argument('action', choices=['list', 'review', 'accept', 'reject'], help='Approval action')
-    approve_parser.add_argument('--id', type=int, help='Approval request ID')
-    approve_parser.add_argument('--reviewer', help='Reviewer name')
-    approve_parser.add_argument('--notes', help='Review notes')
-    approve_parser.add_argument('--no-auto-apply', action='store_true', help='Don\'t auto-apply approved changes')
+    approve_parser = subparsers.add_parser(
+        "approve", help="Approval workflow management"
+    )
+    approve_parser.add_argument(
+        "action", choices=["list", "review", "accept", "reject"], help="Approval action"
+    )
+    approve_parser.add_argument("--id", type=int, help="Approval request ID")
+    approve_parser.add_argument("--reviewer", help="Reviewer name")
+    approve_parser.add_argument("--notes", help="Review notes")
+    approve_parser.add_argument(
+        "--no-auto-apply", action="store_true", help="Don't auto-apply approved changes"
+    )
 
     # Events command (Phase 2)
-    events_parser = subparsers.add_parser('events', help='Event handler management')
-    events_parser.add_argument('action', choices=['status', 'test', 'trigger'], help='Event action')
-    events_parser.add_argument('--event-type', help='Event type (git_post_commit, s3_upload, etc.)')
+    events_parser = subparsers.add_parser("events", help="Event handler management")
+    events_parser.add_argument(
+        "action", choices=["status", "test", "trigger"], help="Event action"
+    )
+    events_parser.add_argument(
+        "--event-type", help="Event type (git_post_commit, s3_upload, etc.)"
+    )
 
     # Notebook command (Phase 3)
-    notebook_parser = subparsers.add_parser('notebook', help='Interactive Jupyter notebook')
-    notebook_parser.add_argument('action', nargs='?', default='launch', choices=['launch', 'export'], help='Notebook action')
+    notebook_parser = subparsers.add_parser(
+        "notebook", help="Interactive Jupyter notebook"
+    )
+    notebook_parser.add_argument(
+        "action",
+        nargs="?",
+        default="launch",
+        choices=["launch", "export"],
+        help="Notebook action",
+    )
 
     # Workflow command (Phase 3 Integration)
-    workflow_parser = subparsers.add_parser('workflow', help='Run workflow integrations')
-    workflow_parser.add_argument('workflow',
-                                choices=['file-inventory', 'local-inventory', 'aws-inventory',
-                                        'gap-analysis', 'sync-status', 'all'],
-                                help='Workflow to run')
-    workflow_parser.add_argument('--mode', choices=['quick', 'full'], help='Mode for local inventory')
+    workflow_parser = subparsers.add_parser(
+        "workflow", help="Run workflow integrations"
+    )
+    workflow_parser.add_argument(
+        "workflow",
+        choices=[
+            "file-inventory",
+            "local-inventory",
+            "aws-inventory",
+            "gap-analysis",
+            "sync-status",
+            "all",
+        ],
+        help="Workflow to run",
+    )
+    workflow_parser.add_argument(
+        "--mode", choices=["quick", "full"], help="Mode for local inventory"
+    )
 
     args = parser.parse_args()
 
@@ -897,29 +1001,29 @@ def main():
 
     # Execute command
     try:
-        if args.command == 'verify':
+        if args.command == "verify":
             return cmd_verify(core, cache, args)
-        elif args.command == 'update':
+        elif args.command == "update":
             return cmd_update(core, cache, args)
-        elif args.command == 'generate':
+        elif args.command == "generate":
             return cmd_generate(core, output_manager, args)
-        elif args.command == 'cache':
+        elif args.command == "cache":
             return cmd_cache(cache, args)
-        elif args.command == 'history':
+        elif args.command == "history":
             return cmd_history(core, args)
-        elif args.command == 'info':
+        elif args.command == "info":
             return cmd_info(core, cache)
-        elif args.command == 'snapshot':
+        elif args.command == "snapshot":
             return cmd_snapshot(core)
-        elif args.command == 'migrate':
+        elif args.command == "migrate":
             return cmd_migrate(core)
-        elif args.command == 'approve':
+        elif args.command == "approve":
             return cmd_approve(core, args)
-        elif args.command == 'events':
+        elif args.command == "events":
             return cmd_events(core, args)
-        elif args.command == 'notebook':
+        elif args.command == "notebook":
             return cmd_notebook(core, args)
-        elif args.command == 'workflow':
+        elif args.command == "workflow":
             return cmd_workflow(core, args)
         else:
             logger.error(f"Unknown command: {args.command}")
@@ -928,9 +1032,10 @@ def main():
     except Exception as e:
         logger.error(f"Command failed: {e}")
         import traceback
+
         traceback.print_exc()
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

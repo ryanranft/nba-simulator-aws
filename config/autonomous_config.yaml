@@ -28,7 +28,7 @@ fallback_to_sample: true # Fall back to sampling if inventory unavailable
 
 # Orchestrator Configuration
 min_tasks_to_trigger: 1 # Minimum tasks in queue to trigger orchestrator
-max_orchestrator_runtime_minutes: 120 # Kill orchestrator if runs longer than 2 hours
+max_orchestrator_runtime_minutes: 60 # Kill orchestrator if runs longer than 1 hour
 max_concurrent_scrapers: 5 # Maximum concurrent scraper processes
 
 # Rate Limiting Configuration (Week 3 Enhancement)
@@ -119,7 +119,7 @@ health_check:
   # Alert thresholds
   alert_thresholds:
     reconciliation_daemon_down_minutes: 5 # Alert if daemon down for 5+ min
-    orchestrator_timeout_minutes: 120 # Alert if orchestrator runs > 2 hours
+    orchestrator_timeout_minutes: 60 # Alert if orchestrator runs > 1 hour
     task_queue_stale_hours: 24 # Alert if task queue not updated in 24h
     error_rate_threshold: 0.1 # Alert if error rate > 10%
 
@@ -148,6 +148,58 @@ alerts:
     - high_error_rate
     - critical_tasks_stale
 
+# Scheduled Tasks (Daily automated scraping)
+scheduled_tasks:
+  enabled: true # Enable scheduled task execution
+
+  # ESPN Daily Scraper (Phase 0.0001)
+  daily_espn_scrape:
+    enabled: true
+    schedule: "0 2 * * *" # Run at 2 AM daily (cron format)
+    script: "scripts/etl/espn_incremental_simple.py"
+    args: ["--days", "3"] # Scrape last 3 days (catches any missed games)
+    priority: HIGH
+    timeout_minutes: 60
+    retry_on_failure: true
+    max_retries: 3
+    description: "Daily ESPN data collection for last 3 days"
+    post_execution:
+      trigger_dims_update: true
+      trigger_reconciliation: true
+      metric_category: espn_data
+
+  # hoopR Daily Comprehensive (ALL 152 endpoints)
+  daily_hoopr_comprehensive:
+    enabled: true
+    schedule: "0 3 * * *" # Run at 3 AM daily (after ESPN)
+    script: "scripts/autonomous/run_scheduled_hoopr_comprehensive.sh"
+    args: ["--recent-seasons", "1", "--upload-to-s3"] # Current season only for daily
+    priority: HIGH
+    timeout_minutes: 180 # 3 hours for single season comprehensive
+    retry_on_failure: true
+    max_retries: 3
+    description: "Daily comprehensive hoopR collection - ALL 152 endpoints (Phases 1-4)"
+    post_execution:
+      trigger_dims_update: true
+      trigger_reconciliation: true
+      metric_category: hoopr_comprehensive
+
+  # Basketball Reference Daily Comprehensive (ALL 43 data types)
+  daily_bbref_comprehensive:
+    enabled: true
+    schedule: "0 4 * * *" # Run at 4 AM daily (after ESPN and hoopR)
+    script: "scripts/autonomous/run_scheduled_bbref_comprehensive.sh"
+    args: ["--priority", "IMMEDIATE", "--season", "current"] # Tier 1-2 daily
+    priority: HIGH
+    timeout_minutes: 240 # 4 hours for comprehensive (rate limited)
+    retry_on_failure: true
+    max_retries: 3
+    description: "Daily comprehensive Basketball Reference - ALL 43 data types (Tiers 1-11)"
+    post_execution:
+      trigger_dims_update: true
+      trigger_reconciliation: true
+      metric_category: basketball_reference_comprehensive
+
 # Logging Configuration
 logging:
   level: INFO # DEBUG, INFO, WARNING, ERROR
@@ -165,7 +217,7 @@ resource_limits:
 # Performance Targets
 performance:
   reconciliation_max_minutes: 10 # Target: reconciliation < 10 min
-  orchestrator_max_minutes: 120 # Target: orchestration < 2 hours
+  orchestrator_max_minutes: 60 # Target: orchestration < 1 hour
   task_completion_rate_target: 0.95 # Target: 95% task success rate
 
 # Integration Configuration

@@ -72,6 +72,11 @@ events:
       metrics: ["data_gaps.*", "sync_status.*", "aws_inventory.*"]
       description: "Triggered when scraper finishes - runs gap analysis and sync check"
 
+    - name: "espn_scraper_complete"
+      trigger: "scraper_complete"
+      metrics: ["espn_data.*", "data_gaps.*", "sync_status.*"]
+      description: "Triggered when ESPN scraper completes - updates ESPN metrics, gap detection, and sync status"
+
     - name: "monthly_audit"
       trigger: "cron"
       schedule: "0 0 1 * *"  # Monthly on 1st at midnight
@@ -115,6 +120,11 @@ approval:
     - "data_gaps.games_without_pbp"              # PBP gaps need review
     - "sync_status.local_s3_sync_status"         # Sync issues need approval
     - "local_data.archives_size_gb"              # Large storage changes
+
+    # ESPN autonomous collection critical metrics (Phase 0.0001)
+    - "espn_data.last_update_hours"              # ESPN data freshness monitoring
+    - "espn_data.completeness_pct"               # ESPN data completeness
+    - "espn_data.gap_days_count"                 # ESPN gap detection
 
   require_approval_threshold: 15                 # % drift requiring approval
 
@@ -385,3 +395,231 @@ metrics:
       parse_type: "string"
       category: "volatile"
       description: "S3 bucket accessibility status (accessible/unavailable)"
+
+  # ESPN Data Metrics (Phase 0.0001 - Autonomous Data Collection)
+  espn_data:
+    # File Count Metrics
+    pbp_file_count:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/espn_play_by_play/ --recursive 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Total ESPN play-by-play files in S3"
+
+    boxscore_file_count:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/espn_box_scores/ --recursive 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Total ESPN box score files in S3"
+
+    schedule_file_count:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/espn_schedules/ --recursive 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Total ESPN schedule files in S3"
+
+    team_stats_file_count:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/espn_team_stats/ --recursive 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Total ESPN team stats files in S3"
+
+    # Data Freshness Metrics
+    last_update_hours:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/espn_play_by_play/ --recursive 2>/dev/null | tail -1 | awk '{cmd=\"date +%s\"; cmd | getline now; close(cmd); cmd=\"date -d \\\"\"$1\" \"$2\"\\\" +%s 2>/dev/null || date -j -f \\\"%Y-%m-%d %H:%M:%S\\\" \\\"\"$1\" \"$2\"\\\" +%s\"; cmd | getline then; close(cmd); print int((now - then) / 3600)}'"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Hours since last ESPN data upload"
+
+    oldest_data_days:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/espn_play_by_play/ --recursive 2>/dev/null | head -1 | awk '{cmd=\"date +%s\"; cmd | getline now; close(cmd); cmd=\"date -d \\\"\"$1\" \"$2\"\\\" +%s 2>/dev/null || date -j -f \\\"%Y-%m-%d %H:%M:%S\\\" \\\"\"$1\" \"$2\"\\\" +%s\"; cmd | getline then; close(cmd); print int((now - then) / 86400)}'"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Days since oldest ESPN data file"
+
+    # Data Size Metrics
+    total_size_gb:
+      command: "python3 -c \"import boto3; s3 = boto3.client('s3'); folders = ['espn_play_by_play/', 'espn_box_scores/', 'espn_schedules/', 'espn_team_stats/']; size = 0; [size := size + sum(obj.get('Size', 0) for obj in s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix=folder).get('Contents', [])) for folder in folders]; print(f'{size / 1024 / 1024 / 1024:.2f}')\" 2>/dev/null || echo 0.0"
+      parse_type: "float"
+      precision: 2
+      category: "volatile"
+      description: "Total ESPN data size across all folders (GB)"
+
+    avg_file_size_kb:
+      command: "python3 -c \"import boto3; s3 = boto3.client('s3'); objs = s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix='espn_play_by_play/').get('Contents', []); sizes = [obj['Size'] for obj in objs]; print(f'{(sum(sizes) / len(sizes) / 1024):.1f}' if sizes else '0.0')\" 2>/dev/null || echo 0.0"
+      parse_type: "float"
+      precision: 1
+      category: "volatile"
+      description: "Average ESPN play-by-play file size (KB)"
+
+    # Data Quality Metrics
+    small_files_count:
+      command: "python3 -c \"import boto3; s3 = boto3.client('s3'); objs = s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix='espn_play_by_play/').get('Contents', []); print(sum(1 for obj in objs if obj.get('Size', 0) < 1024))\" 2>/dev/null || echo 0"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Number of ESPN files smaller than 1KB (potentially incomplete)"
+
+    completeness_pct:
+      command: "python3 -c \"import boto3; s3 = boto3.client('s3'); schedules = len(s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix='espn_schedules/').get('Contents', [])); pbp = len(s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix='espn_play_by_play/').get('Contents', [])); pct = (pbp / schedules * 100) if schedules > 0 else 0; print(f'{pct:.1f}')\" 2>/dev/null || echo 0.0"
+      parse_type: "float"
+      precision: 1
+      category: "volatile"
+      description: "ESPN data completeness percentage (pbp files / schedules * 100)"
+
+    # Gap Detection Metrics
+    gap_days_count:
+      command: "python3 -c \"import boto3; from datetime import datetime, timedelta; s3 = boto3.client('s3'); objs = s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix='espn_schedules/').get('Contents', []); dates = sorted([datetime.strptime(obj['Key'].split('/')[-1].replace('.json', ''), '%Y%m%d') for obj in objs if obj['Key'].endswith('.json')]); gaps = sum(1 for i in range(len(dates)-1) if (dates[i+1] - dates[i]).days > 1); print(gaps)\" 2>/dev/null || echo 0"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Number of gaps (missing days) in ESPN schedule data"
+
+  # hoopR Data Metrics (3-source cross-validation)
+  hoopr_data:
+    # File Count Metrics
+    pbp_file_count:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/hoopr_parquet/ --recursive 2>/dev/null | grep -c '.parquet' || echo 0"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Total hoopR play-by-play parquet files in S3"
+
+    phase1_file_count:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/hoopr_phase1/ --recursive 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Total hoopR Phase 1 CSV files in S3"
+
+    schedule_file_count:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/hoopr_schedules/ --recursive 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Total hoopR schedule files in S3"
+
+    team_stats_file_count:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/hoopr_team_stats/ --recursive 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Total hoopR team stats files in S3"
+
+    # Data Freshness Metrics
+    last_update_hours:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/hoopr_parquet/ --recursive 2>/dev/null | tail -1 | awk '{cmd=\"date +%s\"; cmd | getline now; close(cmd); cmd=\"date -d \\\"\"$1\" \"$2\"\\\" +%s 2>/dev/null || date -j -f \\\"%Y-%m-%d %H:%M:%S\\\" \\\"\"$1\" \"$2\"\\\" +%s\"; cmd | getline then; close(cmd); print int((now - then) / 3600)}'"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Hours since last hoopR data upload"
+
+    oldest_data_days:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/hoopr_parquet/ --recursive 2>/dev/null | head -1 | awk '{cmd=\"date +%s\"; cmd | getline now; close(cmd); cmd=\"date -d \\\"\"$1\" \"$2\"\\\" +%s 2>/dev/null || date -j -f \\\"%Y-%m-%d %H:%M:%S\\\" \\\"\"$1\" \"$2\"\\\" +%s\"; cmd | getline then; close(cmd); print int((now - then) / 86400)}'"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Days since oldest hoopR data file"
+
+    # Data Size Metrics
+    total_size_gb:
+      command: "python3 -c \"import boto3; s3 = boto3.client('s3'); folders = ['hoopr_parquet/', 'hoopr_phase1/', 'hoopr_schedules/', 'hoopr_team_stats/']; size = 0; [size := size + sum(obj.get('Size', 0) for obj in s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix=folder).get('Contents', [])) for folder in folders]; print(f'{size / 1024 / 1024 / 1024:.2f}')\" 2>/dev/null || echo 0.0"
+      parse_type: "float"
+      precision: 2
+      category: "volatile"
+      description: "Total hoopR data size across all folders (GB)"
+
+    avg_file_size_mb:
+      command: "python3 -c \"import boto3; s3 = boto3.client('s3'); objs = s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix='hoopr_parquet/').get('Contents', []); sizes = [obj['Size'] for obj in objs]; print(f'{(sum(sizes) / len(sizes) / 1024 / 1024):.1f}' if sizes else '0.0')\" 2>/dev/null || echo 0.0"
+      parse_type: "float"
+      precision: 1
+      category: "volatile"
+      description: "Average hoopR parquet file size (MB)"
+
+    # Data Quality Metrics
+    small_files_count:
+      command: "python3 -c \"import boto3; s3 = boto3.client('s3'); objs = s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix='hoopr_parquet/').get('Contents', []); print(sum(1 for obj in objs if obj.get('Size', 0) < 10240))\" 2>/dev/null || echo 0"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Number of hoopR files smaller than 10KB (potentially incomplete)"
+
+    completeness_pct:
+      command: "python3 -c \"import boto3; s3 = boto3.client('s3'); schedules = len(s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix='hoopr_schedules/').get('Contents', [])); pbp = len(s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix='hoopr_parquet/').get('Contents', [])); pct = (pbp / schedules * 100) if schedules > 0 else 0; print(f'{pct:.1f}')\" 2>/dev/null || echo 0.0"
+      parse_type: "float"
+      precision: 1
+      category: "volatile"
+      description: "hoopR data completeness percentage (pbp files / schedules * 100)"
+
+    # Gap Detection Metrics
+    gap_days_count:
+      command: "python3 -c \"import boto3; from datetime import datetime, timedelta; s3 = boto3.client('s3'); objs = s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix='hoopr_schedules/').get('Contents', []); dates = sorted([datetime.strptime(obj['Key'].split('/')[-1].replace('.json', '').replace('.csv', ''), '%Y%m%d') for obj in objs if obj['Key'].endswith(('.json', '.csv'))]); gaps = sum(1 for i in range(len(dates)-1) if (dates[i+1] - dates[i]).days > 1); print(gaps)\" 2>/dev/null || echo 0"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Number of gaps (missing days) in hoopR schedule data"
+
+  # Basketball Reference Data Metrics (historical validation)
+  basketball_reference_data:
+    # File Count Metrics
+    pbp_file_count:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/basketball_reference/pbp/ --recursive 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Total Basketball Reference play-by-play files in S3"
+
+    boxscore_file_count:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/basketball_reference/box_scores/ --recursive 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Total Basketball Reference box score files in S3"
+
+    schedule_file_count:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/basketball_reference/schedules/ --recursive 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Total Basketball Reference schedule files in S3"
+
+    team_stats_file_count:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/basketball_reference/team_stats/ --recursive 2>/dev/null | wc -l | tr -d ' '"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Total Basketball Reference team stats files in S3"
+
+    # Data Freshness Metrics
+    last_update_hours:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/basketball_reference/ --recursive 2>/dev/null | tail -1 | awk '{cmd=\"date +%s\"; cmd | getline now; close(cmd); cmd=\"date -d \\\"\"$1\" \"$2\"\\\" +%s 2>/dev/null || date -j -f \\\"%Y-%m-%d %H:%M:%S\\\" \\\"\"$1\" \"$2\"\\\" +%s\"; cmd | getline then; close(cmd); print int((now - then) / 3600)}'"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Hours since last Basketball Reference data upload"
+
+    oldest_data_days:
+      command: "aws s3 ls s3://nba-sim-raw-data-lake/basketball_reference/ --recursive 2>/dev/null | head -1 | awk '{cmd=\"date +%s\"; cmd | getline now; close(cmd); cmd=\"date -d \\\"\"$1\" \"$2\"\\\" +%s 2>/dev/null || date -j -f \\\"%Y-%m-%d %H:%M:%S\\\" \\\"\"$1\" \"$2\"\\\" +%s\"; cmd | getline then; close(cmd); print int((now - then) / 86400)}'"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Days since oldest Basketball Reference data file"
+
+    # Data Size Metrics
+    total_size_gb:
+      command: "python3 -c \"import boto3; s3 = boto3.client('s3'); size = sum(obj.get('Size', 0) for obj in s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix='basketball_reference/').get('Contents', [])); print(f'{size / 1024 / 1024 / 1024:.2f}')\" 2>/dev/null || echo 0.0"
+      parse_type: "float"
+      precision: 2
+      category: "volatile"
+      description: "Total Basketball Reference data size (GB)"
+
+    avg_file_size_kb:
+      command: "python3 -c \"import boto3; s3 = boto3.client('s3'); objs = s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix='basketball_reference/pbp/').get('Contents', []); sizes = [obj['Size'] for obj in objs]; print(f'{(sum(sizes) / len(sizes) / 1024):.1f}' if sizes else '0.0')\" 2>/dev/null || echo 0.0"
+      parse_type: "float"
+      precision: 1
+      category: "volatile"
+      description: "Average Basketball Reference file size (KB)"
+
+    # Data Quality Metrics
+    small_files_count:
+      command: "python3 -c \"import boto3; s3 = boto3.client('s3'); objs = s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix='basketball_reference/').get('Contents', []); print(sum(1 for obj in objs if obj.get('Size', 0) < 1024))\" 2>/dev/null || echo 0"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Number of Basketball Reference files smaller than 1KB (potentially incomplete)"
+
+    completeness_pct:
+      command: "python3 -c \"import boto3; s3 = boto3.client('s3'); schedules = len(s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix='basketball_reference/schedules/').get('Contents', [])); pbp = len(s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix='basketball_reference/pbp/').get('Contents', [])); pct = (pbp / schedules * 100) if schedules > 0 else 0; print(f'{pct:.1f}')\" 2>/dev/null || echo 0.0"
+      parse_type: "float"
+      precision: 1
+      category: "volatile"
+      description: "Basketball Reference data completeness percentage (pbp files / schedules * 100)"
+
+    # Gap Detection Metrics
+    gap_days_count:
+      command: "python3 -c \"import boto3; from datetime import datetime, timedelta; s3 = boto3.client('s3'); objs = s3.list_objects_v2(Bucket='nba-sim-raw-data-lake', Prefix='basketball_reference/schedules/').get('Contents', []); dates = sorted([datetime.strptime(obj['Key'].split('/')[-1].split('_')[0], '%Y%m%d') for obj in objs if obj['Key'].endswith('.html')]); gaps = sum(1 for i in range(len(dates)-1) if (dates[i+1] - dates[i]).days > 1); print(gaps)\" 2>/dev/null || echo 0"
+      parse_type: "integer"
+      category: "volatile"
+      description: "Number of gaps (missing days) in Basketball Reference schedule data"

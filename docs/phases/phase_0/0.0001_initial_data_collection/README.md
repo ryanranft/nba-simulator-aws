@@ -1,11 +1,12 @@
-# Phase 0: Data Collection & Initial Upload
+# Phase 0.0001: ESPN Data Extraction & Validation
 
-**Status:** ✅ COMPLETE
+**Status:** 🔄 IN PROGRESS (Active Data Collection)
 **Prerequisites:** None (foundational phase)
-**Estimated Time:** 2 days
+**Estimated Time:** Ongoing (baseline: 2 days, incremental updates: continuous)
 **Estimated Cost:** $2.74/month (S3 storage)
 **Started:** September 29, 2025
-**Completed:** October 1, 2025
+**Baseline Complete:** October 1, 2025
+**Repurposed:** November 6, 2025
 
 ---
 
@@ -23,7 +24,7 @@
 
 ## Overview
 
-Get raw data from multiple sources into AWS S3 with temporal precision. This is the **foundation phase** for the NBA temporal panel data system - all subsequent phases depend on temporally-indexed data being available in S3.
+**Active extraction and validation of ESPN data from external scraper repository.** This is the **foundation phase** for the NBA temporal panel data system - all subsequent phases depend on ESPN data being available in S3 with proper organization.
 
 **⚠️ IMPORTANT: This is a temporal panel data system, not a traditional game simulator.**
 
@@ -33,15 +34,22 @@ Get raw data from multiple sources into AWS S3 with temporal precision. This is 
 - Hybrid simulation methodology
 - Advanced modeling techniques (Bayesian updating, regime-switching, network effects)
 
-**0.0001 role:** Collect the temporal raw data that makes this vision possible.
+**0.0001 role:** Extract, validate, and maintain ESPN data in S3 to enable the temporal panel data system.
 
-**This phase includes:**
-- Local development environment setup
-- AWS S3 bucket creation
-- Multi-source data collection with temporal timestamps
-- ESPN data (146,115 files, 119GB) - primary historical data
-- NBA API data (~366,486 files) - temporal precision data with wall clock timestamps
-- Basketball Reference, hoopR, Kaggle - supplementary sources
+**This phase now includes:**
+- ✅ Local development environment setup (COMPLETE)
+- ✅ AWS S3 bucket creation (COMPLETE)
+- ✅ Baseline ESPN data upload (146,115 files, 119GB) (COMPLETE - October 1, 2025)
+- 🔄 S3 path reorganization with `espn_*` prefixes (IN PROGRESS - November 6, 2025)
+- 🔄 Data validation and gap detection (IN PROGRESS)
+- 🔄 Incremental data collection and filling (ONGOING)
+- ⏳ Integration with ADCE autonomous scraping (PLANNED)
+
+**ESPN Data Sources:**
+- **Primary:** External ESPN scraper (`/Users/ryanranft/0espn/`)
+- **Coverage:** NBA seasons 1993-2025 (schedules, play-by-play, box scores, team stats)
+- **Current S3 state:** 147,396 files, ~119 GB (as of November 6, 2025)
+- **Growth:** +1,281 files since baseline (ADCE autonomous collection)
 
 **What happens in this phase:**
 - Collect play-by-play data with wall clock timestamps for temporal alignment
@@ -177,8 +185,8 @@ The following data sources were added by ADCE autonomous collection:
 
 **Growth Validation:**
 - Initial upload data preserved (no data loss)
-- Original data types grew: box_scores +8 files, team_stats +1,273 files
-- ADCE added 8 new complementary data sources
+- Original ESPN data types grew: espn_box_scores +8 files, espn_team_stats +1,273 files
+- ADCE added 8 new complementary data sources (non-ESPN)
 - Total system growth: ~18.2% from baseline
 
 ---
@@ -333,29 +341,36 @@ aws s3api get-public-access-block --bucket nba-sim-raw-data-lake
 2. ✅ Uploaded 146,115 JSON files to S3
 3. ✅ Documented data structure in `docs/DATA_STRUCTURE_GUIDE.md`
 
-**Data uploaded:**
-- **Schedule files:** 11,633 files → `s3://nba-sim-raw-data-lake/schedule/`
-- **Play-by-play files:** 44,826 files → `s3://nba-sim-raw-data-lake/pbp/`
-- **Box score files:** 44,828 files → `s3://nba-sim-raw-data-lake/box_scores/`
-- **Team stats files:** 44,828 files → `s3://nba-sim-raw-data-lake/team_stats/`
+**Data uploaded (baseline October 1, 2025):**
+- **ESPN Schedules:** 11,633 files → `s3://nba-sim-raw-data-lake/espn_schedules/`
+- **ESPN Play-by-Play:** 44,826 files → `s3://nba-sim-raw-data-lake/espn_play_by_play/`
+- **ESPN Box Scores:** 44,828 files → `s3://nba-sim-raw-data-lake/espn_box_scores/`
+- **ESPN Team Stats:** 44,828 files → `s3://nba-sim-raw-data-lake/espn_team_stats/`
+
+**Current state (November 6, 2025):**
+- **ESPN Schedules:** 11,633 files → `s3://nba-sim-raw-data-lake/espn_schedules/`
+- **ESPN Play-by-Play:** 44,826 files → `s3://nba-sim-raw-data-lake/espn_play_by_play/`
+- **ESPN Box Scores:** 44,836 files (+8) → `s3://nba-sim-raw-data-lake/espn_box_scores/`
+- **ESPN Team Stats:** 46,101 files (+1,273) → `s3://nba-sim-raw-data-lake/espn_team_stats/`
+- **Total:** 147,396 files (~119 GB)
 
 **Upload commands:**
 ```bash
-# Upload by data type
+# Upload by data type (updated with espn_* prefixes)
 aws s3 sync /Users/ryanranft/0espn/data/nba/schedule/ \
-  s3://nba-sim-raw-data-lake/schedule/ \
+  s3://nba-sim-raw-data-lake/espn_schedules/ \
   --exclude "*" --include "*.json"
 
 aws s3 sync /Users/ryanranft/0espn/data/nba/pbp/ \
-  s3://nba-sim-raw-data-lake/pbp/ \
+  s3://nba-sim-raw-data-lake/espn_play_by_play/ \
   --exclude "*" --include "*.json"
 
 aws s3 sync /Users/ryanranft/0espn/data/nba/box_scores/ \
-  s3://nba-sim-raw-data-lake/box_scores/ \
+  s3://nba-sim-raw-data-lake/espn_box_scores/ \
   --exclude "*" --include "*.json"
 
 aws s3 sync /Users/ryanranft/0espn/data/nba/team_stats/ \
-  s3://nba-sim-raw-data-lake/team_stats/ \
+  s3://nba-sim-raw-data-lake/espn_team_stats/ \
   --exclude "*" --include "*.json"
 ```
 
@@ -384,17 +399,23 @@ aws s3 sync /Users/ryanranft/0espn/data/nba/team_stats/ \
 
 **Validation commands:**
 ```bash
-# Count files in S3
-aws s3 ls s3://nba-sim-raw-data-lake/ --recursive | wc -l
-# Expected: 146,115
+# Count ESPN files in S3
+aws s3 ls s3://nba-sim-raw-data-lake/espn_schedules/ --recursive | wc -l
+aws s3 ls s3://nba-sim-raw-data-lake/espn_play_by_play/ --recursive | wc -l
+aws s3 ls s3://nba-sim-raw-data-lake/espn_box_scores/ --recursive | wc -l
+aws s3 ls s3://nba-sim-raw-data-lake/espn_team_stats/ --recursive | wc -l
+# Expected: 147,396 total (as of November 6, 2025)
 
 # Check total size
 aws s3 ls s3://nba-sim-raw-data-lake/ --recursive --summarize | grep "Total Size"
 # Expected: ~119 GB
 
 # Download and verify sample file
-aws s3 cp s3://nba-sim-raw-data-lake/schedule/20230410.json /tmp/test.json
+aws s3 cp s3://nba-sim-raw-data-lake/espn_schedules/20230410.json /tmp/test.json
 python -m json.tool /tmp/test.json > /dev/null && echo "Valid JSON"
+
+# Run Phase 0.0001 validator
+python validators/phases/phase_0/validate_0_0001.py
 ```
 
 **Validation:**
@@ -422,15 +443,26 @@ python -m json.tool /tmp/test.json > /dev/null && echo "Valid JSON"
 
 **Time Period:** NBA games 1993-2025
 
-### 0.0001 Initial Upload (Baseline)
+### 0.0001 Initial Upload (Baseline - October 1, 2025)
 
 **File Breakdown:**
-- Schedule files: 11,633 (YYYYMMDD format)
-- Play-by-play files: 44,826 (game ID format)
-- Box score files: 44,828 (game ID format)
-- Team stats files: 44,828 (game ID format)
+- ESPN Schedule files: 11,633 (YYYYMMDD format) → `espn_schedules/`
+- ESPN Play-by-play files: 44,826 (game ID format) → `espn_play_by_play/`
+- ESPN Box score files: 44,828 (game ID format) → `espn_box_scores/`
+- ESPN Team stats files: 44,828 (game ID format) → `espn_team_stats/`
 
 **Total:** 146,115 JSON files, 119 GB
+
+### Current State (November 6, 2025)
+
+**File Breakdown:**
+- ESPN Schedule files: 11,633 → `espn_schedules/`
+- ESPN Play-by-play files: 44,826 → `espn_play_by_play/`
+- ESPN Box score files: 44,836 (+8) → `espn_box_scores/`
+- ESPN Team stats files: 46,101 (+1,273) → `espn_team_stats/`
+
+**Total:** 147,396 JSON files (~119 GB)
+**Growth:** +1,281 files since baseline (ADCE autonomous collection)
 
 **Data quality:**
 - ~83% files contain usable game data
@@ -542,6 +574,20 @@ After completing this phase:
 
 ---
 
+## Session Documentation
+
+Detailed session handoff and implementation documents for ESPN integration:
+
+- **[ESPN_ADCE_INTEGRATION_FINAL_SUMMARY.md](ESPN_ADCE_INTEGRATION_FINAL_SUMMARY.md)** - Complete ADCE autonomous integration summary
+- **[ESPN_DEPLOYMENT_INSTRUCTIONS.md](ESPN_DEPLOYMENT_INSTRUCTIONS.md)** - Deployment procedures and configuration
+- **[ESPN_FINAL_HANDOFF.md](ESPN_FINAL_HANDOFF.md)** - Final session handoff documentation
+- **[ESPN_DUPLICATE_PREVENTION_SESSION_REPORT.md](ESPN_DUPLICATE_PREVENTION_SESSION_REPORT.md)** - Duplicate detection and prevention implementation
+- **[SESSION_HANDOFF_2025-11-06.md](SESSION_HANDOFF_2025-11-06.md)** - November 2025 session handoff
+- **[SESSION_HANDOFF_2025-11-06_CONTINUATION.md](SESSION_HANDOFF_2025-11-06_CONTINUATION.md)** - November 2025 continuation session
+- **[MIGRATION_PLAN.md](MIGRATION_PLAN.md)** - Migration planning and execution
+
+---
+
 ## Navigation
 
 **Return to:** [PROGRESS.md](../../PROGRESS.md) | **Workflows:** [Workflow Index](../claude_workflows/CLAUDE_WORKFLOW_ORDER.md)
@@ -557,6 +603,6 @@ After completing this phase:
 
 ---
 
-*Last updated: 2025-10-04 (reorganized per ADR-008)*
+*Last updated: 2025-11-07 (organized session documentation)*
 *Completed by: Phase 0 team*
 *Total time: 2 days*

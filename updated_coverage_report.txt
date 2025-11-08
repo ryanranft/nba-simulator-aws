@@ -1,0 +1,107 @@
+{
+  "generated_at": "20251108_015709",
+  "total_seasons_analyzed": 6,
+  "seasons": {
+    "2011": {
+      "season": 2011,
+      "season_label": "2011-12",
+      "expected_games": 990,
+      "schedule_games": 1105,
+      "database_games": 1118,
+      "missing_count": 0,
+      "extra_count": 13,
+      "missing_games": [],
+      "extra_games": [],
+      "team_summary": {}
+    },
+    "2012": {
+      "season": 2012,
+      "season_label": "2012-13",
+      "expected_games": 1230,
+      "schedule_games": 1214,
+      "database_games": 1229,
+      "missing_count": 0,
+      "extra_count": 15,
+      "missing_games": [],
+      "extra_games": [],
+      "team_summary": {}
+    },
+    "2015": {
+      "season": 2015,
+      "season_label": "2015-16",
+      "expected_games": 1230,
+      "schedule_games": 1216,
+      "database_games": 1230,
+      "missing_count": 0,
+      "extra_count": 14,
+      "missing_games": [],
+      "extra_games": [],
+      "team_summary": {}
+    },
+    "2017": {
+      "season": 2017,
+      "season_label": "2017-18",
+      "expected_games": 1230,
+      "schedule_games": 1218,
+      "database_games": 1229,
+      "missing_count": 1,
+      "extra_count": 12,
+      "missing_games": [
+        {
+          "game_id": "400975770",
+          "date": "2018-03-16T00:00Z",
+          "home_team": "MEM",
+          "away_team": "CHI",
+          "status": "Final"
+        }
+      ],
+      "extra_games": [],
+      "team_summary": {
+        "CHI": 1,
+        "MEM": 1
+      }
+    },
+    "2018": {
+      "season": 2018,
+      "season_label": "2018-19",
+      "expected_games": 1230,
+      "schedule_games": 1219,
+      "database_games": 1229,
+      "missing_count": 1,
+      "extra_count": 11,
+      "missing_games": [
+        {
+          "game_id": "401070722",
+          "date": "2018-10-22T23:30Z",
+          "home_team": "TOR",
+          "away_team": "CHA",
+          "status": "Final"
+        }
+      ],
+      "extra_games": [],
+      "team_summary": {
+        "CHA": 1,
+        "TOR": 1
+      }
+    },
+    "2019": {
+      "season": 2019,
+      "season_label": "2019-20",
+      "expected_games": 971,
+      "schedule_games": 964,
+      "database_games": 965,
+      "missing_count": 0,
+      "extra_count": 1,
+      "missing_games": [],
+      "extra_games": [],
+      "team_summary": {}
+    }
+  },
+  "summary": {
+    "total_missing_games": 2,
+    "seasons_with_gaps": [
+      2017,
+      2018
+    ]
+  }
+}

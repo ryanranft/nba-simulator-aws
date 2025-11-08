@@ -32,11 +32,13 @@ python scripts/monitoring/dims_cli.py verify --category s3_storage
 # Count hoopR-specific files
 aws s3 ls s3://nba-sim-raw-data-lake/hoopr_parquet/ --recursive | wc -l
 aws s3 ls s3://nba-sim-raw-data-lake/hoopr_phase1/ --recursive | wc -l
+aws s3 ls s3://nba-sim-raw-data-lake/hoopr_152/ --recursive | wc -l  # Comprehensive collection
 ```
 
 **Historical milestones:**
 - **Oct 9, 2025 (0.0002 Initial Upload):** 410 files (314 CSV + 96 Parquet), 8.2 GB
 - **Oct 9, 2025 (RDS Integration):** 13.1M play-by-play events, 6.7 GB in RDS PostgreSQL
+- **Nov 7, 2025 (Comprehensive Restoration):** 152 endpoints, daily autonomous collection @ 3 AM
 
 **Current metrics tracked in:** `inventory/metrics.yaml`
 
@@ -528,12 +530,32 @@ CREATE INDEX idx_hoopr_schedule_date ON hoopr_schedule(game_date);
 
 ---
 
+## Comprehensive Collection (November 7, 2025)
+
+On November 7, 2025, comprehensive daily collection was restored for all **152 hoopR endpoints**, expanding beyond the initial 4 bulk loaders to include:
+
+- **Phase 1:** 4 bulk loaders (PBP, player box, team box, schedule)
+- **Phase 2:** 25 static/reference endpoints (league, teams, players, draft)
+- **Phase 3:** 40 per-season dashboards (clutch, tracking, lineups, hustle)
+- **Phase 4:** 87 per-game box scores (tracking, synergy, defense, shooting, rebounding, passing)
+
+**Daily Schedule:** 3:00 AM (autonomous via cron)
+**Runtime:** 2-3 hours
+**Daily Data:** 3-5 GB
+**Features:** 500+ ML features available
+
+**See:** [COMPREHENSIVE_COLLECTION.md](COMPREHENSIVE_COLLECTION.md) for complete documentation
+
+---
+
 ## Scripts Reference
 
 ### Collection Scripts
 - `scripts/etl/scrape_hoopr_phase1_foundation.R` - Initial data collection
-- `scripts/etl/scrape_hoopr_complete_all_endpoints.R` - All 152 endpoints
-- `scripts/etl/hoopr_incremental_scraper.py` - Daily updates
+- `scripts/etl/scrape_hoopr_all_152_endpoints.R` - All 152 endpoints (comprehensive)
+- `scripts/etl/overnight_hoopr_all_152.sh` - Bash wrapper for comprehensive collection
+- `scripts/autonomous/run_scheduled_hoopr_comprehensive.sh` - Daily autonomous wrapper
+- `scripts/etl/hoopr_incremental_scraper.py` - Daily updates (legacy)
 
 ### Loading Scripts
 - `scripts/db/load_hoopr_to_rds.py` - S3 → RDS bulk load

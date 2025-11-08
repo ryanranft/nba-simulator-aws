@@ -1,83 +1,83 @@
 metadata:
   version: 1.0.0
-  last_updated: '2025-11-05T10:22:44.053360Z'
+  last_updated: '2025-11-08T01:02:09.648410Z'
   last_verified: '2025-10-21T19:00:00Z'
   verified_by: manual_verification
   system: DIMS v1.0.0
   notes: Initial metrics from comprehensive verification on 2025-10-21
 s3_storage:
   total_objects:
-    value: 172951
-    last_verified: '2025-11-04T16:30:24.671835Z'
+    value: 172975
+    last_verified: '2025-11-06T14:32:14.608779Z'
     verification_method: automated
     cached: false
     cache_expires: null
   total_size_gb:
-    value: 119.32
-    last_verified: '2025-11-04T16:01:55.691958Z'
+    value: 119.33
+    last_verified: '2025-11-06T14:42:35.558228Z'
     verification_method: automated
     cached: false
     cache_expires: null
   hoopr_files:
     value: 96
-    last_verified: '2025-10-30T15:16:15.493405Z'
+    last_verified: '2025-11-07T00:20:47.832753Z'
     verification_method: automated
     cached: false
     cache_expires: null
 prediction_system:
   total_lines:
     value: 2145
-    last_verified: '2025-11-04T16:01:55.809100Z'
+    last_verified: '2025-11-07T00:20:47.991248Z'
     verification_method: automated
     cached: false
     cache_expires: null
   fetch_upcoming_games_lines:
     value: 345
     path: scripts/ml/fetch_upcoming_games.py
-    last_verified: '2025-11-04T16:01:55.917452Z'
+    last_verified: '2025-11-07T00:20:48.100860Z'
     verification_method: automated
     cached: false
     cache_expires: null
   fetch_recent_player_data_lines:
     value: 341
     path: scripts/ml/fetch_recent_player_data.py
-    last_verified: '2025-10-26T22:20:36Z'
-    verification_method: wc_command
+    last_verified: '2025-11-07T00:20:48.206171Z'
+    verification_method: automated
     cached: false
     cache_expires: null
   prepare_upcoming_game_features_lines:
     value: 416
     path: scripts/ml/prepare_upcoming_game_features.py
-    last_verified: '2025-10-26T22:20:36Z'
-    verification_method: wc_command
+    last_verified: '2025-11-07T00:20:48.319594Z'
+    verification_method: automated
     cached: false
     cache_expires: null
   predict_upcoming_games_lines:
     value: 367
     path: scripts/ml/predict_upcoming_games.py
-    last_verified: '2025-10-26T22:20:36Z'
-    verification_method: wc_command
+    last_verified: '2025-11-07T00:20:48.436437Z'
+    verification_method: automated
     cached: false
     cache_expires: null
   train_model_for_predictions_lines:
     value: 359
     path: scripts/ml/train_model_for_predictions.py
-    last_verified: '2025-10-26T22:20:36Z'
-    verification_method: wc_command
+    last_verified: '2025-11-07T00:20:48.540803Z'
+    verification_method: automated
     cached: false
     cache_expires: null
   demo_predictions_lines:
     value: 181
     path: scripts/ml/demo_predictions.py
-    last_verified: '2025-10-26T22:20:36Z'
-    verification_method: wc_command
+    last_verified: '2025-11-07T00:20:48.650445Z'
+    verification_method: automated
     cached: false
     cache_expires: null
   daily_predictions_sh_lines:
     value: 136
     path: scripts/ml/daily_predictions.sh
-    last_verified: '2025-10-26T22:20:36Z'
-    verification_method: wc_command
+    last_verified: '2025-11-07T00:20:48.768631Z'
+    verification_method: automated
     cached: false
     cache_expires: null
   scripts:
@@ -105,7 +105,7 @@ prediction_system:
 plus_minus_system:
   total_lines:
     value: 4619
-    last_verified: '2025-10-21T22:15:15.424825Z'
+    last_verified: '2025-11-07T00:20:48.910958Z'
     verification_method: automated
     components:
       python: 1616
@@ -115,8 +115,8 @@ plus_minus_system:
     cache_expires: null
   python_lines:
     value: 1616
-    last_verified: '2025-10-26T22:20:36Z'
-    verification_method: wc_command
+    last_verified: '2025-11-07T00:20:49.021436Z'
+    verification_method: automated
     files:
     - plus_minus_calculator.py
     - populate_plus_minus_tables.py
@@ -126,15 +126,15 @@ plus_minus_system:
   sql_lines:
     value: 2318
     directory: sql/plus_minus/
-    last_verified: '2025-10-26T22:20:36Z'
-    verification_method: find_cat_wc
+    last_verified: '2025-11-07T00:20:49.137494Z'
+    verification_method: automated
     description: All SQL schemas, views, and migrations for Plus/Minus system
     cached: false
     cache_expires: null
   docs_lines:
     value: 0
-    last_verified: '2025-10-26T22:20:36Z'
-    verification_method: wc_command
+    last_verified: '2025-11-07T00:20:49.250933Z'
+    verification_method: automated
     note: Documentation files may have been moved or renamed
     cached: false
     cache_expires: null
@@ -171,46 +171,49 @@ plus_minus_system:
       lines: 480
 code_base:
   python_files:
-    value: 1887
-    last_verified: '2025-11-05T10:22:43.937938Z'
+    value: 1746
+    last_verified: '2025-11-08T01:02:06.752751Z'
     verification_method: automated
     cached: false
     cache_expires: null
   ml_scripts:
     value: 72
     directory: scripts/ml/
-    last_verified: '2025-11-04T16:30:24.893283Z'
+    last_verified: '2025-11-07T00:20:49.782549Z'
     verification_method: automated
     cached: false
     cache_expires: null
   phase_2_scripts:
     value: 40
     directory: scripts/pbp_to_boxscore/
-    last_verified: '2025-10-21T14:00:00Z'
+    last_verified: '2025-11-07T00:20:49.896812Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
   test_files:
-    value: 675
-    last_verified: '2025-11-04T23:28:22.433526Z'
+    value: 586
+    last_verified: '2025-11-07T00:20:50.343836Z'
     verification_method: automated
     cached: false
     cache_expires: null
 documentation:
   markdown_files:
-    value: 1804
-    last_verified: '2025-11-05T09:37:07.126404Z'
+    value: 1596
+    last_verified: '2025-11-08T01:02:08.272600Z'
     verification_method: automated
     cached: false
     cache_expires: null
   total_size_mb:
-    value: 253
-    last_verified: '2025-11-04T23:28:22.648269Z'
+    value: 248
+    last_verified: '2025-11-07T00:20:50.621181Z'
     verification_method: automated
     cached: false
     cache_expires: null
 git:
   book_recommendation_commits:
     value: 214
-    last_verified: '2025-10-21T14:00:00Z'
-    verification_method: git_log
+    last_verified: '2025-11-07T00:20:50.759862Z'
+    verification_method: automated
     description: Commits for book recommendation implementations (Oct 2025)
     cached: false
     cache_expires: null
@@ -218,7 +221,7 @@ workflows:
   total:
     value: 67
     directory: docs/claude_workflows/workflow_descriptions/
-    last_verified: '2025-10-26T20:15:25.903684Z'
+    last_verified: '2025-11-07T00:20:50.879589Z'
     verification_method: automated
     cached: false
     cache_expires: null
@@ -267,7 +270,7 @@ sql_schemas:
       lines: 468
     - name: sql/phase9_box_score_snapshots.sql
       lines: 286
-    last_verified: '2025-10-22T19:50:07.868415Z'
+    last_verified: '2025-11-07T00:20:51.008906Z'
     verification_method: automated
     cached: false
     cache_expires: null
@@ -280,14 +283,14 @@ local_data:
   archives_size_gb:
     value: 1
     path: ~/sports-simulator-archives/nba
-    last_verified: '2025-10-26T22:20:36Z'
+    last_verified: '2025-11-07T00:20:51.387284Z'
     verification_method: automated
     cached: false
     cache_expires: null
   temp_data_size_gb:
     value: 0
     path: ~/nba-sim-temp
-    last_verified: '2025-10-26T22:20:36Z'
+    last_verified: '2025-11-07T00:20:51.496824Z'
     verification_method: automated
     note: Directory does not exist (expected)
     cached: false
@@ -295,33 +298,33 @@ local_data:
 file_inventory:
   total_files_documented:
     value: 0
-    last_verified: '2025-10-26T22:20:36Z'
+    last_verified: '2025-11-07T00:20:51.618095Z'
     verification_method: automated
     note: FILE_INVENTORY.md section count
     cached: false
     cache_expires: null
   last_inventory_age_days:
     value: 999
-    last_verified: '2025-10-26T22:20:36Z'
+    last_verified: '2025-11-07T00:20:51.737999Z'
     verification_method: automated
     note: 999 = FILE_INVENTORY.md not found or very old
     cached: false
     cache_expires: null
 aws_inventory:
   rds_database_size_gb:
-    value: 14.0
-    endpoint: nba-sim-db.ck96ciigs7fy.us-east-1.rds.amazonaws.com
+    value: 15.91
+    endpoint: AWS RDS (endpoint from hierarchical secrets)
     database: nba_simulator
-    last_verified: '2025-10-26T22:56:42Z'
-    verification_method: postgresql_query
+    last_verified: '2025-11-08T01:02:08.485076Z'
+    verification_method: automated
     note: Database contains production data
     cached: false
     cache_expires: null
   rds_allocated_storage_gb:
     value: 0
     instance_id: nba-sim-db
-    last_verified: '2025-10-26T22:56:42Z'
-    verification_method: aws_rds_api
+    last_verified: '2025-11-07T00:20:53.002878Z'
+    verification_method: automated
     cached: false
     cache_expires: null
   monthly_cost_estimate_usd:
@@ -337,16 +340,16 @@ aws_inventory:
 data_gaps:
   missing_games_count:
     value: 29129
-    last_verified: '2025-10-26T22:56:42Z'
-    verification_method: postgresql_query
+    last_verified: '2025-11-07T00:21:23.640085Z'
+    verification_method: automated
     description: Games without box score data
     note: Data gaps detected, ETL pipeline pending
     cached: false
     cache_expires: null
   games_without_pbp:
     value: 16049
-    last_verified: '2025-10-26T22:56:42Z'
-    verification_method: postgresql_query
+    last_verified: '2025-11-06T23:45:08.115247Z'
+    verification_method: automated
     description: Games without play-by-play data
     note: Data gaps detected, ETL pipeline pending
     cached: false
@@ -355,8 +358,209 @@ sync_status:
   local_s3_sync_status:
     value: unavailable
     bucket: s3://nba-sim-raw-data-lake
-    last_verified: '2025-10-29T20:09:58.287576Z'
+    last_verified: '2025-11-07T00:21:54.036873Z'
     verification_method: automated
     description: S3 bucket accessibility status
+    cached: false
+    cache_expires: null
+espn_data:
+  pbp_file_count:
+    value: 45002
+    last_verified: '2025-11-07T10:02:27.336199Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  boxscore_file_count:
+    value: 45012
+    last_verified: '2025-11-07T10:02:37.793448Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  schedule_file_count:
+    value: 11664
+    last_verified: '2025-11-07T10:02:40.638596Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  team_stats_file_count:
+    value: 46277
+    last_verified: '2025-11-07T10:02:49.563619Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  last_update_hours:
+    value: 27
+    last_verified: '2025-11-08T01:02:08.647081Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  oldest_data_days:
+    value: 1
+    last_verified: '2025-11-08T01:02:08.899097Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  total_size_gb:
+    value: 2.79
+    last_verified: '2025-11-07T10:03:01.421071Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  avg_file_size_kb:
+    value: 690.9
+    last_verified: '2025-11-07T10:03:02.059584Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  small_files_count:
+    value: 0
+    last_verified: '2025-11-07T10:03:02.690850Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  completeness_pct:
+    value: 100.0
+    last_verified: '2025-11-07T10:03:03.581989Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  gap_days_count:
+    value: 0
+    last_verified: '2025-11-07T10:03:04.288948Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+hoopr_data:
+  pbp_file_count:
+    value: 96
+    last_verified: '2025-11-07T00:22:36.492566Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  phase1_file_count:
+    value: 218
+    last_verified: '2025-11-07T00:22:37.206200Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  schedule_file_count:
+    value: 0
+    last_verified: '2025-11-07T00:22:37.830130Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  team_stats_file_count:
+    value: 0
+    last_verified: '2025-11-07T00:22:38.424080Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  last_update_hours:
+    value: 706
+    last_verified: '2025-11-08T01:02:09.031980Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  oldest_data_days:
+    value: 29
+    last_verified: '2025-11-08T01:02:09.135368Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  total_size_gb:
+    value: 5.37
+    last_verified: '2025-11-07T00:22:40.563834Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  avg_file_size_mb:
+    value: 5.3
+    last_verified: '2025-11-07T00:22:41.085049Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  small_files_count:
+    value: 0
+    last_verified: '2025-11-07T00:22:41.648150Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  completeness_pct:
+    value: 0.0
+    last_verified: '2025-11-07T00:22:42.244421Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  gap_days_count:
+    value: 0
+    last_verified: '2025-11-07T00:22:42.707799Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+basketball_reference_data:
+  pbp_file_count:
+    value: 0
+    last_verified: '2025-11-07T00:22:43.303971Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  boxscore_file_count:
+    value: 0
+    last_verified: '2025-11-07T00:22:43.949854Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  schedule_file_count:
+    value: 5
+    last_verified: '2025-11-07T00:22:44.646671Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  team_stats_file_count:
+    value: 0
+    last_verified: '2025-11-07T00:22:45.273414Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  last_update_hours:
+    value: 679
+    last_verified: '2025-11-08T01:02:09.262563Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  oldest_data_days:
+    value: 29
+    last_verified: '2025-11-08T01:02:09.414967Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  total_size_gb:
+    value: 0.1
+    last_verified: '2025-11-07T00:22:47.372309Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  avg_file_size_kb:
+    value: 0.0
+    last_verified: '2025-11-07T00:22:47.833756Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  small_files_count:
+    value: 3
+    last_verified: '2025-11-07T00:22:48.448493Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  completeness_pct:
+    value: 0.0
+    last_verified: '2025-11-07T00:22:48.970214Z'
+    verification_method: automated
+    cached: false
+    cache_expires: null
+  gap_days_count:
+    value: 0
+    last_verified: '2025-11-07T00:22:49.485459Z'
+    verification_method: automated
     cached: false
     cache_expires: null

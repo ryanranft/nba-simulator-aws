@@ -2,6 +2,9 @@
 """
 ESPN Incremental Scraper - Simplified (No Local Database)
 
+⚠️ LEGACY VERSION - For backward compatibility only
+➡️  Use espn_incremental_async.py for autonomous operations and new scraping tasks
+
 Scrapes last N days of ESPN data directly to S3.
 No local database required - always scrapes recent window.
 
@@ -11,16 +14,13 @@ Usage:
     python scripts/etl/espn_incremental_simple.py --dry-run    # Test mode
 
 For overnight automation (3-source cross-validation):
-    - Scrapes last 3 days every night
-    - Uploads to S3
-    - Enables cross-validation with hoopR and NBA API
+    - Use espn_incremental_async.py instead (AsyncBaseScraper framework)
+    - Integrated with ADCE autonomous data collection
+    - Better rate limiting and retry logic
 
-Version: 3.0 (Simplified)
+Version: 3.0 (Simplified - Legacy)
 Created: October 18, 2025
-
-Migrated to AsyncBaseScraper framework.
-Version: 2.0 (AsyncBaseScraper Integration - Preserve Mode)
-Migrated: October 22, 2025
+Superseded by: espn_incremental_async.py (November 6, 2025)
 """
 
 
@@ -53,7 +53,10 @@ import requests
 # Configuration
 BASE_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba"
 S3_BUCKET = "nba-sim-raw-data-lake"
-S3_PREFIX = "espn_incremental"
+S3_PREFIX_PBP = "espn_play_by_play"
+S3_PREFIX_BOX = "espn_box_scores"
+S3_PREFIX_SCHEDULE = "espn_schedules"
+S3_PREFIX_TEAM = "espn_team_stats"
 RATE_LIMIT_SECONDS = 1.0  # Be nice to ESPN
 
 
@@ -112,7 +115,7 @@ class ESPNIncrementalScraper:
 
     def get_play_by_play(self, game_id):
         """Get play-by-play for a game."""
-        url = f"{BASE_URL}/playbyplay"
+        url = f"{BASE_URL}/summary"
         params = {"event": game_id}
 
         try:
@@ -121,6 +124,20 @@ class ESPNIncrementalScraper:
             return response.json()
         except Exception as e:
             self.logger.error(f"Error fetching PBP for game {game_id}: {e}")
+            self.stats["errors"] += 1
+            return None
+
+    def get_box_score(self, game_id):
+        """Get box score for a game."""
+        url = f"{BASE_URL}/summary"
+        params = {"event": game_id}
+
+        try:
+            response = requests.get(url, params=params, timeout=30)
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            self.logger.error(f"Error fetching box score for game {game_id}: {e}")
             self.stats["errors"] += 1
             return None
 
@@ -137,9 +154,10 @@ class ESPNIncrementalScraper:
                 Body=json.dumps(data, indent=2),
                 ContentType="application/json",
             )
+            self.logger.info(f"    ✓ Uploaded to s3://{S3_BUCKET}/{s3_key}")
             return True
         except Exception as e:
-            self.logger.error(f"Error uploading to S3: {e}")
+            self.logger.error(f"    ✗ Error uploading to S3 ({s3_key}): {e}")
             self.stats["errors"] += 1
             return False
 
@@ -151,6 +169,10 @@ class ESPNIncrementalScraper:
         schedule_data = self.get_schedule(date_str)
         if not schedule_data:
             return
+
+        # Save schedule to S3
+        schedule_key = f"{S3_PREFIX_SCHEDULE}/{date_str}.json"
+        self.upload_to_s3(schedule_data, schedule_key)
 
         # Extract games
         events = schedule_data.get("events", [])
@@ -168,17 +190,28 @@ class ESPNIncrementalScraper:
 
             self.logger.info(f"  Processing game {game_id}...")
 
-            # Get play-by-play
+            # Get game summary (contains pbp, box score, team stats)
             time.sleep(RATE_LIMIT_SECONDS)  # Rate limiting
-            pbp_data = self.get_play_by_play(game_id)
+            game_data = self.get_play_by_play(game_id)
 
-            if pbp_data:
-                # Upload to S3
-                s3_key = f"{S3_PREFIX}/{date_str}/game_{game_id}_pbp.json"
-                if self.upload_to_s3(pbp_data, s3_key):
+            if game_data:
+                # Upload to S3 with proper naming (game_id.json, not game_{id}_pbp.json)
+                pbp_key = f"{S3_PREFIX_PBP}/{game_id}.json"
+                box_key = f"{S3_PREFIX_BOX}/{game_id}.json"
+                team_key = f"{S3_PREFIX_TEAM}/{game_id}.json"
+
+                # Upload same data to all three locations (ESPN summary has everything)
+                uploaded = 0
+                if self.upload_to_s3(game_data, pbp_key):
+                    uploaded += 1
+                if self.upload_to_s3(game_data, box_key):
+                    uploaded += 1
+                if self.upload_to_s3(game_data, team_key):
+                    uploaded += 1
+
+                if uploaded > 0:
                     self.stats["games_scraped"] += 1
-                    self.stats["games_uploaded"] += 1
-                    self.logger.info(f"    ✓ Uploaded to S3")
+                    self.stats["games_uploaded"] += uploaded
 
             time.sleep(RATE_LIMIT_SECONDS)
 

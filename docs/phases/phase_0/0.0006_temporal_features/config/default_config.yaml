@@ -1,0 +1,355 @@
+# Phase 0.0006: Temporal Feature Engineering Configuration
+# Default configuration for temporal feature calculation workflow
+
+# Project paths
+project_dir: /Users/ryanranft/nba-simulator-aws
+log_dir: logs/temporal_features
+reports_dir: reports/temporal_features
+ml_export_dir: data/ml_features
+
+# Database configuration
+database:
+  host: localhost
+  port: 5432
+  dbname: nba_data
+  user: nba_admin
+  # password: set via environment variable NBA_DB_PASSWORD
+  
+  # Connection pooling
+  connection_pool_size: 20
+  connection_pool_overflow: 30
+  connection_timeout: 30
+
+# Source tables
+source_tables:
+  possessions: temporal_possession_stats
+  games: games
+  teams: teams
+  players: players
+
+# Target tables (will be created if not exist)
+target_tables:
+  team_game_stats: temporal_team_game_stats
+  team_season_stats: temporal_team_season_stats
+  kenpom_metrics: temporal_kenpom_metrics
+  four_factors: temporal_four_factors
+  rolling_features: temporal_rolling_features
+  context_features: temporal_context_features
+
+# KenPom calculations
+kenpom:
+  # Adjustment methodology
+  # Options: iterative (KenPom-style), regression (linear), simple (no adjustment)
+  adjustment_method: iterative
+  adjustment_iterations: 10
+  adjustment_convergence_threshold: 0.01
+  
+  # Tempo normalization
+  tempo_baseline: 100.0               # Possessions per 40 minutes
+  normalize_to_pace: true
+  
+  # Strength of schedule
+  calculate_sos: true
+  sos_weight: 0.5
+  sos_regression_weight: 0.3
+  
+  # Efficiency bounds (for outlier detection)
+  min_offensive_efficiency: 70.0
+  max_offensive_efficiency: 130.0
+  min_defensive_efficiency: 70.0
+  max_defensive_efficiency: 130.0
+
+# Four Factors weights (Dean Oliver)
+four_factors:
+  shooting_weight: 0.40
+  turnover_weight: 0.25
+  rebounding_weight: 0.20
+  free_throw_weight: 0.15
+  
+  # Factor calculation methods
+  shooting_metric: effective_fg_pct   # or true_shooting_pct
+  turnover_metric: turnover_pct       # per 100 possessions
+  rebounding_metric: rebound_pct      # offensive/defensive
+  free_throw_metric: free_throw_rate  # FTA / FGA
+
+# Rolling windows configuration
+rolling_windows:
+  enabled: true
+  window_sizes: [5, 10, 20]
+  
+  # Window types
+  window_types:
+    - trailing                         # Last N games
+    # - centered                       # N games before and after (future feature)
+  
+  # Update frequency
+  update_daily: true
+  recalculate_historical: false       # Set true for full rebuild
+  
+  # Minimum games required for valid window
+  min_games_for_window:
+    5: 3                               # Need 3+ games for 5-game window
+    10: 6                              # Need 6+ games for 10-game window
+    20: 12                             # Need 12+ games for 20-game window
+  
+  # Features to calculate in windows
+  features:
+    - offensive_efficiency
+    - defensive_efficiency
+    - net_rating
+    - point_differential
+    - effective_fg_pct
+    - turnover_pct
+    - rebound_pct
+    - free_throw_rate
+    - tempo
+    - win_pct
+  
+  # Statistical measures
+  calculate_stats:
+    - mean
+    - median
+    - std_dev
+    - min
+    - max
+    - trend                            # improving/declining/stable
+
+# Context features
+context:
+  # Rest days tracking
+  track_rest_days: true
+  max_rest_days_tracked: 10
+  rest_categories:
+    - 0                                # Back-to-back
+    - 1                                # One day rest
+    - 2                                # Two days rest
+    - 3+                               # Three+ days rest
+  
+  # Travel distance
+  calculate_travel_distance: true
+  travel_distance_threshold: 1000     # Miles (flag long trips)
+  time_zone_threshold: 2               # Flag if 2+ time zones
+  
+  # Streak tracking
+  track_streaks: true
+  min_streak_length: 3
+  max_streak_length: 20
+  streak_types:
+    - win_streak
+    - loss_streak
+    - home_win_streak
+    - away_win_streak
+    - scoring_streak                   # 100+ points
+    - defensive_streak                 # <100 points allowed
+  
+  # Home/away splits
+  calculate_home_away_splits: true
+  
+  # Season progression
+  track_season_progression: true
+  season_phases:
+    - early_season                     # First 20 games
+    - mid_season                       # Games 21-60
+    - late_season                      # Games 61-82
+    - playoffs                         # Playoff games
+  
+  # Momentum indicators
+  momentum_indicators:
+    enabled: true
+    
+    # Hot/cold shooting
+    hot_shooting_threshold: 0.45       # >45% FG for 3+ games
+    cold_shooting_threshold: 0.40      # <40% FG for 3+ games
+    
+    # Scoring
+    scoring_surge_threshold: 110       # >110 PPG for 3+ games
+    scoring_slump_threshold: 95        # <95 PPG for 3+ games
+    
+    # Defense
+    defensive_lockdown_threshold: 100  # <100 PPG allowed for 3+ games
+    defensive_struggle_threshold: 115  # >115 PPG allowed for 3+ games
+    
+    # Minimum games for momentum
+    min_games_for_momentum: 3
+
+# Situational features
+situational:
+  # Score differential categories
+  score_differentials:
+    - blowout_leading: 20              # Leading by 20+
+    - comfortable_leading: 10          # Leading by 10-19
+    - close_leading: 5                 # Leading by 1-9
+    - close_trailing: -5               # Trailing by 1-9
+    - comfortable_trailing: -10        # Trailing by 10-19
+    - blowout_trailing: -20            # Trailing by 20+
+  
+  # Clutch time definition
+  clutch_time:
+    time_remaining_minutes: 5
+    score_differential_max: 5
+  
+  # Garbage time definition
+  garbage_time:
+    time_remaining_minutes: 5
+    score_differential_min: 20
+
+# ML export configuration
+ml_export:
+  enabled: true
+  
+  # Feature groups to include in export
+  include_features:
+    - kenpom_metrics
+    - four_factors
+    - rolling_windows
+    - context_features
+    - momentum_indicators
+    - situational_features
+  
+  # Data organization
+  organize_by_season: true
+  
+  # Data splits
+  train_test_split: 0.80
+  validation_split: 0.10               # From training set
+  test_split: 0.10
+  
+  # Split method
+  split_method: temporal               # temporal or random
+  
+  # Normalization
+  normalize: true
+  normalization_method: standard        # standard, minmax, robust
+  fit_on_train_only: true              # Don't leak test set info
+  
+  # Feature engineering
+  create_interaction_features: false   # Polynomial features (future)
+  polynomial_degree: 2
+  
+  # Missing value handling
+  handle_missing_values: true
+  missing_value_strategy: median       # mean, median, forward_fill
+  
+  # File formats
+  export_formats:
+    - csv
+    - parquet                          # Recommended for large datasets
+    # - json                           # Uncomment if needed
+  
+  # Compression
+  compress: true
+  compression_format: gzip             # gzip, bz2, xz
+
+# Processing configuration
+processing:
+  # Batch processing
+  batch_size: 100                      # Games per batch
+  parallel_teams: 8                    # Process teams in parallel
+  parallel_seasons: false              # Sequential by season
+  
+  # Retry logic
+  max_retries: 3
+  retry_delay_seconds: 5
+  retry_backoff_multiplier: 2.0
+  
+  # Memory management
+  max_games_in_memory: 1000
+  clear_cache_every_n_batches: 10
+  
+  # Checkpointing
+  enable_checkpoints: true
+  checkpoint_interval_batches: 50
+  checkpoint_dir: data/checkpoints
+
+# Validation
+validation:
+  # Validate calculations
+  validate_calculations: true
+  
+  # Sanity checks
+  check_efficiency_bounds: true
+  check_percentage_bounds: true        # 0-1 or 0-100
+  check_negative_values: true
+  
+  # Cross-validation
+  cross_validate_with_box_scores: true
+  box_score_tolerance_pct: 2.0        # Within 2%
+  
+  # Outlier detection
+  detect_outliers: true
+  outlier_std_threshold: 3.0          # Flag if >3 std devs
+
+# Output settings
+output:
+  # Save reports
+  save_reports: true
+  report_format: markdown              # markdown, json, html
+  report_details: full                 # full, summary, minimal
+  
+  # Logging
+  detailed_logging: true
+  log_level: INFO                      # DEBUG, INFO, WARNING, ERROR
+  log_rotation: true
+  log_retention_days: 30
+  
+  # Progress reporting
+  show_progress_bar: true
+  progress_update_interval: 10         # Updates every N batches
+
+# DIMS integration
+dims:
+  enabled: true
+  report_metrics: true
+  
+  # Metrics to report
+  metrics:
+    - features_calculated
+    - games_processed
+    - teams_processed
+    - tables_updated
+    - processing_duration_seconds
+    - ml_dataset_size_mb
+    - avg_features_per_game
+    - calculation_errors
+    - validation_failures
+  
+  # Health checks
+  health_check_interval_seconds: 300
+  report_interval_seconds: 600
+
+# Performance tuning
+performance:
+  # Database
+  use_prepared_statements: true
+  enable_query_cache: true
+  query_cache_size_mb: 512
+  
+  # Indexing
+  verify_indexes_on_startup: true
+  create_indexes_if_missing: true
+  
+  # Bulk operations
+  use_bulk_insert: true
+  bulk_insert_size: 1000
+  
+  # Parallel execution
+  max_workers: 8                       # CPU cores to use
+
+# Feature flags (for phased rollout)
+features:
+  # Core features (always enabled)
+  core_kenpom: true
+  core_four_factors: true
+  
+  # Rolling windows (can disable for testing)
+  enable_rolling_windows: true
+  
+  # Advanced features
+  advanced_context: true
+  momentum_indicators: true
+  situational_features: true
+  
+  # Experimental features (future)
+  player_level_features: false
+  lineup_features: false
+  matchup_predictions: false

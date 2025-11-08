@@ -14,6 +14,18 @@ s3:
     - nba_pbp
     - nba_box_score
     - nba_schedule_json
+    # ESPN data (Phase 0.0001 - Active Data Collection)
+    - espn_play_by_play
+    - espn_box_scores
+    - espn_schedules
+    - espn_team_stats
+    # hoopR data (3-source cross-validation)
+    - hoopr_parquet
+    - hoopr_phase1
+    - hoopr_schedules
+    - hoopr_team_stats
+    # Basketball Reference data (historical validation)
+    - basketball_reference
 
   # Phase 2B: AWS S3 Inventory integration
   use_aws_inventory: true # ✅ ENABLED - AWS Inventory configured on 2025-10-22
@@ -33,6 +45,45 @@ gap_detection:
     high: 0.80 # < 80% = HIGH
     medium: 0.95 # < 95% = MEDIUM
     low: 0.99 # < 99% = LOW
+
+  # ESPN-specific gap detection (Phase 0.0001)
+  espn_specific:
+    enabled: true
+    required_data_types:
+      - play_by_play
+      - box_scores
+      - schedules
+    freshness_threshold_hours: 24 # ESPN data >24h old = stale
+    completeness_target_pct: 95.0 # Target 95% coverage
+    critical_gap_days: 3 # Gaps >3 days = CRITICAL
+    scraper_name: espn_incremental_simple # Scraper to use for gaps
+    scraper_args: ["--days", "7"] # Default: last 7 days
+
+  # hoopR-specific gap detection (3-source validation)
+  hoopr_specific:
+    enabled: true
+    required_data_types:
+      - play_by_play
+      - schedules
+      - team_stats
+    freshness_threshold_hours: 24 # hoopR data >24h old = stale
+    completeness_target_pct: 95.0 # Target 95% coverage
+    critical_gap_days: 3 # Gaps >3 days = CRITICAL
+    scraper_name: hoopr_incremental_simple # Scraper to use for gaps
+    scraper_args: ["--days", "7"] # Default: last 7 days
+
+  # Basketball Reference-specific gap detection (historical validation)
+  basketball_reference_specific:
+    enabled: true
+    required_data_types:
+      - play_by_play
+      - box_scores
+      - schedules
+    freshness_threshold_hours: 168 # BBRef data >7 days old = stale (weekly updates)
+    completeness_target_pct: 90.0 # Target 90% coverage (more lenient)
+    critical_gap_days: 14 # Gaps >14 days = CRITICAL (longer tolerance)
+    scraper_name: basketball_reference_incremental_scraper # Scraper to use for gaps
+    scraper_args: ["--days", "14"] # Default: last 14 days
 
 # Task Queue Configuration
 task_queue:

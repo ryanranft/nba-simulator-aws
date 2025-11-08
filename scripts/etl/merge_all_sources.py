@@ -4,7 +4,7 @@ Master Database ETL Pipeline
 Merges all NBA data sources into unified master database schema.
 
 Data Sources:
-1. ESPN (S3: s3://nba-sim-raw-data-lake/pbp/, box_scores/, team_stats/, schedule/)
+1. ESPN (S3: s3://nba-sim-raw-data-lake/espn_play_by_play/, espn_box_scores/, espn_team_stats/, espn_schedules/)
 2. NBA.com Stats (S3: s3://nba-sim-raw-data-lake/nba_api_comprehensive/)
 3. hoopR (S3: s3://nba-sim-raw-data-lake/hoopr_parquet/, hoopr_csv/)
 4. Basketball Reference (S3: s3://nba-sim-raw-data-lake/basketball_reference/)
@@ -83,7 +83,7 @@ class MasterDatabaseETL:
 
         # Data source configurations
         self.data_sources = {
-            "espn": DataSourceConfig("espn", "pbp/", priority=2),
+            "espn": DataSourceConfig("espn", "espn_play_by_play/", priority=2),
             "nba_stats": DataSourceConfig(
                 "nba_stats", "nba_api_comprehensive/", priority=1
             ),
@@ -226,7 +226,7 @@ class MasterDatabaseETL:
         # List ESPN files for the season
         try:
             response = self.s3_client.list_objects_v2(
-                Bucket=self.s3_bucket, Prefix="pbp/", MaxKeys=1000
+                Bucket=self.s3_bucket, Prefix="espn_play_by_play/", MaxKeys=1000
             )
 
             for obj in response.get("Contents", []):
@@ -639,7 +639,7 @@ class MasterDatabaseETL:
         seasons = []
         try:
             response = self.s3_client.list_objects_v2(
-                Bucket=self.s3_bucket, Prefix="pbp/", MaxKeys=1000
+                Bucket=self.s3_bucket, Prefix="espn_play_by_play/", MaxKeys=1000
             )
 
             for obj in response.get("Contents", []):
@@ -738,8 +738,3 @@ def main():
 
 if __name__ == "__main__":
     exit(main())
-
-
-
-
-

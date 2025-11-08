@@ -24,14 +24,22 @@
 
 **Total Dataset:** 70,522 JSON files (55 GB in S3)
 
-**Folder Structure:**
+**Folder Structure (Updated November 6, 2025):**
 ```
 s3://nba-sim-raw-data-lake/
-├── pbp/          44,826 files - Play-by-play game data
-├── box_scores/   44,828 files - Box score statistics
-├── team_stats/   44,828 files - Team statistics
-└── schedule/     11,633 files - Daily game schedules
+├── espn_play_by_play/   44,826 files - ESPN play-by-play game data
+├── espn_box_scores/     44,836 files - ESPN box score statistics (+8 from baseline)
+├── espn_team_stats/     46,101 files - ESPN team statistics (+1,273 from baseline)
+├── espn_schedules/      11,633 files - ESPN daily game schedules
+├── nba_api_comprehensive/  ~22,256 files - NBA API comprehensive stats
+├── nba_api_playbyplay/     ~2,163 files - NBA API play-by-play
+├── basketball_reference/   ~444 files - Basketball Reference data
+├── hoopr_phase1/          ~218 files - hoopR CSV format
+├── hoopr_parquet/         ~96 files - hoopR parquet format
+└── [other data sources]
 ```
+
+**Note:** ESPN paths renamed with `espn_*` prefix to distinguish from other data sources (November 6, 2025)
 
 **Key Insight:** Each folder type was scraped from **different ESPN web pages**, so they have **different JSON structures** even for the same game ID.
 
@@ -43,11 +51,11 @@ s3://nba-sim-raw-data-lake/
 
 | Folder | Total Files | Valid Files | Valid % | Empty % | Est. Usable |
 |--------|-------------|-------------|---------|---------|-------------|
-| **nba_pbp** | 44,826 | ~31,378 | 70.0% | 30.0% | ~31,378 |
-| **nba_box_score** | 44,828 | ~40,494 | 90.3% | 9.7% | ~40,494 |
-| **nba_team_stats** | 44,828 | ~38,103 | 85.0% | 15.0% | ~38,103 |
-| **nba_schedule_json** | 11,633 | ~11,633 | 100.0% | 0.0% | ~11,633 |
-| **TOTAL** | **70,522** | **~60,000** | **85.2%** | **14.8%** | **~60,000** |
+| **espn_play_by_play** | 44,826 | ~31,378 | 70.0% | 30.0% | ~31,378 |
+| **espn_box_scores** | 44,836 | ~40,505 | 90.3% | 9.7% | ~40,505 |
+| **espn_team_stats** | 46,101 | ~39,186 | 85.0% | 15.0% | ~39,186 |
+| **espn_schedules** | 11,633 | ~11,633 | 100.0% | 0.0% | ~11,633 |
+| **TOTAL** | **147,396** | **~122,702** | **83.3%** | **16.7%** | **~122,702** |
 
 **Storage Impact:**
 - Total S3 storage: ~119 GB (all files)
@@ -61,7 +69,7 @@ s3://nba-sim-raw-data-lake/
 
 ---
 
-## Play-by-Play Files (nba_pbp/)
+## ESPN Play-by-Play Files (espn_play_by_play/)
 
 **Source:** ESPN game detail pages (e.g., `espn.com/nba/game/_/gameId/401307856`)
 
@@ -173,7 +181,7 @@ df_valid = df.filter(
 
 ---
 
-## Box Score Files (nba_box_score/)
+## ESPN Box Score Files (espn_box_scores/)
 
 **Source:** ESPN box score pages (e.g., `espn.com/nba/boxscore/_/gameId/401307856`)
 
@@ -231,7 +239,7 @@ df_valid = df.filter(
 
 ---
 
-## Team Stats Files (nba_team_stats/)
+## ESPN Team Stats Files (espn_team_stats/)
 
 **Source:** ESPN team stats pages
 
@@ -274,7 +282,7 @@ df_valid = df.filter(
 
 ---
 
-## Schedule Files (nba_schedule_json/)
+## ESPN Schedule Files (espn_schedules/)
 
 **Source:** ESPN daily schedule pages (e.g., `espn.com/nba/schedule/_/date/20210512`)
 
@@ -418,7 +426,7 @@ print(f"Schedule: {df_schedule.count()} files (all valid)")
 
 ### Extraction Paths (10% of fields per ADR-002)
 
-#### From Play-by-Play Files (nba_pbp/)
+#### From ESPN Play-by-Play Files (espn_play_by_play/)
 
 **Table: plays**
 ```
@@ -449,7 +457,7 @@ Extraction:
 - team_id          ← (map from game context)
 ```
 
-#### From Box Score Files (nba_box_score/)
+#### From ESPN Box Score Files (espn_box_scores/)
 
 **Table: team_game_stats**
 ```
@@ -462,7 +470,7 @@ Extraction:
 - stats            ← stats[] (parse FG, 3PT, FT, etc.)
 ```
 
-#### From Schedule Files (nba_schedule_json/)
+#### From ESPN Schedule Files (espn_schedules/)
 
 **Table: games**
 ```

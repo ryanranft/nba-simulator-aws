@@ -21,8 +21,9 @@ from pathlib import Path
 class Phase010Validator:
     """Validates 0.0010 PostgreSQL JSONB Storage implementation"""
 
-    def __init__(self, verbose: bool = False):
+    def __init__(self, verbose: bool = False, schema: str = "raw_data"):
         self.verbose = verbose
+        self.schema = schema
         self.failures = []
         self.warnings = []
         self.conn = None
@@ -43,15 +44,24 @@ class Phase010Validator:
                 "database": os.getenv(
                     "RDS_DATABASE", os.getenv("POSTGRES_DB", "nba_data")
                 ),
-                "user": os.getenv("RDS_USER", os.getenv("POSTGRES_USER", "postgres")),
+                "user": os.getenv(
+                    "RDS_USERNAME", os.getenv("POSTGRES_USER", "postgres")
+                ),
                 "password": os.getenv(
                     "RDS_PASSWORD", os.getenv("POSTGRES_PASSWORD", "")
                 ),
             }
 
-            if not config["password"]:
-                self.failures.append("Database password not found in environment")
-                return False
+            # Empty password is valid for local PostgreSQL with trust authentication
+            # Only warn if password is empty for remote hosts
+            if not config["password"] and config["host"] not in [
+                "localhost",
+                "127.0.0.1",
+            ]:
+                self.log(
+                    f"Warning: Empty password for remote host {config['host']}",
+                    "WARNING",
+                )
 
             self.conn = psycopg2.connect(
                 host=config["host"],
@@ -82,23 +92,24 @@ class Phase010Validator:
     # ========================================================================
 
     def validate_schema_exists(self) -> bool:
-        """Validate raw_data schema exists"""
+        """Validate schema exists"""
         try:
             self.cursor.execute(
                 """
                 SELECT schema_name
                 FROM information_schema.schemata
-                WHERE schema_name = 'raw_data';
-            """
+                WHERE schema_name = %s;
+            """,
+                (self.schema,),
             )
 
             exists = self.cursor.fetchone() is not None
 
             if exists:
-                self.log("Schema 'raw_data' exists")
+                self.log(f"Schema '{self.schema}' exists")
                 return True
             else:
-                self.failures.append("Schema 'raw_data' does not exist")
+                self.failures.append(f"Schema '{self.schema}' does not exist")
                 return False
 
         except Exception as e:
@@ -122,10 +133,10 @@ class Phase010Validator:
                     """
                     SELECT table_name
                     FROM information_schema.tables
-                    WHERE table_schema = 'raw_data'
+                    WHERE table_schema = %s
                       AND table_name = %s;
                 """,
-                    (table,),
+                    (self.schema, table),
                 )
 
                 exists = self.cursor.fetchone() is not None
@@ -188,11 +199,11 @@ class Phase010Validator:
                     """
                     SELECT column_name
                     FROM information_schema.columns
-                    WHERE table_schema = 'raw_data'
+                    WHERE table_schema = %s
                       AND table_name = %s
                     ORDER BY ordinal_position;
                 """,
-                    (table,),
+                    (self.schema, table),
                 )
 
                 actual_columns = [row[0] for row in self.cursor.fetchall()]
@@ -224,9 +235,10 @@ class Phase010Validator:
                 """
                 SELECT COUNT(*)
                 FROM pg_indexes
-                WHERE schemaname = 'raw_data'
+                WHERE schemaname = %s
                   AND indexdef LIKE '%USING gin%';
-            """
+            """,
+                (self.schema,),
             )
 
             gin_count = self.cursor.fetchone()[0]
@@ -242,9 +254,10 @@ class Phase010Validator:
                 """
                 SELECT COUNT(*)
                 FROM pg_indexes
-                WHERE schemaname = 'raw_data'
+                WHERE schemaname = %s
                   AND indexdef LIKE '%USING btree%';
-            """
+            """,
+                (self.schema,),
             )
 
             btree_count = self.cursor.fetchone()[0]
@@ -264,10 +277,10 @@ class Phase010Validator:
                     """
                     SELECT indexname
                     FROM pg_indexes
-                    WHERE schemaname = 'raw_data'
+                    WHERE schemaname = %s
                       AND indexname = %s;
                 """,
-                    (index,),
+                    (self.schema, index),
                 )
 
                 exists = self.cursor.fetchone() is not None
@@ -299,10 +312,10 @@ class Phase010Validator:
                     """
                     SELECT matviewname
                     FROM pg_matviews
-                    WHERE schemaname = 'raw_data'
+                    WHERE schemaname = %s
                       AND matviewname = %s;
                 """,
-                    (view,),
+                    (self.schema, view),
                 )
 
                 exists = self.cursor.fetchone() is not None
@@ -321,10 +334,10 @@ class Phase010Validator:
                     """
                     SELECT table_name
                     FROM information_schema.views
-                    WHERE table_schema = 'raw_data'
+                    WHERE table_schema = %s
                       AND table_name = %s;
                 """,
-                    (view,),
+                    (self.schema, view),
                 )
 
                 exists = self.cursor.fetchone() is not None
@@ -361,10 +374,10 @@ class Phase010Validator:
                     """
                     SELECT trigger_name
                     FROM information_schema.triggers
-                    WHERE trigger_schema = 'raw_data'
+                    WHERE trigger_schema = %s
                       AND trigger_name = %s;
                 """,
-                    (trigger,),
+                    (self.schema, trigger),
                 )
 
                 exists = self.cursor.fetchone() is not None
@@ -420,9 +433,9 @@ class Phase010Validator:
         """Validate schema version table"""
         try:
             self.cursor.execute(
-                """
+                f"""
                 SELECT version, applied_at, description
-                FROM raw_data.schema_version
+                FROM {self.schema}.schema_version
                 ORDER BY applied_at DESC
                 LIMIT 1;
             """
@@ -445,7 +458,7 @@ class Phase010Validator:
     def validate_data_exists(self) -> bool:
         """Check if any data has been migrated (optional)"""
         try:
-            self.cursor.execute("SELECT COUNT(*) FROM raw_data.nba_games;")
+            self.cursor.execute(f"SELECT COUNT(*) FROM {self.schema}.nba_games;")
             games_count = self.cursor.fetchone()[0]
 
             if games_count > 0:
@@ -467,6 +480,7 @@ class Phase010Validator:
         """Run all validations"""
         print(f"\n{'='*70}")
         print(f"0.0010 Validation: PostgreSQL JSONB Storage")
+        print(f"Schema: {self.schema}")
         print(f"{'='*70}\n")
 
         # Connect to database
@@ -529,10 +543,16 @@ def main():
     parser.add_argument(
         "--check-only", "-c", action="store_true", help="Only check database connection"
     )
+    parser.add_argument(
+        "--schema",
+        default="raw_data",
+        choices=["raw_data", "master"],
+        help="Database schema to validate (default: raw_data)",
+    )
 
     args = parser.parse_args()
 
-    validator = Phase010Validator(verbose=args.verbose)
+    validator = Phase010Validator(verbose=args.verbose, schema=args.schema)
 
     if args.check_only:
         print("\nChecking database connection...")

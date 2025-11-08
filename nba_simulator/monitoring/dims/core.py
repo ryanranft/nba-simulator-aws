@@ -1,121 +1,59 @@
 """
-DIMS Core Module - Data Inventory Management System
+DIMS Core Module
+Handles all metric CRUD operations, configuration loading, and command execution.
 
-Handles all metric CRUD operations, verification, and command execution.
-Integrated with nba_simulator package infrastructure.
-
-Features:
-- Automated metric calculation via shell commands
-- Drift detection with configurable thresholds
-- Historical tracking and snapshots
-- Database backend for persistence
-- Event-driven updates
-- Approval workflows
-
-Based on: scripts/monitoring/dims/core.py
-Enhanced with better integration and error handling.
+Migrated to: nba_simulator.monitoring.dims
+Original: scripts/monitoring/dims/core.py
 """
 
 import os
 import yaml
 import subprocess
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
-from dataclasses import dataclass, asdict
-from enum import Enum
 
-from ...database import get_db_connection, execute_query
-from ...utils import setup_logging
+logger = logging.getLogger(__name__)
 
+# Phase 2 imports (optional - only if enabled)
+try:
+    from .database import DatabaseBackend
 
-class MetricStatus(Enum):
-    """Metric verification status"""
+    DATABASE_AVAILABLE = True
+except ImportError:
+    DATABASE_AVAILABLE = False
+    logger.warning("Database backend not available")
 
-    OK = "ok"
-    MINOR = "minor"
-    MODERATE = "moderate"
-    MAJOR = "major"
-    ERROR = "error"
-    NEW = "new"
-    DIFFERENT = "different"
+try:
+    from .approval import ApprovalManager
 
+    APPROVAL_AVAILABLE = True
+except ImportError:
+    APPROVAL_AVAILABLE = False
+    logger.warning("Approval manager not available")
 
-class MetricSeverity(Enum):
-    """Metric drift severity"""
+try:
+    from .events import EventHandler
 
-    NONE = "none"
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
-
-
-@dataclass
-class MetricVerificationResult:
-    """Result of a metric verification"""
-
-    metric: str
-    documented: Any
-    actual: Any
-    drift: Any
-    drift_pct: Optional[float]
-    status: MetricStatus
-    severity: MetricSeverity
-    message: str
-    timestamp: datetime = None
-
-    def __post_init__(self):
-        if self.timestamp is None:
-            self.timestamp = datetime.now(timezone.utc)
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary"""
-        return {
-            "metric": self.metric,
-            "documented": self.documented,
-            "actual": self.actual,
-            "drift": self.drift,
-            "drift_pct": self.drift_pct,
-            "status": self.status.value,
-            "severity": self.severity.value,
-            "message": self.message,
-            "timestamp": self.timestamp.isoformat(),
-        }
+    EVENTS_AVAILABLE = True
+except ImportError:
+    EVENTS_AVAILABLE = False
+    logger.warning("Event handler not available")
 
 
 class DIMSCore:
-    """
-    Core class for Data Inventory Management System operations.
+    """Core class for Data Inventory Management System operations."""
 
-    Manages metrics verification, calculation, and tracking.
-    """
-
-    def __init__(
-        self,
-        project_root: Optional[str] = None,
-        config_path: Optional[str] = None,
-        metrics_path: Optional[str] = None,
-        logger: Optional[logging.Logger] = None,
-    ):
+    def __init__(self, project_root: Optional[str] = None):
         """
         Initialize DIMS Core.
 
         Args:
             project_root: Path to project root. If None, auto-detects.
-            config_path: Path to config.yaml. If None, uses default.
-            metrics_path: Path to metrics.yaml. If None, uses default.
-            logger: Optional logger instance.
         """
-        # Setup logging
-        if logger:
-            self.logger = logger
-        else:
-            self.logger = setup_logging("nba_simulator.monitoring.dims")
-
-        # Detect project root
         if project_root is None:
+            # Auto-detect project root (look for inventory/ directory)
             current = Path(__file__).resolve()
             while current.parent != current:
                 if (current / "inventory").exists():
@@ -124,164 +62,104 @@ class DIMSCore:
                 current = current.parent
 
         self.project_root = Path(project_root or os.getcwd())
+        self.config_path = self.project_root / "inventory" / "config.yaml"
+        self.metrics_path = self.project_root / "inventory" / "metrics.yaml"
 
-        # Set paths
-        if config_path:
-            self.config_path = Path(config_path)
-        else:
-            self.config_path = self.project_root / "inventory" / "config.yaml"
-
-        if metrics_path:
-            self.metrics_path = Path(metrics_path)
-        else:
-            self.metrics_path = self.project_root / "inventory" / "metrics.yaml"
-
-        # Load configuration and metrics
+        # Load configuration
         self.config = self._load_config()
         self.metrics = self._load_metrics()
 
-        # Initialize optional modules
+        # Initialize Phase 2 modules (if enabled)
         self.database = None
-        self.cache = None
-        self.events = None
         self.approval = None
+        self.events = None
 
-        self._initialize_features()
-
-        self.logger.info(f"DIMS Core initialized for {self.project_root}")
-
-    def _initialize_features(self):
-        """Initialize optional features based on configuration"""
         features = self.config.get("features", {})
 
         # Database backend
-        if features.get("database_backend", False):
+        if features.get("database_backend", False) and DATABASE_AVAILABLE:
             try:
-                from .database import DIMSDatabase
-
-                self.database = DIMSDatabase()
-                self.logger.info("Database backend enabled")
+                db_config = self.config.get("database", {})
+                self.database = DatabaseBackend(db_config)
+                logger.info("Database backend initialized")
             except Exception as e:
-                self.logger.warning(f"Database backend failed to initialize: {e}")
-
-        # Cache layer
-        if features.get("cache", {}).get("enabled", False):
-            try:
-                from .cache import DIMSCache
-
-                cache_config = self.config.get("cache", {})
-                self.cache = DIMSCache(cache_config)
-                self.logger.info("Cache layer enabled")
-            except Exception as e:
-                self.logger.warning(f"Cache failed to initialize: {e}")
-
-        # Event handler
-        if features.get("event_driven", False):
-            try:
-                from .events import DIMSEvents
-
-                self.events = DIMSEvents(self.config, self.database)
-                self.logger.info("Event handler enabled")
-            except Exception as e:
-                self.logger.warning(f"Event handler failed to initialize: {e}")
+                logger.error(f"Failed to initialize database backend: {e}")
 
         # Approval workflow
-        if features.get("approval_workflow", False):
+        if features.get("approval_workflow", False) and APPROVAL_AVAILABLE:
             try:
-                from .approval import DIMSApproval
-
-                self.approval = DIMSApproval(self.config, self.database)
-                self.logger.info("Approval workflow enabled")
+                self.approval = ApprovalManager(self.config, self.database)
+                logger.info("Approval workflow initialized")
             except Exception as e:
-                self.logger.warning(f"Approval workflow failed to initialize: {e}")
+                logger.error(f"Failed to initialize approval workflow: {e}")
+
+        # Event handler
+        if features.get("event_driven", False) and EVENTS_AVAILABLE:
+            try:
+                self.events = EventHandler(self.config, self.database)
+                logger.info("Event handler initialized")
+            except Exception as e:
+                logger.error(f"Failed to initialize event handler: {e}")
 
     def _load_config(self) -> Dict[str, Any]:
-        """Load configuration from config.yaml"""
+        """Load configuration from config.yaml."""
         if not self.config_path.exists():
             raise FileNotFoundError(f"Config file not found: {self.config_path}")
 
-        try:
-            with open(self.config_path, "r") as f:
-                config = yaml.safe_load(f)
+        with open(self.config_path, "r") as f:
+            config = yaml.safe_load(f)
 
-            self.logger.info(f"Loaded configuration from {self.config_path}")
-            return config
-        except Exception as e:
-            self.logger.error(f"Failed to load config: {e}")
-            raise
+        logger.info(f"Loaded configuration from {self.config_path}")
+        return config
 
     def _load_metrics(self) -> Dict[str, Any]:
-        """Load metrics from metrics.yaml"""
+        """Load metrics from metrics.yaml."""
         if not self.metrics_path.exists():
-            self.logger.warning(f"Metrics file not found: {self.metrics_path}")
-            return {"metadata": {}}
+            logger.warning(f"Metrics file not found: {self.metrics_path}")
+            return {}
 
-        try:
-            with open(self.metrics_path, "r") as f:
-                metrics = yaml.safe_load(f)
+        with open(self.metrics_path, "r") as f:
+            metrics = yaml.safe_load(f)
 
-            self.logger.info(f"Loaded metrics from {self.metrics_path}")
-            return metrics or {"metadata": {}}
-        except Exception as e:
-            self.logger.error(f"Failed to load metrics: {e}")
-            return {"metadata": {}}
+        logger.info(f"Loaded metrics from {self.metrics_path}")
+        return metrics
 
-    def save_metrics(self, metrics: Optional[Dict[str, Any]] = None) -> bool:
+    def save_metrics(self, metrics: Optional[Dict[str, Any]] = None) -> None:
         """
         Save metrics to metrics.yaml.
 
         Args:
             metrics: Metrics dict to save. If None, saves current self.metrics.
-
-        Returns:
-            True if successful, False otherwise
         """
         if metrics is None:
             metrics = self.metrics
 
-        try:
-            # Update metadata
-            if "metadata" not in metrics:
-                metrics["metadata"] = {}
+        # Update metadata
+        if "metadata" not in metrics:
+            metrics["metadata"] = {}
 
-            metrics["metadata"]["last_updated"] = datetime.now(timezone.utc).isoformat()
-            metrics["metadata"]["version"] = self.config.get("version", "1.0.0")
+        metrics["metadata"]["last_updated"] = datetime.now().isoformat() + "Z"
+        metrics["metadata"]["version"] = self.config.get("version", "1.0.0")
 
-            # Create backup
-            if self.metrics_path.exists():
-                backup_path = self.metrics_path.with_suffix(".yaml.bak")
-                import shutil
+        # Write to file
+        with open(self.metrics_path, "w") as f:
+            yaml.dump(metrics, f, default_flow_style=False, sort_keys=False)
 
-                shutil.copy2(self.metrics_path, backup_path)
-
-            # Write to file
-            with open(self.metrics_path, "w") as f:
-                yaml.dump(metrics, f, default_flow_style=False, sort_keys=False)
-
-            self.logger.info(f"Saved metrics to {self.metrics_path}")
-            return True
-
-        except Exception as e:
-            self.logger.error(f"Failed to save metrics: {e}")
-            return False
+        logger.info(f"Saved metrics to {self.metrics_path}")
 
     def execute_command(
-        self, command: str, timeout: int = 90, cwd: Optional[str] = None
+        self, command: str, timeout: int = 30
     ) -> Tuple[bool, Optional[str]]:
         """
         Execute a shell command and return its output.
 
         Args:
             command: Shell command to execute
-            timeout: Command timeout in seconds (default: 90s for large S3 operations)
-            cwd: Working directory (defaults to project_root)
+            timeout: Command timeout in seconds
 
         Returns:
             Tuple of (success: bool, output: Optional[str])
         """
-        if cwd is None:
-            cwd = str(self.project_root)
-
         try:
             result = subprocess.run(
                 command,
@@ -289,22 +167,22 @@ class DIMSCore:
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                cwd=cwd,
+                cwd=str(self.project_root),
             )
 
             if result.returncode == 0:
                 output = result.stdout.strip()
                 return (True, output)
             else:
-                self.logger.error(f"Command failed: {command}")
-                self.logger.error(f"Error: {result.stderr}")
+                logger.error(f"Command failed: {command}")
+                logger.error(f"Error: {result.stderr}")
                 return (False, None)
 
         except subprocess.TimeoutExpired:
-            self.logger.error(f"Command timed out after {timeout}s: {command}")
+            logger.error(f"Command timed out: {command}")
             return (False, None)
         except Exception as e:
-            self.logger.error(f"Command execution error: {e}")
+            logger.error(f"Command execution error: {e}")
             return (False, None)
 
     def get_metric_value(
@@ -320,13 +198,6 @@ class DIMSCore:
         Returns:
             Metric value or None if not found
         """
-        # Check cache first if enabled
-        if use_cache and self.cache:
-            cached_value = self.cache.get(metric_path)
-            if cached_value is not None:
-                return cached_value
-
-        # Navigate to metric in YAML
         parts = metric_path.split(".")
         current = self.metrics
 
@@ -338,15 +209,9 @@ class DIMSCore:
 
         # Extract value if it's in standard format
         if isinstance(current, dict) and "value" in current:
-            value = current["value"]
-        else:
-            value = current
+            return current["value"]
 
-        # Cache if enabled
-        if use_cache and self.cache:
-            self.cache.set(metric_path, value)
-
-        return value
+        return current
 
     def calculate_metric(self, metric_category: str, metric_name: str) -> Optional[Any]:
         """
@@ -365,29 +230,26 @@ class DIMSCore:
         )
 
         if not metric_def:
-            self.logger.error(
+            logger.error(
                 f"Metric definition not found: {metric_category}.{metric_name}"
             )
             return None
 
         # Check if metric is enabled
         if not metric_def.get("enabled", True):
-            self.logger.debug(f"Metric disabled: {metric_category}.{metric_name}")
+            logger.info(f"Metric disabled: {metric_category}.{metric_name}")
             return None
 
         # Get command
         command = metric_def.get("command")
         if not command:
-            self.logger.error(
+            logger.error(
                 f"No command defined for metric: {metric_category}.{metric_name}"
             )
             return None
 
         # Execute command
-        timeout = metric_def.get(
-            "timeout", 90
-        )  # Increased default for large S3 operations
-        success, output = self.execute_command(command, timeout=timeout)
+        success, output = self.execute_command(command)
 
         if not success or output is None:
             return None
@@ -408,7 +270,7 @@ class DIMSCore:
             else:
                 return output
         except (ValueError, TypeError) as e:
-            self.logger.error(f"Failed to parse output '{output}' as {parse_type}: {e}")
+            logger.error(f"Failed to parse output '{output}' as {parse_type}: {e}")
             return None
 
     def update_metric(
@@ -432,91 +294,63 @@ class DIMSCore:
         Returns:
             True if successful, False otherwise
         """
-        try:
-            # Navigate to metric location
-            if metric_category not in self.metrics:
-                self.metrics[metric_category] = {}
+        # Navigate to metric location
+        if metric_category not in self.metrics:
+            self.metrics[metric_category] = {}
 
-            if metric_name not in self.metrics[metric_category]:
-                self.metrics[metric_category][metric_name] = {}
+        if metric_name not in self.metrics[metric_category]:
+            self.metrics[metric_category][metric_name] = {}
 
-            metric = self.metrics[metric_category][metric_name]
+        metric = self.metrics[metric_category][metric_name]
 
-            # Store old value for logging
-            old_value = metric.get("value") if isinstance(metric, dict) else metric
+        # Store old value for logging
+        old_value = metric.get("value") if isinstance(metric, dict) else metric
 
-            # Update metric in YAML
-            if isinstance(metric, dict):
-                metric["value"] = new_value
-                metric["last_verified"] = datetime.now(timezone.utc).isoformat()
-                metric["verification_method"] = verification_method
-                metric["verified_by"] = verified_by
-                metric["cached"] = False
-                metric["cache_expires"] = None
-            else:
-                # Create new metric structure
-                self.metrics[metric_category][metric_name] = {
-                    "value": new_value,
-                    "last_verified": datetime.now(timezone.utc).isoformat(),
-                    "verification_method": verification_method,
-                    "verified_by": verified_by,
-                    "cached": False,
-                    "cache_expires": None,
-                }
+        # Update metric in YAML
+        if isinstance(metric, dict):
+            metric["value"] = new_value
+            metric["last_verified"] = datetime.now().isoformat() + "Z"
+            metric["verification_method"] = verification_method
+            metric["cached"] = False
+            metric["cache_expires"] = None
+        else:
+            # Create new metric structure
+            self.metrics[metric_category][metric_name] = {
+                "value": new_value,
+                "last_verified": datetime.now().isoformat() + "Z",
+                "verification_method": verification_method,
+                "cached": False,
+                "cache_expires": None,
+            }
 
-            self.logger.info(
-                f"Updated metric {metric_category}.{metric_name}: "
-                f"{old_value} → {new_value}"
+        logger.info(
+            f"Updated metric {metric_category}.{metric_name}: "
+            f"{old_value} → {new_value}"
+        )
+
+        # Also save to database if enabled
+        if self.database:
+            # Determine value type
+            value_type = "string"
+            if isinstance(new_value, bool):
+                value_type = "boolean"
+            elif isinstance(new_value, int):
+                value_type = "integer"
+            elif isinstance(new_value, float):
+                value_type = "float"
+
+            self.database.save_metric(
+                metric_category=metric_category,
+                metric_name=metric_name,
+                value=new_value,
+                value_type=value_type,
+                verification_method=verification_method,
+                verified_by=verified_by,
             )
 
-            # Save to YAML
-            self.save_metrics()
+        return True
 
-            # Also save to database if enabled
-            if self.database:
-                # Determine value type
-                value_type = "string"
-                if isinstance(new_value, bool):
-                    value_type = "boolean"
-                elif isinstance(new_value, int):
-                    value_type = "integer"
-                elif isinstance(new_value, float):
-                    value_type = "float"
-
-                self.database.save_metric(
-                    metric_category=metric_category,
-                    metric_name=metric_name,
-                    value=new_value,
-                    value_type=value_type,
-                    verification_method=verification_method,
-                    verified_by=verified_by,
-                )
-
-            # Clear cache if enabled
-            if self.cache:
-                self.cache.invalidate(f"{metric_category}.{metric_name}")
-
-            # Emit event if enabled
-            if self.events:
-                self.events.emit(
-                    "metric_updated",
-                    {
-                        "category": metric_category,
-                        "name": metric_name,
-                        "old_value": old_value,
-                        "new_value": new_value,
-                    },
-                )
-
-            return True
-
-        except Exception as e:
-            self.logger.error(f"Failed to update metric: {e}")
-            return False
-
-    def verify_metric(
-        self, metric_category: str, metric_name: str
-    ) -> MetricVerificationResult:
+    def verify_metric(self, metric_category: str, metric_name: str) -> Dict[str, Any]:
         """
         Verify a single metric by comparing documented vs actual value.
 
@@ -525,105 +359,93 @@ class DIMSCore:
             metric_name: Metric name
 
         Returns:
-            MetricVerificationResult with comparison details
+            Dict with verification results
         """
-        metric_path = f"{metric_category}.{metric_name}"
+        result = {
+            "metric": f"{metric_category}.{metric_name}",
+            "documented": None,
+            "actual": None,
+            "drift": None,
+            "drift_pct": None,
+            "status": "ok",
+            "severity": "none",
+            "message": "",
+        }
 
         # Get documented value
-        documented = self.get_metric_value(metric_path)
+        documented = self.get_metric_value(f"{metric_category}.{metric_name}")
+        result["documented"] = documented
 
         # Calculate actual value
         actual = self.calculate_metric(metric_category, metric_name)
+        result["actual"] = actual
 
-        # Handle errors
         if actual is None:
-            return MetricVerificationResult(
-                metric=metric_path,
-                documented=documented,
-                actual=None,
-                drift=None,
-                drift_pct=None,
-                status=MetricStatus.ERROR,
-                severity=MetricSeverity.HIGH,
-                message="Failed to calculate actual value",
-            )
+            result["status"] = "error"
+            result["severity"] = "high"
+            result["message"] = "Failed to calculate actual value"
+            return result
 
         if documented is None:
-            return MetricVerificationResult(
-                metric=metric_path,
-                documented=None,
-                actual=actual,
-                drift=None,
-                drift_pct=None,
-                status=MetricStatus.NEW,
-                severity=MetricSeverity.LOW,
-                message="No documented value found (new metric)",
-            )
+            result["status"] = "new"
+            result["severity"] = "low"
+            result["message"] = "No documented value found (new metric)"
+            return result
 
-        # Calculate drift for numeric values
-        if isinstance(documented, (int, float)) and isinstance(actual, (int, float)):
-            drift = actual - documented
-            drift_pct = (
-                abs((drift / documented) * 100)
-                if documented != 0
-                else (0 if drift == 0 else 100)
-            )
+        # Calculate drift
+        try:
+            if isinstance(documented, (int, float)) and isinstance(
+                actual, (int, float)
+            ):
+                drift = actual - documented
+                result["drift"] = drift
 
-            # Get thresholds
-            thresholds = self.config.get("verification", {}).get("thresholds", {})
-            minor_threshold = thresholds.get("minor_drift_pct", 5)
-            moderate_threshold = thresholds.get("moderate_drift_pct", 15)
-            major_threshold = thresholds.get("major_drift_pct", 25)
+                if documented != 0:
+                    drift_pct = abs((drift / documented) * 100)
+                    result["drift_pct"] = round(drift_pct, 2)
+                else:
+                    drift_pct = 0 if drift == 0 else 100
+                    result["drift_pct"] = drift_pct
 
-            # Determine status and severity
-            if drift == 0:
-                status = MetricStatus.OK
-                severity = MetricSeverity.NONE
-                message = "Values match exactly"
-            elif drift_pct < minor_threshold:
-                status = MetricStatus.MINOR
-                severity = MetricSeverity.LOW
-                message = f"Minor drift: {drift_pct:.1f}%"
-            elif drift_pct < moderate_threshold:
-                status = MetricStatus.MODERATE
-                severity = MetricSeverity.MEDIUM
-                message = f"Moderate drift: {drift_pct:.1f}%"
+                # Determine status based on thresholds
+                thresholds = self.config.get("verification", {}).get("thresholds", {})
+                minor_threshold = thresholds.get("minor_drift_pct", 5)
+                moderate_threshold = thresholds.get("moderate_drift_pct", 15)
+
+                if drift == 0:
+                    result["status"] = "ok"
+                    result["severity"] = "none"
+                    result["message"] = "Values match exactly"
+                elif drift_pct < minor_threshold:
+                    result["status"] = "minor"
+                    result["severity"] = "low"
+                    result["message"] = f"Minor drift: {drift_pct:.1f}%"
+                elif drift_pct < moderate_threshold:
+                    result["status"] = "moderate"
+                    result["severity"] = "medium"
+                    result["message"] = f"Moderate drift: {drift_pct:.1f}%"
+                else:
+                    result["status"] = "major"
+                    result["severity"] = "high"
+                    result["message"] = f"Major drift: {drift_pct:.1f}%"
+
             else:
-                status = MetricStatus.MAJOR
-                severity = MetricSeverity.HIGH
-                message = f"Major drift: {drift_pct:.1f}%"
+                # Non-numeric comparison
+                if documented == actual:
+                    result["status"] = "ok"
+                    result["message"] = "Values match"
+                else:
+                    result["status"] = "different"
+                    result["severity"] = "medium"
+                    result["message"] = "Values differ"
+                    result["drift"] = f"{documented} → {actual}"
 
-            return MetricVerificationResult(
-                metric=metric_path,
-                documented=documented,
-                actual=actual,
-                drift=drift,
-                drift_pct=round(drift_pct, 2),
-                status=status,
-                severity=severity,
-                message=message,
-            )
+        except Exception as e:
+            result["status"] = "error"
+            result["severity"] = "high"
+            result["message"] = f"Error comparing values: {e}"
 
-        # Non-numeric comparison
-        if documented == actual:
-            status = MetricStatus.OK
-            severity = MetricSeverity.NONE
-            message = "Values match"
-        else:
-            status = MetricStatus.DIFFERENT
-            severity = MetricSeverity.MEDIUM
-            message = "Values differ"
-
-        return MetricVerificationResult(
-            metric=metric_path,
-            documented=documented,
-            actual=actual,
-            drift=f"{documented} → {actual}",
-            drift_pct=None,
-            status=status,
-            severity=severity,
-            message=message,
-        )
+        return result
 
     def verify_all_metrics(self, triggered_by: str = "manual") -> Dict[str, Any]:
         """
@@ -635,16 +457,23 @@ class DIMSCore:
         Returns:
             Dict with verification results
         """
-        start_time = datetime.now(timezone.utc)
+        start_time = datetime.now()
 
         results = {
-            "timestamp": start_time.isoformat(),
+            "timestamp": start_time.isoformat() + "Z",
             "total_metrics": 0,
             "verified": 0,
             "drift_detected": False,
             "discrepancies": [],
             "approvals_required": [],
-            "summary": {status.value: 0 for status in MetricStatus},
+            "summary": {
+                "ok": 0,
+                "minor": 0,
+                "moderate": 0,
+                "major": 0,
+                "error": 0,
+                "new": 0,
+            },
         }
 
         metrics_config = self.config.get("metrics", {})
@@ -657,45 +486,30 @@ class DIMSCore:
                 if not metric_def.get("enabled", True):
                     continue
 
-                self.logger.debug(f"Verifying {category}.{metric_name}...")
+                logger.info(f"Verifying {category}.{metric_name}...")
 
                 verification = self.verify_metric(category, metric_name)
                 results["verified"] += 1
 
                 # Update summary
-                results["summary"][verification.status.value] += 1
+                status = verification["status"]
+                if status in results["summary"]:
+                    results["summary"][status] += 1
 
                 # Add to discrepancies if not OK
-                if verification.status != MetricStatus.OK:
-                    results["discrepancies"].append(verification.to_dict())
+                if status != "ok":
+                    results["discrepancies"].append(verification)
 
-                if verification.status in (
-                    MetricStatus.MINOR,
-                    MetricStatus.MODERATE,
-                    MetricStatus.MAJOR,
-                ):
+                if status in ("minor", "moderate", "major"):
                     results["drift_detected"] = True
 
-                    # Check if approval required
-                    if self.approval and self.approval.requires_approval(
-                        category,
-                        metric_name,
-                        verification.drift_pct,
-                        verification.severity.value,
-                    ):
-                        results["approvals_required"].append(verification.to_dict())
+        execution_time_ms = int((datetime.now() - start_time).total_seconds() * 1000)
 
-        execution_time_ms = int(
-            (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
-        )
-        results["execution_time_ms"] = execution_time_ms
-
-        self.logger.info(
-            f"Verification complete: {results['verified']}/{results['total_metrics']} metrics "
-            f"verified in {execution_time_ms}ms"
+        logger.info(
+            f"Verification complete: {results['verified']}/{results['total_metrics']} metrics verified in {execution_time_ms}ms"
         )
 
-        # Save to database if enabled
+        # Save verification run to database if enabled
         if self.database:
             run_id = self.database.save_verification_run(
                 results=results,
@@ -710,7 +524,7 @@ class DIMSCore:
         self, metric_path: str, days: int = 30
     ) -> List[Dict[str, Any]]:
         """
-        Get historical values of a metric.
+        Get historical values of a metric from snapshots.
 
         Args:
             metric_path: Dot-separated metric path
@@ -719,27 +533,25 @@ class DIMSCore:
         Returns:
             List of {date: str, value: Any} dicts
         """
-        # Try database first if available
-        if self.database:
-            return self.database.get_metric_history(metric_path, days)
-
-        # Fall back to file-based history
         history = []
         historical_dir = self.project_root / "inventory" / "historical"
 
         if not historical_dir.exists():
             return history
 
+        # Get snapshot files from last N days
         cutoff_date = datetime.now() - timedelta(days=days)
 
         for snapshot_file in sorted(historical_dir.glob("*.yaml")):
             try:
+                # Parse date from filename (YYYY-MM-DD.yaml)
                 date_str = snapshot_file.stem
                 snapshot_date = datetime.strptime(date_str, "%Y-%m-%d")
 
                 if snapshot_date < cutoff_date:
                     continue
 
+                # Load snapshot
                 with open(snapshot_file, "r") as f:
                     snapshot = yaml.safe_load(f)
 
@@ -762,14 +574,14 @@ class DIMSCore:
                     history.append({"date": date_str, "value": value})
 
             except Exception as e:
-                self.logger.warning(f"Error reading snapshot {snapshot_file}: {e}")
+                logger.warning(f"Error reading snapshot {snapshot_file}: {e}")
                 continue
 
         return history
 
     def create_snapshot(self) -> bool:
         """
-        Create a snapshot of current metrics.
+        Create a snapshot of current metrics (file and database).
 
         Returns:
             True if successful, False otherwise
@@ -778,6 +590,7 @@ class DIMSCore:
             historical_dir = self.project_root / "inventory" / "historical"
             historical_dir.mkdir(parents=True, exist_ok=True)
 
+            # Create snapshot filename (YYYY-MM-DD.yaml)
             today = datetime.now()
             snapshot_file = historical_dir / f"{today.strftime('%Y-%m-%d')}.yaml"
 
@@ -785,7 +598,7 @@ class DIMSCore:
             with open(snapshot_file, "w") as f:
                 yaml.dump(self.metrics, f, default_flow_style=False, sort_keys=False)
 
-            self.logger.info(f"Created snapshot: {snapshot_file}")
+            logger.info(f"Created snapshot: {snapshot_file}")
 
             # Also save to database if enabled
             if self.database:
@@ -794,7 +607,7 @@ class DIMSCore:
             return True
 
         except Exception as e:
-            self.logger.error(f"Failed to create snapshot: {e}")
+            logger.error(f"Failed to create snapshot: {e}")
             return False
 
     def get_system_info(self) -> Dict[str, Any]:
@@ -810,12 +623,11 @@ class DIMSCore:
             "project_root": str(self.project_root),
             "config_path": str(self.config_path),
             "metrics_path": str(self.metrics_path),
-            "features": {
-                "database_backend": self.database is not None,
-                "cache": self.cache is not None,
-                "events": self.events is not None,
-                "approval": self.approval is not None,
-            },
+            "features": self.config.get("features", {}),
+            "cache_enabled": self.config.get("cache", {}).get("enabled", False),
+            "verification_enabled": self.config.get("verification", {}).get(
+                "enabled", False
+            ),
             "total_metrics_defined": sum(
                 len(metrics) for metrics in self.config.get("metrics", {}).values()
             ),

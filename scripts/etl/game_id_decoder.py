@@ -227,7 +227,7 @@ def extract_year_from_filename(filename: str) -> Optional[int]:
     Extract year from game ID filename.
 
     Args:
-        filename: S3 key or local path (e.g., "s3://bucket/pbp/171031017.json")
+        filename: S3 key or local path (e.g., "s3://bucket/espn_play_by_play/171031017.json")
 
     Returns:
         Year as integer, or None if unable to parse
@@ -236,7 +236,7 @@ def extract_year_from_filename(filename: str) -> Optional[int]:
         >>> extract_year_from_filename("171031017.json")
         1997
 
-        >>> extract_year_from_filename("s3://bucket/pbp/401307856.json")
+        >>> extract_year_from_filename("s3://bucket/espn_play_by_play/401307856.json")
         2021
     """
     # Extract just the filename

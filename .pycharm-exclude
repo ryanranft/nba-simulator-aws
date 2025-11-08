@@ -1,0 +1,56 @@
+# PyCharm Memory Optimization - Excluded Directories
+# ===================================================
+# These directories are excluded from PyCharm indexing to improve performance
+# Last Updated: 2025-11-08 (CRITICAL UPDATE)
+
+## ⚠️ CRITICAL: JSON Data Files (146,115+ files, 119+ GB) ⚠️
+data/
+# THIS IS THE LARGEST DIRECTORY AND MUST BE EXCLUDED
+# Contains raw NBA data in JSON format from ESPN scraping
+# PyCharm will crash or become unusable if it tries to index this
+# Without this exclusion, PyCharm will attempt to index 146,115+ files!
+
+## Large Log Directories (537+ MB)
+logs/
+logs/archived_logs/
+
+## Test Coverage Reports (20+ MB)
+htmlcov/
+.coverage
+coverage.json
+.pytest_cache/
+
+## ML Experiment Tracking (can be large)
+mlruns/
+mlartifacts/
+
+## Backup Directories
+backups/
+backup_api_scrapes/
+nba_simulator.backup.*/
+nba-simulator-refactored/
+
+## Temporary Files
+tmp/
+synthesis_output/
+
+## Archives
+archives/
+
+## Why This Matters:
+# PyCharm indexes all files in the project by default. Without excluding data/,
+# PyCharm tries to index 146,115+ JSON files (119+ GB), which causes:
+# - Complete memory exhaustion (8+ GB used)
+# - 30+ minute indexing times (or complete hangs)
+# - Completely unusable IDE
+# - Frequent crashes
+
+## How to Apply:
+# 1. These directories are already configured in .idea/nba-simulator-aws.iml
+# 2. Restart PyCharm after updating this file
+# 3. Run ./pycharm_memory_cleanup.sh to remove large files
+# 4. PyCharm will re-index (much faster)
+
+## Maintenance:
+# Run weekly: ./pycharm_memory_cleanup.sh
+# This moves backups and archives old logs automatically

@@ -22,8 +22,9 @@ import psycopg2
 class Phase011Validator:
     """Validates 0.0011 RAG Pipeline implementation"""
 
-    def __init__(self, verbose: bool = False):
+    def __init__(self, verbose: bool = False, schema: str = "rag"):
         self.verbose = verbose
+        self.schema = schema
         self.failures = []
         self.warnings = []
         self.conn = None
@@ -43,11 +44,23 @@ class Phase011Validator:
                 "database": os.getenv(
                     "RDS_DATABASE", os.getenv("POSTGRES_DB", "nba_data")
                 ),
-                "user": os.getenv("RDS_USER", os.getenv("POSTGRES_USER", "postgres")),
+                "user": os.getenv(
+                    "RDS_USERNAME", os.getenv("POSTGRES_USER", "postgres")
+                ),
                 "password": os.getenv(
                     "RDS_PASSWORD", os.getenv("POSTGRES_PASSWORD", "")
                 ),
             }
+
+            # Empty password is valid for local PostgreSQL with trust authentication
+            # Only warn if password is empty for remote hosts
+            if not config["password"] and config["host"] not in [
+                "localhost",
+                "127.0.0.1",
+            ]:
+                self.warnings.append(
+                    f"Warning: Empty password for remote host {config['host']}"
+                )
 
             self.conn = psycopg2.connect(**config)
             self.cursor = self.conn.cursor()
@@ -123,13 +136,14 @@ class Phase011Validator:
                 """
                 SELECT schema_name
                 FROM information_schema.schemata
-                WHERE schema_name = 'rag';
-            """
+                WHERE schema_name = %s;
+            """,
+                (self.schema,),
             )
             if self.cursor.fetchone():
-                self.log("✓ RAG schema exists")
+                self.log(f"✓ {self.schema} schema exists")
             else:
-                self.failures.append("RAG schema not found")
+                self.failures.append(f"{self.schema} schema not found")
                 all_valid = False
         except Exception as e:
             self.failures.append(f"Schema check failed: {e}")
@@ -149,15 +163,15 @@ class Phase011Validator:
                     """
                     SELECT table_name
                     FROM information_schema.tables
-                    WHERE table_schema = 'rag' AND table_name = %s;
+                    WHERE table_schema = %s AND table_name = %s;
                 """,
-                    (table,),
+                    (self.schema, table),
                 )
 
                 if self.cursor.fetchone():
-                    self.log(f"✓ Table rag.{table}")
+                    self.log(f"✓ Table {self.schema}.{table}")
                 else:
-                    self.failures.append(f"Table rag.{table} not found")
+                    self.failures.append(f"Table {self.schema}.{table} not found")
                     all_valid = False
             except Exception as e:
                 self.failures.append(f"Table check failed for {table}: {e}")
@@ -187,17 +201,17 @@ class Phase011Validator:
                     """
                     SELECT routine_name
                     FROM information_schema.routines
-                    WHERE routine_schema = 'rag'
+                    WHERE routine_schema = %s
                       AND routine_name = %s
                       AND routine_type = 'FUNCTION';
                 """,
-                    (func,),
+                    (self.schema, func),
                 )
 
                 if self.cursor.fetchone():
-                    self.log(f"✓ Function rag.{func}()")
+                    self.log(f"✓ Function {self.schema}.{func}()")
                 else:
-                    self.failures.append(f"Function rag.{func}() not found")
+                    self.failures.append(f"Function {self.schema}.{func}() not found")
                     all_exist = False
             except Exception as e:
                 self.failures.append(f"Function check failed for {func}: {e}")
@@ -247,9 +261,10 @@ class Phase011Validator:
                 """
                 SELECT indexname
                 FROM pg_indexes
-                WHERE schemaname = 'rag'
+                WHERE schemaname = %s
                   AND indexname LIKE '%hnsw%';
-            """
+            """,
+                (self.schema,),
             )
 
             indexes = self.cursor.fetchall()
@@ -273,7 +288,7 @@ class Phase011Validator:
             return {}
 
         try:
-            self.cursor.execute("SELECT * FROM rag.get_embedding_stats();")
+            self.cursor.execute(f"SELECT * FROM {self.schema}.get_embedding_stats();")
             stats_rows = self.cursor.fetchall()
 
             stats = {"total": 0, "by_type": {}}
@@ -297,6 +312,7 @@ class Phase011Validator:
         """Run all validations"""
         print(f"\n{'='*70}")
         print("0.0011: RAG Pipeline Validation")
+        print(f"Schema: {self.schema}")
         print(f"{'='*70}")
 
         results = {}
@@ -370,10 +386,13 @@ def main():
         description="Validate 0.0011 RAG Pipeline implementation"
     )
     parser.add_argument("--verbose", action="store_true", help="Show verbose output")
+    parser.add_argument(
+        "--schema", default="rag", help="Database schema to validate (default: rag)"
+    )
 
     args = parser.parse_args()
 
-    validator = Phase011Validator(verbose=args.verbose)
+    validator = Phase011Validator(verbose=args.verbose, schema=args.schema)
 
     try:
         all_passed, results = validator.run_all_validations()

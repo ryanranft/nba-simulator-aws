@@ -5,20 +5,20 @@ Partition S3 Data by Year for Glue Crawler Processing
 This script reorganizes S3 data from flat structure to year-partitioned structure,
 allowing Glue Crawlers to process one year at a time (avoiding OOM errors).
 
-Current S3 Structure (FLAT):
+Current S3 Structure (FLAT with ESPN prefixes):
   s3://nba-sim-raw-data-lake/
-    ├── schedule/171031017.json, 191103005.json, ... (11,633 files)
-    ├── pbp/171031017.json, 191103005.json, ... (44,826 files)
-    ├── box_scores/171031017.json, 191103005.json, ... (44,828 files)
-    └── team_stats/171031017.json, 191103005.json, ... (44,828 files)
+    ├── espn_schedules/171031017.json, 191103005.json, ... (11,633 files)
+    ├── espn_play_by_play/171031017.json, 191103005.json, ... (44,826 files)
+    ├── espn_box_scores/171031017.json, 191103005.json, ... (44,836 files)
+    └── espn_team_stats/171031017.json, 191103005.json, ... (46,101 files)
 
 New S3 Structure (YEAR-PARTITIONED):
   s3://nba-sim-raw-data-lake/
-    ├── schedule/year=1997/*.json
-    ├── schedule/year=1998/*.json
-    ├── schedule/year=2021/*.json
-    ├── pbp/year=1997/*.json
-    ├── pbp/year=1998/*.json
+    ├── espn_schedules/year=1997/*.json
+    ├── espn_schedules/year=1998/*.json
+    ├── espn_schedules/year=2021/*.json
+    ├── espn_play_by_play/year=1997/*.json
+    ├── espn_play_by_play/year=1998/*.json
     └── ... (one folder per year)
 
 Benefits:
