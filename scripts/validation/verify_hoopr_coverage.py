@@ -32,6 +32,26 @@ except ImportError:
     sys.exit(1)
 
 
+def detect_table_name(conn):
+    """Detect which table name to use (hoopr_schedule or hoopr_raw.nba_schedule)."""
+    with conn.cursor() as cur:
+        # Try hoopr_schedule first (nba-simulator-aws style)
+        try:
+            cur.execute("SELECT 1 FROM hoopr_schedule LIMIT 1")
+            return "hoopr_schedule"
+        except psycopg2.Error:
+            conn.rollback()
+
+        # Try hoopr_raw.nba_schedule (nba-mcp-synthesis style)
+        try:
+            cur.execute("SELECT 1 FROM hoopr_raw.nba_schedule LIMIT 1")
+            return "hoopr_raw.nba_schedule"
+        except psycopg2.Error:
+            conn.rollback()
+
+    return None
+
+
 def get_db_connection():
     """Get database connection with proper credentials."""
     import os
@@ -52,7 +72,7 @@ def get_db_connection():
         print(f"❌ Database connection failed: {e}")
         print("\nTry setting environment variables:")
         print("  export POSTGRES_HOST=localhost")
-        print("  export POSTGRES_DB=nba_simulator")
+        print("  export POSTGRES_DB=nba_simulator  # or nba_mcp_synthesis")
         print("  export POSTGRES_USER=ryanranft")
         sys.exit(1)
 
@@ -63,15 +83,23 @@ def check_overall_coverage(conn):
     print("HOOPR DATA COVERAGE OVERVIEW")
     print("="*80)
 
+    # Determine which table to use (hoopr_schedule or hoopr_raw.nba_schedule)
+    table_name = detect_table_name(conn)
+    if not table_name:
+        print("❌ No hoopR schedule table found!")
+        return None
+
+    print(f"📊 Using table: {table_name}\n")
+
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         # Overall stats
-        cur.execute("""
+        cur.execute(f"""
             SELECT
                 MIN(game_date) as earliest_game,
                 MAX(game_date) as latest_game,
                 COUNT(*) as total_games,
                 COUNT(DISTINCT EXTRACT(YEAR FROM game_date)) as seasons_covered
-            FROM hoopr_schedule
+            FROM {table_name}
         """)
         overall = cur.fetchone()
 
@@ -102,9 +130,11 @@ def check_season_coverage(conn, specific_season=None):
     print("COVERAGE BY NBA SEASON")
     print("="*80)
 
+    table_name = detect_table_name(conn)
+
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         # NBA seasons run Oct-June, so season year is the year the season starts
-        query = """
+        query = f"""
             WITH season_games AS (
                 SELECT
                     CASE
@@ -113,7 +143,7 @@ def check_season_coverage(conn, specific_season=None):
                         ELSE EXTRACT(YEAR FROM game_date) - 1
                     END as season_year,
                     game_date
-                FROM hoopr_schedule
+                FROM {table_name}
             )
             SELECT
                 season_year,
@@ -160,14 +190,16 @@ def find_gaps(conn, min_gap_days=7):
     print(f"POTENTIAL DATA GAPS (>{min_gap_days} days with no games)")
     print("="*80)
 
+    table_name = detect_table_name(conn)
+
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         # Find gaps between consecutive games
-        cur.execute("""
+        cur.execute(f"""
             WITH ordered_games AS (
                 SELECT
                     game_date,
                     LAG(game_date) OVER (ORDER BY game_date) as prev_game_date
-                FROM hoopr_schedule
+                FROM {table_name}
             ),
             gaps AS (
                 SELECT
@@ -222,14 +254,16 @@ def check_current_season(conn):
     print("CURRENT SEASON (2025-26) STATUS")
     print("="*80)
 
+    table_name = detect_table_name(conn)
+
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         # Check for games since Oct 1, 2025 (start of 2025-26 season)
-        cur.execute("""
+        cur.execute(f"""
             SELECT
                 COUNT(*) as game_count,
                 MIN(game_date) as first_game,
                 MAX(game_date) as last_game
-            FROM hoopr_schedule
+            FROM {table_name}
             WHERE game_date >= '2025-10-01'
         """)
 
@@ -268,13 +302,15 @@ def check_recent_collection(conn):
     print("RECENT COLLECTION ACTIVITY")
     print("="*80)
 
+    table_name = detect_table_name(conn)
+
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         # Check last 30 days of data
-        cur.execute("""
+        cur.execute(f"""
             SELECT
                 game_date::date as date,
                 COUNT(*) as games
-            FROM hoopr_schedule
+            FROM {table_name}
             WHERE game_date >= CURRENT_DATE - INTERVAL '30 days'
             GROUP BY game_date::date
             ORDER BY game_date DESC
