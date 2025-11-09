@@ -178,7 +178,14 @@ s3://nba-sim-raw-data-lake/
 **Official Name:** hoopR R Package (nbahoopR functions)
 **Status:** ✅ COMPLETE (Local + S3 + RDS)
 **Coverage:** 2002-2025 (24 complete seasons)
-**Last Updated:** October 9, 2025 (~6:00 PM)
+**Last Updated:** November 9, 2025
+**Comprehensive Collection Restored:** November 7, 2025 (152 endpoints)
+
+**📖 Complete Explanation:** See `docs/HOOPR_DATA_SOURCES_EXPLAINED.md` for full details on:
+- What hoopR is (R package wrapping NBA Stats API)
+- Where parquet backup came from (`/Users/ryanranft/Desktop/sports_data_backup/hoopR/nba/`)
+- Difference between Phase 1 (4 endpoints) vs 152-endpoint collection
+- Why data exists in multiple locations (S3, RDS, local parquet, nba-mcp-synthesis)
 
 ### Statistics
 
@@ -232,8 +239,18 @@ s3://nba-sim-raw-data-lake/
 **Discovery:** October 9, 2025 - Found 57.8 GB of hoopR data already collected locally
 
 1. **Primary:** `/Users/ryanranft/Projects/hoopR-nba-raw` (43 GB - 29,688 JSON files)
+   - Original JSON collection from NBA Stats API
+   - Source for parquet conversion
+
 2. **Structured:** `/Users/ryanranft/Projects/hoopR-nba-data` (8.6 GB - 235 files)
-3. **Analysis-Ready:** `/Users/ryanranft/Desktop/sports_data_backup/hoopR` (6.2 GB - 120 parquet files)
+   - Processed structured data
+
+3. **Analysis-Ready Parquet Backup:** `/Users/ryanranft/Desktop/sports_data_backup/hoopR/nba/` (6.2 GB - 96 parquet files)
+   - **This is the source loaded into nba-mcp-synthesis (November 7-8, 2025)**
+   - 24 seasons × 4 data types = 96 parquet files
+   - Same data as in S3 and RDS (backup copy)
+   - Used for local betting analysis without cloud costs
+   - See `docs/HOOPR_DATA_SOURCES_EXPLAINED.md` for details
 
 ### S3 Locations
 
