@@ -1,9 +1,9 @@
 # Phase 0: Data Collection
 
-**Status:** ⏸️ IN PROGRESS (25/26 sub-phases complete, 96%)
+**Status:** ⏸️ IN PROGRESS (26/27 sub-phases complete, 96%)
 **Started:** September 29, 2025
 **Completed:** November 4, 2025
-**Last Updated:** November 5, 2025 (Post-Refactoring Verification)
+**Last Updated:** November 9, 2025 (hoopR Coverage & Verification)
 
 **📋 [Verification Guide](../../PHASE_0_VERIFICATION_GUIDE.md)** - Complete verification procedures for all 23 sub-phases
 
@@ -102,16 +102,17 @@ CLI entry points for Phase 0 Python workflows:
 | **0.0024** | [3-Source Validation Workflow](0.0024_validation_workflow/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Nov 4, 2025 | Python migration of cross-validation workflow (ESPN, hoopR, NBA API with graceful degradation) |
 | **0.0025** | [Daily ESPN Update Workflow](0.0025_daily_update/README.md) | ✅ COMPLETE ✓ | ⭐ HIGH | Nov 4, 2025 | Python migration of daily update workflow (database updates, catalog maintenance, Slack notifications) |
 | **0.0026** | [Scraper Framework Migration](0.0026_scraper_framework_migration/README.md) | ✅ COMPLETE ✓ | 🟡 IMPORTANT | Nov 6, 2025 | Unified scraper package structure (24 scrapers migrated to nba_simulator.etl, 1,453 lines refactored, 3 sessions) |
+| **0.0027** | [hoopR Coverage & Verification](0.0027_hoopr_coverage_verification/README.md) | ✅ COMPLETE ✓ | 🟡 IMPORTANT | Nov 9, 2025 | hoopR data gap analysis, automated verification tools, collection script for missing 11 months (Dec 2024→Nov 2025, ~3,438 lines) |
 
 ---
 
 ## Progress Summary
 
 ### Completion Status
-- **Complete:** 25 sub-phases (0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 0.10, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 0.24, 0.25, 0.26)
+- **Complete:** 26 sub-phases (0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 0.10, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 0.24, 0.25, 0.26, 0.27)
 - **In Progress:** 0 sub-phases
 - **Pending:** 1 sub-phase (0.6)
-- **Total:** 26 sub-phases (25 complete, 0 in progress, 1 pending)
+- **Total:** 27 sub-phases (26 complete, 0 in progress, 1 pending)
 
 **Phase 0 Infrastructure Completion:** ✅ COMPLETE (Data Collection & Foundation)
 **Phase 0 Enhancements:**
