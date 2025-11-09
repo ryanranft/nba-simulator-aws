@@ -650,6 +650,36 @@ Version: Phase 0 Complete - Database Migration Complete + Workflows Production-R
 
 ## Recent Updates
 
+**2025-11-09 (ESPN & hoopR Data Collection):** ✅ **MAJOR DATA COLLECTION MILESTONE - 15.37M+ Records Collected**
+- **ESPN Data Loading Complete:**
+  - ✅ **14,180,218 plays** loaded to nba_simulator (14,180,696 to nba_mcp_synthesis)
+  - ✅ **86,470 team stats** loaded to nba_simulator (258 to nba_mcp_synthesis)
+  - ✅ **45,129 box scores** loaded to both databases
+  - Extended espn_json_to_db.py with PBP and team stats loading
+  - Fixed PBP extraction (corrected to pbp.playGrps)
+  - Added unique constraints for upserts
+  - 21 files changed, 1,756 insertions
+- **hoopR Gap Collection Complete:**
+  - ✅ **Gap filled:** Dec 2, 2024 → Nov 9, 2025 (11 months)
+  - ✅ **1.19M plays** collected
+  - ✅ **67K player box scores** collected
+  - ✅ **5K team box scores** collected
+  - ✅ **2.5K schedule entries** collected
+  - ✅ **8 parquet files** created (50 MB total)
+  - Used automated collection script (collect_missing_hoopr_data.sh)
+- **Git Operations:**
+  - ✅ Committed ESPN work: 66fede4 - feat(espn): Complete ESPN data loading from local JSON files
+  - ✅ Merged hoopr-data-work branch into main
+  - ✅ Added 14 new hoopR verification files (3,054 insertions)
+- **Documentation Added:**
+  - HOOPR_DATA_SOURCES_EXPLAINED.md (530 lines)
+  - NBA_MCP_SYNTHESIS_RELATIONSHIP.md (467 lines)
+  - HOOPR_DATA_EXPLAINED_QUICK_REFERENCE.md (156 lines)
+  - HOOPR_MISSING_DATA_EXECUTION_PLAN.md (495 lines)
+  - Plus 4 verification scripts (1,245 lines)
+- **Result:** Both ESPN and hoopR data now synchronized through November 2025
+- **Total Session Impact:** 15.37M+ records collected, ~3,500 lines documentation added
+
 **2025-11-05 (Full Extraction - Phase 0.0005 Production Scale):** ✅ **FULL EXTRACTION COMPLETE - 1.37M Possessions from 29,323 Games**
 - **Scale:** Production-scale extraction processed entire historical database
 - **Results:** ✅ OUTSTANDING SUCCESS
